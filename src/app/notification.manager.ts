@@ -6,10 +6,7 @@ export class Notifiy {
             const notify = window.open ('notify.html', 'notify', 'height=600, width=350, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
             notify.onload =()=>
             {
-                chrome.storage.local.get
-                ("name",res=>{
-                    alert(res);
-                })            
+                notify.document.getElementById("testttt").textContent = JSON.stringify(data);
             }
         })     
     }

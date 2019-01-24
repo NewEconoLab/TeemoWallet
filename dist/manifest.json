@@ -1,16 +1,18 @@
 {
     "manifest_version": 2,
-
     "name": "Teemo Wallet",
     "description":
         "A boilerplate project to quickly build a Chrome extension using TypeScript and React (built using webpack).",
     "version": "1.0.0",
 
     "browser_action": {
+        "default_title": "NELPluginWallet",
         "default_icon": "icon16.png",
         "default_popup": "popup.html"
     },
-
+    "web_accessible_resources": [
+        "js/inject.js"
+    ],
     "background": {
         "scripts": [
             "lib/neo-thinsdk.min.js",
@@ -19,7 +21,20 @@
         "persistent": false
     },
     "permissions": [
-        "storage"
+        "notifications",
+        "storage",
+        "tabs",
+        "http://*/*",
+        "https://*/*"  
+    ],
+    "content_scripts": [
+      {
+        "matches": [         
+          "http://*/*",
+          "https://*/*" 
+        ], 
+        "js": [ "js/content.js" ]
+      }
     ],
     "icons": {
         "16": "icon16.png",

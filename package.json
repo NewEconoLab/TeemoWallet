@@ -30,9 +30,12 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
+    "classnames": "^2.2.6",
+    "mobx-react": "^5.4.3",
     "nel-neo-thinsdk": "0.0.9",
     "neo-thinsdk-ts-nodejs": "^1.0.1",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "react-router": "^4.3.1"
   }
 }

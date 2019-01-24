@@ -1,3 +1,6 @@
+var Test=()=>{
+    alert("test")
+}
 var getAccount = (callback) =>{
     alert("inject getAccount");
 
