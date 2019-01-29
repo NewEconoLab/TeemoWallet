@@ -1,23 +1,25 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import Welcome from './welcome';
+import './index.less'
+import App from './App';
 
 if(chrome.tabs)
 {
-    chrome.tabs.query({ active: true, currentWindow: true }, tab => {
-        
-        ReactDOM.render(<Welcome develop={false} />, document.getElementById('popup'));
-        // chrome.storage.local.get("teemmo-wallet-login",res=>{
-        //     if(!res)
-        //     {
-        //     }
-        // })
+    chrome.tabs.query({ active: true, currentWindow: true }, tab => {        
+        ReactDOM.render(
+            <App/>, document.getElementById('popup')
+        );
     });
 }
 else
 {
     window.onload=()=>
-    {        
-        ReactDOM.render(<Welcome develop={true} />, document.getElementById('popup'));
+    {   
+        const popup = document.getElementById('popup');
+        document.body.style.background="#b2b2b2";
+        popup.style.background="#fff";
+        ReactDOM.render(
+            <App/>, popup
+        );
     }
 }

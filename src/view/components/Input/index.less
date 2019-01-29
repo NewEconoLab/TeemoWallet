@@ -3,9 +3,18 @@
     width: 315px;
     display: block;
     .input-title{
-        height: 12px;
+        line-height: 14px;
+        height: 14px;
         font-family: NotoSansHans-Regular;
         font-size: 12px;
+        color: #B2B2B2;
+    }
+    .file-title{
+        margin-top: 17px;
+        line-height: 14px;
+        height: 14px;
+        font-family: NotoSansHans-Regular;
+        font-size: 14px;
         color: #B2B2B2;
     }
     .input-line{
@@ -27,6 +36,15 @@
             color: #F25151 ;
             border-bottom: 1px solid #F25151;
         }
+        &.file{
+            color: #B2B2B2;
+            &.active{
+                color: #333333;
+            }
+            &:hover{
+                cursor: pointer;            
+            }
+        }
         &.active{
             border-bottom: 1px solid #5F8DFB;
         }
@@ -34,6 +52,9 @@
             color: #B2B2B2;
             font-size: 14px;
         }
+    }
+    input[type="file"]{
+        display:none;
     }
     .input-message{
         height: 20px;

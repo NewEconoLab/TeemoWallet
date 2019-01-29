@@ -34,7 +34,7 @@ export default class Label extends React.Component<IProps, {}>
 	{        
 		return (
             <div 
-                className={'label'+(this.props.active?'active':'')}
+                className={'label'+(this.props.active?' active':'')}
 				onClick={this.onClick}
 				style={this.props.style}
             >

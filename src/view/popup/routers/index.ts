@@ -3,11 +3,25 @@ import AsyncComponent from '../../components/asyncComponent';
 
 export default [
     {
-        component: AsyncComponent(() => import('../welcome/index')),
+        component: AsyncComponent(() => import('../containers/welcome')),
         path: '/welcome',
     },
     {
-        component: AsyncComponent(()=>import('../test/index')),
+        component: AsyncComponent(()=>import('../containers/login')),
+        path:'/login'
+    },
+    {
+        component: AsyncComponent(()=>import('../containers/test')),
         path:'/test'
+    },
+    {
+      component: AsyncComponent(() => import('../containers/welcome')),
+      exact: true,
+      path: '/',
+    },
+    {
+        path: '*',
+        component: AsyncComponent(() => import('../containers/welcome')),
+        requiresAuth: false,
     }
 ];

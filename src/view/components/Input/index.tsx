@@ -14,7 +14,7 @@ interface IProps {
 	onFocus?: () => void,
 	style?: object,
 	readonly?: boolean,
-	type: string,
+	type: 'text'|'password'|'file'|'hidden'|'select',	//当前组件主要就支持这几种类型
     onBlur?: (event: any) => void,
 	topsearch?: boolean,
 	onEnter?: () => void,
@@ -64,26 +64,51 @@ export default class Input extends React.Component<IProps, {}> {
 			this.props.onClickMax();
 		}
 	}
+
+	public fileClick = () =>
+	{
+		document.getElementById('file-input').click();
+	}
+
+	// 文件更改触发事件
+	public fileChange = (event: any) =>
+	{
+		// 判断是否有onChange方法 && 是否有files对象 && files对象是否有文件流
+		if (this.props.onChange && event.target.files && event.target.files.length) 
+		{
+			this.props.onChange(event.target.files[0]);
+		}
+	}
+
 	public render() {
-        const inputClassName = classnames('input-line', { 'top-search': this.props.topsearch ? this.props.topsearch : false },{'active':this.props.value?true:false});
+        const inputClassName = classnames('input-line', { 'file': this.props.type==="file" ? true : false },{'active':this.props.value?true:false});
 		return (
 			<div className="input-group">
-                {
-                    <div className="input-title">{(this.state.title||this.props.value)?this.props.placeholder:""}</div>
-                }
-				<input
-					className={inputClassName}
-					value={this.props.value}
-					type={this.props.type}
-					placeholder={this.state.title?"":this.props.placeholder}
-					onChange={this.onInputChange}
-					style={this.props.style}
-					readOnly={this.props.readonly}
-					onBlur={this.onInputBlur}
-					onFocus={this.onFocus}
-					onKeyDown={this.onKeyDown}
-					maxLength={this.props.maxlength}
-				/>
+				<div className="input-title">{(this.state.title||this.props.value)?this.props.placeholder:""}</div>
+				{
+					this.props.type==="file"?
+					<div className={inputClassName} onClick={this.fileClick}>
+						{this.props.value?this.props.value:this.props.placeholder}
+						<input type="file" id="file-input" onChange={this.fileChange} />
+					</div>:
+					(
+						this.props.type==="select"?
+						<div></div>:
+						<input
+							className={inputClassName}
+							value={this.props.value}
+							type={this.props.type}
+							placeholder={this.state.title?"":this.props.placeholder}
+							onChange={this.onInputChange}
+							style={this.props.style}
+							readOnly={this.props.readonly}
+							onBlur={this.onInputBlur}
+							onFocus={this.onFocus}
+							onKeyDown={this.onKeyDown}
+							maxLength={this.props.maxlength}
+						/>
+					)
+				}
                 <div className="message">
                 </div>
 			</div>

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import './index.less';
-import Button from '../../components/Button';
+import Button from '../../../components/Button';
+import { RouteComponentProps } from 'react-router-dom';
 
-interface AppProps {
+interface AppProps extends RouteComponentProps {
     develop:boolean;
 }
 
@@ -21,7 +22,7 @@ export default class Welcome extends React.Component<AppProps> {
 
     public componentDidMount() {
         // Example of how to send a message to eventPage.ts.
-        if(!this.props.develop)
+        if(chrome.tabs)
         {
             chrome.runtime.sendMessage({ popupMounted: true });
         }
@@ -29,6 +30,7 @@ export default class Welcome extends React.Component<AppProps> {
 
     public start =()=>
     {
+        this.props.history.push('/login')
     }
 
 
