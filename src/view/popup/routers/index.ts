@@ -11,6 +11,10 @@ export default [
         path:'/login'
     },
     {
+        component: AsyncComponent(()=>import('../containers/walletnew')),
+        path:'/walletnew'
+    },
+    {
         component: AsyncComponent(()=>import('../containers/test')),
         path:'/test'
     },

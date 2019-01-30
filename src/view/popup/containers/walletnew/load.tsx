@@ -26,15 +26,13 @@ export default class Login extends React.Component<AppProps> {
         {id:"wif",name:"WIF私钥字符串"},
     ]
 
-    public state = 
-    {
-        currentOption:this.options[0],
-        currentLable:"import",
-        password:"",
+    public state = {
         filename:"",
+        password:"",
         confirm:"",
         nep2:"",
         wif:"",
+        currentOption:this.options[0]
     }
 
     public componentDidMount() 
@@ -79,13 +77,6 @@ export default class Login extends React.Component<AppProps> {
     goBack = ()=>
     {
         this.props.history.push('/login')
-    }
-
-    getCreateLable = () => {
-        this.setState({currentLable:"create"});
-    }
-    getImoprtLable = () => {
-        this.setState({currentLable:"import"});
     }
 
     /**
@@ -138,56 +129,6 @@ export default class Login extends React.Component<AppProps> {
         }
     }
 
-    getImportContent =()=>
-    {
-        return(            
-            <div className="form">
-                <div className="form-title">
-                    <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
-                </div>
-                {
-                    // 该方法为了渲染form表单对应不同栏目的内容
-                    this.getFormContent(this.state.currentOption)
-                }                        
-                <div className="form-btn-list">
-                    <div className="btn-first">
-                        <Button type='warn' text="取消" onClick={this.goBack}/>
-                    </div>
-                    <div>
-                        <Button type='primary' text="确定"/>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    getCreateContent =()=>
-    {
-        return(
-            <div className="form">                
-                <div className="form-content">                            
-                    <div className="first">
-                        <Input type="text" placeholder="为你的钱包命名" value={this.state.nep2} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="设置密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="确认密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="btn-list">
-                        <div className="btn-first">
-                            <Button type='warn' text="取消" onClick={this.goBack}/>
-                        </div>
-                        <div>
-                            <Button type='primary' text="确定"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     render() {
         return (
             <div className="loginContainer">
@@ -196,10 +137,26 @@ export default class Login extends React.Component<AppProps> {
                 </div>
                 <div className="content">
                     <div className="form-label">
-                        <Label text="创建钱包" active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
-                        <Label text="导入钱包" active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
+                        <Label text="创建钱包" />
+                        <Label text="导入钱包" active={true} />
                     </div>
-                    {this.state.currentLable==="create"?this.getCreateContent():this.getImportContent()}
+                    <div className="form">
+                        <div className="form-title">
+                            <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
+                        </div>
+                        {
+                            // 该方法为了渲染form表单对应不同栏目的内容
+                            this.getFormContent(this.state.currentOption)
+                        }                        
+                        <div className="form-btn-list">
+                            <div className="btn-first">
+                                <Button type='warn' text="取消" onClick={this.goBack}/>
+                            </div>
+                            <div>
+                                <Button type='primary' text="确定"/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         )

@@ -27,11 +27,8 @@ export default class Login extends React.Component<AppProps> {
     ]
 
     public state = {
-        filename:"",
         password:"",
         confirm:"",
-        nep2:"",
-        wif:"",
         currentOption:this.options[0]
     }
 
@@ -74,54 +71,9 @@ export default class Login extends React.Component<AppProps> {
         this.setState({currentOption:call})
     }
 
-    /**
-     * 根据选项返回对应的模块
-     * @param {IOption} option 当前的选择项
-     */
-    public getFormContent=(option:IOption)=>
+    public toCreateWallet=()=>
     {
-        if (option.id==='nep6') 
-        {
-            return(
-                <div className="form-content">                            
-                    <div className="input">
-                        <Input type="file" placeholder="选择Nep6文件（.json）" value={this.state.filename} onChange={this.fileChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="输入密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            );
-        } 
-        else if(option.id==='nep2')
-        {
-            return(                
-                <div className="form-content">                            
-                    <div className="input">
-                        <Input type="text" placeholder="输入Nep2" value={this.state.nep2} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="输入密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            )
-        }
-        else
-        {
-            return(                
-                <div className="form-content">                            
-                    <div className="wif">
-                        <Input type="text" placeholder="输入私钥" value={this.state.wif} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="wif">
-                        <Input type="password" placeholder="设置密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="wif">
-                        <Input type="password" placeholder="确认密码" value={this.state.confirm} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            )
-        }
+        this.props.history.push('/walletnew')
     }
 
     render() {
@@ -131,27 +83,20 @@ export default class Login extends React.Component<AppProps> {
                     <div className="title">欢迎回来</div>
                 </div>
                 <div className="content">
-                    <div className="form-label">
-                        <Label text="创建钱包" />
-                        <Label text="导入钱包" active={true} />
-                    </div>
-                    <div className="form">
-                        <div className="form-title">
-                            <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
-                        </div>
-                        {
-                            // 该方法为了渲染form表单对应不同栏目的内容
-                            this.getFormContent(this.state.currentOption)
-                        }                        
-                        <div className="form-btn-list">
-                            <div className="btn-first">
-                                <Button type='warn' text="取消"/>
+                    <div className="box">
+                        <div className="box-content">
+                            <div className="form-title">
+                                <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
                             </div>
-                            <div>
-                                <Button type='primary' text="确定"/>
+                            <div className="login-password">
+                                <Input type='password' placeholder='输入密码' value={this.state.password} onChange={this.passwordChange} />
+                            </div>
+                            <div className="login-button">
+                                <Button type='primary' size='long' text="登陆"/>
                             </div>
                         </div>
                     </div>
+                    <div className="href" onClick={this.toCreateWallet}>忘记密码，请重新导入钱包。</div>
                 </div>
             </div>
         )
