@@ -86,7 +86,7 @@ export default class Login extends React.Component<AppProps> {
                     <div className="box">
                         <div className="box-content">
                             <div className="form-title">
-                                <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
+                                <Input type="text" placeholder="我的钱包" value={this.state.confirm} onChange={this.passwordChange}/> 
                             </div>
                             <div className="login-password">
                                 <Input type='password' placeholder='输入密码' value={this.state.password} onChange={this.passwordChange} />
@@ -95,7 +95,7 @@ export default class Login extends React.Component<AppProps> {
                                 <Button type='primary' size='long' text="登陆"/>
                             </div>
                         </div>
-                    </div>
+                    </div> 
                     <div className="href" onClick={this.toCreateWallet}>忘记密码，请重新导入钱包。</div>
                 </div>
             </div>

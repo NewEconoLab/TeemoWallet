@@ -4,7 +4,7 @@
   "description": "A boilerplate project to quickly build a Chrome extension using TypeScript and React (built using webpack).",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --config webpack.dev.js",
     "watch": "webpack -w --config webpack.dev.js",
     "lint": "tslint 'src/**/*.{ts, tsx}'",
     "server":"webpack-dev-server --config webpack.dev.js --watch --color --port 8080"
