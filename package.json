@@ -7,7 +7,7 @@
     "dev": "webpack-dev-server --inline --progress --config webpack.dev.js",
     "watch": "webpack -w --config webpack.dev.js",
     "lint": "tslint 'src/**/*.{ts, tsx}'",
-    "server":"webpack-dev-server --config webpack.dev.js --watch --color --port 8080"
+    "server": "webpack-dev-server --config webpack.dev.js --watch --color --port 8080"
   },
   "author": "Joe Martella",
   "license": "MIT",
@@ -42,6 +42,7 @@
     "react-router": "^4.3.1",
     "react-router-config": "^4.4.0-beta.6",
     "react-router-dom": "^4.3.1",
+    "url-loader": "^1.1.2",
     "webpack-dev-server": "^3.1.14"
   }
 }

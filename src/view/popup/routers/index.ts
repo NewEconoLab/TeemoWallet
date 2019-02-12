@@ -23,7 +23,7 @@ export default [
         path:'/test'
     },
     {
-      component: AsyncComponent(() => import('../containers/welcome')),
+      component: AsyncComponent(() => import('../containers/mywallet')),
       exact: true,
       path: '/',
     },

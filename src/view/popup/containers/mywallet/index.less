@@ -1,13 +1,70 @@
 .mywallet{
     width: 100%;
-
-    .foot{
+    .head{
+        position: fixed;
+        z-index: 998;
+        top: 0px;
+        border-bottom: 1px solid #E5E5E5;
+        .functionRow {
+            margin: 30px 30px;
+            .list {
+                display: flex;
+                .walletCode{
+                    line-height: 30px;
+                    width: 255px;
+                    span{
+                        margin-left: 15px;
+                    }
+                }
+                .function{
+                    margin-right: 20px;
+                }
+            }
+            .address {
+                margin-top: 10px;
+                font-family: NotoSansHans-Regular;
+                font-size: 12px;
+                color: #333333;
+            }
+        }
+        .lablelist {
+            margin: 0 15px;
+            display: flex;
+            .lable{
+                flex: 1;
+                height: 30px;
+                text-align: center;
+                span{
+                    font-family: NotoSansHans-Medium;
+                    font-size: 16px;
+                    color: #B2B2B2;
+                    text-align: center;
+                }
+                &:hover{
+                    cursor: pointer;
+                }
+                &.active{
+                    span{
+                        color: #5F8DFB;
+                        padding-bottom: 7px;
+                        border-bottom: 3px solid #5F8DFB;
+                    }
+                }
+            }
+        }
+    }
+    .foot {
         position: fixed;
         z-index: 998;
         background: #FFFFFF;
         box-shadow: 0 -1px 4px 0 rgba(184,184,184,0.50);
         height: 60px;
         width: 375px;
+        top: 540px;
+        .content {
+            margin: 15px;
+            width: 260px;
+        }
     }
 
 }

@@ -17,7 +17,8 @@ interface IProps
 	onCallback?: (event: IOption) => void,
 	style?: object,
 	placeholder?:string,
-	defaultValue?:string | number
+	defaultValue?:string | number,
+	up?:boolean
 }
 
 interface IState{
@@ -84,7 +85,7 @@ export default class Select extends React.Component<IProps, IState> {
 
 	public render()
 	{
-		const selectBox = classnames('select-box', {'disNone': !this.state.expand})
+		const selectBox = classnames('select-box', {'disNone': !this.state.expand},{'up': !!this.props.up})
 		const { options = [] } = this.props;
 		let showName:string = this.props.placeholder || options[0][name];
 		if(this.state.options && this.state.options.name) {

@@ -5,7 +5,7 @@ module.exports = {
     inject:path.join(__dirname,"src/app/inject.ts"),
     content: path.join(__dirname,'src/app/content.ts'),
     background: path.join(__dirname,'src/app/background.ts'),
-    popup: path.join(__dirname, "src/view/popup/index.tsx"),
+    index: path.join(__dirname, "src/view/popup/index.tsx"),
     notifyPage: path.join(__dirname, "src/view/notify/index.tsx"),
   },
   output: {
@@ -33,7 +33,16 @@ module.exports = {
             loader: require.resolve("less-loader") // Compiles Sass to CSS
           }
         ]
-      }
+      },
+      { 
+        exclude: /node_modules/,
+        test: /\.(gif|jpg|png|woff|svg|eot|ttf)\??.*$/,
+        use:[
+          {
+            loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
+          }
+        ]
+      },
     ]
   },
   resolve: {

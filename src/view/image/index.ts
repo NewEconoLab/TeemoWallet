@@ -1,0 +1,16 @@
+export const ICON = {
+    attention:require('./attention.png'),
+    bc:require('./bc.png'),
+    exchange:require('./exchange.png'),
+    FUNCTION:require('./function.png'),
+    logo:require('./logo.png'),
+    logo2:require('./logo2.png'),
+    LOGOUT:require('./logout.png'),
+    nns:require('./NNS.png'),
+    previous:require('./previous.png'),
+    next:require('./next.png'),
+    quesheng:require('./quesheng.png'),
+    tick:require('./tick.png'),
+    unchecked:require('./unchecked.png'),
+    checked:require('./checked.png'),
+}

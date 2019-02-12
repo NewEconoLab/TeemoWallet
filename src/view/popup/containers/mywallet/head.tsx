@@ -1,41 +1,36 @@
-import React from "react";
-import { RouteComponentProps } from "react-router";
-import './index.less'
+// 输入框组件
+import * as React from 'react';
+import { ICON } from '../../../image';
 
-interface AppProps extends RouteComponentProps {
-    develop:boolean;
-}
-
-interface AppState {
-    develop:boolean;
-}
-export default class WalletHeader extends React.Component<any> {
-    constructor(props: any, state: AppState) {
-        super(props, state);
+// @observer
+export default class Input extends React.Component<any, {}> {
+	constructor(props: any) {
+		super(props);
     }
-    
-    render() {
-        return (
-            <div className="walletHead">
+
+	public render() {
+		return (
+            <div className="head">
                 <div className="functionRow">
-                    <div className='header'>
-                        <img src="" alt=""/>
-                        <span>我的钱包1</span>
-                    </div>
-                    <div className="function">
-                        <div className="functionlist">
-                            <img src="../../../image/function.png" alt="" />
+                    <div className="list">
+                        <div className="walletCode">
+                            <img  width='30px' height='30px'/>
+                            <span>我的钱包1</span>
+                        </div>
+                        <div className="function">
+                            <img src={ICON.FUNCTION} height={20} />
                         </div>
                         <div className="out">
-                            <img src="../../../image/logout.png" alt=""/>
+                            <img src={ICON.LOGOUT} height={20}/>
                         </div>
                     </div>
+                    <div className="address">ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf</div>
                 </div>
                 <div className="lablelist">
-                    <div className="lable">交易记录</div>
-                    <div className="lable">资产</div>
+                    <div className="lable active"><span>交易记录</span></div>
+                    <div className="lable"><span>资产</span></div>
                 </div>
             </div>
-        )
-    }
+		);
+	}
 }

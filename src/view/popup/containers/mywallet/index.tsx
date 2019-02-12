@@ -2,6 +2,7 @@ import * as React from 'react';
 import './index.less';
 import { RouteComponentProps } from 'react-router-dom';
 import WalletFoot from './foot';
+import WalletHeader from './head';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -31,6 +32,7 @@ export default class MyWallet extends React.Component<AppProps> {
     render() {
         return (
             <div className="mywallet">
+                <WalletHeader/>
                 <WalletFoot/>
             </div>
         )
