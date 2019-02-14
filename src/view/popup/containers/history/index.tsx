@@ -43,6 +43,7 @@ export default class History extends React.Component<any, {}>
                 <div className="history">
                     <div className="title">交易历史</div>
                     <Select text="" options={this.options} onCallback={this.onSelectModule}/>
+                    <Panel type="contract" time={11222} wait={true} message="" title="个人转账" ></Panel>
                 </div>
             </div>
 		);

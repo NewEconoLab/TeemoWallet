@@ -18,10 +18,10 @@ export default class Input extends React.Component<any, {}> {
                             <span>我的钱包1</span>
                         </div>
                         <div className="function">
-                            <img src={ICON.FUNCTION} height={20} />
+                            <img src={ICON.FUNCTION} height={24} />
                         </div>
                         <div className="out">
-                            <img src={ICON.LOGOUT} height={20}/>
+                            <img src={ICON.LOGOUT} height={24}/>
                         </div>
                     </div>
                     <div className="address">ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf</div>
