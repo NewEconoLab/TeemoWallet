@@ -38,7 +38,7 @@ export default class Panel extends React.Component<IProps, {}>
 		return (
 			<div className="panel">
 				<div className="panel-heading">
-					<div>
+					<div className="transfer-type">
 						<div className="icon">{this.props.children}</div>
 						<div className="message">
 							<div className="type">合约交互</div>
@@ -46,11 +46,30 @@ export default class Panel extends React.Component<IProps, {}>
 						</div>
 					</div>
 					<div className="asset">
-						<span>-5 GAS</span>
-						<span>等待确认</span>
+						<div className="output">-5 GAS</div>
+						<div className="wait">等待确认</div>
 					</div>
 				</div>
 				<div className="panel-body">
+					<div className="group txid">
+						<div className="title">TXID</div>
+						<div className="value">5380...2927</div>
+					</div>
+					<div className="transaction-info">
+						<div className="transaction-title">转账</div>
+						<div className="group send">
+							<div className="title">发往</div>
+							<div className="value">AeMy...oWu3</div>
+						</div>
+						<div className="group expense">
+							<div className="title">花费</div>
+							<div className="value">5 GAS</div>
+						</div>
+						<div className="group netfee">
+							<div className="title">手续费</div>
+							<div className="value">0 GAS</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		);

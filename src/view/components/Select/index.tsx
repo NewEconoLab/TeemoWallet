@@ -93,7 +93,7 @@ export default class Select extends React.Component<IProps, IState> {
 		}
 		return (
 			<div className="select-wrapper">
-				<div className="select-type">{this.props.text}</div>
+				{this.props.text?<div className="select-type">{this.props.text}</div>:<></>}
 				<div className="select-content" onClick={this.onExpand}>
 					<div className="selected-text" style={this.props.style}>
 						<span>{showName}</span>

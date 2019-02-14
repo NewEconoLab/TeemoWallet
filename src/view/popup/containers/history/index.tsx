@@ -4,6 +4,7 @@
 import * as React from 'react';
 import './index.less';
 import Panel from '../../../components/Panel';
+import Select, { IOption } from '../../../components/Select';
 // @observer
 export default class History extends React.Component<any, {}> 
 {
@@ -19,6 +20,17 @@ export default class History extends React.Component<any, {}>
 			this.props.onClick();
 		}
 	}
+    public options:IOption[]=
+    [
+        {id:"all",name:"全部"},
+        {id:"gas",name:"GAS"},
+        {id:"cgas",name:"CGAS"},
+        {id:"neo",name:"NEO"},
+    ]
+    onSelectModule = (call:IOption)=>
+    {
+        this.setState({currentOption:call})
+    }
 
 	public render()
 	{
@@ -30,6 +42,7 @@ export default class History extends React.Component<any, {}>
                 </div>
                 <div className="history">
                     <div className="title">交易历史</div>
+                    <Select text="" options={this.options} onCallback={this.onSelectModule}/>
                 </div>
             </div>
 		);

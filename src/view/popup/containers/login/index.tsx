@@ -19,17 +19,9 @@ export default class Login extends React.Component<AppProps> {
         super(props, state);
     }
 
-    public options:IOption[]=
-    [
-        {id:"nep6",name:"Nep6加密文件"},
-        {id:"nep2",name:"Nep2加密字段"},
-        {id:"wif",name:"WIF私钥字符串"},
-    ]
-
     public state = {
         password:"",
         confirm:"",
-        currentOption:this.options[0]
     }
 
     public componentDidMount() 
