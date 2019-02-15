@@ -10,7 +10,7 @@ export const ICON = {
     previous:require('./previous.png'),
     next:require('./next.png'),
     quesheng:require('./quesheng.png'),
-    tick:require('./tick.png'),
+    checked:require('./tick.png'),
     unchecked:require('./unchecked.png'),
-    checked:require('./checked.png'),
+    success:require('./success.png'),
 }

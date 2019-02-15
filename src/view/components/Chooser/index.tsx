@@ -22,11 +22,11 @@ interface IProps
 
 interface IState{
 	options:IOption,
-	expand:boolean
+	expand:boolean 
 }
 
 
-export default class Select extends React.Component<IProps, IState> {
+export default class Chooser extends React.Component<IProps, IState> {
 	public state = {
 		// 选择的项
 		options:{id: '', name: ''},

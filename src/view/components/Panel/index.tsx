@@ -24,9 +24,15 @@ export default class Panel extends React.Component<IProps, {}>
 	{
 		super(props);		
 	}
+	public state = {
+		open:false
+	}
 	// 监控输入内容
 	public onClick = () =>
 	{
+		this.setState({
+			open:!this.state.open
+		})
 		if (this.props.onClick)
 		{
 			this.props.onClick();
@@ -37,11 +43,11 @@ export default class Panel extends React.Component<IProps, {}>
 	{
 		return (
 			<div className="panel">
-				<div className="panel-heading">
+				<div className="panel-heading" onClick={this.onClick}>
 					<div className="transfer-type">
 						<div className="icon">{this.props.children}</div>
 						<div className="message">
-							<div className="type">合约交互</div>
+							<div className="type">{this.props.type==="contract"?"合约交互":"个人转账"}</div>
 							<div className="time">1-1 10:09</div>
 						</div>
 					</div>
@@ -50,27 +56,30 @@ export default class Panel extends React.Component<IProps, {}>
 						<div className="wait">等待确认</div>
 					</div>
 				</div>
-				<div className="panel-body">
-					<div className="group txid">
-						<div className="title">TXID</div>
-						<div className="value">5380...2927</div>
-					</div>
-					<div className="transaction-info">
-						<div className="transaction-title">转账</div>
-						<div className="group send">
-							<div className="title">发往</div>
-							<div className="value">AeMy...oWu3</div>
+				{
+					this.state.open?					
+					<div className="panel-body" >
+						<div className="group txid">
+							<div className="title">TXID</div>
+							<div className="value">5380...2927</div>
 						</div>
-						<div className="group expense">
-							<div className="title">花费</div>
-							<div className="value">5 GAS</div>
+						<div className="transaction-info">
+							<div className="transaction-title">转账</div>
+							<div className="group send">
+								<div className="title">发往</div>
+								<div className="value">AeMy...oWu3</div>
+							</div>
+							<div className="group expense">
+								<div className="title">花费</div>
+								<div className="value">5 GAS</div>
+							</div>
+							<div className="group netfee">
+								<div className="title">手续费</div>
+								<div className="value">0 GAS</div>
+							</div>
 						</div>
-						<div className="group netfee">
-							<div className="title">手续费</div>
-							<div className="value">0 GAS</div>
-						</div>
-					</div>
-				</div>
+					</div>:<></>
+				}
 			</div>
 		);
 	}

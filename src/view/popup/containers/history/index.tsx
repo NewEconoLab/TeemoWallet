@@ -5,6 +5,7 @@ import * as React from 'react';
 import './index.less';
 import Panel from '../../../components/Panel';
 import Select, { IOption } from '../../../components/Select';
+import Checkbox from '../../../components/Checkbox';
 // @observer
 export default class History extends React.Component<any, {}> 
 {
@@ -26,7 +27,7 @@ export default class History extends React.Component<any, {}>
         {id:"gas",name:"GAS"},
         {id:"cgas",name:"CGAS"},
         {id:"neo",name:"NEO"},
-    ]
+    ];
     onSelectModule = (call:IOption)=>
     {
         this.setState({currentOption:call})
@@ -42,7 +43,14 @@ export default class History extends React.Component<any, {}>
                 </div>
                 <div className="history">
                     <div className="title">交易历史</div>
-                    <Select text="" options={this.options} onCallback={this.onSelectModule}/>
+                    <div className="filter">
+                        <div className="filter-select">
+                            <Select text="" options={this.options} onCallback={this.onSelectModule}/>
+                        </div>
+                        <div className="filter-checkbox">
+                            <Checkbox text="隐藏0GAS"></Checkbox>
+                        </div>
+                    </div>
                     <Panel type="contract" time={11222} wait={true} message="" title="个人转账" ></Panel>
                 </div>
             </div>
