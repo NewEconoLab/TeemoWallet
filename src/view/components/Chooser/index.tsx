@@ -26,8 +26,8 @@ interface IState{
 }
 
 
-export default class Chooser extends React.Component<IProps, IState> {
-	public state = {
+export default class Chooser extends React.Component<any, IState> {
+	public state:IState = {
 		// 选择的项
 		options:{id: '', name: ''},
 		expand: false,
@@ -91,23 +91,8 @@ export default class Chooser extends React.Component<IProps, IState> {
 			showName =   this.state.options.name
 		}
 		return (
-			<div className="select-wrapper">
-				<div className="select-type">{this.props.text}</div>
-				<div className="select-content" onClick={this.onExpand}>
-					<div className="selected-text" style={this.props.style}>
-						<span>{showName}</span>
-						<span className="triangle" />
-					</div>
-					<div className={selectBox}>
-						<ul>
-							{
-								options.map((v, i) => {
-									return <li key={i} className='option' onClick={this.onSelect.bind(this, v)}>{v.name}</li>;
-								})
-							}
-						</ul>
-					</div>
-				</div>
+			<div className="">
+				<div></div>
 			</div>
 		);
 	}

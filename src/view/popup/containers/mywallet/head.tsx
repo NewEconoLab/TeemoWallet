@@ -1,6 +1,7 @@
 // 输入框组件
 import * as React from 'react';
 import { ICON } from '../../../image';
+import Chooser from '../../../components/Chooser';
 
 // @observer
 export default class Input extends React.Component<any, {}> {
@@ -19,6 +20,7 @@ export default class Input extends React.Component<any, {}> {
                         </div>
                         <div className="function">
                             <img src={ICON.FUNCTION} height={24} />
+                            <Chooser></Chooser>
                         </div>
                         <div className="out">
                             <img src={ICON.LOGOUT} height={24}/>
