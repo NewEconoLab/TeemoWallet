@@ -6,65 +6,68 @@ import * as React from 'react';
 import classnames from 'classnames';
 import './index.less';
 import EventHandler from '../../popup/utils/event';
+
 export interface IOption {
 	id: string | number,
-	name: string
+	name: string,
+	icon: any
 }
+
 interface IProps
 {
 	options:IOption[],
-	text:string,
-	onCallback?: (event: IOption) => void,
-	style?: object,
 	placeholder?:string,
-	defaultValue?:string | number
+	defaultValue?:string | number,
+	onCallback?: (event: IOption) => void
 }
 
 interface IState{
-	options:IOption,
+	option:IOption
 	expand:boolean 
 }
 
 
-export default class Chooser extends React.Component<any, IState> {
+export default class Chooser extends React.Component<IProps, IState> {
 	public state:IState = {
 		// 选择的项
-		options:{id: '', name: ''},
+		option:{id: '', name: '', icon : undefined},
 		expand: false,
 	}
 	public componentDidMount() {
 		if(this.props.defaultValue) {
 			this.setState({
-				options:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
+				option:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
 			}, () => {
 				if(this.props.onCallback) {
-					this.props.onCallback(this.state.options);
+					this.props.onCallback(this.state.option);
 				}
 			});
-		} else if(!this.props.placeholder) {
-			this.setState({
-				options:this.props.options[0]
-			});
-			if(this.props.onCallback) {
-				this.props.onCallback(this.props.options[0]);
-			}
-		}
+		} 
+		// else if(!this.props.placeholder) {
+		// 	this.setState({
+		// 		option:this.props.options[0]
+		// 	});
+		// 	if(this.props.onCallback) {
+		// 		this.props.onCallback(this.props.options[0]);
+		// 	}
+		// }
 
 		// 注册全局点击事件，以便点击其他区域时，隐藏展开的内容
 		EventHandler.add(this.globalClick);
 	}
-	// 全局点击
-	public globalClick = () => {
-		this.setState({ expand: false });
-	}
-	// 选择选项
-	public onSelect = (item) => {
 
-		this.setState({ options: item, expand: false });
+	// 选择选项
+	public onSelect = (item:IOption) => {
+
+		this.setState({ option: item, expand: false });
 
 		if(this.props.onCallback) {
 			this.props.onCallback(item);
 		}
+	}
+	// 全局点击
+	public globalClick = () => {
+		this.setState({ expand: false });
 	}
 	// 展开
 	public onExpand = (e) => {
@@ -72,28 +75,43 @@ export default class Chooser extends React.Component<any, IState> {
 		const expand = !this.state.expand;
 	
 		this.setState({
-		  expand: expand
+			expand: expand
 		});
 	
 		e.stopPropagation();
-	  }
+	}
 	public componentWillUnmount() {
 		//  组件释放remove click处理
 		EventHandler.remove(this.globalClick);
-	  }
+	}
 
 	public render()
 	{
-		const selectBox = classnames('select-box', {'disNone': !this.state.expand})
-		const { options = [] } = this.props;
-		let showName:string = this.props.placeholder || options[0][name];
-		if(this.state.options && this.state.options.name) {
-			showName =   this.state.options.name
-		}
+		const content = classnames('hint-content', {'disNone': !this.state.expand})
 		return (
-			<div className="">
-				<div></div>
-			</div>
+            <div className="hint-box">
+                <div className="hint-msg">
+					<div onClick={this.onExpand}>{this.props.children}</div>
+                    <div className={content}>
+						{this.props.options.map(option=>{
+							return (
+								<div className="hint-line" key={option.id} onClick={this.onSelect.bind(this, option)} >
+									<div className="line-icon">
+										<img src={option.icon} alt=""/>
+									</div>
+									<div className="line-text">
+										{option.name}
+									</div>
+								</div>
+							)
+						})}
+
+                        <div className="hint-wrapper">
+                            <div className="arrow" />
+                        </div>
+                    </div>
+                </div>
+            </div>
 		);
 	}
 }

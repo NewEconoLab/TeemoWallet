@@ -73,15 +73,15 @@ export default class Select extends React.Component<IProps, IState> {
 		const expand = !this.state.expand;
 	
 		this.setState({
-		  expand: expand
+			expand: expand
 		});
 	
 		e.stopPropagation();
-	  }
+	}
 	public componentWillUnmount() {
 		//  组件释放remove click处理
 		EventHandler.remove(this.globalClick);
-	  }
+	}
 
 	public render()
 	{
