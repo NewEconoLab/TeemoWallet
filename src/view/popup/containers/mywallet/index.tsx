@@ -4,6 +4,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import WalletFoot from './foot';
 import WalletHeader from './head';
 import History from '../history';
+import Assets from '../assets';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -34,7 +35,10 @@ export default class MyWallet extends React.Component<AppProps> {
         return (
             <div className="mywallet">
                 <WalletHeader/>
-                <History></History>
+                <div className="body">                
+                    {/* <History></History> */}
+                    <Assets />
+                </div>
                 <WalletFoot/>
             </div>
         )
