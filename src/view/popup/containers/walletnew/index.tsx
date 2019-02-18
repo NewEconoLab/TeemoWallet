@@ -5,6 +5,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import Label from '../../../components/Label';
 import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
+import WalletCreate from './create';
+import WalletImport from './load';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -41,41 +43,7 @@ export default class Login extends React.Component<AppProps> {
     {
         // Example of how to send a message to eventPage.ts.
     }
-
-    /**
-     * 选择文件后触发的方法
-     * @param {File} event change方法返回的文件对象
-     */
-    public fileChange=(event:File)=>
-    {   
-        console.log(event);
-        
-        this.setState({filename:event.name})
-    }
-
-    /**
-     * 输入密码后触发的改变方法
-     * @param {string} event change方法返回的字符对象
-     */
-    public passwordChange=(event:string)=>
-    {
-        this.setState({password:event})
-    }
-
-    /**
-     * 输入密码后触发的改变方法
-     * @param {string} event change方法返回的字符对象
-     */
-    public nep2Change=(event:string)=>
-    {
-        this.setState({password:event})
-    }
-
-    onSelectModule = (call:IOption)=>
-    {
-        this.setState({currentOption:call})
-    }
-
+    
     goBack = ()=>
     {
         this.props.history.push('/login')
@@ -86,106 +54,6 @@ export default class Login extends React.Component<AppProps> {
     }
     getImoprtLable = () => {
         this.setState({currentLable:"import"});
-    }
-
-    /**
-     * 根据选项返回对应的模块
-     * @param {IOption} option 当前的选择项
-     */
-    public getFormContent=(option:IOption)=>
-    {
-        if (option.id==='nep6') 
-        {
-            return(
-                <div className="form-content">                            
-                    <div className="input">
-                        <Input type="file" placeholder="选择Nep6文件（.json）" value={this.state.filename} onChange={this.fileChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="输入密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            );
-        } 
-        else if(option.id==='nep2')
-        {
-            return(                
-                <div className="form-content">                            
-                    <div className="input">
-                        <Input type="text" placeholder="输入Nep2" value={this.state.nep2} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="输入密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            )
-        }
-        else
-        {
-            return(                
-                <div className="form-content">                            
-                    <div className="wif">
-                        <Input type="text" placeholder="输入私钥" value={this.state.wif} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="wif">
-                        <Input type="password" placeholder="设置密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="wif">
-                        <Input type="password" placeholder="确认密码" value={this.state.confirm} onChange={this.passwordChange}/>
-                    </div>
-                </div>
-            )
-        }
-    }
-
-    getImportContent =()=>
-    {
-        return(            
-            <div className="form">
-                <div className="form-title">
-                    <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
-                </div>
-                {
-                    // 该方法为了渲染form表单对应不同栏目的内容
-                    this.getFormContent(this.state.currentOption)
-                }                        
-                <div className="form-btn-list">
-                    <div className="btn-first">
-                        <Button type='warn' text="取消" onClick={this.goBack}/>
-                    </div>
-                    <div>
-                        <Button type='primary' text="确定"/>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    getCreateContent =()=>
-    {
-        return(
-            <div className="form">                
-                <div className="form-content">                            
-                    <div className="first">
-                        <Input type="text" placeholder="为你的钱包命名" value={this.state.nep2} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="设置密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="input">
-                        <Input type="password" placeholder="确认密码" value={this.state.password} onChange={this.passwordChange}/>
-                    </div>
-                    <div className="btn-list">
-                        <div className="btn-first">
-                            <Button type='warn' text="取消" onClick={this.goBack}/>
-                        </div>
-                        <div>
-                            <Button type='primary' text="确定"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
     }
 
     render() {
@@ -199,7 +67,7 @@ export default class Login extends React.Component<AppProps> {
                         <Label text="创建钱包" active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
                         <Label text="导入钱包" active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
                     </div>
-                    {this.state.currentLable==="create"?this.getCreateContent():this.getImportContent()}
+                    {this.state.currentLable==="create"?<WalletCreate goBack={this.goBack}/>:<WalletImport goBack={this.goBack} />}
                 </div>
             </div>
         )

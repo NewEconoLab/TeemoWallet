@@ -3,7 +3,7 @@ import * as React from 'react';
 import Select, { IOption } from '../../../components/Select';
 
 // @observer
-export default class Input extends React.Component<any, {}> {
+export default class WalletFoot extends React.Component<any, {}> {
 	constructor(props: any) {
 		super(props);
     }

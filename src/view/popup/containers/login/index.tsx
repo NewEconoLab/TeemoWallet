@@ -68,6 +68,10 @@ export default class Login extends React.Component<AppProps> {
         this.props.history.push('/walletnew')
     }
 
+    public goMyWallet=()=>{
+        this.props.history.push('/mywallet')
+    }
+
     render() {
         return (
             <div className="loginContainer">
@@ -84,7 +88,7 @@ export default class Login extends React.Component<AppProps> {
                                 <Input type='password' placeholder='输入密码' value={this.state.password} onChange={this.passwordChange} />
                             </div>
                             <div className="login-button">
-                                <Button type='primary' size='long' text="登陆"/>
+                                <Button type='primary' size='long' text="登陆" onClick={this.goMyWallet} />
                             </div>
                         </div>
                     </div> 

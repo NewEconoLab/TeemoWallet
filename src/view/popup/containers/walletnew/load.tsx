@@ -1,24 +1,29 @@
+// 输入框组件
 import * as React from 'react';
-import './index.less';
-import Button from '../../../components/Button';
 import { RouteComponentProps } from 'react-router-dom';
-import Label from '../../../components/Label';
-import Select, { IOption } from '../../../components/Select';
+import Button from '../../../components/Button';
 import Input from '../../../components/Input';
+import Select, { IOption } from '../../../components/Select';
 
-interface AppProps extends RouteComponentProps {
-    develop:boolean;
+interface IState{
+    currentOption:IOption,
+    currentLable:string,
+    password:string,
+    filename:string,
+    confirm:string,
+    nep2:string,
+    wif:string,
+}
+interface IProps{
+    goBack:()=>void
 }
 
-interface AppState {
-    develop:boolean;
-}
-
-export default class Login extends React.Component<AppProps> {
-    constructor(props: AppProps, state: AppState) {
-        super(props, state);
+// @observer
+export default class WalletImport extends React.Component<IProps, IState> {
+	constructor(props: any) {
+		super(props);
     }
-
+    
     public options:IOption[]=
     [
         {id:"nep6",name:"Nep6加密文件"},
@@ -26,13 +31,15 @@ export default class Login extends React.Component<AppProps> {
         {id:"wif",name:"WIF私钥字符串"},
     ]
 
-    public state = {
-        filename:"",
+    public state = 
+    {
+        currentOption:this.options[0],
+        currentLable:"import",
         password:"",
+        filename:"",
         confirm:"",
         nep2:"",
         wif:"",
-        currentOption:this.options[0]
     }
 
     public componentDidMount() 
@@ -76,9 +83,8 @@ export default class Login extends React.Component<AppProps> {
 
     goBack = ()=>
     {
-        this.props.history.push('/login')
+        this.props.goBack();
     }
-
     /**
      * 根据选项返回对应的模块
      * @param {IOption} option 当前的选择项
@@ -129,36 +135,26 @@ export default class Login extends React.Component<AppProps> {
         }
     }
 
-    render() {
-        return (
-            <div className="loginContainer">
-                <div className="titleBackground">
-                    <div className="title">新钱包</div>
+
+	public render() {
+        return(            
+            <div className="form">
+                <div className="form-title">
+                    <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
                 </div>
-                <div className="content">
-                    <div className="form-label">
-                        <Label text="创建钱包" />
-                        <Label text="导入钱包" active={true} />
+                {
+                    // 该方法为了渲染form表单对应不同栏目的内容
+                    this.getFormContent(this.state.currentOption)
+                }                        
+                <div className="form-btn-list">
+                    <div className="btn-first">
+                        <Button type='warn' text="取消" onClick={this.goBack}/>
                     </div>
-                    <div className="form">
-                        <div className="form-title">
-                            <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
-                        </div>
-                        {
-                            // 该方法为了渲染form表单对应不同栏目的内容
-                            this.getFormContent(this.state.currentOption)
-                        }                        
-                        <div className="form-btn-list">
-                            <div className="btn-first">
-                                <Button type='warn' text="取消" onClick={this.goBack}/>
-                            </div>
-                            <div>
-                                <Button type='primary' text="确定"/>
-                            </div>
-                        </div>
+                    <div>
+                        <Button type='primary' text="确定"/>
                     </div>
                 </div>
             </div>
         )
-    }
+	}
 }

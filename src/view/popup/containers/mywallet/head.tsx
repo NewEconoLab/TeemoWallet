@@ -4,15 +4,20 @@ import { ICON } from '../../../image';
 import Chooser, { IOption } from '../../../components/Chooser';
 import Modal from '../../../components/Modal';
 import Exchange from '../exchange';
+import classnames = require('classnames');
 
-// @observer
-export default class Input extends React.Component<any, {}> {
+interface IProps{
+    lableChange:(table:string)=>void
+}
+
+export default class WalletHeader extends React.Component<IProps, {}> {
 	constructor(props: any) {
 		super(props);
     }
 
     public state={
-        exchange:false
+        exchange:false,
+        activeLable:"history"
     }
 
     public options:IOption[]=[
@@ -32,7 +37,33 @@ export default class Input extends React.Component<any, {}> {
         }
     }
 
+    public showHistory=()=>{
+        this.setState({
+            activeLable:"history"
+        })
+        if(this.props.lableChange){
+            this.props.lableChange('history');
+        }
+    }
+
+    public showAssets=()=>{
+        this.setState({
+            activeLable:"assets"
+        })
+        if(this.props.lableChange){
+            this.props.lableChange('assets');
+        }
+    }
+
+    public goOut=()=>{
+        if(this.props.lableChange){
+            this.props.lableChange('out');
+        }
+    }
+
 	public render() {
+        const history = classnames("lable",{"active":this.state.activeLable=="history"});
+        const assets = classnames("lable",{"active":this.state.activeLable=="assets"});
 		return (
             <div className="head">
                 <div className="functionRow">
@@ -46,15 +77,15 @@ export default class Input extends React.Component<any, {}> {
                                 <img src={ICON.FUNCTION} height={24} />
                             </Chooser>
                         </div>
-                        <div className="out">
+                        <div className="out" onClick={this.goOut}>
                             <img src={ICON.LOGOUT} height={24}/>
                         </div>
                     </div>
                     <div className="address">ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf</div>
                 </div>
                 <div className="lablelist">
-                    <div className="lable active"><span>交易记录</span></div>
-                    <div className="lable"><span>资产</span></div>
+                    <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
+                    <div className={assets} onClick={this.showAssets}><span>资产</span></div>
                 </div>
                 <Exchange show={this.state.exchange} ></Exchange>
             </div>

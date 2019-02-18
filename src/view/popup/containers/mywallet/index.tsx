@@ -11,16 +11,18 @@ interface AppProps extends RouteComponentProps {
 }
 
 interface AppState {
-    develop:boolean;
+    value:string;
+    label:string;
 }
 
-export default class MyWallet extends React.Component<AppProps> {
+export default class MyWallet extends React.Component<AppProps,AppState> {
     constructor(props: AppProps, state: AppState) {
         super(props, state);
     }
 
     public state = {
-        value:""
+        value:"",
+        label:"history"
     }
 
     public componentDidMount() {
@@ -30,14 +32,24 @@ export default class MyWallet extends React.Component<AppProps> {
             chrome.runtime.sendMessage({ popupMounted: true });
         }
     }
+    public labelChange=(label)=>{
+        if(label=="out"){
+            this.props.history.push('/login')
+        }
+        this.setState({
+            label:label
+        });
+    }
 
     render() {
         return (
             <div className="mywallet">
-                <WalletHeader/>
-                <div className="body">                
-                    {/* <History></History> */}
+                <WalletHeader lableChange={this.labelChange}/>
+                <div className="body">         
+                {this.state.label=="history"?       
+                    <History/>:
                     <Assets />
+                }
                 </div>
                 <WalletFoot/>
             </div>
