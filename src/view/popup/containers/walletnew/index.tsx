@@ -56,6 +56,10 @@ export default class Login extends React.Component<AppProps> {
         this.setState({currentLable:"import"});
     }
 
+    goMyWallet=()=>{
+        this.props.history.push("mywallet")
+    }
+
     render() {
         return (
             <div className="loginContainer">
@@ -67,7 +71,7 @@ export default class Login extends React.Component<AppProps> {
                         <Label text="创建钱包" active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
                         <Label text="导入钱包" active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
                     </div>
-                    {this.state.currentLable==="create"?<WalletCreate goBack={this.goBack}/>:<WalletImport goBack={this.goBack} />}
+                    {this.state.currentLable==="create"?<WalletCreate goBack={this.goBack} goMyWallet={this.goMyWallet} />:<WalletImport goBack={this.goBack} />}
                 </div>
             </div>
         )

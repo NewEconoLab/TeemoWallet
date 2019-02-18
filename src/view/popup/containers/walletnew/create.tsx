@@ -2,6 +2,7 @@
 import * as React from 'react';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
+import { RouteComponentProps } from 'react-router';
 
 interface IState{
     walletname:string,
@@ -18,6 +19,7 @@ interface IState{
 
 interface IPorps{
     goBack:()=>void;
+    goMyWallet:()=>void;
 }
 
 // @observer
@@ -72,6 +74,11 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     {
         if(this.props.goBack)
             this.props.goBack();
+    }
+
+    goMyWallet =()=> {
+        if(this.props.goMyWallet)
+            this.props.goMyWallet();
     }
 
     createWallet =()=>{        
@@ -171,7 +178,7 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                         </div>
                         <div className="form-line">
                             <a href={this.state.download_href} download={this.state.download_name}>
-                                <Button text="下载备份文件并继续" size="long" />
+                                <Button text="下载备份文件并继续" size="long" onClick={this.goMyWallet}/>
                             </a>
                         </div>
                     </div>

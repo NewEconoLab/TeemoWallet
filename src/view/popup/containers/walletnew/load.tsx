@@ -20,9 +20,12 @@ interface IProps{
 
 // @observer
 export default class WalletImport extends React.Component<IProps, IState> {
+
 	constructor(props: any) {
 		super(props);
     }
+
+    public reader = new FileReader();
     
     public options:IOption[]=
     [
@@ -85,6 +88,22 @@ export default class WalletImport extends React.Component<IProps, IState> {
     {
         this.props.goBack();
     }
+
+    loadWallet =()=>
+    {
+        if(this.state.currentLable==='nep6'){
+            // ThinNeo.Helper.GetPrivateKeyFromNep2(this.state.filename)
+        }
+        
+        if(this.state.currentLable==='nep2'){
+
+        }
+
+        if(this.state.currentLable==='wif'){
+
+        }
+    }
+
     /**
      * 根据选项返回对应的模块
      * @param {IOption} option 当前的选择项
