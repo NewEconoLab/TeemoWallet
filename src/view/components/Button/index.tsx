@@ -25,7 +25,7 @@ export default class Button extends React.Component<IProps, {}>
 	// 监控输入内容
 	public onClick = () =>
 	{
-		if (this.props.onClick)
+		if ( !this.props.disabled && this.props.onClick)
 		{
 			this.props.onClick();
 		}

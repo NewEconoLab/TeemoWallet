@@ -4604,7 +4604,7 @@ var ThinNeo;
                 scrypt.hash(passbin, addresshash, 64);
             };
             if (scrypt_loaded == false) {
-                scrypt.load('lib/asmjs');
+                scrypt.load('asmjs');
             }
             else {
                 ready();
@@ -4701,7 +4701,7 @@ var ThinNeo;
                 scrypt.hash(passbin, addresshash, 64);
             };
             if (scrypt_loaded == false) {
-                scrypt.load('lib/asmjs');
+                scrypt.load('asmjs');
             }
             else {
                 ready();
