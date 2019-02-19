@@ -732,7 +732,7 @@ declare namespace ThinNeo {
         getPrivateKey(scrypt: nep6ScryptParameters, password: string, callback: (info: string, result: string | Uint8Array) => void): void;
     }
     class nep6ScryptParameters {
-        N: number;
+        n: number;
         r: number;
         p: number;
     }

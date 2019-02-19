@@ -1,11 +1,6 @@
-export interface LoginInfo
-{    
-    address: string;
-    pubkey: Uint8Array;
-    prikey: Uint8Array;
-}
+import { AccountInfo } from "../common/entity";
 
 export class MyStorage
 {
-    public login:LoginInfo;
+    public account:AccountInfo;
 }

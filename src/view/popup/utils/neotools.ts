@@ -1,3 +1,4 @@
+import { LoginInfo, Result, AccountInfo } from "../../../common/entity";
 
 export class neotools
 {
@@ -45,7 +46,7 @@ export class neotools
     public static wifDecode(wif: string)
     {
         let result: Result = new Result();
-        let login: LoginInfo = new LoginInfo();
+        let login = {} as LoginInfo;
         try
         {
             login.prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
@@ -116,33 +117,30 @@ export class neotools
     /**
      * nep2TOWif
      */
-    public static async nep2ToWif(nep2: string, password: string): Promise<Result>
+    public static async nep2Load(nep2: string, password: string): Promise<AccountInfo>
     {
-        var res = new Result();
-        let login: LoginInfo = new LoginInfo();
-        let promise: Promise<Result> = new Promise((resolve, reject) =>
+        let account = {} as AccountInfo;
+        let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
         {
-            let n: number = 16384;
+            const n: number = 16384;
             var r: number = 8;
             var p: number = 8
+            account.scrypt={n,r,p};
+            account.nep2key=nep2;
             ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, n, r, p, (info, result) =>
             {
                 if ("nep2 hash not match." == result)
                     reject(result);
-                login.prikey = result as Uint8Array;
-                res.info = {};
-                if (login.prikey != null)
+                account.prikey = result as Uint8Array;
+                if (account.prikey != null)
                 {
-                    login.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(login.prikey);
-                    login.address = ThinNeo.Helper.GetAddressFromPublicKey(login.pubkey);
-                    res.err = false;
-                    res.info = login;
-                    resolve(res);
+                    account.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(account.prikey);
+                    account.address = ThinNeo.Helper.GetAddressFromPublicKey(account.pubkey);
+                    resolve(account);
                 }
                 else
                 {
-                    res.err = true;
-                    reject(res);
+                    reject("");
                 }
             });
         });
@@ -152,14 +150,12 @@ export class neotools
     /**
      * nep6Load
      */
-    public static async nep6Load(wallet: ThinNeo.nep6wallet, password: string): Promise<{}>
+    public static async nep6Load(wallet: ThinNeo.nep6wallet, password: string): Promise< Array< AccountInfo > >
     {
         try
         {
             //getPrivateKey 是异步方法，且同时只能执行一个
-            var istart = 0;
-            let res = new Result();
-            let arr = {}
+            let arr:AccountInfo[]=[]
             if (wallet.accounts)
             {
                 for (let keyindex = 0; keyindex < wallet.accounts.length; keyindex++)
@@ -171,9 +167,10 @@ export class neotools
                     }
                     try
                     {
-                        let result: Result = await neotools.getPriKeyfromAccount(wallet.scrypt, password, account);
-                        // console.log("getpkformacc:" + result);
-                        arr[account.address] = (result.info);
+                        const info = await neotools.getPriKeyfromAccount(wallet.scrypt, password, account) as AccountInfo;
+                        info.nep2key = account.nep2key;
+                        info.scrypt = wallet.scrypt;
+                        arr.push(info);
                         return arr;
                     } catch (error)
                     {
@@ -191,17 +188,17 @@ export class neotools
             throw e.result;
 
         }
-        // });
-        // return promise;
     }
 
     /**
      * getPriKeyform
      */
-    public static async getPriKeyfromAccount(scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account): Promise<Result>
+    public static async getPriKeyfromAccount(
+        scrypt: ThinNeo.nep6ScryptParameters, 
+        password: string, 
+        account: ThinNeo.nep6account): Promise<LoginInfo>
     {
-        let res = new Result();
-        let promise: Promise<Result> =
+        let promise: Promise<LoginInfo> =
             new Promise((resolve, reject) =>
             {
                 account.getPrivateKey(scrypt, password, (info, result) =>
@@ -213,14 +210,12 @@ export class neotools
                         // var wif = ThinNeo.Helper.GetWifFromPrivateKey(result as Uint8Array);
                         // var hexkey = (result as Uint8Array).toHexString();
                         // console.log(info + "|" + address + " wif=" + wif);
-                        res.err = false;
-                        res.info = { pubkey: pubkey, address: address, prikey: result as Uint8Array };
-                        resolve(res);
+                        resolve({ pubkey, address: address, prikey: result as Uint8Array });
                     }
                     else
                     {
                         // info2.textContent += info + "|" + result;
-                        reject({ err: true, result: result });
+                        reject(result);
                     }
 
                 });
@@ -228,23 +223,4 @@ export class neotools
         return promise;
     }
 
-}
-
-
-
-export class Result
-{
-    err: boolean;
-    info: any;
-}
-
-
-export class LoginInfo
-{
-    pubkey: Uint8Array;
-    prikey: Uint8Array;
-    address: string;
-    nep2: string;
-    payfee: boolean;
-    static info: LoginInfo;
 }

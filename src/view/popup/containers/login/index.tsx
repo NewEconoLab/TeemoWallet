@@ -5,6 +5,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import Label from '../../../components/Label';
 import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
+import { bg } from '../../utils/bgtools';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -26,7 +27,9 @@ export default class Login extends React.Component<AppProps> {
 
     public componentDidMount() 
     {
-        // Example of how to send a message to eventPage.ts.
+        if(bg.storage.account){            
+            this.props.history.push("/mywallet")
+        }
     }
 
     /**

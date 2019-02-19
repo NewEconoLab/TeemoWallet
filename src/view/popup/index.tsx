@@ -16,7 +16,7 @@ if(chrome.tabs)
 else
 {
     window.onload=()=>
-    {   
+    {        
         //初始化鼠标随机方法
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
         const popup = document.getElementById('popup');

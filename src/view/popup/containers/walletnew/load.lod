@@ -9,14 +9,19 @@ import { BADFLAGS } from 'dns';
 import { bg } from '../../utils/bgtools';
 
 interface IState{
-    currentOption:IOption,
-    currentLable:string,
+    file:File,
+    wif:string,
+    nep2:string,
+    pwdfirm:string,
     password:string,
     filename:string,
-    confirm:string,
-    nep2:string,
-    wif:string,
-    file:File,
+    currentLable:string,
+    currentOption:IOption,
+    
+    wif_error:boolean,
+    password_error:boolean,
+    pwdconfirm_error:boolean,
+    
 }
 interface IProps{
     goBack:()=>void
@@ -39,16 +44,18 @@ export default class WalletImport extends React.Component<IProps, IState> {
         {id:"wif",name:"WIF私钥字符串"},
     ]
 
-    public state = 
+    public state:IState = 
     {
+        file:null,
+        wif:'',
+        nep2:'',
+        pwdfirm:'',
+        password:'',
+        filename:'',
+        currentLable:'',
         currentOption:this.options[0],
-        currentLable:"import",
-        password:"",
-        filename:"",
-        confirm:"",
-        nep2:"",
-        wif:"",
-        file:null
+        password_error:false,
+        pwdconfirm_error:false,
     }
 
     public componentDidMount() 
@@ -88,9 +95,27 @@ export default class WalletImport extends React.Component<IProps, IState> {
      * 输入密码后触发的改变方法
      * @param {string} event change方法返回的字符对象
      */
+    public passwordConfirmChange=(event:string)=>
+    {
+        this.setState({pwdfirm:event})
+    }
+
+    /**
+     * 输入密码后触发的改变方法
+     * @param {string} event change方法返回的字符对象
+     */
     public nep2Change=(event:string)=>
     {
-        this.setState({password:event})
+        this.setState({nep2:event})
+    }
+
+    /**
+     * 输入密码后触发的改变方法
+     * @param {string} event change方法返回的字符对象
+     */
+    public wifChange=(event:string)=>
+    {
+        this.setState({wif:event})
     }
 
     onSelectModule = (call:IOption)=>
@@ -107,8 +132,8 @@ export default class WalletImport extends React.Component<IProps, IState> {
     {
         if(this.state.currentOption.id==='nep6'){
             neotools.nep6Load(this.wallet,this.state.password)
-            .then(result =>{
-                // bg.store.login = result
+            .then(accounts =>{
+                bg.store.login = accounts[0];
             })
             .catch(error =>{
                 console.log(error);
@@ -162,13 +187,25 @@ export default class WalletImport extends React.Component<IProps, IState> {
             return(                
                 <div className="form-content">                            
                     <div className="wif">
-                        <Input type="text" placeholder="输入私钥" value={this.state.wif} onChange={this.passwordChange}/>
+                        <Input type="text" placeholder="输入私钥" 
+                            value={this.state.wif} 
+                            onChange={this.wifChange}
+                            error={this.state.wif_error}
+                        />
                     </div>
                     <div className="wif">
-                        <Input type="password" placeholder="设置密码" value={this.state.password} onChange={this.passwordChange}/>
+                        <Input type="password" placeholder="设置密码" 
+                            value={this.state.password} 
+                            onChange={this.passwordChange}
+                            error={this.state.password_error}
+                        />
                     </div>
                     <div className="wif">
-                        <Input type="password" placeholder="确认密码" value={this.state.confirm} onChange={this.passwordChange}/>
+                        <Input type="password" placeholder="确认密码" 
+                            value={this.state.pwdfirm} 
+                            onChange={this.passwordConfirmChange}
+                            error={this.state.pwdconfirm_error}
+                        />
                     </div>
                 </div>
             )

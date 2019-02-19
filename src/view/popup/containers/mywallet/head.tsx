@@ -5,6 +5,7 @@ import Chooser, { IOption } from '../../../components/Chooser';
 import Modal from '../../../components/Modal';
 import Exchange from '../exchange';
 import classnames = require('classnames');
+import { bg } from '../../utils/bgtools';
 
 interface IProps{
     lableChange:(table:string)=>void
@@ -57,6 +58,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
 
     public goOut=()=>{
         if(this.props.lableChange){
+            bg.storage.account=null;
             this.props.lableChange('out');
         }
     }
@@ -81,7 +83,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             <img src={ICON.LOGOUT} height={24}/>
                         </div>
                     </div>
-                    <div className="address">ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf</div>
+                    <div className="address">{bg.storage.account.address}</div>
                 </div>
                 <div className="lablelist">
                     <div className={history} onClick={this.showHistory}><span>交易记录</span></div>

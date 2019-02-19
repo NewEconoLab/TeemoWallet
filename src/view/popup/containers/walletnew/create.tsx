@@ -89,13 +89,13 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
         var addr = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
 
         this.wallet.scrypt = new ThinNeo.nep6ScryptParameters();
-        this.wallet.scrypt.N = 16384;
+        this.wallet.scrypt.n = 16384;
         this.wallet.scrypt.r = 8;
         this.wallet.scrypt.p = 8;
         this.wallet.accounts = [];
         this.wallet.accounts[ 0 ] = new ThinNeo.nep6account();
         this.wallet.accounts[ 0 ].address = addr;
-        ThinNeo.Helper.GetNep2FromPrivateKey(key, this.state.password, this.wallet.scrypt.N, this.wallet.scrypt.r, this.wallet.scrypt.p, (info, result) =>
+        ThinNeo.Helper.GetNep2FromPrivateKey(key, this.state.password, this.wallet.scrypt.n, this.wallet.scrypt.r, this.wallet.scrypt.p, (info, result) =>
         {
             if (info == "finish")
             {
