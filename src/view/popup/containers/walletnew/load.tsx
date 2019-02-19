@@ -106,7 +106,7 @@ export default class WalletImport extends React.Component<IProps, IState> {
         if(this.state.currentOption.id==='nep6'){
             neotools.nep6Load(this.wallet,this.state.password)
             .then(result =>{
-                console.log(result);
+                
             })
             .catch(error =>{
                 console.log(error);
