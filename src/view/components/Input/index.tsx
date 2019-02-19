@@ -3,6 +3,7 @@ import * as React from 'react';
 // import { observer } from 'mobx-react';
 import classnames from 'classnames';
 import './index.less';
+import { ICON } from '../../image';
 
 interface IProps {
 	placeholder: string,
@@ -81,7 +82,8 @@ export default class Input extends React.Component<IProps, {}> {
 	}
 
 	public render() {
-        const inputClassName = classnames('input-line', { 'file': this.props.type==="file" ? true : false },{'active':this.props.value?true:false});
+		const inputClassName = classnames('input-line', { 'file': this.props.type==="file" ? true : false },{'active':this.props.value?true:false},{'error':this.props.error});
+		const inputMessage = classnames('input-message',{'error':this.props.error})
 		return (
 			<div className="input-group">
 				<div className="input-title">{(this.state.title||this.props.value)?this.props.placeholder:""}</div>
@@ -109,7 +111,11 @@ export default class Input extends React.Component<IProps, {}> {
 						/>
 					)
 				}
-                <div className="message">
+                <div className={inputMessage}>
+					{this.props.error?
+					<img src={ICON.attention} alt=""/> :<></>
+					}
+					{this.props.message}
                 </div>
 			</div>
 		);

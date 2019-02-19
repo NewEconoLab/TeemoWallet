@@ -4,6 +4,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Select, { IOption } from '../../../components/Select';
+import { neotools } from '../../utils/neotools';
 
 interface IState{
     currentOption:IOption,
@@ -13,6 +14,7 @@ interface IState{
     confirm:string,
     nep2:string,
     wif:string,
+    file:File,
 }
 interface IProps{
     goBack:()=>void
@@ -20,9 +22,13 @@ interface IProps{
 
 // @observer
 export default class WalletImport extends React.Component<IProps, IState> {
+
 	constructor(props: any) {
 		super(props);
     }
+
+    public reader = new FileReader();
+    wallet: ThinNeo.nep6wallet = new ThinNeo.nep6wallet();
     
     public options:IOption[]=
     [
@@ -40,11 +46,16 @@ export default class WalletImport extends React.Component<IProps, IState> {
         confirm:"",
         nep2:"",
         wif:"",
+        file:null
     }
 
     public componentDidMount() 
     {
         // Example of how to send a message to eventPage.ts.
+        this.reader.onload=()=>{            
+            this.wallet.fromJsonStr(this.reader.result as string);
+
+        }
     }
 
     /**
@@ -53,9 +64,13 @@ export default class WalletImport extends React.Component<IProps, IState> {
      */
     public fileChange=(event:File)=>
     {   
-        console.log(event);
-        
+        this.setState({
+            file:event
+        })
         this.setState({filename:event.name})
+        if(event.name.includes('.json')){
+            this.reader.readAsText(event);
+        }
     }
 
     /**
@@ -85,6 +100,29 @@ export default class WalletImport extends React.Component<IProps, IState> {
     {
         this.props.goBack();
     }
+
+    loadWallet =()=>
+    {
+        if(this.state.currentOption.id==='nep6'){
+            neotools.nep6Load(this.wallet,this.state.password)
+            .then(result =>{
+                console.log(result);
+            })
+            .catch(error =>{
+                console.log(error);
+                
+            })
+        }
+        
+        if(this.state.currentLable==='nep2'){
+
+        }
+
+        if(this.state.currentLable==='wif'){
+
+        }
+    }
+
     /**
      * 根据选项返回对应的模块
      * @param {IOption} option 当前的选择项
@@ -151,7 +189,7 @@ export default class WalletImport extends React.Component<IProps, IState> {
                         <Button type='warn' text="取消" onClick={this.goBack}/>
                     </div>
                     <div>
-                        <Button type='primary' text="确定"/>
+                        <Button type='primary' text="确定" onClick={this.loadWallet}/>
                     </div>
                 </div>
             </div>

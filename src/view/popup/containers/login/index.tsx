@@ -91,7 +91,7 @@ export default class Login extends React.Component<AppProps> {
                                 <Button type='primary' size='long' text="登陆" onClick={this.goMyWallet} />
                             </div>
                         </div>
-                    </div> 
+                    </div>
                     <div className="href" onClick={this.toCreateWallet}>忘记密码，请重新导入钱包。</div>
                 </div>
             </div>
