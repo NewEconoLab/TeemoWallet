@@ -5,6 +5,8 @@ import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import Select, { IOption } from '../../../components/Select';
 import { neotools } from '../../utils/neotools';
+import { BADFLAGS } from 'dns';
+import { bg } from '../../utils/bgtools';
 
 interface IState{
     currentOption:IOption,
@@ -106,7 +108,7 @@ export default class WalletImport extends React.Component<IProps, IState> {
         if(this.state.currentOption.id==='nep6'){
             neotools.nep6Load(this.wallet,this.state.password)
             .then(result =>{
-                
+                // bg.store.login = result
             })
             .catch(error =>{
                 console.log(error);

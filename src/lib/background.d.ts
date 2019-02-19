@@ -1,5 +1,5 @@
 import { MyStorage } from "../app/storage";
 
-declare namespace Background{
-    const store:MyStorage
+declare interface Background extends Window{
+    store:MyStorage
 }
