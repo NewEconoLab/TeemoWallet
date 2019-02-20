@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import './index.less';
 import EventHandler from '../../popup/utils/event';
 export interface IOption {
-	id: string | number,
+	id: string,
 	name: string
 }
 interface IProps

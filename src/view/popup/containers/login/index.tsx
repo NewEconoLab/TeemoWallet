@@ -9,6 +9,7 @@ import { bg, tools } from '../../utils/bgtools';
 import Chooser from '../../../components/Chooser';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { neotools } from '../../utils/neotools';
+import AddrList from './addrlist';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -47,11 +48,13 @@ export default class Login extends React.Component<AppProps,AppState> {
         }else{
             this.props.history.push("/login")
         }
-        let accounts = tools.getAccount();
+        let accounts = tools.getAccount();        
         if(accounts.length){            
             let options = accounts.map((acc,index)=>{
                 return {id:acc.address,name:(acc.walletName?acc.walletName:["我的钱包",(index+1)].join(' '))}as IOption;
             })
+            console.log(options);
+            
             this.setState({
                 accounts,
                 options,       
@@ -130,30 +133,12 @@ export default class Login extends React.Component<AppProps,AppState> {
                     <div className="box">
                         <div className="box-content">
                             <div className="form-title">
-                            <div className="select-group">
-                                <div className="select-title">
-                                    <span> {this.state.currentOption.name} </span>         
-                                    <span className="triangle "></span>
-                                    <div className="wallet-list">
-                                        <div className="list-content">
-                                            {this.state.options.map(option=>{
-                                                return (
-                                                    <div className="list-line" onClick={this.chooserAddr.bind(this,option)}>
-                                                        <div className="line-text">{option.name}</div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                        <div className="wallet-list-wrapper">
-                                            <div className="arrow" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="select-line">
-                                    
-                                </div>
-                                <div className="select-message">{this.state.currentOption.id}</div>
-                            </div>
+                                <AddrList 
+                                    options={this.state.options} 
+                                    onCallback={this.getcurrentOption} 
+                                    title={this.state.currentOption.name}
+                                    message={this.state.currentOption.id}
+                                />
                             </div>
                             <div className="login-password">
                                 <Input type='password' placeholder='输入密码' 
