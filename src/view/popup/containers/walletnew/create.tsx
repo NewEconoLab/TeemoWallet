@@ -3,6 +3,8 @@ import * as React from 'react';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import { RouteComponentProps } from 'react-router';
+import { AccountInfo } from '../../../../common/entity';
+import { tools, bg } from '../../utils/bgtools';
 
 interface IState{
     walletname:string,
@@ -15,6 +17,7 @@ interface IState{
     passwordconfirm_error:boolean,
     password_error:boolean,
     wif:string,
+    account:AccountInfo
 }
 
 interface IPorps{
@@ -40,7 +43,8 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
         walletname:"",
         password:"",
         passwordconfirm:"",
-        wif:""
+        wif:"",
+        account:null
     }
     
     public passwordChange=(event)=>{
@@ -54,10 +58,10 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
 
     public password2Change=(event)=>{
         this.setState({
-            passwordconfirm_error:!(this.state.password!==this.state.passwordconfirm)
+            passwordconfirm:event
         })
         this.setState({
-            passwordconfirm:event
+            passwordconfirm_error:this.state.password!=event
         })
     }
 
@@ -77,6 +81,8 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     }
 
     goMyWallet =()=> {
+        tools.setAccount(this.state.account);
+        bg.storage.account=this.state.account;
         if(this.props.goMyWallet)
             this.props.goMyWallet();
     }
@@ -89,13 +95,13 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
         var addr = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
 
         this.wallet.scrypt = new ThinNeo.nep6ScryptParameters();
-        this.wallet.scrypt.n = 16384;
+        this.wallet.scrypt.N = 16384;
         this.wallet.scrypt.r = 8;
         this.wallet.scrypt.p = 8;
         this.wallet.accounts = [];
         this.wallet.accounts[ 0 ] = new ThinNeo.nep6account();
         this.wallet.accounts[ 0 ].address = addr;
-        ThinNeo.Helper.GetNep2FromPrivateKey(key, this.state.password, this.wallet.scrypt.n, this.wallet.scrypt.r, this.wallet.scrypt.p, (info, result) =>
+        ThinNeo.Helper.GetNep2FromPrivateKey(key, this.state.password, this.wallet.scrypt.N, this.wallet.scrypt.r, this.wallet.scrypt.p, (info, result) =>
         {
             if (info == "finish")
             {
@@ -118,6 +124,15 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                 this.setState({
                     moudle_download:true
                 });
+                const account:AccountInfo={
+                    address:this.wallet.accounts[0].address,
+                    nep2key:this.wallet.accounts[0].nep2key,
+                    walletName:this.state.walletname,
+                    prikey:key,
+                    pubkey:pubkey,
+                    scrypt:this.wallet.scrypt
+                }
+                this.setState({account})
             }
         });
     }

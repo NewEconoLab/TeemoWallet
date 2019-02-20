@@ -122,12 +122,12 @@ export class neotools
         let account = {} as AccountInfo;
         let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
         {
-            const n: number = 16384;
+            const N: number = 16384;
             var r: number = 8;
             var p: number = 8
-            account.scrypt={n,r,p};
+            account.scrypt={N,r,p};
             account.nep2key=nep2;
-            ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, n, r, p, (info, result) =>
+            ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, N, r, p, (info, result) =>
             {
                 if ("nep2 hash not match." == result)
                     reject(result);

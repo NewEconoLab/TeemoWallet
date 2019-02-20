@@ -76,8 +76,9 @@ export default class WalletImport extends React.Component<IProps, IState> {
             test();
         }
 
-        if(this.state.currentOption.id==='wif'){
-
+        if(this.state.currentOption.id==='wif'){    
+            let test = this.refs.wif['loadWallet']
+            test();
         }
     }
 

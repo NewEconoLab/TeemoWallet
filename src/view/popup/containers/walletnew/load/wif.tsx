@@ -2,6 +2,8 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
+import { NepAccount } from '../../../../../common/entity';
+import { bg, tools } from '../../../utils/bgtools';
 
 interface IState{
     wif:string,
@@ -51,16 +53,39 @@ export default class WifImport extends React.Component<IPorps, IState> {
 
     public password2Change=(event)=>{
         this.setState({
-            passwordconfirm_error:!(this.state.password!==this.state.passwordconfirm)
+            passwordconfirm:event
         })
         this.setState({
-            passwordconfirm:event
+            passwordconfirm_error:this.state.password!=event
         })
     }
 
     goMyWallet =()=> {
         if(this.props.goMyWallet)
             this.props.goMyWallet();
+    }
+
+    loadWallet=()=>{
+        try {
+            let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
+            NepAccount.encryption(this.state.password,prikey)
+            .then(account=>{
+                bg.storage.account = account;
+                tools.setAccount(account);
+                this.goMyWallet();                
+            })
+            .catch(error=>{
+                console.log(error);
+                this.setState({
+                    wif_error:true
+                })
+            })
+        } catch (error) {
+            console.log(error);
+            this.setState({
+                wif_error:true
+            })
+        }
     }
 
 	public render() {

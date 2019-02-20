@@ -8,12 +8,11 @@ export const tools =
     setAccount:(account:AccountInfo)=>{
         let arr = tools.getAccount();
                 
-        let newacc:NepAccount = {
-            address:account.address,
-            nep2key:account.nep2key,
-            walletName:account.walletName,
-            scrypt:account.scrypt,
-        }
+        let newacc=new NepAccount(
+            account.walletName,
+            account.address,
+            account.nep2key,
+            account.scrypt)
         
         console.log(arr);
         
@@ -40,7 +39,15 @@ export const tools =
     getAccount:()=>{
         const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
         let accounts = [] as NepAccount[];
-        if(str) accounts = accounts.concat(JSON.parse(str));
+        if(str) 
+        {
+            let arr = accounts.concat(JSON.parse(str));
+            for (let index = 0; index < arr.length; index++) {
+                const acc = arr[index];
+                let nep = new NepAccount(acc.walletName,acc.address,acc.nep2key,acc.scrypt);
+                accounts.push(nep);                
+            }
+        }
         return accounts;
     }
 }
