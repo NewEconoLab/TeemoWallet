@@ -1,6 +1,6 @@
 .ncontract-wrap{  
   color: #333333;
-  padding: 0 15px;
+  padding: 0 15px 100px 15px;
   .first-line{
     text-align: center;
     font-family: NotoSansHans-Medium;
@@ -30,15 +30,22 @@
     border-radius: 3px;
     margin-bottom: 15px;
     font-size: 14px;
+    line-height: 14px;
     .line-wrap{
-      padding: 17px 10px;
+      padding: 20px 10px;
       display: flex;
       justify-content: space-between;
       border-bottom: 1px solid #E5E5E5;
       .line-left{
         width: 65px;
         font-family: NotoSansHans-Regular;
-        color: #B2B2B2;
+        color: #B2B2B2;        
+        .first-p,.second-p{
+          width: 65px;
+        } 
+        .first-p{
+          margin-bottom: 20px;
+        }     
       }
       .line-right{
         text-align: right;
@@ -46,11 +53,26 @@
           font-family: NotoSansHans-Regular;
           color: #5F8DFB;
         }
+        .first-p{
+          margin-bottom: 20px;
+        }
+        .second-p{
+          font-size: 12px;
+          word-break: break-word;
+        }
       }
       &:last-child{
         border-bottom: none;
       }
     }
+  }
+  .transaction-content{
+    background: #FFFFFF;
+    box-shadow: 0 1px 4px 0 rgba(184,184,184,0.50);
+    border-radius: 3px;
+    font-family: NotoSansHans-Regular;
+    font-size: 14px;
+    padding: 20px 10px;
   }
   .check-fee{
     padding-left: 5px;
@@ -63,9 +85,8 @@
   .previous-img{
     width: 30px;
     height: 30px;
-    margin-top: 20px;
-    position: absolute;
-    bottom: 30px;
+    position: fixed;
+    bottom: 120px;
     left: 50%;
     z-index: 2;
     margin-left: -15px;

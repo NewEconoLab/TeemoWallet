@@ -35,6 +35,9 @@ export default class ContractRequest extends React.Component
         <div className="second-line">
           合约交互
         </div>
+        <div className="second-line">
+          请求签名 
+        </div>
         {
           this.state.pageNumber === 0 && (
             <>
@@ -74,7 +77,9 @@ export default class ContractRequest extends React.Component
           this.state.pageNumber === 1 && (
             <>
               <div className="contract-title">交易数据</div>
-              <div className="transaction-wrap white-wrap">
+              <div className="contract-title">签名消息</div>
+               
+              {/* <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">合约hash</div>
                   <div className="line-right">
@@ -82,27 +87,30 @@ export default class ContractRequest extends React.Component
                   </div>
                 </div>
                 <div className="line-wrap">
-                  <div className="line-two">
-                    <div className="line-left">方法</div>
-                    <div className="line-right">
-                      <span>aaa</span>
+                    <div className="line-left">
+                      <p className="first-p">方法</p>
+                      <p className="second-p">参数hash</p>
                     </div>
-                  </div>
-                  <div className="line-two">
-                    <div className="line-left">参数hash</div>
                     <div className="line-right">
-                      <span>0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</span>
+                      <p className="first-p">aaa</p>
+                      <p className="second-p">0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</p>
                     </div>
-                  </div>
                 </div>
                 <div className="line-wrap">
-                  <div className="line-left">手续费</div>
-                  <div className="line-right">
-                    <span>0.001 GAS</span>
-                  </div>
+                    <div className="line-left">
+                      <p className="first-p">方法</p>
+                      <p className="second-p">参数hash</p>
+                    </div>
+                    <div className="line-right">
+                      <p className="first-p">aaa</p>
+                      <p className="second-p">0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</p>
+                    </div>
                 </div>
+              </div> */}
+              <div className="transaction-content">
+                <span>内容</span>
               </div>
-              <div className="next-img" onClick={this.previousPage}>
+              <div className="previous-img" onClick={this.previousPage}>
                 <img src={require('../../../image/next.png')} alt="" />
               </div>
             </>
