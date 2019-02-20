@@ -71,12 +71,12 @@ export default class WalletImport extends React.Component<IProps, IState> {
             test();
         }
         
-        if(this.state.currentLable==='nep2'){
+        if(this.state.currentOption.id==='nep2'){            
             let test = this.refs.nep2['loadWallet']
             test();
         }
 
-        if(this.state.currentLable==='wif'){
+        if(this.state.currentOption.id==='wif'){
 
         }
     }

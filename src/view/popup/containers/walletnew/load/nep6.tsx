@@ -3,7 +3,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
 import { neotools } from '../../../utils/neotools';
-import { bg } from '../../../utils/bgtools';
+import { bg, tools } from '../../../utils/bgtools';
 
 interface IState{
     file:File,
@@ -82,6 +82,12 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
         neotools.nep6Load(this.wallet,this.state.password)
         .then(accounts =>{
             bg.storage.account = accounts[0];
+            for (let i = 0; i < accounts.length; i++) {
+                const account = accounts[i];
+                console.log(account);
+                
+                tools.setAccount(account);
+            }
             this.goMyWallet();
         })
         .catch(error =>{

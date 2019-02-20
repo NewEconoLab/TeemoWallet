@@ -6,6 +6,14 @@ export class Result
 }
 
 export interface AccountInfo extends LoginInfo{
+    walletName:string;
+    nep2key:string;
+    scrypt:ThinNeo.nep6ScryptParameters;
+}
+
+export interface NepAccount{
+    walletName:string;
+    address: string;
     nep2key:string;
     scrypt:ThinNeo.nep6ScryptParameters;
 }

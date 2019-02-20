@@ -1,26 +1,40 @@
-import { MyStorage } from "./storage";
-import { AccountInfo } from "../common/entity";
+// import { MyStorage } from "./storage";
+// import { AccountInfo } from "../common/entity";
+
+
+export interface AccountInfo extends LoginInfo{
+  walletName:string;
+  nep2key:string;
+  scrypt:ThinNeo.nep6ScryptParameters;
+}
+
+export interface LoginInfo
+{
+  pubkey: Uint8Array;
+  prikey: Uint8Array;
+  address: string;
+}
 
 class storage{
     static account:AccountInfo=null;
 }
 
-import { Notifiy } from "./notification.manager";
+// import { Notifiy } from "./notification.manager";
 
-// Listen to messages sent from other parts of the extension.
-chrome.runtime.onMessage.addListener
-(
-    (request, sender, sendResponse) => 
-    {
-        // onMessage must return "true" if response is async.
-        let isResponseAsync = false;
+// // Listen to messages sent from other parts of the extension.
+// chrome.runtime.onMessage.addListener
+// (
+//     (request, sender, sendResponse) => 
+//     {
+//         // onMessage must return "true" if response is async.
+//         let isResponseAsync = false;
 
-        if (request.key === "open") {
-            Notifiy.openNotify({msg:request.msg});
-        }
-        return isResponseAsync;
-    }
-);
+//         if (request.key === "open") {
+//             Notifiy.openNotify({msg:request.msg});
+//         }
+//         return isResponseAsync;
+//     }
+// );
 
 
 const nelApiUrl = 'https://api.nel.group/api/testnet';
@@ -101,14 +115,14 @@ Uint8Array.prototype.toHexString = function () {
 };
 console.info(ThinNeo.Helper.GetAddressFromScriptHash("0x0b193415c6f098b02e81a3b14d0e3b08e9c3f79a".hexToBytes()));
 
-chrome.runtime.onMessage.addListener(
-     (request, sender, sendResponse)=>{
-        if (request.key)
-        {
-            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                console.log(request.msg);
-                chrome.storage.local.set({notify:request.msg},()=>{})
-                Notifiy.openNotify(request.msg);
-            })
-        }
-    });
+// chrome.runtime.onMessage.addListener(
+//      (request, sender, sendResponse)=>{
+//         if (request.key)
+//         {
+//             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//                 console.log(request.msg);
+//                 chrome.storage.local.set({notify:request.msg},()=>{})
+//                 Notifiy.openNotify(request.msg);
+//             })
+//         }
+//     });
