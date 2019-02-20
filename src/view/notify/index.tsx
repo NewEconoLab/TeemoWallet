@@ -20,7 +20,7 @@ else{
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
         const app = document.createElement('div');
         document.body.appendChild(app);
-        document.body.style.background="#b2b2b2";
+        document.body.style.background="#F9F9F9";
         app.style.background="#fff";
         ReactDOM.render(
             <Notify name={name}/>,app

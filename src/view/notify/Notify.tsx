@@ -1,5 +1,6 @@
 import * as React from 'react';
-import Button from '../components/Button';
+import './reset.less';
+import Home from './containers/home';
 
 export interface Props
 {
@@ -22,16 +23,19 @@ export default class Notify extends React.Component<Props, any>
     
     public componentDidMount() 
     {
-        chrome.storage.local.get(notify=>{
-            let info = notify['refInfo'];
-            alert(notify);
-            
-            this.setState({
-                title:info['refTitle'],
-                domain:info['refDomain'],
-                scripthash:info['scriptHash']
+        if(chrome.tabs)
+        {            
+            chrome.storage.local.get(notify=>{
+                let info = notify['refInfo'];
+                alert(notify);
+                
+                this.setState({
+                    title:info['refTitle'],
+                    domain:info['refDomain'],
+                    scripthash:info['scriptHash']
+                })
             })
-        })
+        }
     }
 
     public setStorage()
@@ -44,10 +48,11 @@ export default class Notify extends React.Component<Props, any>
     public render() 
     {
         return (
-            <div className="popupContainer">
-                这里是Notify页面 来自{this.state.title}
+            <div className="notifyContainer">
+                {/* 这里是Notify页面 来自{this.state.title}
                 url:{this.state.domain}
-                <Button text="开始"/>
+                <Button text="开始"/> */}
+                <Home {...this.props} />
             </div>
         )
     }
