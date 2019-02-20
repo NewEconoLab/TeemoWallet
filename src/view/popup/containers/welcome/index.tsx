@@ -30,7 +30,7 @@ export default class Welcome extends React.Component<AppProps> {
 
     public start =()=>
     {
-        this.props.history.push('/login')
+        this.props.history.push('/walletnew')
     }
 
 

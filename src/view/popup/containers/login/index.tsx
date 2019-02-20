@@ -43,12 +43,14 @@ export default class Login extends React.Component<AppProps,AppState> {
 
     public componentDidMount() 
     {
+        let accounts = tools.getAccount();  
         if(bg.storage && bg.storage.account){            
             this.props.history.push("/mywallet")
-        }else{
+        }else if(accounts.length){
             this.props.history.push("/login")
+        }else{
+            this.props.history.push('/welcome')
         }
-        let accounts = tools.getAccount();        
         if(accounts.length){            
             let options = accounts.map((acc,index)=>{
                 return {id:acc.address,name:(acc.walletName?acc.walletName:["我的钱包",(index+1)].join(' '))}as IOption;
