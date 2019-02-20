@@ -13,6 +13,7 @@ import Button from '../../../components/Button';
 interface IProps
 {
 	show:boolean
+	onHide?:()=>void;
 }
 
 interface IState
@@ -43,23 +44,26 @@ export default class Exchange extends React.Component<IProps, IState>
 			amount:event
 		})
 	}
+	public onHide=()=>{
+		this.props.onHide?this.props.onHide():null;
+	}
 
 	public render()
 	{
 		return (
 			<Modal title="CGAS兑换" show={this.props.show}>
 				<div className="line">
-					<Select options={this.options} text="操作类型" />
+					<Select options={this.options} text="操作类型" size="big" />
 				</div>
 				<div className="line">
 					<Input placeholder="兑换数量" value={this.state.amount+""} onChange={this.onChange} type="text" />		
 				</div>		
-				<div className="line">
-					<Checkbox text="隐藏0GAS" />
+				<div className="line-checkbox">
+					<Checkbox text="优先确认交易（支付 0.001 GAS）" />
 				</div>
 				<div className="btn-list">
 					<div className="cancel">
-						<Button type="warn" text="取消" />
+						<Button type="warn" text="取消" onClick={this.onHide} />
 					</div>
 					<div className="confrim">
 						<Button type="primary" text="确认" />

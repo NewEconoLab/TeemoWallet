@@ -62,6 +62,9 @@ export default class WalletHeader extends React.Component<IProps, {}> {
             this.props.lableChange('out');
         }
     }
+    public closeExchange=()=>{
+        this.setState({exchange:false});
+    }
 
 	public render() {
         const history = classnames("lable",{"active":this.state.activeLable=="history"});
@@ -89,7 +92,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
                     <div className={assets} onClick={this.showAssets}><span>资产</span></div>
                 </div>
-                <Exchange show={this.state.exchange} ></Exchange>
+                <Exchange show={this.state.exchange} onHide={this.closeExchange}></Exchange>
             </div>
 		);
 	}

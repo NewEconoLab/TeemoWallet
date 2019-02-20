@@ -16,6 +16,7 @@ interface IProps
 	text:string,
 	onCallback?: (event: IOption) => void,
 	style?: object,
+	size?:"big"
 	placeholder?:string,
 	defaultValue?:string | number,
 	up?:boolean
@@ -86,6 +87,7 @@ export default class Select extends React.Component<IProps, IState> {
 	public render()
 	{
 		const selectBox = classnames('select-box', {'disNone': !this.state.expand},{'up': !!this.props.up})
+		const selectContent = classnames('select-content',this.props.size?this.props.size:"");
 		const { options = [] } = this.props;
 		let showName:string = this.props.placeholder || options[0][name];
 		if(this.state.options && this.state.options.name) {
@@ -94,7 +96,7 @@ export default class Select extends React.Component<IProps, IState> {
 		return (
 			<div className="select-wrapper">
 				{this.props.text?<div className="select-type">{this.props.text}</div>:<></>}
-				<div className="select-content" onClick={this.onExpand}>
+				<div className={selectContent} onClick={this.onExpand}>
 					<div className="selected-text" style={this.props.style}>
 						<span>{showName}</span>
 						<span className="triangle" />
