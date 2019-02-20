@@ -5,6 +5,9 @@ export class Result
     info: any;
 }
 
+/**
+ * -------------------------以下是账户所使用到的实体类
+ */
 export interface AccountInfo extends LoginInfo{
     walletName:string;
     nep2key:string;
@@ -86,4 +89,28 @@ export interface LoginInfo
     pubkey: Uint8Array;
     prikey: Uint8Array;
     address: string;
+}
+
+
+/**
+ * Invoke
+ */
+
+export interface Invoke{
+    scriptHash:string;
+    operation:string;
+    arguments:Array<Argument>;
+    assets:{[asset:string]:string};
+    fee:string;
+    network:"TestNet"|"MainNet"
+}
+
+export interface Argument{
+    type:"String"|"Boolean"|"Hash160"|"Integer"|"ByteArray"|"Array"|"Address"
+    value:string|number|boolean|Array<Argument>
+}
+
+export interface Asset{
+    NEO:string;
+    GAS:string;
 }

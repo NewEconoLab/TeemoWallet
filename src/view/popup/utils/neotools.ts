@@ -1,4 +1,4 @@
-import { LoginInfo, Result, AccountInfo } from "../../../common/entity";
+import { LoginInfo, Result, AccountInfo, Invoke } from "../../../common/entity";
 
 export class neotools
 {
@@ -223,4 +223,39 @@ export class neotools
         return promise;
     }
 
+    contractBuilder(invoke:Invoke){
+        let sb = new ThinNeo.ScriptBuilder();
+        let arr = invoke.arguments.map(argument=>{
+            let str = ""
+            switch (argument.type) {                
+                case "String":
+                    str="(str)"+argument.value    
+                    break;
+                case "Integer":
+                    str="(int)"+argument.value    
+                    break;
+                case "Hash160":
+                    str="(hex160)"+argument.value                        
+                    break;
+                case "ByteArray":
+                    str="(bytes)"+argument.value                        
+                    break;
+                case "Boolean":
+                    str="(int)"+(argument.value?1:0);                    
+                    break;
+                case "Address":
+                    str="(addr)"+argument.value   
+                    break;             
+                case "Array":
+                    // str="(str)"+argument.value 暂时不考虑                
+                    break;
+                default:
+                    throw new Error("No parameter of this type");
+            }
+            return str;
+        })
+        sb.EmitParamJson(arr)
+        sb.EmitPushString(invoke.operation)
+        sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+    }
 }
