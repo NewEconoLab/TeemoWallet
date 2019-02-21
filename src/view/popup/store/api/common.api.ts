@@ -1,14 +1,13 @@
-import request from 'utils/request';
-import {HASH_CONFIG} from 'config';
+import request from '../../utils/request';
 /**
  * 获取nep5的资产（CGAS）
  */
-export const getnep5balanceofaddress =  (address:string) => {
+export const getnep5balanceofaddress =  (address:string,assetId:string) => {
   const opts = {
    method:'getnep5balanceofaddress',
    params:[
-    HASH_CONFIG.ID_CGAS.toString(),
-    address
+     assetId,
+     address
    ],
    baseUrl:'common'
   }
@@ -19,14 +18,13 @@ export const getnep5balanceofaddress =  (address:string) => {
  * 
  * @param address 
  */
-export const getregisteraddressbalance =  (address:string) => {
+export const getregisteraddressbalance =  (address:string,register:string) => {
   // alert(DomainSelling.RootNeo.register.toString())
   const opts = {
    method:'getregisteraddressbalance',
    params:[
     address,
-    // "0x"+HASH_CONFIG.accountCGAS.toString()
-    "0x"+DomainSelling.RootNeo.register.toString()
+    register
    ]
   }
   return request(opts);

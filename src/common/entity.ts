@@ -155,8 +155,8 @@ export class MarkUtxo
 
     }
 
-    public static getUtxo():{
-
+    public static getUtxo():{ [id: string]: Utxo[] }{
+        return {};
     }
 
     /**

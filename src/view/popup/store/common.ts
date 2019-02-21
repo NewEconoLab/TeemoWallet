@@ -11,7 +11,7 @@ class Common
     }   
     private tabname:string;
 
-    private network:string;
+    private _network:string;
 
     // 账户信息
     private _account:AccountInfo;
@@ -19,13 +19,13 @@ class Common
     private _accountList:NepAccount[];
     
     
-    public set _network(v : string) {
+    public set network(v : string) {
         Storage_internal.set("network",v);
         this._network = v;
     }
     
     
-    public get _network() : string {
+    public get network() : string {
         return this._network = Storage_internal.get("network");
     }
     
