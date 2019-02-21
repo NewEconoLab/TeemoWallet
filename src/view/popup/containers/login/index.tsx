@@ -10,6 +10,7 @@ import Chooser from '../../../components/Chooser';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { neotools } from '../../utils/neotools';
 import AddrList from './addrlist';
+import common from '../../store/common';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -22,8 +23,6 @@ interface AppState {
     options:IOption[],
     currentOption:IOption,
     currentAccount:NepAccount,
-    accounts:NepAccount[]
-
 }
 
 export default class Login extends React.Component<AppProps,AppState> {
@@ -37,28 +36,24 @@ export default class Login extends React.Component<AppProps,AppState> {
         confirm:"",
         options:[],
         currentOption:{id:"",name:""},
-        currentAccount:null,
-        accounts:[]
+        currentAccount:null
     }
 
     public componentDidMount() 
     {
-        let accounts = Storage_local.getAccount();  
         if(bg.storage && bg.storage.account){            
             this.props.history.push("/mywallet")
-        }else if(accounts.length){
+        }else if(common.accountList.length){
             this.props.history.push("/login")
         }else{
             this.props.history.push('/welcome')
         }
-        if(accounts.length){            
-            let options = accounts.map((acc,index)=>{
+        if(common.accountList.length){            
+            let options = common.accountList.map((acc,index)=>{
                 return {id:acc.address,name:(acc.walletName?acc.walletName:["我的钱包",(index+1)].join(' '))}as IOption;
-            })
-            console.log(options);
+            });
             
             this.setState({
-                accounts,
                 options,       
             })
             this.getcurrentOption(options[0]);
@@ -109,7 +104,9 @@ export default class Login extends React.Component<AppProps,AppState> {
     }
 
     public loginWallet=()=>{
-        console.log(this.state.currentAccount)
+        console.log("--------state-currentAccount");
+        console.log(this.state.currentAccount);
+        
         NepAccount.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
             bg.storage.account = account;

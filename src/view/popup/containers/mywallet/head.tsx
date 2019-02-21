@@ -76,7 +76,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     <div className="list">
                         <div className="walletCode">
                             <img  width='30px' height='30px'/>
-                            <span>{common.account.walletName}</span>
+                            <span>{common.account.walletName?common.account.walletName: "我的钱包 "+(common.account.index+1)}</span>
                         </div>
                         <div className="function">
                             <Chooser options={this.options} onCallback={this.cutFunction} >

@@ -82,18 +82,21 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
     {
         neotools.nep6Load(this.wallet,this.state.password)
         .then(accounts =>{
-            common.account = accounts[0];
-            for (let i = 0; i < accounts.length; i++) {
-                const account = accounts[i];
-                console.log(account);
-                
-                Storage_local.setAccount(account);
+            if(accounts && accounts.length)
+            {
+                common.account = accounts[0]
+                for (let i = 0; i < accounts.length; i++) {
+                    const account = accounts[i];                
+                    common.account.index = Storage_local.setAccount(account);
+                }
+                this.goMyWallet();
+            }else{
+                this.setState({
+                    password_error:true
+                });
             }
-            this.goMyWallet();
         })
         .catch(error =>{
-            console.log(error);
-            
             this.setState({
                 password_error:true
             });

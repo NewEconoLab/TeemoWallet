@@ -9,34 +9,42 @@ export class Result
 /**
  * -------------------------以下是账户所使用到的实体类
  */
-export interface AccountInfo extends LoginInfo{
-    walletName:string;
-    nep2key:string;
-    scrypt:ThinNeo.nep6ScryptParameters;
+export interface AccountInfo extends NepAccount{
+    // walletName:string;
+    // nep2key:string;
+    // scrypt:ThinNeo.nep6ScryptParameters;
+
+    
+    pubkey: Uint8Array;
+    prikey: Uint8Array;
+    address: string;
 }
 
 export class NepAccount{
+    index?:number;
     walletName:string;
     address: string;
     nep2key:string;
     scrypt:ThinNeo.nep6ScryptParameters;
-    constructor(name:string,addr:string,nep2:string,scrypt:ThinNeo.nep6ScryptParameters){
+    constructor(name:string,addr:string,nep2:string,scrypt:ThinNeo.nep6ScryptParameters,index?:number){
         this.walletName=name;
         this.address=addr;
         this.nep2key=nep2;
         this.scrypt=scrypt
+        if(index!==undefined)
+            this.index=index;
     }
 
     static deciphering= async (password:string,nepaccount:NepAccount)=>{
         return new Promise<AccountInfo>((resolve, reject) =>
         {
+            console.log(nepaccount);
+            
             let account = {} as AccountInfo;
             account.scrypt=nepaccount.scrypt
             account.nep2key=nepaccount.nep2key;
             ThinNeo.Helper.GetPrivateKeyFromNep2(nepaccount.nep2key, password, nepaccount.scrypt.N, nepaccount.scrypt.r, nepaccount.scrypt.p, (info, result) =>
             {
-                console.log(result);
-                
                 if ("nep2 hash not match." == result)
                     reject(result);
                 account.prikey = result as Uint8Array;
@@ -44,6 +52,7 @@ export class NepAccount{
                 {
                     account.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(account.prikey);
                     account.address = ThinNeo.Helper.GetAddressFromPublicKey(account.pubkey);
+                    account.index = nepaccount.index;
                     resolve(account);
                 }
                 else
@@ -64,7 +73,6 @@ export class NepAccount{
             let account={}as AccountInfo
             account.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(key);
             account.address = ThinNeo.Helper.GetAddressFromPublicKey(account.pubkey);
-
             account.scrypt = new ThinNeo.nep6ScryptParameters();
             account.scrypt.N = 16384;
             account.scrypt.r = 8;
@@ -129,8 +137,7 @@ export class MarkUtxo
      */
     public static setMark(utxos:MarkUtxo[])
     {
-        const session:{[txid:string]:number[]} = this.getMark()
-        // tslint:disable-next-line:prefer-for-of
+        const session = Storage_internal.get<{[txid:string]:number[]}>("utxo_manager");
         for (let index = 0; index < utxos.length; index++) 
         {
             const utxo = utxos[index];
@@ -148,13 +155,17 @@ export class MarkUtxo
 
     }
 
+    public static getUtxo():{
+
+    }
+
     /**
      * getMark 获得被标记的utxo
      */
-    public static getMark()
-    {
-        return Storage_internal.get<{[txid:string]:number[]}>("utxo_manager");
-    }
+    // public static getMark()
+    // {
+    //     return Storage_internal.get<{[txid:string]:number[]}>("utxo_manager");
+    // }
 
     // public height:number;
     public txid:string;

@@ -96,4 +96,6 @@ export class Transaction extends ThinNeo.Transaction
     {
         return this.GetHash().clone().reverse().toHexString();
     }
+
+    
 }

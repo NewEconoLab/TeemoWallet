@@ -1,4 +1,5 @@
 import { LoginInfo, Result, AccountInfo, Invoke } from "../../../common/entity";
+import { Transaction } from "./transaction";
 
 export class neotools
 {
@@ -39,7 +40,7 @@ export class neotools
         }
         return !error;
     }
-    
+
     /**
      * wifDecode wif解码
      * @param wif wif私钥
@@ -259,8 +260,10 @@ export class neotools
         sb.EmitPushString(invoke.operation)
         sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
         
-        let tran = new ThinNeo.Transaction();
+        let tran = new Transaction();
+        tran.setScript(sb.ToArray())
         
+        // tran.creatInuptAndOutup()
 
     }
 
