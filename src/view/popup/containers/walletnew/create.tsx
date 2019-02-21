@@ -4,7 +4,8 @@ import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import { RouteComponentProps } from 'react-router';
 import { AccountInfo } from '../../../../common/entity';
-import { tools, bg } from '../../utils/bgtools';
+import { Storage_local } from '../../utils/storagetools';
+import common from '../../store/common';
 
 interface IState{
     walletname:string,
@@ -81,8 +82,8 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     }
 
     goMyWallet =()=> {
-        tools.setAccount(this.state.account);
-        bg.storage.account=this.state.account;
+        Storage_local.setAccount(this.state.account);
+        common.account=this.state.account;
         if(this.props.goMyWallet)
             this.props.goMyWallet();
     }

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
 import { neotools } from '../../../utils/neotools';
-import { bg, tools } from '../../../utils/bgtools';
+import { bg, Storage_local } from '../../../utils/storagetools';
 
 interface IState{
     nep2:string;
@@ -66,7 +66,7 @@ export default class Nep2Import extends React.Component<IPorps, IState> {
         neotools.nep2Load(this.state.nep2,this.state.password)
         .then(accounts =>{
             bg.storage.account = accounts;
-            tools.setAccount(accounts);
+            Storage_local.setAccount(accounts);
             this.goMyWallet();
         })
         .catch(error =>{

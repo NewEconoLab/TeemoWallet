@@ -866,6 +866,7 @@ declare namespace ThinNeo {
     class TransactionInput {
         hash: Uint8Array;
         index: number;
+        addr:string;
     }
     class Witness {
         InvocationScript: Uint8Array;

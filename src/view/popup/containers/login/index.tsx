@@ -5,7 +5,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import Label from '../../../components/Label';
 import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
-import { bg, tools } from '../../utils/bgtools';
+import { bg, Storage_local} from '../../utils/storagetools';
 import Chooser from '../../../components/Chooser';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { neotools } from '../../utils/neotools';
@@ -43,7 +43,7 @@ export default class Login extends React.Component<AppProps,AppState> {
 
     public componentDidMount() 
     {
-        let accounts = tools.getAccount();  
+        let accounts = Storage_local.getAccount();  
         if(bg.storage && bg.storage.account){            
             this.props.history.push("/mywallet")
         }else if(accounts.length){
@@ -66,7 +66,7 @@ export default class Login extends React.Component<AppProps,AppState> {
     }
 
     public getcurrentOption=(event: IOption)=>{        
-        tools.getAccount().forEach(currentAccount=>{
+        Storage_local.getAccount().forEach(currentAccount=>{
             if(currentAccount.address===event.id){
                 this.setState({
                     currentAccount

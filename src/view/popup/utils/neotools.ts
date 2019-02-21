@@ -39,6 +39,7 @@ export class neotools
         }
         return !error;
     }
+    
     /**
      * wifDecode wif解码
      * @param wif wif私钥
@@ -257,5 +258,24 @@ export class neotools
         sb.EmitParamJson(arr)
         sb.EmitPushString(invoke.operation)
         sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+        
+        let tran = new ThinNeo.Transaction();
+        
+
     }
+
+    invokeTest(){
+        var script = {} as Invoke
+        script.scriptHash="74f2dc36a68fdc4682034178eb2220729231db76";
+        script.operation="transfer",
+        script.arguments=[
+            {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+            {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+            {type:"Integer",value:"100000"}
+        ]
+        script.fee="0.001";
+        script.network="TestNet";
+        script.assets={}
+    }
+
 }
