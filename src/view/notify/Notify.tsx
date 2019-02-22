@@ -26,14 +26,14 @@ export default class Notify extends React.Component<Props, any>
         if(chrome.tabs)
         {            
             chrome.storage.local.get(notify=>{
-                let info = notify['refInfo'];
+                let info = notify['invokeParam'];
                 alert(notify);
                 
-                this.setState({
-                    title:info['refTitle'],
-                    domain:info['refDomain'],
-                    scripthash:info['scriptHash']
-                })
+                // this.setState({
+                //     title:info['refTitle'],
+                //     domain:info['refDomain'],
+                //     scripthash:info['scriptHash']
+                // })
             })
         }
     }

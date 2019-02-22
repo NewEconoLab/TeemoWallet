@@ -2,8 +2,8 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    inject:path.join(__dirname,"src/app/inject.ts"),
-    content: path.join(__dirname,'src/app/content.ts'),
+    // inject:path.join(__dirname,"src/app/inject.ts"),
+    // content: path.join(__dirname,'src/app/content.ts'),
     index: path.join(__dirname, "src/view/popup/index.tsx"),
     notifyPage: path.join(__dirname, "src/view/notify/index.tsx"),
   },

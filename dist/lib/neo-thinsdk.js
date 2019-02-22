@@ -2559,7 +2559,12 @@ var Neo;
                 return this.x == null && this.y == null;
             };
             ECPoint.multiply = function (p, n) {
+                console.log(n);                
                 var k = n instanceof Uint8Array ? Neo.BigInteger.fromUint8Array(n, 1, false) : n;
+                console.log(k);
+                console.log(k.isZero());
+                
+                
                 if (p.isInfinity())
                     return p;
                 if (k.isZero())

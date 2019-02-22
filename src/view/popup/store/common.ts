@@ -22,8 +22,7 @@ class Common
     public set network(v : string) {
         Storage_internal.set("network",v);
         this._network = v;
-    }
-    
+    }    
     
     public get network() : string {
         return this._network = Storage_internal.get("network");
@@ -54,7 +53,14 @@ class Common
     
     // 从background storage 变量中取值
     public get account() : AccountInfo {
-        return Storage_internal.get<AccountInfo>(this.tabname);
+        const acc =Storage_internal.get<AccountInfo>(this.tabname);
+
+        const newacc = new AccountInfo(
+            new NepAccount(acc.walletName,acc.address,acc.nep2key,acc.scrypt,acc.index),
+            acc.prikey,acc.pubkey
+        );
+        
+        return newacc;
     }
 
 }

@@ -90,7 +90,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     <div className="address">{common.account.address}</div>
                 </div>
                 <div className="lablelist">
-                    <div className={history} onClick={this.showHistory}><span><a href="http://scan.nel.group">交易记录</a></span></div>
+                    <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
                     <div className={assets} onClick={this.showAssets}><span>资产</span></div>
                 </div>
                 <Exchange show={this.state.exchange} onHide={this.closeExchange}></Exchange>

@@ -1,8 +1,11 @@
 import request from '../../utils/request';
+export class Api
+{
+  
 /**
  * 获取nep5的资产（CGAS）
  */
-export const getnep5balanceofaddress =  (address:string,assetId:string) => {
+public static getnep5balanceofaddress =  (address:string,assetId:string) => {
   const opts = {
    method:'getnep5balanceofaddress',
    params:[
@@ -18,7 +21,7 @@ export const getnep5balanceofaddress =  (address:string,assetId:string) => {
  * 
  * @param address 
  */
-export const getregisteraddressbalance =  (address:string,register:string) => {
+public static getregisteraddressbalance =  (address:string,register:string) => {
   // alert(DomainSelling.RootNeo.register.toString())
   const opts = {
    method:'getregisteraddressbalance',
@@ -34,7 +37,7 @@ export const getregisteraddressbalance =  (address:string,register:string) => {
  * 发送交易
  * @param data 交易数据
  */
-export const sendrawtransaction =  (data:string) => {
+public static sendrawtransaction =  (data:string) => {
   const opts = {
    method:'sendrawtransaction',
    params:[
@@ -49,7 +52,7 @@ export const sendrawtransaction =  (data:string) => {
  * 获得指定地址对应的utxo
  * @param address 地址
  */
-export const getUtxo=(address:string)=>{
+public static getUtxo=(address:string)=>{
   const opts={
     method:"getutxo",
     params:[
@@ -65,7 +68,7 @@ export const getUtxo=(address:string)=>{
  * 获得指定地址对应的utxo
  * @param address 地址
  */
-export const getDomainInfo=(domain:string)=>{
+public static getDomainInfo=(domain:string)=>{
   const opts={
     method:"getdomaininfo",
     params:[
@@ -79,7 +82,7 @@ export const getDomainInfo=(domain:string)=>{
  * 判断交易是否入链
  * @param txid 交易id
  */
-export const hasTx=(txid:string)=>{
+public static hasTx=(txid:string)=>{
   const opts={
     method:"hastx",
     params:[
@@ -93,7 +96,7 @@ export const hasTx=(txid:string)=>{
  * 判断合约调用是否抛出 notify
  * @param txid 交易id
  */
-export const hasContract=(txid:string)=>{
+public static hasContract=(txid:string)=>{
   const opts={
     method:"hascontract",
     params:[
@@ -107,7 +110,7 @@ export const hasContract=(txid:string)=>{
  * 判断双交易是否成功
  * @param txid 交易id
  */
-export const getRehargeAndTransfer=(txid:string)=>{
+public static getRehargeAndTransfer=(txid:string)=>{
   const opts={
     method:"getrechargeandtransfer",
     params:[
@@ -117,7 +120,7 @@ export const getRehargeAndTransfer=(txid:string)=>{
   return request(opts);
 }
 
-export const getBlockCount=()=>{
+public static getBlockCount=()=>{
   const opts={
     method:"getblockcount",
     params:[],
@@ -126,7 +129,7 @@ export const getBlockCount=()=>{
   return request(opts);
 }
 
-export const rechargeAndTransfer=(data1:string,data2:string)=>{
+public static rechargeAndTransfer=(data1:string,data2:string)=>{
   const opts={
     method:"rechargeandtransfer",
     params:[
@@ -140,7 +143,7 @@ export const rechargeAndTransfer=(data1:string,data2:string)=>{
  * @method 获得nep5资产信息
  * @param asset 资产id
  */
-export const getnep5asset=(asset: string)=>{
+public static getnep5asset=(asset: string)=>{
   const opts={
     method:"getnep5asset",
     params:[
@@ -148,4 +151,5 @@ export const getnep5asset=(asset: string)=>{
     ]
   }
   return request(opts);
+}
 }

@@ -1,5 +1,7 @@
-import { LoginInfo, Result, AccountInfo, Invoke } from "../../../common/entity";
+import { LoginInfo, Result, AccountInfo, Invoke, MarkUtxo, NepAccount } from "../../../common/entity";
 import { Transaction } from "./transaction";
+import { HASH_CONFIG } from "../../config";
+import common from "../store/common";
 
 export class neotools
 {
@@ -121,24 +123,23 @@ export class neotools
      */
     public static async nep2Load(nep2: string, password: string): Promise<AccountInfo>
     {
-        let account = {} as AccountInfo;
         let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
         {
-            const N: number = 16384;
-            var r: number = 8;
-            var p: number = 8
-            account.scrypt={N,r,p};
-            account.nep2key=nep2;
-            ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, N, r, p, (info, result) =>
+            const scrypt={N:16384,r:8,p:8};
+            ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, scrypt.N, scrypt.r, scrypt.p, (info, result) =>
             {
                 if ("nep2 hash not match." == result)
                     reject(result);
-                account.prikey = result as Uint8Array;
-                if (account.prikey != null)
+                const prikey = result as Uint8Array;
+                if (prikey != null)
                 {
-                    account.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(account.prikey);
-                    account.address = ThinNeo.Helper.GetAddressFromPublicKey(account.pubkey);
-                    resolve(account);
+                    const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+                    const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+                    resolve(new AccountInfo(
+                        new NepAccount("",address,nep2,scrypt),
+                        prikey,
+                        pubkey
+                    ));
                 }
                 else
                 {
@@ -169,10 +170,12 @@ export class neotools
                     }
                     try
                     {
-                        const info = await neotools.getPriKeyfromAccount(wallet.scrypt, password, account) as AccountInfo;
-                        info.nep2key = account.nep2key;
-                        info.scrypt = wallet.scrypt;
-                        arr.push(info);
+                        const info = await neotools.getPriKeyfromAccount(wallet.scrypt, password, account);                        
+                        arr.push(new AccountInfo(
+                            new NepAccount("",account.address,account.nep2key,wallet.scrypt),
+                            info.prikey,
+                            info.pubkey
+                        ));
                         return arr;
                     } catch (error)
                     {
@@ -209,14 +212,10 @@ export class neotools
                     {
                         var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(result as Uint8Array);
                         var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-                        // var wif = ThinNeo.Helper.GetWifFromPrivateKey(result as Uint8Array);
-                        // var hexkey = (result as Uint8Array).toHexString();
-                        // console.log(info + "|" + address + " wif=" + wif);
                         resolve({ pubkey, address: address, prikey: result as Uint8Array });
                     }
                     else
                     {
-                        // info2.textContent += info + "|" + result;
                         reject(result);
                     }
 
@@ -225,9 +224,10 @@ export class neotools
         return promise;
     }
 
-    contractBuilder(invoke:Invoke){
+    public static invokeScriptBuild(data:Invoke)
+    {
         let sb = new ThinNeo.ScriptBuilder();
-        let arr = invoke.arguments.map(argument=>{
+        let arr = data.arguments.map(argument=>{
             let str = ""
             switch (argument.type) {                
                 case "String":
@@ -257,28 +257,75 @@ export class neotools
             return str;
         })
         sb.EmitParamJson(arr)
-        sb.EmitPushString(invoke.operation)
-        sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
-        
-        let tran = new Transaction();
-        tran.setScript(sb.ToArray())
-        
-        // tran.creatInuptAndOutup()
-
+        sb.EmitPushString(data.operation)
+        sb.EmitAppCall(Neo.Uint160.parse(data.scriptHash));
+        return sb.ToArray();
     }
 
-    invokeTest(){
-        var script = {} as Invoke
-        script.scriptHash="74f2dc36a68fdc4682034178eb2220729231db76";
-        script.operation="transfer",
-        script.arguments=[
-            {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-            {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-            {type:"Integer",value:"100000"}
-        ]
-        script.fee="0.001";
-        script.network="TestNet";
-        script.assets={}
+    public static async contractBuilder(invoke:Invoke):Promise<Uint8Array>{
+        let tran = new Transaction();
+        
+        try {
+            const script=this.invokeScriptBuild(invoke);
+            tran.setScript(script);
+        } catch (error) {
+            console.log(error);            
+        }
+        if(!!invoke.fee && invoke.fee!=='' && invoke.fee!='0'){
+            
+            try {
+                const utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
+                if(utxos)
+                    tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        try {
+            const message  = tran.GetMessage().clone();
+            const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
+            tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+            const data:Uint8Array = tran.GetRawData();
+            return data;
+            
+        } catch (error) {
+            console.log(error);            
+        }
+    }
+
+    public static invokeTest(){
+        var script:Invoke = {
+            scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",
+            operation:"transfer",
+            arguments:[
+                {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+                {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+                {type:"Integer",value:"100000"}
+            ],
+            fee:'0.001',
+            network:'TestNet',
+            assets:{}
+        }
+        // script.scriptHash="74f2dc36a68fdc4682034178eb2220729231db76";
+        // script.operation="transfer",
+        // script.arguments=[
+        //     {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        //     {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        //     {type:"Integer",value:"100000"}
+        // ]
+        // script.fee="0.001";
+        // script.network="TestNet";
+        // script.assets={}
+        console.log(common.account.prikey.toHexString());
+        neotools.contractBuilder(script)
+        .then(result=>{
+            console.log(result);
+            console.log(result.toHexString());
+            
+        })
+        .catch(reason=>{
+            console.log(reason);            
+        })
     }
 
 }

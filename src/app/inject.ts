@@ -19,6 +19,14 @@ var getAccount = (callback) =>{
     }, false);
 }
 
+// invoke 调用
+var invokeGroup = (invokeMessage) =>{
+    window.postMessage({
+        key:"invokeGroup",
+        msg:invokeMessage
+    },"*")
+}
+
 var sendTransferTx = (from,to,asset,value,callback) =>{
     alert("inject sendTransferTx");
 
