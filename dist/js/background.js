@@ -9,10 +9,10 @@ chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
         if (request.key === "getAccount") {
             chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                var notify = window.open ('notify.html', 'notify', 'height=602, width=375, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
+                var notify = window.open ('notify.html', 'notify', 'height=602, width=377, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
                 notify.onload = () => {
                     chrome.storage.local.set("message",
-                        {key:"getAccount",value:storage.account}
+                        {key:"getAccount",value:request.msg.refInfo}
                     );
                 }
 
@@ -37,10 +37,8 @@ chrome.runtime.onMessage.addListener(
         if (request.key === 'invokeGroup')
         {
             chrome.tabs.query({active:true,currentWindow:true},(tabs)=>{
-                console.log("=====================================进入了 invokeGroup");
-                
                 chrome.storage.local.set("invokeParam",request.msg.invokeParam)
-                var notify = window.open ('notify.html', 'notify', 'height=600, width=350, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
+                var notify = window.open ('notify.html', 'notify', 'height=602, width=377, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')
                 notify.onload = () => {
                     chrome.storage.local.set("invokeMessage",request.msg);
                 }

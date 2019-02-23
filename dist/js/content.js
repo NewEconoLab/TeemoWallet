@@ -33,7 +33,9 @@ window.addEventListener("message", function(e)
     {
         chrome.runtime.sendMessage({
             key:'getAccount', 
-            msg:{}
+            msg:{
+                refInfo : refInfo,
+            }
         });
     }
     if(request.key === "sendTransferTx")
