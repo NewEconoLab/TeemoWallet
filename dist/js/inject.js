@@ -20,20 +20,20 @@ var getAccount = (callback) =>{
 }
 
 // invoke 调用
-var invokeGroup = (invokeMessage) =>{
-    window.postMessage({
-        key:"invokeGroup",
-        msg:invokeMessage
-    },"*")
-    window.addEventListener("message", function(e)
-    {
-        var request = e.data;
-        if(request.key === "invokeGroup_R")
-        {
-            callback(request.msg);
-        }
-    }, false);
-}
+// var invokeGroup = (invokeMessage) =>{
+//     window.postMessage({
+//         key:"invokeGroup",
+//         msg:invokeMessage
+//     },"*")
+//     window.addEventListener("message", function(e)
+//     {
+//         var request = e.data;
+//         if(request.key === "invokeGroup_R")
+//         {
+//             callback(request.msg);
+//         }
+//     }, false);
+// }
 
 var sendTransferTx = (from,to,asset,value,callback) =>{
     alert("inject sendTransferTx");
@@ -58,12 +58,16 @@ var sendTransferTx = (from,to,asset,value,callback) =>{
     }, false);
 }
 
-var sendInvokeTx = (scriptHash,invokeParam,callback) =>{
+/**
+ *  合约调用
+ * @param {*} invokeParam 
+ * @param {any} callback 
+ */
+var invokeGroup = (invokeParam,callback) =>{
     alert("inject sendInvokeTx");
     window.postMessage({
         key:"sendInvokeTx",
         msg:{
-            scriptHash: scriptHash, 
             invokeParam: invokeParam
         }
     },"*")

@@ -7,18 +7,24 @@ import './index.less';
 import Button from '../../../components/Button';
 // import { observer } from 'mobx-react';
 
+interface IPorps
+{
+  title:string;
+  domain:string;
+}
+
 // @observer
-export default class Dice extends React.Component{
+export default class Dice extends React.Component<IPorps>{
   
   public render()
   {
     return (
       <div className="ndice-wrap">
         <div className="first-line">
-          DICE-NEO上第一款公平骰子游戏
+          {this.props.title}
         </div>
         <div className="second-line">
-          www.dice.com
+          {this.props.domain}
         </div>
         <div className="dice-logo" />
         <div className="third-line">

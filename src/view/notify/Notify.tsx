@@ -1,6 +1,7 @@
 import * as React from 'react';
 import './reset.less';
 import Home from './containers/home';
+import Dice from './containers/dice';
 
 export interface Props
 {
@@ -18,24 +19,9 @@ export default class Notify extends React.Component<Props, any>
     public state = {
         title:"",
         domain:"",
-        scripthash:""
-    }
-    
-    public componentDidMount() 
-    {
-        if(chrome.tabs)
-        {            
-            chrome.storage.local.get(notify=>{
-                let info = notify['invokeParam'];
-                alert(notify);
-                
-                // this.setState({
-                //     title:info['refTitle'],
-                //     domain:info['refDomain'],
-                //     scripthash:info['scriptHash']
-                // })
-            })
-        }
+        scripthash:"",
+        label:""
+        
     }
 
     public setStorage()
@@ -52,7 +38,9 @@ export default class Notify extends React.Component<Props, any>
                 {/* 这里是Notify页面 来自{this.state.title}
                 url:{this.state.domain}
                 <Button text="开始"/> */}
-                <Home {...this.props} />
+                {
+                    <Home {...this.props}/>
+                }
             </div>
         )
     }

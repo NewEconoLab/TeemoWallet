@@ -306,16 +306,6 @@ export class neotools
             network:'TestNet',
             assets:{}
         }
-        // script.scriptHash="74f2dc36a68fdc4682034178eb2220729231db76";
-        // script.operation="transfer",
-        // script.arguments=[
-        //     {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-        //     {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-        //     {type:"Integer",value:"100000"}
-        // ]
-        // script.fee="0.001";
-        // script.network="TestNet";
-        // script.assets={}
         console.log(common.account.prikey.toHexString());
         neotools.contractBuilder(script)
         .then(result=>{
