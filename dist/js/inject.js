@@ -82,6 +82,141 @@ var invokeGroup = (invokeParam,callback) =>{
     }, false);
 }
 
-// function sendMsgTest() {
-//     window.postMessage({"test": '这里是inject.js'}, '*');
-// }
+var teemmo;
+((teemmo)=>{
+
+    var getProvider=()=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"getProvider",
+                msg:{}
+            },"*");            
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getProvider_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+
+    var getNetworks=()=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"getNetworks",
+                msg:{}
+            },"*");            
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getProvider_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+
+    var getAccount=()=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"getAccount",
+                msg:{}
+            },"*")
+        
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getAccount_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+
+    var getBalance=(params)=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"getBalance",
+                msg:{}
+            },"*");            
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getProvider_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+
+    var getStorage=(params)=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"getStorage",
+                msg:{}
+            },"*");            
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getProvider_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+    
+    var send=(params)=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"send",
+                msg:{}
+            },"*");            
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "getProvider_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+    
+    var invoke=(params)=>{
+        return new Promise((resolve, reject) =>{
+            window.postMessage({
+                key:"invoke",
+                msg:{
+                    invokeParam: params
+                }
+            },"*")
+        
+            window.addEventListener("message", function(e)
+            {
+                var request = e.data;
+                if(request.key === "invoke_R")
+                {
+                    resolve(request.msg);
+                }
+            }, false);
+        });
+    }
+
+    var NEO={
+        getProvider,
+        getNetworks,
+        getAccount,
+        getBalance,
+        getStorage,
+        send,
+        invoke
+    }
+    teemmo.NEO=NEO
+
+})(teemmo || (teemmo = {}));

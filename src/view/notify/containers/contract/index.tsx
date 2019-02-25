@@ -5,10 +5,16 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
+import { Invoke } from '../../../../common/entity';
 // import { observer } from 'mobx-react';
 
+interface IProps{
+  title:string,
+  domain:string,
+  invoek:Invoke
+}
 // @observer
-export default class ContractRequest extends React.Component
+export default class ContractRequest extends React.Component<IProps>
 {
   public state = {
     pageNumber: 0 // 0为上一页，1为下一页

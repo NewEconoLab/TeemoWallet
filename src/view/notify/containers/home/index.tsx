@@ -9,6 +9,7 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
+import { Invoke } from '../../../../app/back/entity';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
@@ -18,7 +19,8 @@ export default class Home extends React.Component<any, any> {
     label:"",
     title:"",
     domain:"",
-    address:""
+    address:"",
+    invoke:{} as Invoke
   }
   public componentDidMount() 
   {
@@ -59,14 +61,14 @@ export default class Home extends React.Component<any, any> {
           {
             this.state.label=="getAccount"?
             <Dice title={this.state.title} domain={this.state.domain} />:
-            <ContractRequest {...this.props} />
+            <ContractRequest title={this.state.title} domain={this.state.domain} invoek={this.state.invoke} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>
         <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} />
       </div>
     );
-  }
+  } 
 }
 
 // export default injectIntl(Home);

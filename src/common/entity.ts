@@ -1,6 +1,6 @@
-import { Storage_internal } from "../view/popup/utils/storagetools";
-import { Api } from "../view/popup/store/api/common.api";
-import common from "../view/popup/store/common";
+import { Storage_internal } from "../app/back/storagetools";
+import { Api } from "../app/back/store/api/common.api";
+import { common } from "../app/back/store/common";
 
 export class Result
 {

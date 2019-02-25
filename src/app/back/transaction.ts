@@ -1,5 +1,6 @@
-namespace background{
-        
+import { Utxo, MarkUtxo } from "./entity";
+import { common } from "./store/common";
+
     /**
      * 继承 NEO-TS SDK - Transaction类
      */
@@ -97,4 +98,3 @@ namespace background{
 
         
     }
-}

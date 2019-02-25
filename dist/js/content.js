@@ -29,58 +29,77 @@ window.addEventListener("message", function(e)
 
     var request = e.data;
 
+    if(request.key === "getNetworks")
+    {
+        chrome.runtime.sendMessage({
+            key:'getNetWorks', 
+            title:refInfo,
+            msg:{}
+        });
+    }
     if(request.key === "getAccount")
     {
         chrome.runtime.sendMessage({
             key:'getAccount', 
-            msg:{
-                refInfo : refInfo,
-            }
-        });
-    }
-    if(request.key === "sendTransferTx")
-    {
-        alert('ContentScript: sendInvokeTx');
-
-        chrome.runtime.sendMessage({
-            key:'sendTransferTx', 
-            msg:{
-                refInfo : refInfo,
-                from : request.msg.from, 
-                to : request.msg.to , 
-                asset : request.msg.asset ,
-                value:request.msg.value
-            }
+            title:refInfo,
+            msg:{}
         });
     }
     if(request.key === "sendInvokeTx")
     {
-        alert('ContentScript: sendInvokeTx');
-
         var scriptHash = request.msg.scriptHash;
         var invokeParam = request.msg.invokeParam;
-        // alert(scriptHash);
-        // alert(invokeParam);
-
         chrome.runtime.sendMessage({
             key:'sendInvokeTx', 
+            title:refInfo,
             msg:{
-                refInfo : refInfo,
                 scriptHash : scriptHash, 
                 invokeParam : invokeParam
             }
         });
     }
-    if(request.key=="invokeGroup")
+    if(request.key=="invoke")
     {
-        console.log(request.msg);
-        
+        var invokeParam = request.msg.invokeParam;
         chrome.runtime.sendMessage({
             key:'invokeGroup', 
+            title:refInfo,
+            msg:{ invokeParam }
+        });
+    }
+    if(request.key=="send")
+    {
+        chrome.runtime.sendMessage({
+            key:'invokeGroup', 
+            title:refInfo,
             msg:{
-                invokeParam:request.msg
+                params : request.msg
             }
         });
+    }
+    if(request.key=="getProvider")
+    {
+
+    }
+    if(request.key=="getNetworks")
+    {
+
+    }
+    if(request.key=="getBalance")
+    {
+        var scriptHash = request.msg.scriptHash;
+        var invokeParam = request.msg.invokeParam;
+        chrome.runtime.sendMessage({
+            key:'getBalance', 
+            title:refInfo,
+            msg:{
+                params : request.msg
+            }
+        });
+    }
+    if(request.key=="getStorage")
+    {
+
     }
     console.log(request);
 }, false);
@@ -89,7 +108,6 @@ window.onload=()=>{
     injectCustomJs()
     sendMsgTest()
 }
-
 
 function convertFromHex(hex) {
     var hex2 = hex.toString();//force conversion
@@ -107,10 +125,8 @@ function convertToHex(str) {
     return hex;
 }
 
-
 chrome.runtime.onMessage.addListener(
-    function (request, sender, sendResponse) {
-        alert("content_script Listener：fromBG" + request.result);
+    (request, sender, sendResponse) => {
 
         if(request.message=="invokeGroup_R")
         {

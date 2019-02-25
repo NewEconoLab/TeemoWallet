@@ -1,4 +1,5 @@
-namespace background{
+import { AccountInfo, NepAccount } from "../entity";
+import { Storage_internal, Storage_local } from "../storagetools";
 
     /**
      * 我的账户管理
@@ -63,5 +64,3 @@ namespace background{
 
     }
     export const common = new Common();
-    
-}

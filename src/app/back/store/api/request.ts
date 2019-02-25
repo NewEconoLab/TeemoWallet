@@ -1,5 +1,5 @@
-namespace background{
-  
+import { common } from "../common";
+
   interface IOpts {
     method:string, // 接口名
     params: any[], // 参数
@@ -32,7 +32,7 @@ namespace background{
   return urlout;
   }
 
-  export async function request(opts: IOpts): Promise<any> {
+  export async function request(opts: IOpts) {
   let url = [baseUrl,common.network].join('/');
   if (opts.baseUrl === 'common') {
     url = [baseCommonUrl,common.network].join('/')
@@ -61,5 +61,3 @@ namespace background{
     throw error;    
   }
   }
-
-}

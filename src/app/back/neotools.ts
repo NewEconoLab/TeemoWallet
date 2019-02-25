@@ -1,5 +1,7 @@
-namespace background
-{
+import { Result, LoginInfo, AccountInfo, NepAccount, MarkUtxo, Invoke } from "./entity";
+import { common } from "./store/common";
+import { Transaction } from "./transaction";
+
     export class neotools
     {
         /**
@@ -118,7 +120,7 @@ namespace background
         /**
          * nep2TOWif
          */
-        public static async nep2Load(nep2: string, password: string): Promise<AccountInfo>
+        public static async nep2Load(nep2: string, password: string)
         {
             let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
             {
@@ -328,5 +330,3 @@ namespace background
         saleContract: Neo.Uint160.parse("1b0ca9a908e07b20469917aed8d503049b420eeb"),
         ID_NNC: Neo.Uint160.parse('fc732edee1efdf968c23c20a9628eaa5a6ccb934'),
       }
-
-}

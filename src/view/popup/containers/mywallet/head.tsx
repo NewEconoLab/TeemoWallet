@@ -59,7 +59,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
 
     public goOut=()=>{
         if(this.props.lableChange){
-            bg.storage.account=null;
+            bg['storage'].account=null;
             this.props.lableChange('out');
         }
     }

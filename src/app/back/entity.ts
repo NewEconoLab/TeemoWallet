@@ -1,5 +1,7 @@
+import { Api } from "./store/api/common.api";
+import { common } from "./store/common";
+import { Storage_internal } from "./storagetools";
 
-namespace background{
     
     export class Result
     {
@@ -194,7 +196,7 @@ namespace background{
 
         }
 
-        public static async getAllUtxo():Promise<{ [id: string]: Utxo[] }>
+        public static async getAllUtxo()
         {
             try 
             {
@@ -274,4 +276,3 @@ namespace background{
         public asset: string;
         public count: Neo.Fixed8;
     }
-}

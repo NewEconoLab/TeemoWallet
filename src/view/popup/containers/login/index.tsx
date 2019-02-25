@@ -41,7 +41,7 @@ export default class Login extends React.Component<AppProps,AppState> {
 
     public componentDidMount() 
     {
-        if(bg.storage && bg.storage.account){            
+        if(bg['storage'] && bg['storage'].account){            
             this.props.history.push("/mywallet")
         }else if(common.accountList.length){
             this.props.history.push("/login")
@@ -109,7 +109,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         
         NepAccount.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
-            bg.storage.account = account;
+            bg['storage'].account = account;
             this.props.history.push('/mywallet')
         })
         .catch(error=>{
