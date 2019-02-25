@@ -5,6 +5,8 @@ import WalletFoot from './foot';
 import WalletHeader from './head';
 import History from '../history';
 import Assets from '../assets';
+import { neotools } from '../../utils/neotools';
+import common from '../../store/common';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -26,6 +28,8 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
     }
 
     public componentDidMount() {
+        if(!common.network)
+            common.network="testnet"
         // Example of how to send a message to eventPage.ts.
         if(chrome.tabs)
         {

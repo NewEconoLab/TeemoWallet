@@ -3,7 +3,8 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
 import { NepAccount } from '../../../../../common/entity';
-import { bg, tools } from '../../../utils/bgtools';
+import { Storage_local } from '../../../utils/storagetools';
+import common from '../../../store/common';
 
 interface IState{
     wif:string,
@@ -70,8 +71,8 @@ export default class WifImport extends React.Component<IPorps, IState> {
             let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
             NepAccount.encryption(this.state.password,prikey)
             .then(account=>{
-                bg.storage.account = account;
-                tools.setAccount(account);
+                common.account = account;
+                Storage_local.setAccount(account);
                 this.goMyWallet();                
             })
             .catch(error=>{

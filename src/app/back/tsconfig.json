@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "module": "system",
+      "target": "es6",
+      "declaration": true,
+      "sourceMap": true,
+      "removeComments": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "outFile": "../../../dist/js/background.js",
+      "strict": false,
+      "composite": true
+    }
+}

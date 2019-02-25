@@ -73,6 +73,15 @@ window.addEventListener("message", function(e)
             }
         });
     }
+    if(request.key=="invokeGroup")
+    {
+        chrome.runtime.sendMessage({
+            key:'sendInvokeTx', 
+            msg:{
+                invokeParam:request.msg
+            }
+        });
+    }
     console.log(request);
 }, false);
 

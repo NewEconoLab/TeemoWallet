@@ -5,7 +5,8 @@ import Chooser, { IOption } from '../../../components/Chooser';
 import Modal from '../../../components/Modal';
 import Exchange from '../exchange';
 import classnames = require('classnames');
-import { bg } from '../../utils/bgtools';
+import { bg } from '../../utils/storagetools';
+import common from '../../store/common';
 
 interface IProps{
     lableChange:(table:string)=>void
@@ -75,7 +76,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     <div className="list">
                         <div className="walletCode">
                             <img  width='30px' height='30px'/>
-                            <span>我的钱包1</span>
+                            <span>{common.account.walletName?common.account.walletName: "我的钱包 "+(common.account.index+1)}</span>
                         </div>
                         <div className="function">
                             <Chooser options={this.options} onCallback={this.cutFunction} >
@@ -86,7 +87,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             <img src={ICON.LOGOUT} height={24}/>
                         </div>
                     </div>
-                    <div className="address">{bg.storage.account.address}</div>
+                    <div className="address">{common.account.address}</div>
                 </div>
                 <div className="lablelist">
                     <div className={history} onClick={this.showHistory}><span>交易记录</span></div>

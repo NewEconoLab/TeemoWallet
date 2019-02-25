@@ -5,12 +5,18 @@ import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
 import Transfer from '../transfer';
+import { neotools } from '../../utils/neotools';
 // @observer
 export default class Assets extends React.Component<any, {}> 
 {
 	constructor(props: any)
 	{
 		super(props);		
+    }
+
+    componentDidMount(){
+        
+        neotools.invokeTest();
     }
     
     public state={

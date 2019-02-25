@@ -6,7 +6,11 @@ import * as React from 'react';
 import './index.less';
 // import { observer } from 'mobx-react';
 // @observer
-export default class Header extends React.Component{
+interface IProps
+{
+  address:string;
+}
+export default class Header extends React.Component<IProps>{
   
   public render()
   {
@@ -22,7 +26,7 @@ export default class Header extends React.Component{
             </div>
         </div>
         <div className="sec-line">
-            <span>ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf</span>
+            <span>{this.props.address}</span>
         </div>
       </div>
     );

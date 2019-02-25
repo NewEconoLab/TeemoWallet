@@ -3,8 +3,9 @@ import * as React from 'react';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import { RouteComponentProps } from 'react-router';
-import { AccountInfo } from '../../../../common/entity';
-import { tools, bg } from '../../utils/bgtools';
+import { AccountInfo, NepAccount } from '../../../../common/entity';
+import { Storage_local } from '../../utils/storagetools';
+import common from '../../store/common';
 
 interface IState{
     walletname:string,
@@ -81,8 +82,8 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     }
 
     goMyWallet =()=> {
-        tools.setAccount(this.state.account);
-        bg.storage.account=this.state.account;
+        Storage_local.setAccount(this.state.account);
+        common.account=this.state.account;
         if(this.props.goMyWallet)
             this.props.goMyWallet();
     }
@@ -124,14 +125,16 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                 this.setState({
                     moudle_download:true
                 });
-                const account:AccountInfo={
-                    address:this.wallet.accounts[0].address,
-                    nep2key:this.wallet.accounts[0].nep2key,
-                    walletName:this.state.walletname,
-                    prikey:key,
-                    pubkey:pubkey,
-                    scrypt:this.wallet.scrypt
-                }
+                const account:AccountInfo = new AccountInfo(
+                    new NepAccount(
+                        this.state.walletname,
+                        this.wallet.accounts[0].address,
+                        this.wallet.accounts[0].nep2key,
+                        this.wallet.scrypt,
+                    ),
+                    key,
+                    pubkey,
+                )
                 this.setState({account})
             }
         });
