@@ -47,18 +47,15 @@ interface LoginInfo {
     prikey: Uint8Array;
     address: string;
 }
-/**
- * Invoke
- */
-interface Invoke {
+interface InvokeArgs {
     scriptHash: string;
     operation: string;
-    arguments: Array<Argument>;
-    assets: {
-        [asset: string]: string;
-    };
     fee: string;
     network: "TestNet" | "MainNet";
+    arguments: Array<Argument>;
+    attachedAssets?: Array<AttachedAssets>;
+    assetIntentOverrides?: AssetIntentOverrides;
+    triggerContractVerification?: boolean;
 }
 interface Argument {
     type: "String" | "Boolean" | "Hash160" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
@@ -68,9 +65,6 @@ interface Asset {
     NEO: string;
     GAS: string;
 }
-/**
- *
- */
 declare class MarkUtxo {
     txid: string;
     n: number;
@@ -192,7 +186,7 @@ declare const Api: {
     getnep5asset: (asset: any) => Promise<any>;
 };
 declare function invokeScriptBuild(data: any): Uint8Array;
-declare const contractBuilder: (invoke: Invoke) => Promise<any>;
+declare const contractBuilder: (invoke: InvokeArgs) => Promise<any>;
 declare function openNotify(call: any): void;
 declare const getAccount: (title: any, data: any) => void;
 declare const invokeGroup: (title: any, data: any) => void;

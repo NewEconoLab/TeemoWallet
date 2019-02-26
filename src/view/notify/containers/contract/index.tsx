@@ -11,7 +11,7 @@ import { Invoke } from '../../../../common/entity';
 interface IProps{
   title:string,
   domain:string,
-  invoek:Invoke
+  invoek:InvokeArgs
 }
 // @observer
 export default class ContractRequest extends React.Component<IProps>

@@ -110,9 +110,6 @@ class AccountInfo extends NepAccount {
         return this._prikey;
     }
 }
-/**
- *
- */
 class MarkUtxo {
     constructor(txid, n) {
         this.txid = txid;

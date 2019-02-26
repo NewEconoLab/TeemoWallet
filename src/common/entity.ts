@@ -1,7 +1,3 @@
-import { Storage_internal } from "../app/back/storagetools";
-import { Api } from "../app/back/store/api/common.api";
-import { common } from "../app/back/store/common";
-
 export class Result
 {
     err: boolean;

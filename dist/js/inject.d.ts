@@ -45,7 +45,7 @@ interface InvokeArgs {
     fee: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
-    assets?: Array<AttachedAssets>;
+    attachedAssets?: Array<AttachedAssets>;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -98,14 +98,35 @@ interface Balance {
     symbol: string;
     amount: string;
 }
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: string;
+}
+interface AccountOutput {
+    address: string;
+    label: string;
+}
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: string;
+}
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
+}
 declare namespace Teemmo {
     class NEO {
         static getProvider: () => Promise<{}>;
-        static getNetworks: () => Promise<{}>;
-        static getAccount: () => Promise<{}>;
+        static getNetworks(): Promise<GetNetworksOutput>;
+        static getAccount(): Promise<AccountOutput>;
         static getBalance(data: GetBalanceArgs): Promise<BalanceResults>;
         static getStorage(params: GetStorageArgs): Promise<GetStorageOutput>;
-        static send: (params: any) => Promise<{}>;
+        static send(params: SendArgs): Promise<SendOutput>;
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
     }
 }

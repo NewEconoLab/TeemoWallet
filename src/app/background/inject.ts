@@ -52,7 +52,7 @@ interface InvokeArgs{
     fee:string;
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
-    assets?:Array<AttachedAssets>;
+    attachedAssets?:Array<AttachedAssets>;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -113,6 +113,32 @@ interface Balance {
     amount: string;
 }
 
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: string;
+}
+
+
+interface AccountOutput {
+    address: string;
+    label: string;
+}
+
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: string;
+}
+  
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
+}
+
 namespace Teemmo
 {    
     export class NEO {        
@@ -133,7 +159,7 @@ namespace Teemmo
             });
         }
 
-        static getNetworks=()=>{
+        static getNetworks():Promise<GetNetworksOutput>{
             return new Promise((resolve, reject) =>{
                 window.postMessage({
                     key:"getNetworks",
@@ -150,7 +176,7 @@ namespace Teemmo
             });
         }
 
-        static getAccount=()=>{
+        static getAccount():Promise<AccountOutput>{
             return new Promise((resolve, reject) =>{
             
                 window.addEventListener("message", function(e)
@@ -203,11 +229,11 @@ namespace Teemmo
             });
         }
         
-        static send=(params)=>{
+        static send(params:SendArgs):Promise<SendOutput>{
             return new Promise((resolve, reject) =>{
                 window.postMessage({
                     key:"send",
-                    msg:{}
+                    msg:params
                 },"*");            
                 window.addEventListener("message", function(e)
                 {

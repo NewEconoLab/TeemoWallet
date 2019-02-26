@@ -9,7 +9,6 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
-import { Invoke } from '../../../../app/back/entity';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
@@ -20,7 +19,7 @@ export default class Home extends React.Component<any, any> {
     title:"",
     domain:"",
     address:"",
-    invoke:{} as Invoke
+    invoke:{} as InvokeArgs
   }
   public componentDidMount() 
   {

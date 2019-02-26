@@ -37,6 +37,34 @@ var EventName;
 var Teemmo;
 (function (Teemmo) {
     class NEO {
+        static getNetworks() {
+            return new Promise((resolve, reject) => {
+                window.postMessage({
+                    key: "getNetworks",
+                    msg: {}
+                }, "*");
+                window.addEventListener("message", function (e) {
+                    var request = e.data;
+                    if (request.key === "getProvider_R") {
+                        resolve(request.msg);
+                    }
+                }, false);
+            });
+        }
+        static getAccount() {
+            return new Promise((resolve, reject) => {
+                window.addEventListener("message", function (e) {
+                    var request = e.data;
+                    if (request.key === "getAccount_R") {
+                        resolve(request.msg);
+                    }
+                }, false);
+                window.postMessage({
+                    key: "getAccount",
+                    msg: {}
+                }, "*");
+            });
+        }
         static getBalance(data) {
             return new Promise((resolve, reject) => {
                 window.postMessage({
@@ -56,6 +84,20 @@ var Teemmo;
                 window.postMessage({
                     key: "getStorage",
                     msg: {}
+                }, "*");
+                window.addEventListener("message", function (e) {
+                    var request = e.data;
+                    if (request.key === "getProvider_R") {
+                        resolve(request.msg);
+                    }
+                }, false);
+            });
+        }
+        static send(params) {
+            return new Promise((resolve, reject) => {
+                window.postMessage({
+                    key: "send",
+                    msg: params
                 }, "*");
                 window.addEventListener("message", function (e) {
                     var request = e.data;
@@ -91,48 +133,6 @@ var Teemmo;
         return new Promise((resolve, reject) => {
             window.postMessage({
                 key: "getProvider",
-                msg: {}
-            }, "*");
-            window.addEventListener("message", function (e) {
-                var request = e.data;
-                if (request.key === "getProvider_R") {
-                    resolve(request.msg);
-                }
-            }, false);
-        });
-    };
-    NEO.getNetworks = () => {
-        return new Promise((resolve, reject) => {
-            window.postMessage({
-                key: "getNetworks",
-                msg: {}
-            }, "*");
-            window.addEventListener("message", function (e) {
-                var request = e.data;
-                if (request.key === "getProvider_R") {
-                    resolve(request.msg);
-                }
-            }, false);
-        });
-    };
-    NEO.getAccount = () => {
-        return new Promise((resolve, reject) => {
-            window.addEventListener("message", function (e) {
-                var request = e.data;
-                if (request.key === "getAccount_R") {
-                    resolve(request.msg);
-                }
-            }, false);
-            window.postMessage({
-                key: "getAccount",
-                msg: {}
-            }, "*");
-        });
-    };
-    NEO.send = (params) => {
-        return new Promise((resolve, reject) => {
-            window.postMessage({
-                key: "send",
                 msg: {}
             }, "*");
             window.addEventListener("message", function (e) {
