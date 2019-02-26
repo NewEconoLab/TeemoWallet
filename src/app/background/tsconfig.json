@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2015",
-    "module": "amd",
+    "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
     "declarationMap": true,
     "sourceMap":true,
-    "rootDir": "./back",
-    "outFile": "./dist/background.js"
+    "rootDir": "./",
+    "outDir": "../../../dist/js"
   },
   "atom": {
     "rewriteTsconfig": true
