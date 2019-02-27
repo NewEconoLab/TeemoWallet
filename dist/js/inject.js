@@ -10,6 +10,7 @@ var ArgumentDataType;
     ArgumentDataType["BYTEARRAY"] = "ByteArray";
     ArgumentDataType["ARRAY"] = "Array";
     ArgumentDataType["ADDRESS"] = "Address";
+    ArgumentDataType["HOOKTXID"] = "Hook_Txid";
 })(ArgumentDataType || (ArgumentDataType = {}));
 var Command;
 (function (Command) {

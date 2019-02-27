@@ -2,14 +2,15 @@ const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 
 enum ArgumentDataType {
-  STRING = 'String',
-  BOOLEAN = 'Boolean',
-  HASH160 = 'Hash160',
-  HASH256 = 'Hash256',
-  INTEGER = 'Integer',
-  BYTEARRAY = 'ByteArray',
-  ARRAY = 'Array',
-  ADDRESS = 'Address',
+    STRING = 'String',
+    BOOLEAN = 'Boolean',
+    HASH160 = 'Hash160',
+    HASH256 = 'Hash256',
+    INTEGER = 'Integer',
+    BYTEARRAY = 'ByteArray',
+    ARRAY = 'Array',
+    ADDRESS = 'Address',
+    HOOKTXID = 'Hook_Txid',
 }
 
 enum Command {
@@ -88,7 +89,7 @@ interface InvokeOutput {
 }
 
 interface Argument{
-    type:"String"|"Boolean"|"Hash160"|"Integer"|"ByteArray"|"Array"|"Address"|"Hook_Txid";
+    type:"String"|"Boolean"|"Hash160"|"Hash256"|"Integer"|"ByteArray"|"Array"|"Address"|"Hook_Txid";
     value:string|number|boolean|Array<Argument>
 }
 

@@ -30,6 +30,18 @@ const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
 class Result {
 }
+var ArgumentDataType;
+(function (ArgumentDataType) {
+    ArgumentDataType["STRING"] = "String";
+    ArgumentDataType["BOOLEAN"] = "Boolean";
+    ArgumentDataType["HASH160"] = "Hash160";
+    ArgumentDataType["HASH256"] = "Hash256";
+    ArgumentDataType["INTEGER"] = "Integer";
+    ArgumentDataType["BYTEARRAY"] = "ByteArray";
+    ArgumentDataType["ARRAY"] = "Array";
+    ArgumentDataType["ADDRESS"] = "Address";
+    ArgumentDataType["HOOKTXID"] = "Hook_Txid";
+})(ArgumentDataType || (ArgumentDataType = {}));
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -565,26 +577,29 @@ function invokeScriptBuild(data) {
     let arr = data.arguments.map(argument => {
         let str = "";
         switch (argument.type) {
-            case "String":
+            case ArgumentDataType.STRING:
                 str = "(str)" + argument.value;
                 break;
-            case "Integer":
+            case ArgumentDataType.INTEGER:
                 str = "(int)" + argument.value;
                 break;
-            case "Hash160":
+            case ArgumentDataType.HASH160:
                 str = "(hex160)" + argument.value;
                 break;
-            case "ByteArray":
+            case ArgumentDataType.HASH256:
+                str = "(hex256)" + argument.value;
+                break;
+            case ArgumentDataType.BYTEARRAY:
                 str = "(bytes)" + argument.value;
                 break;
-            case "Boolean":
+            case ArgumentDataType.BOOLEAN:
                 str = "(int)" + (argument.value ? 1 : 0);
                 break;
-            case "Address":
+            case ArgumentDataType.ADDRESS:
                 str = "(addr)" + argument.value;
                 break;
-            case "Array":
-                // str="(str)"+argument.value 暂时不考虑                
+            case ArgumentDataType.ARRAY:
+                // str="(str)"+argument.value 暂时不考虑
                 break;
             default:
                 throw new Error("No parameter of this type");
@@ -595,6 +610,56 @@ function invokeScriptBuild(data) {
     sb.EmitPushString(data.operation);
     sb.EmitAppCall(Neo.Uint160.parse(data.scriptHash));
     return sb.ToArray();
+}
+/**
+ * 编译 invoke参数列表
+ * @param {InvokeGroup} data InvokeGroup参数
+ */
+function invokeGroupBuild(data) {
+    let sb = new ThinNeo.ScriptBuilder();
+    // return sb.ToArray();
+    // 判断是否为内联合并交易
+    if (data.merge) {
+        for (let index = 0; index < data.group.length; index++) {
+            const invoke = data.group[index];
+            let arr = invoke.arguments.map(argument => {
+                let str = "";
+                switch (argument.type) {
+                    case ArgumentDataType.STRING:
+                        str = "(str)" + argument.value;
+                        break;
+                    case ArgumentDataType.INTEGER:
+                        str = "(int)" + argument.value;
+                        break;
+                    case ArgumentDataType.HASH160:
+                        str = "(hex160)" + argument.value;
+                        break;
+                    case ArgumentDataType.BYTEARRAY:
+                        str = "(bytes)" + argument.value;
+                        break;
+                    case ArgumentDataType.BOOLEAN:
+                        str = "(int)" + (argument.value ? 1 : 0);
+                        break;
+                    case ArgumentDataType.ADDRESS:
+                        str = "(addr)" + argument.value;
+                        break;
+                    case ArgumentDataType.ARRAY:
+                        // str="(str)"+argument.value 暂时不考虑
+                        break;
+                    case ArgumentDataType.HOOKTXID:
+                        break;
+                    default:
+                        throw new Error("No parameter of this type");
+                }
+                return str;
+            });
+            sb.EmitParamJson(arr);
+            sb.EmitPushString(invoke.operation);
+            sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+        }
+    }
+    else {
+    }
 }
 const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
     let tran = new Transaction();
@@ -755,8 +820,6 @@ const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* ()
         data.params = [data.params];
     }
     for (const arg of data.params) {
-        console.log(arg);
-        console.log("--------------------进入了循环");
         var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO, HASH_CONFIG.ID_NNC.toString(), HASH_CONFIG.ID_NNK.toString()];
         var nep5asset = [];
         var utxoasset = [];

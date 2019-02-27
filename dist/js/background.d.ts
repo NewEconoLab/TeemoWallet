@@ -18,6 +18,17 @@ declare class Result {
     err: boolean;
     info: any;
 }
+declare enum ArgumentDataType {
+    STRING = "String",
+    BOOLEAN = "Boolean",
+    HASH160 = "Hash160",
+    HASH256 = "Hash256",
+    INTEGER = "Integer",
+    BYTEARRAY = "ByteArray",
+    ARRAY = "Array",
+    ADDRESS = "Address",
+    HOOKTXID = "Hook_Txid"
+}
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -68,7 +79,7 @@ interface AttachedAssets {
     [asset: string]: string;
 }
 interface Argument {
-    type: "String" | "Boolean" | "Hash160" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
+    type: "String" | "Boolean" | "Hash160" | "Hash256" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
     value: string | number | boolean | Array<Argument>;
 }
 interface Asset {
@@ -195,7 +206,12 @@ declare const Api: {
      */
     getnep5asset: (asset: any) => Promise<any>;
 };
-declare function invokeScriptBuild(data: any): Uint8Array;
+declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
+/**
+ * 编译 invoke参数列表
+ * @param {InvokeGroup} data InvokeGroup参数
+ */
+declare function invokeGroupBuild(data: InvokeGroup): void;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<any>;
 declare function openNotify(call: any): void;
 declare const getAccount: (title: any, data: any) => void;
@@ -229,7 +245,7 @@ interface InvokeOutput {
     nodeUrl: string;
 }
 interface Argument {
-    type: "String" | "Boolean" | "Hash160" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
+    type: "String" | "Boolean" | "Hash160" | "Hash256" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
     value: string | number | boolean | Array<Argument>;
 }
 interface Asset {

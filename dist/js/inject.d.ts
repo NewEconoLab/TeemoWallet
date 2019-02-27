@@ -8,7 +8,8 @@ declare enum ArgumentDataType {
     INTEGER = "Integer",
     BYTEARRAY = "ByteArray",
     ARRAY = "Array",
-    ADDRESS = "Address"
+    ADDRESS = "Address",
+    HOOKTXID = "Hook_Txid"
 }
 declare enum Command {
     isReady = "isReady",
@@ -77,7 +78,7 @@ interface InvokeOutput {
     nodeUrl: string;
 }
 interface Argument {
-    type: "String" | "Boolean" | "Hash160" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
+    type: "String" | "Boolean" | "Hash160" | "Hash256" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
     value: string | number | boolean | Array<Argument>;
 }
 interface Asset {
