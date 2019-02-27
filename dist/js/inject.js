@@ -35,114 +35,78 @@ var EventName;
     EventName["DISCONNECTED"] = "DISCONNECTED";
     EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
 })(EventName || (EventName = {}));
+/**
+ * 发送请求
+ * @param command 指令名称
+ * @param data
+ */
+function sendMessage(command, params) {
+    return new Promise((resolve, reject) => {
+        const request = params ? { command, params } : { command };
+        window.postMessage(request, "*");
+        window.addEventListener("message", e => {
+            const response = e.data;
+            if (response.renturn && response.return == command) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+             {
+                if (response.error) {
+                    reject(response.error);
+                }
+                else {
+                    resolve(response.data);
+                }
+            }
+        });
+    });
+}
 var Teemmo;
 (function (Teemmo) {
     class NEO {
+        /**
+         * 获得当前网络信息
+         * @returns {GetNetworksOutput} 网络信息
+         */
         static getNetworks() {
-            return new Promise((resolve, reject) => {
-                window.postMessage({
-                    key: "getNetworks",
-                    msg: {}
-                }, "*");
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "getProvider_R") {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage(Command.getNetworks);
         }
+        /**
+         * 获得当前账户信息
+         * @returns {AccountOutput} 账户信息
+         */
         static getAccount() {
-            return new Promise((resolve, reject) => {
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "getAccount_R") {
-                        resolve(request.msg);
-                    }
-                }, false);
-                window.postMessage({
-                    key: "getAccount",
-                    msg: {}
-                }, "*");
-            });
+            return sendMessage(Command.getAccount);
         }
-        static getBalance(data) {
-            return new Promise((resolve, reject) => {
-                window.postMessage({
-                    key: Command.getBalance,
-                    msg: data
-                }, "*");
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "getBalance_R") {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+        /**
+         * 查询余额
+         * @param {GetBalanceArgs} params 查询余额参数
+         */
+        static getBalance(params) {
+            return sendMessage(Command.getBalance, params);
         }
+        /**
+         * 查询存储区数据
+         * @param {GetStorageArgs} params 查询存储区参数
+         */
         static getStorage(params) {
-            return new Promise((resolve, reject) => {
-                window.postMessage({
-                    key: "getStorage",
-                    msg: {}
-                }, "*");
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "getProvider_R") {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage(Command.getStorage, params);
         }
+        /**
+         * 转账方法
+         * @param {SendArgs} params 转账参数
+         */
         static send(params) {
-            return new Promise((resolve, reject) => {
-                window.postMessage({
-                    key: "send",
-                    msg: params
-                }, "*");
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "getProvider_R") {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage(Command.send, params);
         }
+        /**
+         * invoke交易发送
+         * @param {InvokeArgs} params invoke 参数
+         * @returns {InvokeOutput} invoke执行结果返回
+         */
         static invoke(params) {
-            return new Promise((resolve, reject) => {
-                window.addEventListener("message", function (e) {
-                    var request = e.data;
-                    if (request.key === "invoke_R") {
-                        if (request.msg.txid) {
-                            resolve(request.msg);
-                        }
-                        else {
-                            reject(request.msg);
-                        }
-                    }
-                }, false);
-                window.postMessage({
-                    key: "invoke",
-                    msg: {
-                        invokeParam: params
-                    }
-                }, "*");
-            });
+            return sendMessage(Command.invoke, params);
         }
     }
     NEO.getProvider = () => {
-        return new Promise((resolve, reject) => {
-            window.postMessage({
-                key: "getProvider",
-                msg: {}
-            }, "*");
-            window.addEventListener("message", function (e) {
-                var request = e.data;
-                if (request.key === "getProvider_R") {
-                    resolve(request.msg);
-                }
-            }, false);
-        });
+        return sendMessage(Command.getProvider);
     };
     Teemmo.NEO = NEO;
 })(Teemmo || (Teemmo = {}));

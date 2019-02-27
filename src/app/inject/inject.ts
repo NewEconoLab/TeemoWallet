@@ -148,138 +148,99 @@ interface SendOutput {
     nodeUrl: string;
 }
 
+
+interface Provider {
+    name: string;
+    version: string;
+    compatibility: string[];
+    website: string;
+    extra: {
+        theme: string,
+        currency: string,
+    };
+}
+
+/**
+ * 发送请求
+ * @param command 指令名称
+ * @param data  
+ */
+function sendMessage<K>(command:Command,params?:any):Promise<K>{
+    return new Promise((resolve,reject)=>
+    {
+        const request = params?{command,params}:{command};
+        window.postMessage(request,"*");
+        window.addEventListener("message",e=>
+        {
+            const response = e.data;
+            if(response.renturn && response.return==command)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+            {                
+                if (response.error) 
+                {
+                    reject(response.error);
+                }else
+                {
+                    resolve(response.data)
+                }
+            }
+        })
+    })
+}
+
 namespace Teemmo
-{    
+{
     export class NEO {        
         static getProvider=()=>{
-            return new Promise((resolve, reject) =>{
-                window.postMessage({
-                    key:"getProvider",
-                    msg:{}
-                },"*");            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getProvider_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage<Provider>(Command.getProvider);
         }
 
+        /**
+         * 获得当前网络信息
+         * @returns {GetNetworksOutput} 网络信息
+         */
         static getNetworks():Promise<GetNetworksOutput>{
-            return new Promise((resolve, reject) =>{
-                window.postMessage({
-                    key:"getNetworks",
-                    msg:{}
-                },"*");            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getProvider_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage<GetNetworksOutput>(Command.getNetworks);
         }
 
+        /**
+         * 获得当前账户信息
+         * @returns {AccountOutput} 账户信息
+         */
         static getAccount():Promise<AccountOutput>{
-            return new Promise((resolve, reject) =>{
-            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getAccount_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-                
-                window.postMessage({
-                    key:"getAccount",
-                    msg:{}
-                },"*")
-            });
+            return sendMessage<AccountOutput>(Command.getAccount);
         }
 
-        static getBalance(data:GetBalanceArgs):Promise<BalanceResults>{
-            return new Promise((resolve, reject) =>{
-                window.postMessage({
-                    key:Command.getBalance,
-                    msg:data
-                },"*");            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getBalance_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+        /**
+         * 查询余额
+         * @param {GetBalanceArgs} params 查询余额参数 
+         */
+        static getBalance(params:GetBalanceArgs):Promise<BalanceResults>{
+            return sendMessage<BalanceResults>(Command.getBalance,params);
         }
 
+        /**
+         * 查询存储区数据
+         * @param {GetStorageArgs} params 查询存储区参数
+         */
         static getStorage(params:GetStorageArgs):Promise<GetStorageOutput>{
-            return new Promise((resolve, reject) =>{
-                window.postMessage({
-                    key:"getStorage",
-                    msg:{}
-                },"*");            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getProvider_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage<GetStorageOutput>(Command.getStorage,params);
         }
         
+        /**
+         * 转账方法
+         * @param {SendArgs} params 转账参数
+         */
         static send(params:SendArgs):Promise<SendOutput>{
-            return new Promise((resolve, reject) =>{
-                window.postMessage({
-                    key:"send",
-                    msg:params
-                },"*");            
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if(request.key === "getProvider_R")
-                    {
-                        resolve(request.msg);
-                    }
-                }, false);
-            });
+            return sendMessage<SendOutput>(Command.send,params);
         }
         
+        /**
+         * invoke交易发送
+         * @param {InvokeArgs} params invoke 参数
+         * @returns {InvokeOutput} invoke执行结果返回
+         */
         static invoke(params:InvokeArgs): Promise<InvokeOutput>{
-            return new Promise((resolve, reject) =>{
-                
-                window.addEventListener("message", function(e)
-                {
-                    var request = e.data;
-                    if( request.key === "invoke_R")
-                    {   
-                        if(request.msg.txid){                  
-                            resolve(request.msg);
-                        }else{
-                            reject(request.msg)
-                        }
-
-                    }
-                }, false);
-                
-                window.postMessage({
-                    key:"invoke",
-                    msg:{
-                        invokeParam: params
-                    }
-                },"*")
-            
-            });
+            return sendMessage<InvokeOutput>(Command.invoke,params);
         }
     }
 }

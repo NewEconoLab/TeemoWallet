@@ -182,18 +182,13 @@ interface InvokeArgs{
     fee?:string;
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
-    attachedAssets?:Array<AttachedAssets>;
+    attachedAssets?:AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
 
 interface AttachedAssets {
     [asset: string]: string;
-}
-
-interface Argument{
-    type:"String"|"Boolean"|"Hash160"|"Hash256"|"Integer"|"ByteArray"|"Array"|"Address"|"Hook_Txid";
-    value:string|number|boolean|Array<Argument>
 }
 
 interface Asset{
@@ -565,21 +560,29 @@ async function request(opts: IOpts) {
     try {    
         const value = await fetch(input,init);
         const json = await value.json();
-        if(json.result){      
-          if(opts.getAll){
-            return json
-          }else{
-            return json.result;
-          }
+        if(json.result)
+        {
+            if(opts.getAll)
+            {
+                return json
+            }
+            else
+            {   
+                return json.result;
+            }
         }
         else if(json.error["code"]===-1)
         {
-          return null;
-        }else{
-          throw new Error(json.error);    
+            return null;
         }
-    } catch (error) {
-      throw error;    
+        else
+        {
+            throw new Error(json.error);    
+        }
+    } 
+    catch (error) 
+    {
+        throw error;    
     }
 }
   
@@ -626,7 +629,7 @@ const Api = {
       }
       return request(opts);
     },
-    getregisteraddressbalance :  (address,register) => {
+    getregisteraddressbalance : (address,register) => {
       // alert(DomainSelling.RootNeo.register.toString())
       const opts = {
        method:'getregisteraddressbalance',
@@ -637,7 +640,7 @@ const Api = {
       }
       return request(opts);
     },
-    sendrawtransaction :  (data) => {
+    sendrawtransaction : (data) => {
       const opts = {
        method:'sendrawtransaction',
        params:[
@@ -794,60 +797,147 @@ function invokeScriptBuild(data:InvokeArgs)
     return sb.ToArray();
 }
 
+function EmitParamJson(script:ThinNeo.ScriptBuilder,argument: Argument[]): ThinNeo.ScriptBuilder {
+    for (let i = 0; i >=0; i--) {
+        const param = argument[i];        
+        if (param.type === ArgumentDataType.ARRAY) {
+            var list = param.value as Argument[];
+            for (let i = list.length - 1; i >= 0; i--) {
+                script.EmitParamJson(list[i]);
+            }
+            script.EmitPushNumber(new Neo.BigInteger(list.length));
+            script.Emit(ThinNeo.OpCode.PACK);
+        }
+        switch (param.type) {                
+            case ArgumentDataType.STRING:
+                script.EmitPushString(param.value as string );
+                break;
+            case ArgumentDataType.INTEGER:
+                var num = new Neo.BigInteger(param.value as string);
+                script.EmitPushNumber(num);
+                break;
+            case ArgumentDataType.HASH160:
+                var hex = (param.value as string).replace('0x','').hexToBytes();
+                if (hex.length != 20)
+                    throw new Error("not a int160");
+                script.EmitPushBytes(hex.reverse());
+                break;
+            case ArgumentDataType.BYTEARRAY:
+                var hex = (param.value as string).replace('0x','').hexToBytes();
+                script.EmitPushBytes(hex);                 
+                break;
+            case ArgumentDataType.BOOLEAN:
+                var num = new Neo.BigInteger(param.value?1:0);
+                script.EmitPushNumber(num);             
+                break;
+            case ArgumentDataType.ADDRESS:
+                var hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value as string);
+                script.EmitPushBytes(hex);
+                break;         
+            case ArgumentDataType.HOOKTXID:
+                script.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                script.EmitSysCall("Neo.Transaction.GetHash");
+                break;    
+            case ArgumentDataType.ARRAY:
+                EmitParamJson(script,param.value as Argument[]);
+                break;
+            default:
+                throw new Error("No parameter of this type");
+        }
+    }
+    return script;
+}
+
 /**
  * 编译 invoke参数列表
- * @param {InvokeGroup} data InvokeGroup参数
+ * @param {InvokeArgs[]} group InvokeGroup参数
  */
-function invokeGroupBuild(data:InvokeGroup)
+function groupScriptBuild(group:InvokeArgs[])
 {
     
     let sb = new ThinNeo.ScriptBuilder();
-    // return sb.ToArray();
-    // 判断是否为内联合并交易
-    if(data.merge)
-    {
-        for (let index = 0; index < data.group.length; index++) {
-            const invoke = data.group[index];            
-            let arr = invoke.arguments.map(argument=>{
-                let str = ""
-                switch (argument.type) {                
-                    case ArgumentDataType.STRING:
-                        str="(str)"+argument.value    
-                        break;
-                    case ArgumentDataType.INTEGER:
-                        str="(int)"+argument.value    
-                        break;
-                    case ArgumentDataType.HASH160:
-                        str="(hex160)"+argument.value                        
-                        break;
-                    case ArgumentDataType.BYTEARRAY:
-                        str="(bytes)"+argument.value                        
-                        break;
-                    case ArgumentDataType.BOOLEAN:
-                        str="(int)"+(argument.value?1:0);                    
-                        break;
-                    case ArgumentDataType.ADDRESS:
-                        str="(addr)"+argument.value   
-                        break;             
-                    case ArgumentDataType.ARRAY:
-                        // str="(str)"+argument.value 暂时不考虑
-                        break;
-                    case ArgumentDataType.HOOKTXID:
-
-                        break;
-                    default:
-                        throw new Error("No parameter of this type");
-                }
-                return str;
-            })
-            sb.EmitParamJson(arr)
-            sb.EmitPushString(invoke.operation)
-            sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
-        }
+    /**
+     * 循环塞入数据
+     */
+    for (let index = 0; index < group.length; index++) {
+        const invoke = group[index];            
+        EmitParamJson(sb,invoke.arguments);
     }
-    else
-    {
+    return sb.ToArray();
+}
 
+/**
+ * 打包合并交易
+ * @param data 合并合约调用参数
+ */
+const invokeGroupBuild = async(data:InvokeGroup)=>
+{
+    if (data.merge) 
+    {
+        let tran = new Transaction();
+        let script = groupScriptBuild(data.group);
+        tran.setScript(script);
+        let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
+        let transfer:{[toaddr:string]:AttachedAssets}={} // 用来存放 将要转账的合约地址 资产id 数额
+        let utxos = await MarkUtxo.getAllUtxo();
+        for (let index = 0; index < data.group.length; index++) // 循环算utxo资产对应的累加和相对应每笔要转走的money
+        {
+            const invoke = data.group[index];   
+            if(invoke.fee)  // 判断是否有手续费
+                netfee.add(Neo.Fixed8.parse(invoke.fee)) // 计算总共耗费多少手续费;
+            if(invoke.attachedAssets)  // 判断是否有合约转账
+            {
+                const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));         // 将scripthash 转地址    
+                for (const id in invoke.attachedAssets) {
+                    if (invoke.attachedAssets.hasOwnProperty(id)) {
+                        const number = invoke.attachedAssets[id];
+                        if(id===HASH_CONFIG.ID_GAS)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+                transfer[toaddr] = invoke.attachedAssets;
+            }
+        }
+        try {
+            let result = await sendInvoke;
+        } catch (error) {
+            
+        }
+    } else {
+        
+    }
+}
+
+const sendInvoke = async (tran:Transaction)=>
+{
+    try {
+        const message  = tran.GetMessage().clone();
+        const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
+        tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+        const data:Uint8Array = tran.GetRawData();
+        const result =await Api.sendrawtransaction(data.toHexString());
+        if(result[0].txid)
+        {
+            let ouput:InvokeOutput =
+            {
+                txid:result[0].txid,
+                nodeUrl:"https://api.nel.group/api"
+            }
+            return ouput;            
+        }
+        else
+        {
+            throw {type:"TransactionError",description:result[0].errorMessage,data:""};            
+        }
+        
+    } catch (error) {
+        console.log(error);            
     }
 }
 
@@ -876,12 +966,25 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
         tran.AddWitness(signdata,common.account.pubkey,common.account.address);
         const data:Uint8Array = tran.GetRawData();
         const result =await Api.sendrawtransaction(data.toHexString());
-        return result[0]
+        if(result[0].txid)
+        {
+            let ouput:InvokeOutput =
+            {
+                txid:result[0].txid,
+                nodeUrl:"https://api.nel.group/api"
+            }
+            return ouput;            
+        }
+        else
+        {
+            throw {type:"TransactionError",description:result[0].errorMessage,data:""};            
+        }
         
     } catch (error) {
-        console.log(error);            
+        throw error;                  
     }
 }
+
 
 function openNotify(call) {
     var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
@@ -897,13 +1000,12 @@ function openNotify(call) {
     
 }
 
-
-const getAccount=(title,data)=>{
+const getAccount=(title)=>{
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         
         if(!storage.account){            
             chrome.tabs.sendMessage(tabs[0].id, {
-                message: "getAccount_R",
+                return: Command.getAccount,
                 error:{
                     type : "AccountError",
                     description : "Account not logged in"
@@ -927,7 +1029,7 @@ const getAccount=(title,data)=>{
                         {
                             if(storage.account){
                                 chrome.tabs.sendMessage(tabs[0].id, {
-                                    message: "getAccount_R",
+                                    return: Command.getAccount,
                                     data:{
                                         address : storage.account.address,
                                         label : storage.account.walletName
@@ -935,7 +1037,7 @@ const getAccount=(title,data)=>{
                                 });  
                             }else{
                                 chrome.tabs.sendMessage(tabs[0].id, {
-                                    message: "getAccount_R",
+                                    return: Command.getAccount,
                                     error:{
                                         type : "AccountError",
                                         description : "Account not logged in"
@@ -944,7 +1046,7 @@ const getAccount=(title,data)=>{
                             }
                         }else if(res["confirm"]==="cancel"){
                             chrome.tabs.sendMessage(tabs[0].id, {
-                                message: "getAccount_R",
+                                return: Command.getAccount,
                                 error:{
                                     type : "AccountError",
                                     description : "User cancel Authorization "
@@ -958,7 +1060,7 @@ const getAccount=(title,data)=>{
     })
 }
 
-const invokeGroup=(title,data)=>{
+const invoke=(title,data)=>{
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.storage.local.set({
             label:"invokeGroup",
@@ -969,23 +1071,33 @@ const invokeGroup=(title,data)=>{
                 invoke:data.msg
             }
         },()=>{
-            openNotify(()=>{                        
+            openNotify(()=>{               
                 chrome.storage.local.get("confirm",res=>{
                     if(res["confirm"]==="confirm")
                     {
                         contractBuilder(data.invokeParam)
                         .then(result=>{
                             chrome.tabs.sendMessage(tabs[0].id, {
-                                message: "invoke_R",
+                                return: Command.invoke,
                                 data:{
                                     result
                                 }
                             });  
                         })
-                        .catch(error=>{
-
+                        .catch(error=>{                            
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invoke,
+                                error
+                            });  
                         })
-                    }else if(res["confirm"]==="cancel"){              
+                    }else if(res["confirm"]==="cancel"){       
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            return: Command.invoke,
+                            error:{
+                                type : "TransactionError",
+                                description : "User cancel Authorization "
+                            }
+                        });         
                     }
                 })
             })
@@ -995,7 +1107,7 @@ const invokeGroup=(title,data)=>{
     })
 }
 
-const getNetworks=(title,data)=>{
+const getNetworks=(title)=>{
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {      
         chrome.tabs.sendMessage(tabs[0].id, {
             message: "getNetworks_R",
@@ -1041,7 +1153,6 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
             }
         }
         if(nep5asset.length){
-            console.log(arg);
             
             let res = await Api.getallnep5assetofaddress(arg.address);
             let assets={};
@@ -1093,9 +1204,9 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
         balances[arg.address]=assetArray;
     }
     
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {      
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs)=> {      
         chrome.tabs.sendMessage(tabs[0].id, {
-            message: "getBalance_R",
+            return: Command.getBalance,
             data:balances
         });  
     })
@@ -1103,31 +1214,44 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
 
 const send=(title,data)=>{
 }
+const getProvider=()=>{
+
+}
 
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
-        if (request.key === "getAccount") {
-            getAccount(request.title, request.msg);
-        }
-        if (request.key === 'invoke') {
-            console.log(request.msg);
-            
-            invokeGroup(request.title,request.msg)
-        }
-        if (request.key === 'getNetworks') {
-            getNetworks(request.title,request.msg)
-        }
-        if (request.key === 'getBalance') {
-            getBalance(request.title,request.msg)
-        }
-        if (request.key === 'getStorage') {
-            
-        }
-        if (request.key === 'getProvider') {
-            // 初始化
-        }
-        if (request.key === 'send') {
-            send(request.title,request.msg)
+        const {message,params,command}=request;
+        switch (request.command) {
+            case Command.getProvider:
+                getProvider();
+                break;        
+            case Command.getNetworks:
+                getNetworks(message);
+                break;
+            case Command.getAccount:
+                getAccount(message);
+            break;
+            case Command.getBalance:
+                getBalance(message,params)
+            break;
+            case Command.getStorage:
+                
+            break;
+            case Command.getPublicKey:
+                
+            break;
+            case Command.invoke:
+                invoke(message,params);
+                break;
+            case Command.send:
+                send(message,params);
+                break;
+            case Command.invokeRead:
+                
+                break;
+            default:
+                
+                break;
         }
     }
 );
@@ -1197,3 +1321,19 @@ interface Balance {
     symbol: string;
     amount: string;
 }
+
+enum Command {
+    isReady = 'isReady',
+    getProvider = 'getProvider',
+    getNetworks = 'getNetworks',
+    getAccount = 'getAccount',
+    getPublicKey = 'getPublicKey',
+    getBalance = 'getBalance',
+    getStorage = 'getStorage',
+    invokeRead = 'invokeRead',
+    send = 'send',
+    invoke = 'invoke',
+    event = 'event',
+    disconnect = 'disconnect',
+  }
+  

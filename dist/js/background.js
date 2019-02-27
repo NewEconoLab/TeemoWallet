@@ -611,56 +611,134 @@ function invokeScriptBuild(data) {
     sb.EmitAppCall(Neo.Uint160.parse(data.scriptHash));
     return sb.ToArray();
 }
+function EmitParamJson(script, argument) {
+    for (let i = 0; i >= 0; i--) {
+        const param = argument[i];
+        if (param.type === ArgumentDataType.ARRAY) {
+            var list = param.value;
+            for (let i = list.length - 1; i >= 0; i--) {
+                script.EmitParamJson(list[i]);
+            }
+            script.EmitPushNumber(new Neo.BigInteger(list.length));
+            script.Emit(ThinNeo.OpCode.PACK);
+        }
+        switch (param.type) {
+            case ArgumentDataType.STRING:
+                script.EmitPushString(param.value);
+                break;
+            case ArgumentDataType.INTEGER:
+                var num = new Neo.BigInteger(param.value);
+                script.EmitPushNumber(num);
+                break;
+            case ArgumentDataType.HASH160:
+                var hex = param.value.replace('0x', '').hexToBytes();
+                if (hex.length != 20)
+                    throw new Error("not a int160");
+                script.EmitPushBytes(hex.reverse());
+                break;
+            case ArgumentDataType.BYTEARRAY:
+                var hex = param.value.replace('0x', '').hexToBytes();
+                script.EmitPushBytes(hex);
+                break;
+            case ArgumentDataType.BOOLEAN:
+                var num = new Neo.BigInteger(param.value ? 1 : 0);
+                script.EmitPushNumber(num);
+                break;
+            case ArgumentDataType.ADDRESS:
+                var hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value);
+                script.EmitPushBytes(hex);
+                break;
+            case ArgumentDataType.HOOKTXID:
+                script.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                script.EmitSysCall("Neo.Transaction.GetHash");
+                break;
+            case ArgumentDataType.ARRAY:
+                EmitParamJson(script, param.value);
+                break;
+            default:
+                throw new Error("No parameter of this type");
+        }
+    }
+    return script;
+}
 /**
  * 编译 invoke参数列表
- * @param {InvokeGroup} data InvokeGroup参数
+ * @param {InvokeArgs[]} group InvokeGroup参数
  */
-function invokeGroupBuild(data) {
+function groupScriptBuild(group) {
     let sb = new ThinNeo.ScriptBuilder();
-    // return sb.ToArray();
-    // 判断是否为内联合并交易
+    /**
+     * 循环塞入数据
+     */
+    for (let index = 0; index < group.length; index++) {
+        const invoke = group[index];
+        EmitParamJson(sb, invoke.arguments);
+    }
+    return sb.ToArray();
+}
+/**
+ * 打包合并交易
+ * @param data 合并合约调用参数
+ */
+const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () {
     if (data.merge) {
-        for (let index = 0; index < data.group.length; index++) {
+        let tran = new Transaction();
+        let script = groupScriptBuild(data.group);
+        tran.setScript(script);
+        let netfee = Neo.Fixed8.Zero;
+        let transfer = {}; // 用来存放 将要转账的合约地址 资产id 数额
+        let utxos = yield MarkUtxo.getAllUtxo();
+        for (let index = 0; index < data.group.length; index++) // 循环算utxo资产对应的累加和相对应每笔要转走的money
+         {
             const invoke = data.group[index];
-            let arr = invoke.arguments.map(argument => {
-                let str = "";
-                switch (argument.type) {
-                    case ArgumentDataType.STRING:
-                        str = "(str)" + argument.value;
-                        break;
-                    case ArgumentDataType.INTEGER:
-                        str = "(int)" + argument.value;
-                        break;
-                    case ArgumentDataType.HASH160:
-                        str = "(hex160)" + argument.value;
-                        break;
-                    case ArgumentDataType.BYTEARRAY:
-                        str = "(bytes)" + argument.value;
-                        break;
-                    case ArgumentDataType.BOOLEAN:
-                        str = "(int)" + (argument.value ? 1 : 0);
-                        break;
-                    case ArgumentDataType.ADDRESS:
-                        str = "(addr)" + argument.value;
-                        break;
-                    case ArgumentDataType.ARRAY:
-                        // str="(str)"+argument.value 暂时不考虑
-                        break;
-                    case ArgumentDataType.HOOKTXID:
-                        break;
-                    default:
-                        throw new Error("No parameter of this type");
+            if (invoke.fee) // 判断是否有手续费
+                netfee.add(Neo.Fixed8.parse(invoke.fee)); // 计算总共耗费多少手续费;
+            if (invoke.attachedAssets) // 判断是否有合约转账
+             {
+                const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash)); // 将scripthash 转地址    
+                for (const id in invoke.attachedAssets) {
+                    if (invoke.attachedAssets.hasOwnProperty(id)) {
+                        const number = invoke.attachedAssets[id];
+                        if (id === HASH_CONFIG.ID_GAS) {
+                        }
+                        else {
+                        }
+                    }
                 }
-                return str;
-            });
-            sb.EmitParamJson(arr);
-            sb.EmitPushString(invoke.operation);
-            sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+                transfer[toaddr] = invoke.attachedAssets;
+            }
+        }
+        try {
+            let result = yield sendInvoke;
+        }
+        catch (error) {
         }
     }
     else {
     }
-}
+});
+const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const message = tran.GetMessage().clone();
+        const signdata = ThinNeo.Helper.Sign(message, common.account.prikey);
+        tran.AddWitness(signdata, common.account.pubkey, common.account.address);
+        const data = tran.GetRawData();
+        const result = yield Api.sendrawtransaction(data.toHexString());
+        if (result[0].txid) {
+            let ouput = {
+                txid: result[0].txid,
+                nodeUrl: "https://api.nel.group/api"
+            };
+            return ouput;
+        }
+        else {
+            throw { type: "TransactionError", description: result[0].errorMessage, data: "" };
+        }
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
     let tran = new Transaction();
     try {
@@ -686,10 +764,19 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
         tran.AddWitness(signdata, common.account.pubkey, common.account.address);
         const data = tran.GetRawData();
         const result = yield Api.sendrawtransaction(data.toHexString());
-        return result[0];
+        if (result[0].txid) {
+            let ouput = {
+                txid: result[0].txid,
+                nodeUrl: "https://api.nel.group/api"
+            };
+            return ouput;
+        }
+        else {
+            throw { type: "TransactionError", description: result[0].errorMessage, data: "" };
+        }
     }
     catch (error) {
-        console.log(error);
+        throw error;
     }
 });
 function openNotify(call) {
@@ -702,11 +789,11 @@ function openNotify(call) {
         }
     }, 1000);
 }
-const getAccount = (title, data) => {
+const getAccount = (title) => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (!storage.account) {
             chrome.tabs.sendMessage(tabs[0].id, {
-                message: "getAccount_R",
+                return: Command.getAccount,
                 error: {
                     type: "AccountError",
                     description: "Account not logged in"
@@ -727,7 +814,7 @@ const getAccount = (title, data) => {
                     if (res["confirm"] === "confirm") {
                         if (storage.account) {
                             chrome.tabs.sendMessage(tabs[0].id, {
-                                message: "getAccount_R",
+                                return: Command.getAccount,
                                 data: {
                                     address: storage.account.address,
                                     label: storage.account.walletName
@@ -736,7 +823,7 @@ const getAccount = (title, data) => {
                         }
                         else {
                             chrome.tabs.sendMessage(tabs[0].id, {
-                                message: "getAccount_R",
+                                return: Command.getAccount,
                                 error: {
                                     type: "AccountError",
                                     description: "Account not logged in"
@@ -746,7 +833,7 @@ const getAccount = (title, data) => {
                     }
                     else if (res["confirm"] === "cancel") {
                         chrome.tabs.sendMessage(tabs[0].id, {
-                            message: "getAccount_R",
+                            return: Command.getAccount,
                             error: {
                                 type: "AccountError",
                                 description: "User cancel Authorization "
@@ -758,7 +845,7 @@ const getAccount = (title, data) => {
         });
     });
 };
-const invokeGroup = (title, data) => {
+const invoke = (title, data) => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.storage.local.set({
             label: "invokeGroup",
@@ -775,23 +862,34 @@ const invokeGroup = (title, data) => {
                         contractBuilder(data.invokeParam)
                             .then(result => {
                             chrome.tabs.sendMessage(tabs[0].id, {
-                                message: "invoke_R",
+                                return: Command.invoke,
                                 data: {
                                     result
                                 }
                             });
                         })
                             .catch(error => {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invoke,
+                                error
+                            });
                         });
                     }
                     else if (res["confirm"] === "cancel") {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            return: Command.invoke,
+                            error: {
+                                type: "TransactionError",
+                                description: "User cancel Authorization "
+                            }
+                        });
                     }
                 });
             });
         });
     });
 };
-const getNetworks = (title, data) => {
+const getNetworks = (title) => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, {
             message: "getNetworks_R",
@@ -833,7 +931,6 @@ const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* ()
             }
         }
         if (nep5asset.length) {
-            console.log(arg);
             let res = yield Api.getallnep5assetofaddress(arg.address);
             let assets = {};
             for (const iterator of res) {
@@ -877,36 +974,61 @@ const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* ()
         }
         balances[arg.address] = assetArray;
     }
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
-            message: "getBalance_R",
+            return: Command.getBalance,
             data: balances
         });
     });
 });
 const send = (title, data) => {
 };
+const getProvider = () => {
+};
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.key === "getAccount") {
-        getAccount(request.title, request.msg);
-    }
-    if (request.key === 'invoke') {
-        console.log(request.msg);
-        invokeGroup(request.title, request.msg);
-    }
-    if (request.key === 'getNetworks') {
-        getNetworks(request.title, request.msg);
-    }
-    if (request.key === 'getBalance') {
-        getBalance(request.title, request.msg);
-    }
-    if (request.key === 'getStorage') {
-    }
-    if (request.key === 'getProvider') {
-        // 初始化
-    }
-    if (request.key === 'send') {
-        send(request.title, request.msg);
+    const { message, params, command } = request;
+    switch (request.command) {
+        case Command.getProvider:
+            getProvider();
+            break;
+        case Command.getNetworks:
+            getNetworks(message);
+            break;
+        case Command.getAccount:
+            getAccount(message);
+            break;
+        case Command.getBalance:
+            getBalance(message, params);
+            break;
+        case Command.getStorage:
+            break;
+        case Command.getPublicKey:
+            break;
+        case Command.invoke:
+            invoke(message, params);
+            break;
+        case Command.send:
+            send(message, params);
+            break;
+        case Command.invokeRead:
+            break;
+        default:
+            break;
     }
 });
+var Command;
+(function (Command) {
+    Command["isReady"] = "isReady";
+    Command["getProvider"] = "getProvider";
+    Command["getNetworks"] = "getNetworks";
+    Command["getAccount"] = "getAccount";
+    Command["getPublicKey"] = "getPublicKey";
+    Command["getBalance"] = "getBalance";
+    Command["getStorage"] = "getStorage";
+    Command["invokeRead"] = "invokeRead";
+    Command["send"] = "send";
+    Command["invoke"] = "invoke";
+    Command["event"] = "event";
+    Command["disconnect"] = "disconnect";
+})(Command || (Command = {}));
 //# sourceMappingURL=background.js.map

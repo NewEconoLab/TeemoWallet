@@ -71,16 +71,12 @@ interface InvokeArgs {
     fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
-    attachedAssets?: Array<AttachedAssets>;
+    attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
 interface AttachedAssets {
     [asset: string]: string;
-}
-interface Argument {
-    type: "String" | "Boolean" | "Hash160" | "Hash256" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
-    value: string | number | boolean | Array<Argument>;
 }
 interface Asset {
     NEO: string;
@@ -207,18 +203,26 @@ declare const Api: {
     getnep5asset: (asset: any) => Promise<any>;
 };
 declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
+declare function EmitParamJson(script: ThinNeo.ScriptBuilder, argument: Argument[]): ThinNeo.ScriptBuilder;
 /**
  * 编译 invoke参数列表
- * @param {InvokeGroup} data InvokeGroup参数
+ * @param {InvokeArgs[]} group InvokeGroup参数
  */
-declare function invokeGroupBuild(data: InvokeGroup): void;
-declare const contractBuilder: (invoke: InvokeArgs) => Promise<any>;
+declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
+/**
+ * 打包合并交易
+ * @param data 合并合约调用参数
+ */
+declare const invokeGroupBuild: (data: InvokeGroup) => Promise<void>;
+declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
+declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 declare function openNotify(call: any): void;
-declare const getAccount: (title: any, data: any) => void;
-declare const invokeGroup: (title: any, data: any) => void;
-declare const getNetworks: (title: any, data: any) => void;
+declare const getAccount: (title: any) => void;
+declare const invoke: (title: any, data: any) => void;
+declare const getNetworks: (title: any) => void;
 declare const getBalance: (title: any, data: GetBalanceArgs) => Promise<void>;
 declare const send: (title: any, data: any) => void;
+declare const getProvider: () => void;
 interface GetStorageArgs {
     scriptHash: string;
     key: string;
@@ -272,5 +276,19 @@ interface Balance {
     assetID: string;
     symbol: string;
     amount: string;
+}
+declare enum Command {
+    isReady = "isReady",
+    getProvider = "getProvider",
+    getNetworks = "getNetworks",
+    getAccount = "getAccount",
+    getPublicKey = "getPublicKey",
+    getBalance = "getBalance",
+    getStorage = "getStorage",
+    invokeRead = "invokeRead",
+    send = "send",
+    invoke = "invoke",
+    event = "event",
+    disconnect = "disconnect"
 }
 //# sourceMappingURL=background.d.ts.map

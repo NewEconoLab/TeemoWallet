@@ -127,14 +127,55 @@ interface SendOutput {
     txid: string;
     nodeUrl: string;
 }
+interface Provider {
+    name: string;
+    version: string;
+    compatibility: string[];
+    website: string;
+    extra: {
+        theme: string;
+        currency: string;
+    };
+}
+/**
+ * 发送请求
+ * @param command 指令名称
+ * @param data
+ */
+declare function sendMessage<K>(command: Command, params?: any): Promise<K>;
 declare namespace Teemmo {
     class NEO {
-        static getProvider: () => Promise<{}>;
+        static getProvider: () => Promise<Provider>;
+        /**
+         * 获得当前网络信息
+         * @returns {GetNetworksOutput} 网络信息
+         */
         static getNetworks(): Promise<GetNetworksOutput>;
+        /**
+         * 获得当前账户信息
+         * @returns {AccountOutput} 账户信息
+         */
         static getAccount(): Promise<AccountOutput>;
-        static getBalance(data: GetBalanceArgs): Promise<BalanceResults>;
+        /**
+         * 查询余额
+         * @param {GetBalanceArgs} params 查询余额参数
+         */
+        static getBalance(params: GetBalanceArgs): Promise<BalanceResults>;
+        /**
+         * 查询存储区数据
+         * @param {GetStorageArgs} params 查询存储区参数
+         */
         static getStorage(params: GetStorageArgs): Promise<GetStorageOutput>;
+        /**
+         * 转账方法
+         * @param {SendArgs} params 转账参数
+         */
         static send(params: SendArgs): Promise<SendOutput>;
+        /**
+         * invoke交易发送
+         * @param {InvokeArgs} params invoke 参数
+         * @returns {InvokeOutput} invoke执行结果返回
+         */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
     }
 }
