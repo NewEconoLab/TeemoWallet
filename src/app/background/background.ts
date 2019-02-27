@@ -158,15 +158,26 @@ interface LoginInfo
 }
 
 
+/**
+ * invoke 请求参数
+ * @param {scriptHash} 合约hash
+ * @param {operation} 调用合约的方法名
+ * @param {stgring} 网络费
+ * 
+ */
 interface InvokeArgs{
     scriptHash:string;
     operation:string;
-    fee:string;
+    fee?:string;
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
     attachedAssets?:Array<AttachedAssets>;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+}
+
+interface AttachedAssets {
+    [asset: string]: string;
 }
 
 interface Argument{
@@ -802,7 +813,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
 }
 
 function openNotify(call) {
-    var notify = window.open ('notify.html', 'notify', 'height=602, width=377, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+    var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
     
     //获得关闭事件
     var loop = setInterval(() => {
@@ -1064,22 +1075,6 @@ interface GetStorageArgs {
 
 interface GetStorageOutput {
     result: string;
-}
-  
-
-interface InvokeArgs{
-    scriptHash:string;
-    operation:string;
-    fee:string;
-    network:"TestNet"|"MainNet";
-    arguments:Array<Argument>;
-    assets?:Array<AttachedAssets>;
-    assetIntentOverrides?: AssetIntentOverrides;
-    triggerContractVerification?: boolean;
-}
-
-interface AttachedAssets {
-    [asset: string]: string;
 }
 interface AssetIntentOverrides {
     inputs: AssetInput[];

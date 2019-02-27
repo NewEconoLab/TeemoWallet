@@ -47,15 +47,25 @@ interface LoginInfo {
     prikey: Uint8Array;
     address: string;
 }
+/**
+ * invoke 请求参数
+ * @param {scriptHash} 合约hash
+ * @param {operation} 调用合约的方法名
+ * @param {stgring} 网络费
+ *
+ */
 interface InvokeArgs {
     scriptHash: string;
     operation: string;
-    fee: string;
+    fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: Array<AttachedAssets>;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+}
+interface AttachedAssets {
+    [asset: string]: string;
 }
 interface Argument {
     type: "String" | "Boolean" | "Hash160" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
@@ -200,19 +210,6 @@ interface GetStorageArgs {
 }
 interface GetStorageOutput {
     result: string;
-}
-interface InvokeArgs {
-    scriptHash: string;
-    operation: string;
-    fee: string;
-    network: "TestNet" | "MainNet";
-    arguments: Array<Argument>;
-    assets?: Array<AttachedAssets>;
-    assetIntentOverrides?: AssetIntentOverrides;
-    triggerContractVerification?: boolean;
-}
-interface AttachedAssets {
-    [asset: string]: string;
 }
 interface AssetIntentOverrides {
     inputs: AssetInput[];
