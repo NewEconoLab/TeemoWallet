@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "es2015",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "declaration": true,
+      "declarationMap": true,
+      "sourceMap":true,
+      "rootDir": "./",
+      "outDir": "./js"
+    },
+    "atom": {
+      "rewriteTsconfig": true
+    }
+} 
