@@ -870,6 +870,13 @@ function groupScriptBuild(group:InvokeArgs[])
 {
     
     let sb = new ThinNeo.ScriptBuilder();
+    // 生成随机数
+    const RANDOM_UINT8:Uint8Array = getWeakRandomValues(32);
+    const RANDOM_INT:Neo.BigInteger = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+    console.log(RANDOM_INT.toString());
+    // 塞入随机数
+    sb.EmitPushNumber(RANDOM_INT);
+    sb.Emit(ThinNeo.OpCode.DROP);
     /**
      * 循环塞入数据
      */
