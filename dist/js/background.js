@@ -14,6 +14,8 @@ var storage;
     var network = "testnet";
     storage.network = network;
 })(storage || (storage = {}));
+//初始化鼠标随机方法
+Neo.Cryptography.RandomNumberGenerator.startCollectors();
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -742,7 +744,7 @@ const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
 const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
     let tran = new Transaction();
     try {
-        const script = this.invokeScriptBuild(invoke);
+        const script = invokeScriptBuild(invoke);
         tran.setScript(script);
     }
     catch (error) {

@@ -8,6 +8,8 @@ var storage
     storage.network=network;
 })(storage || (storage = {}));
 
+        //初始化鼠标随机方法
+        Neo.Cryptography.RandomNumberGenerator.startCollectors();
 
 const HASH_CONFIG = {
     accountCGAS:Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
@@ -945,7 +947,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
     let tran = new Transaction();
     
     try {
-        const script=this.invokeScriptBuild(invoke);
+        const script=invokeScriptBuild(invoke);
         tran.setScript(script);
     } catch (error) {
         console.log(error);            
