@@ -27,13 +27,11 @@ window.addEventListener("message", function(e)
     var domain = document.URL;
     var message = {title,domain}
     var request = e.data;
-        
+    
     if(request.command)
     {
-        const params = request.params;
-        const command = request.command;
-        const data = params?{message,params,command}:{message,command}
-        chrome.runtime.sendMessage(data);
+        request['message']=message;
+        chrome.runtime.sendMessage(request);
     }
 
 }, false);

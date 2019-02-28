@@ -60,7 +60,7 @@ interface InvokeArgs{
     fee?:string;
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
-    attachedAssets?:AttachedAssets[];
+    attachedAssets?:AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -163,16 +163,22 @@ interface Provider {
         currency: string,
     };
 }
-
+const ids = [];
 /**
  * 
  * @param array 随机数
  */
-const getWeakRandomValues=(array: number | Uint8Array)=>{    
-    let buffer = typeof array === "number" ? new Uint8Array(array) : array;
-    for (let i = 0; i < buffer.length; i++)
-        buffer[i] = Math.random() * 256;
-    return buffer;
+const getMessageID=()=>{
+    // 随机6位数
+    var Atanisi = Math.floor(Math.random() * 999999);
+    console.log(Atanisi); 
+    // 随机6位数
+    //时间
+    var myDate = new Date();
+    var messageid = myDate.getTime()+""+Atanisi; 
+    // console.log("id "+messageid+" 是否存在与数组："+ (ids.join(',').includes(messageid.toString())));
+    // ids.push(messageid);
+    return messageid;
 }
 
 /**
@@ -181,20 +187,16 @@ const getWeakRandomValues=(array: number | Uint8Array)=>{
  * @param data  
  */
 function sendMessage<K>(command:Command,params?:any):Promise<K>{
-    // 获得随机数来控制消息发送
-    // const RANDOM_UINT8:Uint8Array = getWeakRandomValues(12);
-    // let time = new Date();
-    // time.getTime();
+    const ID = getMessageID();
+    
     return new Promise((resolve,reject)=>
     {
-        const request = params?{command,params}:{command};
+        const request = params?{command,params,ID}:{command,ID};
         window.postMessage(request,"*");
         window.addEventListener("message",e=>
         {
-            const response = e.data;
-            console.log(response);
-            
-            if(response.return==command)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+            const response = e.data;            
+            if(response.return==command && response.ID==ID)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
             {                
                 if (response.error) 
                 {

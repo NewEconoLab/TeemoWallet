@@ -36,15 +36,21 @@ var EventName;
     EventName["DISCONNECTED"] = "DISCONNECTED";
     EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
 })(EventName || (EventName = {}));
+const ids = [];
 /**
  *
  * @param array 随机数
  */
-const getWeakRandomValues = (array) => {
-    let buffer = typeof array === "number" ? new Uint8Array(array) : array;
-    for (let i = 0; i < buffer.length; i++)
-        buffer[i] = Math.random() * 256;
-    return buffer;
+const getMessageID = () => {
+    // 随机6位数
+    var Atanisi = Math.floor(Math.random() * 999999);
+    console.log(Atanisi);
+    // 随机6位数
+    //时间
+    var myDate = new Date();
+    var messageid = myDate.getTime() + "" + Atanisi; // 整合的东东
+    console.log("id " + messageid + " 是否存在与数组：" + (ids.join(',').includes(messageid.toString())));
+    ids.push(messageid);
 };
 /**
  * 发送请求
@@ -52,10 +58,10 @@ const getWeakRandomValues = (array) => {
  * @param data
  */
 function sendMessage(command, params) {
-    // 获得随机数来控制消息发送
-    // const RANDOM_UINT8:Uint8Array = getWeakRandomValues(12);
-    // let time = new Date();
-    // time.getTime();
+    for (let index = 0; index < 10000; index++) {
+        getMessageID();
+    }
+    console.log(ids);
     return new Promise((resolve, reject) => {
         const request = params ? { command, params } : { command };
         window.postMessage(request, "*");

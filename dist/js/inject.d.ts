@@ -140,11 +140,12 @@ interface Provider {
         currency: string;
     };
 }
+declare const ids: any[];
 /**
  *
  * @param array 随机数
  */
-declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
+declare const getMessageID: () => void;
 /**
  * 发送请求
  * @param command 指令名称

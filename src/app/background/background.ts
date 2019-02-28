@@ -32,17 +32,6 @@ class Result
     info: any;
 }
 
-enum ArgumentDataType {
-    STRING = 'String',
-    BOOLEAN = 'Boolean',
-    HASH160 = 'Hash160',
-    HASH256 = 'Hash256',
-    INTEGER = 'Integer',
-    BYTEARRAY = 'ByteArray',
-    ARRAY = 'Array',
-    ADDRESS = 'Address',
-    HOOKTXID = 'Hook_Txid',
-}
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -166,34 +155,6 @@ interface LoginInfo
     pubkey: Uint8Array;
     prikey: Uint8Array;
     address: string;
-}
-
-
-/**
- * invoke 请求参数
- * @param {scriptHash} 合约hash
- * @param {operation} 调用合约的方法名
- * @param {stgring} 网络费
- * 
- */
-interface InvokeArgs{
-    scriptHash:string;
-    operation:string;
-    fee?:string;
-    network:"TestNet"|"MainNet";
-    arguments:Array<Argument>;
-    attachedAssets?:AttachedAssets;
-    assetIntentOverrides?: AssetIntentOverrides;
-    triggerContractVerification?: boolean;
-}
-
-interface AttachedAssets {
-    [asset: string]: string;
-}
-
-interface Asset{
-    NEO:string;
-    GAS:string;
 }
 
 class MarkUtxo
@@ -1025,61 +986,45 @@ function openNotify(call) {
 }
 
 const getAccount=(title)=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {        
-        if(!storage.account){            
-            chrome.tabs.sendMessage(tabs[0].id, {
-                return: Command.getAccount,
-                error:{
-                    type : "AccountError",
-                    description : "Account not logged in"
-                }
-            });
-            return;
-        }      
-        chrome.storage.local.set(
-            {
-                label:"getAccount",                        
-                message:{
-                    account:storage.account?{address:storage.account.address}:undefined,
-                    title:title.refTitle,
-                    domain:title.refDomain
-                },
+    return new Promise((resolve,reject)=>{
+        if(!storage.account){
+            reject({type:"ACCOUNT_ERROR",deciphering:"Account not logged in "})
+        }
+            
+        chrome.storage.local.set({
+            label:"getAccount",                        
+            message:{
+                account:storage.account?{address:storage.account.address}:undefined,
+                title:title.refTitle,
+                domain:title.refDomain
             },
-            ()=>{
-                openNotify(()=>{                            
-                    chrome.storage.local.get("confirm",res=>{
-                        if(res["confirm"]==="confirm")
-                        {
-                            if(storage.account){
-                                chrome.tabs.sendMessage(tabs[0].id, {
-                                    return: Command.getAccount,
-                                    data:{
-                                        address : storage.account.address,
-                                        label : storage.account.walletName
-                                    }
-                                });  
-                            }else{
-                                chrome.tabs.sendMessage(tabs[0].id, {
-                                    return: Command.getAccount,
-                                    error:{
-                                        type : "AccountError",
-                                        description : "Account not logged in"
-                                    }
-                                });  
-                            }
-                        }else if(res["confirm"]==="cancel"){
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.getAccount,
-                                error:{
-                                    type : "AccountError",
-                                    description : "User cancel Authorization "
-                                }
-                            });  
+        },
+        ()=>{
+            openNotify(()=>{                            
+                chrome.storage.local.get("confirm",res=>{
+                    if(res["confirm"]==="confirm")
+                    {
+                        if(storage.account){
+                            resolve({
+                                address : storage.account.address,
+                                label : storage.account.walletName
+                            })
+                        }else{
+                            reject({
+                                type : "AccountError",
+                                description : "Account not logged in"
+                            });
                         }
-                    })
-                });
-            }
-        );
+                    }else if(res["confirm"]==="cancel"){
+                        reject({
+                            type : "AccountError",
+                            description : "User cancel Authorization "
+                        });
+                    }
+                })
+            });
+        })
+
     })
 }
 
@@ -1103,7 +1048,7 @@ const invokeGroup=(title,data)=>{
                             chrome.tabs.sendMessage(tabs[0].id, {
                                 return: Command.invokeGroup,
                                 data: result
-                            });  
+                            });
                         })
                         .catch(error=>{                            
                             chrome.tabs.sendMessage(tabs[0].id, {
@@ -1171,15 +1116,13 @@ const invoke=(title,data)=>{
     })
 }
 
-const getNetworks=(title)=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {      
-        chrome.tabs.sendMessage(tabs[0].id, {
-            message: "getNetworks_R",
-            data:{
-                networks : ["mainnet","testnet"],
-                defaultNetwork : storage.network?storage.network:"testnet"
-            }
-        });  
+const getNetworks=():Promise<GetNetworksOutput>=>{
+    return new Promise((resolve,reject)=>{
+        const network:GetNetworksOutput={
+            networks : ["mainnet","testnet"],
+            defaultNetwork : storage.network?storage.network:"testnet"
+        }
+        resolve(network);
     })
 }
 
@@ -1279,7 +1222,73 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
 const send=(title,data)=>{
 }
 const getProvider=()=>{
+    return new Promise((resolve,reject)=>{
+        let provider:Provider={
+            "compatibility":[""],
+            "extra":{theme:"",currency:""},
+            "name":"",
+            "version":"",
+            "website":""
+        }
+        resolve(provider);
+    })
+}
 
+const responseMessage =(request)=>
+{
+    const {ID,command,message,params}=request;
+    chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
+        const sendResponse=(data:Promise<any>)=>{
+            data
+            .then(data=>{
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    return:command,
+                    ID,data
+                });  
+            })
+            .catch(error=>{
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    return:command,
+                    ID,error
+                });  
+            })
+        }
+
+        switch (request.command) {
+            case Command.getProvider:
+                sendResponse(getProvider());
+                break;        
+            case Command.getNetworks:
+                sendResponse(getNetworks());
+                break;
+            case Command.getAccount:
+                sendResponse(getAccount(message));
+            break;
+            case Command.getBalance:
+                getBalance(message,params)
+            break;
+            case Command.getStorage:
+                
+            break;
+            case Command.getPublicKey:
+                
+            break;
+            case Command.invoke:
+                invoke(message,params);
+                break;
+            case Command.send:
+                send(message,params);
+                break;
+            case Command.invokeRead:
+                
+                break;
+            case Command.invokeGroup:
+                invokeGroup(message,params);
+            default:
+                
+                break;
+        }
+    })
 }
 
 chrome.runtime.onMessage.addListener(
@@ -1288,13 +1297,13 @@ chrome.runtime.onMessage.addListener(
         //初始化鼠标随机方法
         // Neo.Cryptography.RandomNumberGenerator.startCollectors();
         
-        const {message,params,command}=request;
+        const {ID,command,message,params}=request;
         switch (request.command) {
             case Command.getProvider:
                 getProvider();
                 break;        
             case Command.getNetworks:
-                getNetworks(message);
+                getNetworks();
                 break;
             case Command.getAccount:
                 getAccount(message);
@@ -1328,7 +1337,44 @@ chrome.runtime.onMessage.addListener(
 
 
 
+const BLOCKCHAIN = 'NEO';
+const VERSION = 'v1';
 
+enum ArgumentDataType {
+    STRING = 'String',
+    BOOLEAN = 'Boolean',
+    HASH160 = 'Hash160',
+    HASH256 = 'Hash256',
+    INTEGER = 'Integer',
+    BYTEARRAY = 'ByteArray',
+    ARRAY = 'Array',
+    ADDRESS = 'Address',
+    HOOKTXID = 'Hook_Txid',
+}
+
+enum Command {
+  isReady = 'isReady',
+  getProvider = 'getProvider',
+  getNetworks = 'getNetworks',
+  getAccount = 'getAccount',
+  getPublicKey = 'getPublicKey',
+  getBalance = 'getBalance',
+  getStorage = 'getStorage',
+  invokeRead = 'invokeRead',
+  send = 'send',
+  invoke = 'invoke',
+  invokeGroup="invokeGroup",
+  event = 'event',
+  disconnect = 'disconnect',
+}
+
+enum EventName {
+  READY = 'READY',
+  ACCOUNT_CHANGED = 'ACCOUNT_CHANGED',
+  CONNECTED = 'CONNECTED',
+  DISCONNECTED = 'DISCONNECTED',
+  NETWORK_CHANGED = 'NETWORK_CHANGED',
+}
 
 interface GetStorageArgs {
     scriptHash: string;
@@ -1339,6 +1385,30 @@ interface GetStorageArgs {
 interface GetStorageOutput {
     result: string;
 }
+  
+/**
+ * invoke 请求参数
+ * @param {scriptHash} 合约hash
+ * @param {operation} 调用合约的方法名
+ * @param {stgring} 网络费
+ * 
+ */
+interface InvokeArgs{
+    scriptHash:string;
+    operation:string;
+    fee?:string;
+    network:"TestNet"|"MainNet";
+    arguments:Array<Argument>;
+    attachedAssets?:AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
+    triggerContractVerification?: boolean;
+}
+
+
+interface AttachedAssets {
+    [asset: string]: string;
+}
+
 interface AssetIntentOverrides {
     inputs: AssetInput[];
     outputs: AssetOutput[];
@@ -1369,8 +1439,11 @@ interface Asset{
 }
 
 interface InvokeGroup{
-    merge:boolean;  // 是否为内联合并
-    group:Array<InvokeArgs> // invoke列表
+    merge:boolean;
+    group:InvokeArgs[];
+}
+interface InvokeGroupOutup{
+
 }
 
 interface BalanceRequest {
@@ -1392,21 +1465,43 @@ interface Balance {
     amount: string;
 }
 
-enum Command {
-    isReady = 'isReady',
-    getProvider = 'getProvider',
-    getNetworks = 'getNetworks',
-    getAccount = 'getAccount',
-    getPublicKey = 'getPublicKey',
-    getBalance = 'getBalance',
-    getStorage = 'getStorage',
-    invokeRead = 'invokeRead',
-    send = 'send',
-    invoke = 'invoke',
-    invokeGroup='invokeGroup',
-    event = 'event',
-    disconnect = 'disconnect',
-  }
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: string;
+}
+
+
+interface AccountOutput {
+    address: string;
+    label: string;
+}
+
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: string;
+}
+  
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
+}
+
+
+interface Provider {
+    name: string;
+    version: string;
+    compatibility: string[];
+    website: string;
+    extra: {
+        theme: string,
+        currency: string,
+    };
+}
   
 
 window.onload=()=>{
