@@ -968,6 +968,8 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result[0].txid)
         {
+            console.log(data.toHexString());
+            
             let ouput:InvokeOutput =
             {
                 txid:result[0].txid,
@@ -1098,7 +1100,6 @@ const invoke=(title,data)=>{
                     }
                 })
             })
-
         });
 
     })

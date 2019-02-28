@@ -765,6 +765,7 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
         const data = tran.GetRawData();
         const result = yield Api.sendrawtransaction(data.toHexString());
         if (result[0].txid) {
+            console.log(data.toHexString());
             let ouput = {
                 txid: result[0].txid,
                 nodeUrl: "https://api.nel.group/api"
