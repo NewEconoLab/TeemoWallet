@@ -1074,7 +1074,7 @@ const invoke=(title,data)=>{
                 chrome.storage.local.get("confirm",res=>{
                     if(res["confirm"]==="confirm")
                     {
-                        contractBuilder(data.invokeParam)
+                        contractBuilder(data)
                         .then(result=>{
                             chrome.tabs.sendMessage(tabs[0].id, {
                                 return: Command.invoke,
