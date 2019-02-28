@@ -90,6 +90,8 @@ interface InvokeGroup {
     merge: boolean;
     group: InvokeArgs[];
 }
+interface InvokeGroupOutup {
+}
 interface BalanceRequest {
     address: string;
     assets?: string[];
@@ -139,6 +141,11 @@ interface Provider {
     };
 }
 /**
+ *
+ * @param array 随机数
+ */
+declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
+/**
  * 发送请求
  * @param command 指令名称
  * @param data
@@ -178,7 +185,7 @@ declare namespace Teemmo {
          * @returns {InvokeOutput} invoke执行结果返回
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
-        static invokeGroup(params: InvokeGroup): Promise<InvokeGroup>;
+        static invokeGroup(params: InvokeGroup): Promise<InvokeArgs[]>;
     }
 }
 //# sourceMappingURL=inject.d.ts.map

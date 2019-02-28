@@ -265,7 +265,7 @@ namespace Teemmo
         }
 
         static invokeGroup(params:InvokeGroup):Promise<InvokeArgs[]>{
-            return sendMessage<InvokeArgs[]>(Command.invoke,params);
+            return sendMessage<InvokeArgs[]>(Command.invokeGroup,params);
         }
     }
 }

@@ -37,11 +37,25 @@ var EventName;
     EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
 })(EventName || (EventName = {}));
 /**
+ *
+ * @param array 随机数
+ */
+const getWeakRandomValues = (array) => {
+    let buffer = typeof array === "number" ? new Uint8Array(array) : array;
+    for (let i = 0; i < buffer.length; i++)
+        buffer[i] = Math.random() * 256;
+    return buffer;
+};
+/**
  * 发送请求
  * @param command 指令名称
  * @param data
  */
 function sendMessage(command, params) {
+    // 获得随机数来控制消息发送
+    // const RANDOM_UINT8:Uint8Array = getWeakRandomValues(12);
+    // let time = new Date();
+    // time.getTime();
     return new Promise((resolve, reject) => {
         const request = params ? { command, params } : { command };
         window.postMessage(request, "*");
@@ -107,7 +121,7 @@ var Teemmo;
             return sendMessage(Command.invoke, params);
         }
         static invokeGroup(params) {
-            return sendMessage(Command.invoke, params);
+            return sendMessage(Command.invokeGroup, params);
         }
     }
     NEO.getProvider = () => {
