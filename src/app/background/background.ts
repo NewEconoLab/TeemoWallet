@@ -1001,8 +1001,7 @@ function openNotify(call) {
 }
 
 const getAccount=(title)=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {        
         if(!storage.account){            
             chrome.tabs.sendMessage(tabs[0].id, {
                 return: Command.getAccount,
@@ -1220,6 +1219,8 @@ const getProvider=()=>{
 
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
+        console.log(request);
+        
         const {message,params,command}=request;
         switch (request.command) {
             case Command.getProvider:

@@ -986,6 +986,7 @@ const send = (title, data) => {
 const getProvider = () => {
 };
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log(request);
     const { message, params, command } = request;
     switch (request.command) {
         case Command.getProvider:

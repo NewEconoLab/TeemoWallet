@@ -166,6 +166,7 @@ interface Provider {
  * @param data  
  */
 function sendMessage<K>(command:Command,params?:any):Promise<K>{
+    
     return new Promise((resolve,reject)=>
     {
         const request = params?{command,params}:{command};
@@ -173,7 +174,9 @@ function sendMessage<K>(command:Command,params?:any):Promise<K>{
         window.addEventListener("message",e=>
         {
             const response = e.data;
-            if(response.renturn && response.return==command)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+            console.log(response);
+            
+            if(response.return==command)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
             {                
                 if (response.error) 
                 {

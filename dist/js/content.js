@@ -21,6 +21,7 @@ window.addEventListener("message", function (e) {
     var domain = document.URL;
     var message = { title, domain };
     var request = e.data;
+    console.log(request.command);
     if (request.command) {
         const params = request.params;
         const command = request.command;
