@@ -977,7 +977,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
         }
         else
         {
-            throw {type:"TransactionError",description:result[0].errorMessage,data:""};            
+            throw {type:"TransactionError",description:result[0].errorMessage,data:data.toHexString()};            
         }
         
     } catch (error) {
@@ -1078,9 +1078,7 @@ const invoke=(title,data)=>{
                         .then(result=>{
                             chrome.tabs.sendMessage(tabs[0].id, {
                                 return: Command.invoke,
-                                data:{
-                                    result
-                                }
+                                data: result
                             });  
                         })
                         .catch(error=>{                            
