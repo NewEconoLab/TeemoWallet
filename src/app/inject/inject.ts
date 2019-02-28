@@ -103,6 +103,9 @@ interface InvokeGroup{
     merge:boolean;
     group:InvokeArgs[];
 }
+interface InvokeGroupOutup{
+
+}
 
 interface BalanceRequest {
     address: string; // Address to check balance(s)
@@ -247,8 +250,8 @@ namespace Teemmo
             return sendMessage<InvokeOutput>(Command.invoke,params);
         }
 
-        static invokeGroup(params:InvokeGroup){
-            return sendMessage<InvokeGroup>(Command.invoke,params);
+        static invokeGroup(params:InvokeGroup):Promise<InvokeArgs[]>{
+            return sendMessage<InvokeArgs[]>(Command.invoke,params);
         }
     }
 }

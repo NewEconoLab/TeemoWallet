@@ -723,7 +723,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         try {
             let result = yield sendInvoke(tran);
-            return result;
+            return [result];
         }
         catch (error) {
         }
@@ -1070,6 +1070,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
         case Command.invokeRead:
             break;
+        case Command.invokeGroup:
+            invokeGroup(message, params);
         default:
             break;
     }

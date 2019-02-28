@@ -920,7 +920,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
         }
         try {
             let result = await sendInvoke(tran);
-            return result;
+            return [result];
         } catch (error) {
             
         }
@@ -1310,6 +1310,8 @@ chrome.runtime.onMessage.addListener(
             case Command.invokeRead:
                 
                 break;
+            case Command.invokeGroup:
+                invokeGroup(message,params);
             default:
                 
                 break;

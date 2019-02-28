@@ -214,7 +214,7 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  * 打包合并交易
  * @param data 合并合约调用参数
  */
-declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput>;
+declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 declare function openNotify(call: any): void;
