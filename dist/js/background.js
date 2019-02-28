@@ -722,7 +722,8 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
             }
         }
         try {
-            let result = yield sendInvoke;
+            let result = yield sendInvoke(tran);
+            return result;
         }
         catch (error) {
         }
@@ -850,6 +851,48 @@ const getAccount = (title) => {
                             return: Command.getAccount,
                             error: {
                                 type: "AccountError",
+                                description: "User cancel Authorization "
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    });
+};
+const invokeGroup = (title, data) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.storage.local.set({
+            label: "invokeGroup",
+            message: {
+                account: storage.account ? { address: storage.account.address } : undefined,
+                title: title.refTitle,
+                domain: title.refDomain,
+                invoke: data.msg
+            }
+        }, () => {
+            openNotify(() => {
+                chrome.storage.local.get("confirm", res => {
+                    if (res["confirm"] === "confirm") {
+                        invokeGroupBuild(data)
+                            .then(result => {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invokeGroup,
+                                data: result
+                            });
+                        })
+                            .catch(error => {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invokeGroup,
+                                error
+                            });
+                        });
+                    }
+                    else if (res["confirm"] === "cancel") {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            return: Command.invokeGroup,
+                            error: {
+                                type: "TransactionError",
                                 description: "User cancel Authorization "
                             }
                         });
@@ -1043,6 +1086,7 @@ var Command;
     Command["invokeRead"] = "invokeRead";
     Command["send"] = "send";
     Command["invoke"] = "invoke";
+    Command["invokeGroup"] = "invokeGroup";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
 })(Command || (Command = {}));

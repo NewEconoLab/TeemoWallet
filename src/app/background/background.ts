@@ -919,7 +919,8 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             }
         }
         try {
-            let result = await sendInvoke;
+            let result = await sendInvoke(tran);
+            return result;
         } catch (error) {
             
         }
@@ -1072,6 +1073,50 @@ const getAccount=(title)=>{
                 });
             }
         );
+    })
+}
+
+const invokeGroup=(title,data)=>{
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.storage.local.set({
+            label:"invokeGroup",
+            message:{
+                account:storage.account?{address:storage.account.address}:undefined,
+                title:title.refTitle,
+                domain:title.refDomain,
+                invoke:data.msg
+            }
+        },()=>{
+            openNotify(()=>{               
+                chrome.storage.local.get("confirm",res=>{
+                    if(res["confirm"]==="confirm")
+                    {
+                        invokeGroupBuild(data)
+                        .then(result=>{
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invokeGroup,
+                                data: result
+                            });  
+                        })
+                        .catch(error=>{                            
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                return: Command.invokeGroup,
+                                error
+                            });  
+                        })
+                    }else if(res["confirm"]==="cancel"){       
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            return: Command.invokeGroup,
+                            error:{
+                                type : "TransactionError",
+                                description : "User cancel Authorization "
+                            }
+                        });         
+                    }
+                })
+            })
+        });
+
     })
 }
 
@@ -1349,6 +1394,7 @@ enum Command {
     invokeRead = 'invokeRead',
     send = 'send',
     invoke = 'invoke',
+    invokeGroup='invokeGroup',
     event = 'event',
     disconnect = 'disconnect',
   }

@@ -214,11 +214,12 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  * 打包合并交易
  * @param data 合并合约调用参数
  */
-declare const invokeGroupBuild: (data: InvokeGroup) => Promise<void>;
+declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput>;
 declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 declare function openNotify(call: any): void;
 declare const getAccount: (title: any) => void;
+declare const invokeGroup: (title: any, data: any) => void;
 declare const invoke: (title: any, data: any) => void;
 declare const getNetworks: (title: any) => void;
 declare const getBalance: (title: any, data: GetBalanceArgs) => Promise<void>;
@@ -289,6 +290,7 @@ declare enum Command {
     invokeRead = "invokeRead",
     send = "send",
     invoke = "invoke",
+    invokeGroup = "invokeGroup",
     event = "event",
     disconnect = "disconnect"
 }

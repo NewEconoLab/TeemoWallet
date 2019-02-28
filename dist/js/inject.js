@@ -24,6 +24,7 @@ var Command;
     Command["invokeRead"] = "invokeRead";
     Command["send"] = "send";
     Command["invoke"] = "invoke";
+    Command["invokeGroup"] = "invokeGroup";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
 })(Command || (Command = {}));
@@ -103,6 +104,9 @@ var Teemmo;
          * @returns {InvokeOutput} invoke执行结果返回
          */
         static invoke(params) {
+            return sendMessage(Command.invoke, params);
+        }
+        static invokeGroup(params) {
             return sendMessage(Command.invoke, params);
         }
     }

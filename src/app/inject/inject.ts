@@ -24,6 +24,7 @@ enum Command {
   invokeRead = 'invokeRead',
   send = 'send',
   invoke = 'invoke',
+  invokeGroup="invokeGroup",
   event = 'event',
   disconnect = 'disconnect',
 }
@@ -244,6 +245,10 @@ namespace Teemmo
          */
         static invoke(params:InvokeArgs): Promise<InvokeOutput>{
             return sendMessage<InvokeOutput>(Command.invoke,params);
+        }
+
+        static invokeGroup(params:InvokeGroup){
+            return sendMessage<InvokeGroup>(Command.invoke,params);
         }
     }
 }

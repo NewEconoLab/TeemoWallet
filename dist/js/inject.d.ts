@@ -22,6 +22,7 @@ declare enum Command {
     invokeRead = "invokeRead",
     send = "send",
     invoke = "invoke",
+    invokeGroup = "invokeGroup",
     event = "event",
     disconnect = "disconnect"
 }
@@ -177,6 +178,7 @@ declare namespace Teemmo {
          * @returns {InvokeOutput} invoke执行结果返回
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
+        static invokeGroup(params: InvokeGroup): Promise<InvokeGroup>;
     }
 }
 //# sourceMappingURL=inject.d.ts.map
