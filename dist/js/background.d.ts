@@ -203,6 +203,7 @@ declare const Api: {
     getnep5asset: (asset: any) => Promise<any>;
 };
 declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
+declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare function EmitParamJson(script: ThinNeo.ScriptBuilder, argument: Argument[]): ThinNeo.ScriptBuilder;
 /**
  * 编译 invoke参数列表

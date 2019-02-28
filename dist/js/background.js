@@ -14,8 +14,6 @@ var storage;
     var network = "testnet";
     storage.network = network;
 })(storage || (storage = {}));
-//初始化鼠标随机方法
-Neo.Cryptography.RandomNumberGenerator.startCollectors();
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -608,11 +606,24 @@ function invokeScriptBuild(data) {
         }
         return str;
     });
+    // 生成随机数
+    const RANDOM_UINT8 = getWeakRandomValues(32);
+    const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+    console.log(RANDOM_INT.toString());
+    // 塞入随机数
+    sb.EmitPushNumber(RANDOM_INT);
+    sb.Emit(ThinNeo.OpCode.DROP);
     sb.EmitParamJson(arr);
     sb.EmitPushString(data.operation);
     sb.EmitAppCall(Neo.Uint160.parse(data.scriptHash));
     return sb.ToArray();
 }
+const getWeakRandomValues = (array) => {
+    let buffer = typeof array === "number" ? new Uint8Array(array) : array;
+    for (let i = 0; i < buffer.length; i++)
+        buffer[i] = Math.random() * 256;
+    return buffer;
+};
 function EmitParamJson(script, argument) {
     for (let i = 0; i >= 0; i--) {
         const param = argument[i];
@@ -988,6 +999,8 @@ const getProvider = () => {
 };
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log(request);
+    //初始化鼠标随机方法
+    // Neo.Cryptography.RandomNumberGenerator.startCollectors();
     const { message, params, command } = request;
     switch (request.command) {
         case Command.getProvider:
@@ -1033,4 +1046,9 @@ var Command;
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
 })(Command || (Command = {}));
+window.onload = () => {
+    console.log("----------------------------------初始化 ");
+    //初始化鼠标随机方法
+    Neo.Cryptography.RandomNumberGenerator.startCollectors();
+};
 //# sourceMappingURL=background.js.map
