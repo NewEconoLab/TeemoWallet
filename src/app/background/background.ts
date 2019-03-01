@@ -1029,51 +1029,43 @@ const getAccount=(title)=>{
 }
 
 const invokeGroup=(title,data)=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.storage.local.set({
-            label:"invokeGroup",
-            message:{
-                account:storage.account?{address:storage.account.address}:undefined,
-                title:title.refTitle,
-                domain:title.refDomain,
-                invoke:data.msg
-            }
-        },()=>{
-            openNotify(()=>{               
-                chrome.storage.local.get("confirm",res=>{
-                    if(res["confirm"]==="confirm")
-                    {
-                        invokeGroupBuild(data)
-                        .then(result=>{
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invokeGroup,
-                                data: result
-                            });
-                        })
-                        .catch(error=>{                            
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invokeGroup,
-                                error
-                            });  
-                        })
-                    }else if(res["confirm"]==="cancel"){       
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            return: Command.invokeGroup,
-                            error:{
-                                type : "TransactionError",
-                                description : "User cancel Authorization "
-                            }
-                        });         
-                    }
-                })
+    return new Promise((resolve,reject)=>{
+        
+    chrome.storage.local.set({
+        label:"invokeGroup",
+        message:{
+            account:storage.account?{address:storage.account.address}:undefined,
+            title:title.refTitle,
+            domain:title.refDomain,
+            invoke:data.msg
+        }
+    },()=>{
+        openNotify(()=>{               
+            chrome.storage.local.get("confirm",res=>{
+                if(res["confirm"]==="confirm")
+                {
+                    invokeGroupBuild(data)
+                    .then(result=>{
+                        resolve(result);
+                    })
+                    .catch(error=>{        
+                        reject(error);
+                    })
+                }else if(res["confirm"]==="cancel"){       
+                    reject({
+                        type : "TransactionError",
+                        description : "User cancel Authorization "
+                    });     
+                }
             })
-        });
-
+        })
+    });
     })
 }
 
 const invoke=(title,data)=>{
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    return new Promise((resolve,reject)=>{
+        
         chrome.storage.local.set({
             label:"invokeGroup",
             message:{
@@ -1089,30 +1081,20 @@ const invoke=(title,data)=>{
                     {
                         contractBuilder(data)
                         .then(result=>{
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invoke,
-                                data: result
-                            });  
+                            resolve(result);
                         })
-                        .catch(error=>{                            
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invoke,
-                                error
-                            });  
+                        .catch(error=>{
+                            reject(error);
                         })
                     }else if(res["confirm"]==="cancel"){       
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            return: Command.invoke,
-                            error:{
-                                type : "TransactionError",
-                                description : "User cancel Authorization "
-                            }
-                        });         
+                        reject({
+                            type : "TransactionError",
+                            description : "User cancel Authorization "
+                        });
                     }
                 })
             })
         });
-
     })
 }
 
@@ -1126,7 +1108,7 @@ const getNetworks=():Promise<GetNetworksOutput>=>{
     })
 }
 
-const getBalance= async(title,data:GetBalanceArgs)=>{
+const getBalance= async(data:GetBalanceArgs)=>{
     if (!Array.isArray(data.params)) {
       data.params = [data.params];
     }
@@ -1160,19 +1142,22 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
             }
         }
         if(nep5asset.length){
-            
-            let res = await Api.getallnep5assetofaddress(arg.address);
-            let assets={};
-            for (const iterator of res) 
-            {
-                const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
-                const assetID=assetid.replace("0x","")
-                assets[assetID]={assetID,symbol,amount:balance}
-            }
-            for (const id of nep5asset) {
-                if(assets[id]){
-                    assetArray.push(assets[id]);
+            try {
+                let res = await Api.getallnep5assetofaddress(arg.address);
+                let assets={};
+                for (const iterator of res) 
+                {
+                    const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
+                    const assetID=assetid.replace("0x","")
+                    assets[assetID]={assetID,symbol,amount:balance}
                 }
+                for (const id of nep5asset) {
+                    if(assets[id]){
+                        assetArray.push(assets[id]);
+                    }
+                }
+            } catch (error) {
+                throw {type:"NETWORK_ERROR",description:"余额查询失败",data:error};                
             }
         }
         if(utxoasset.length){
@@ -1210,16 +1195,13 @@ const getBalance= async(title,data:GetBalanceArgs)=>{
         }
         balances[arg.address]=assetArray;
     }
-    
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs)=> {      
-        chrome.tabs.sendMessage(tabs[0].id, {
-            return: Command.getBalance,
-            data:balances
-        });  
-    })
+    return balances;
 }
 
 const send=(title,data)=>{
+    return new Promise((resolve,reject)=>{
+
+    })
 }
 const getProvider=()=>{
     return new Promise((resolve,reject)=>{
@@ -1263,27 +1245,27 @@ const responseMessage =(request)=>
                 break;
             case Command.getAccount:
                 sendResponse(getAccount(message));
-            break;
+                break;
             case Command.getBalance:
-                getBalance(message,params)
-            break;
+                sendResponse(getBalance(params));
+                break;
             case Command.getStorage:
                 
-            break;
+                break;
             case Command.getPublicKey:
                 
             break;
             case Command.invoke:
-                invoke(message,params);
+                sendResponse(invoke(message,params));
                 break;
             case Command.send:
-                send(message,params);
+                sendResponse(send(message,params))
                 break;
             case Command.invokeRead:
                 
                 break;
             case Command.invokeGroup:
-                invokeGroup(message,params);
+                sendResponse(invokeGroup(message,params))
             default:
                 
                 break;
