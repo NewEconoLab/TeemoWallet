@@ -7,13 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-window.onload = () => {
+window.addEventListener('ready', () => {
+    console.log("inject ready ");
     const main = new Main();
-    console.log("----------------------初始化");
-    setTimeout(() => {
-        main.start();
-    }, 1000);
-};
+    main.start();
+});
 class Main {
     constructor() {
         this.index = document.getElementById("index");

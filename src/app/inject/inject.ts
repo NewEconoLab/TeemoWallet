@@ -265,8 +265,16 @@ namespace Teemmo
             return sendMessage<InvokeOutput>(Command.invoke,params);
         }
 
-        static invokeGroup(params:InvokeGroup):Promise<InvokeArgs[]>{
-            return sendMessage<InvokeArgs[]>(Command.invokeGroup,params);
+        static invokeGroup(params:InvokeGroup):Promise<InvokeOutput[]>{
+            return sendMessage<InvokeOutput[]>(Command.invokeGroup,params);
         }
     }
+}
+
+var readyEvent = new CustomEvent('ready',{
+    detail:{title:'This is title!'},
+});
+
+if (window.dispatchEvent) {
+    window.dispatchEvent(readyEvent);
 }

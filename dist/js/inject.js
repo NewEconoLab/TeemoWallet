@@ -131,4 +131,10 @@ var Teemmo;
     };
     Teemmo.NEO = NEO;
 })(Teemmo || (Teemmo = {}));
+var readyEvent = new CustomEvent('ready', {
+    detail: { title: 'This is title!' },
+});
+if (window.dispatchEvent) {
+    window.dispatchEvent(readyEvent);
+}
 //# sourceMappingURL=inject.js.map

@@ -1,12 +1,11 @@
 ///<reference path="./inject.d.ts"/>
 
-window.onload=()=>{
+window.addEventListener('ready',()=>{
+    console.log("inject ready ");
     const main = new Main();
-    console.log("----------------------初始化");
-    setTimeout(()=>{    
-        main.start();
-    },1000)
-}
+    main.start();
+    
+})
 
 class Main {
     index:HTMLDivElement;

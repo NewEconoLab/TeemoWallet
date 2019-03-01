@@ -54,7 +54,7 @@ interface InvokeArgs {
     fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
-    attachedAssets?: AttachedAssets[];
+    attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -89,6 +89,8 @@ interface Asset {
 interface InvokeGroup {
     merge: boolean;
     group: InvokeArgs[];
+}
+interface InvokeGroupOutup {
 }
 interface BalanceRequest {
     address: string;
@@ -138,6 +140,12 @@ interface Provider {
         currency: string;
     };
 }
+declare const ids: any[];
+/**
+ *
+ * @param array 随机数
+ */
+declare const getMessageID: () => string;
 /**
  * 发送请求
  * @param command 指令名称
@@ -178,7 +186,10 @@ declare namespace Teemmo {
          * @returns {InvokeOutput} invoke执行结果返回
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
-        static invokeGroup(params: InvokeGroup): Promise<InvokeGroup>;
+        static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
     }
 }
+declare var readyEvent: CustomEvent<{
+    title: string;
+}>;
 //# sourceMappingURL=inject.d.ts.map

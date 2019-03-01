@@ -186,7 +186,10 @@ declare namespace Teemmo {
          * @returns {InvokeOutput} invoke执行结果返回
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
-        static invokeGroup(params: InvokeGroup): Promise<InvokeArgs[]>;
+        static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
     }
 }
+declare var readyEvent: CustomEvent<{
+    title: string;
+}>;
 //# sourceMappingURL=inject.d.ts.map
