@@ -54,7 +54,7 @@ interface InvokeArgs {
     fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
-    attachedAssets?: AttachedAssets[];
+    attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -145,7 +145,7 @@ declare const ids: any[];
  *
  * @param array 随机数
  */
-declare const getMessageID: () => void;
+declare const getMessageID: () => string;
 /**
  * 发送请求
  * @param command 指令名称

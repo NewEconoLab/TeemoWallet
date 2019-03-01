@@ -171,7 +171,6 @@ const ids = [];
 const getMessageID=()=>{
     // 随机6位数
     var Atanisi = Math.floor(Math.random() * 999999);
-    console.log(Atanisi); 
     // 随机6位数
     //时间
     var myDate = new Date();

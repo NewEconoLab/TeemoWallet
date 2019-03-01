@@ -44,13 +44,13 @@ const ids = [];
 const getMessageID = () => {
     // 随机6位数
     var Atanisi = Math.floor(Math.random() * 999999);
-    console.log(Atanisi);
     // 随机6位数
     //时间
     var myDate = new Date();
-    var messageid = myDate.getTime() + "" + Atanisi; // 整合的东东
-    console.log("id " + messageid + " 是否存在与数组：" + (ids.join(',').includes(messageid.toString())));
-    ids.push(messageid);
+    var messageid = myDate.getTime() + "" + Atanisi;
+    // console.log("id "+messageid+" 是否存在与数组："+ (ids.join(',').includes(messageid.toString())));
+    // ids.push(messageid);
+    return messageid;
 };
 /**
  * 发送请求
@@ -58,17 +58,13 @@ const getMessageID = () => {
  * @param data
  */
 function sendMessage(command, params) {
-    for (let index = 0; index < 10000; index++) {
-        getMessageID();
-    }
-    console.log(ids);
+    const ID = getMessageID();
     return new Promise((resolve, reject) => {
-        const request = params ? { command, params } : { command };
+        const request = params ? { command, params, ID } : { command, ID };
         window.postMessage(request, "*");
         window.addEventListener("message", e => {
             const response = e.data;
-            console.log(response);
-            if (response.return == command) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+            if (response.return == command && response.ID == ID) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
              {
                 if (response.error) {
                     reject(response.error);

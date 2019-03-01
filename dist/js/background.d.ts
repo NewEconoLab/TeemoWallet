@@ -18,17 +18,6 @@ declare class Result {
     err: boolean;
     info: any;
 }
-declare enum ArgumentDataType {
-    STRING = "String",
-    BOOLEAN = "Boolean",
-    HASH160 = "Hash160",
-    HASH256 = "Hash256",
-    INTEGER = "Integer",
-    BYTEARRAY = "ByteArray",
-    ARRAY = "Array",
-    ADDRESS = "Address",
-    HOOKTXID = "Hook_Txid"
-}
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -57,30 +46,6 @@ interface LoginInfo {
     pubkey: Uint8Array;
     prikey: Uint8Array;
     address: string;
-}
-/**
- * invoke 请求参数
- * @param {scriptHash} 合约hash
- * @param {operation} 调用合约的方法名
- * @param {stgring} 网络费
- *
- */
-interface InvokeArgs {
-    scriptHash: string;
-    operation: string;
-    fee?: string;
-    network: "TestNet" | "MainNet";
-    arguments: Array<Argument>;
-    attachedAssets?: AttachedAssets;
-    assetIntentOverrides?: AssetIntentOverrides;
-    triggerContractVerification?: boolean;
-}
-interface AttachedAssets {
-    [asset: string]: string;
-}
-interface Asset {
-    NEO: string;
-    GAS: string;
 }
 declare class MarkUtxo {
     txid: string;
@@ -218,13 +183,49 @@ declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 declare function openNotify(call: any): void;
-declare const getAccount: (title: any) => void;
-declare const invokeGroup: (title: any, data: any) => void;
-declare const invoke: (title: any, data: any) => void;
-declare const getNetworks: (title: any) => void;
-declare const getBalance: (title: any, data: GetBalanceArgs) => Promise<void>;
-declare const send: (title: any, data: any) => void;
-declare const getProvider: () => void;
+declare const getAccount: (title: any) => Promise<{}>;
+declare const invokeGroup: (title: any, data: any) => Promise<{}>;
+declare const invoke: (title: any, data: any) => Promise<{}>;
+declare const getNetworks: () => Promise<GetNetworksOutput>;
+declare const getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
+declare const send: (title: any, data: any) => Promise<{}>;
+declare const getProvider: () => Promise<{}>;
+declare const responseMessage: (request: any) => void;
+declare const BLOCKCHAIN = "NEO";
+declare const VERSION = "v1";
+declare enum ArgumentDataType {
+    STRING = "String",
+    BOOLEAN = "Boolean",
+    HASH160 = "Hash160",
+    HASH256 = "Hash256",
+    INTEGER = "Integer",
+    BYTEARRAY = "ByteArray",
+    ARRAY = "Array",
+    ADDRESS = "Address",
+    HOOKTXID = "Hook_Txid"
+}
+declare enum Command {
+    isReady = "isReady",
+    getProvider = "getProvider",
+    getNetworks = "getNetworks",
+    getAccount = "getAccount",
+    getPublicKey = "getPublicKey",
+    getBalance = "getBalance",
+    getStorage = "getStorage",
+    invokeRead = "invokeRead",
+    send = "send",
+    invoke = "invoke",
+    invokeGroup = "invokeGroup",
+    event = "event",
+    disconnect = "disconnect"
+}
+declare enum EventName {
+    READY = "READY",
+    ACCOUNT_CHANGED = "ACCOUNT_CHANGED",
+    CONNECTED = "CONNECTED",
+    DISCONNECTED = "DISCONNECTED",
+    NETWORK_CHANGED = "NETWORK_CHANGED"
+}
 interface GetStorageArgs {
     scriptHash: string;
     key: string;
@@ -232,6 +233,26 @@ interface GetStorageArgs {
 }
 interface GetStorageOutput {
     result: string;
+}
+/**
+ * invoke 请求参数
+ * @param {scriptHash} 合约hash
+ * @param {operation} 调用合约的方法名
+ * @param {stgring} 网络费
+ *
+ */
+interface InvokeArgs {
+    scriptHash: string;
+    operation: string;
+    fee?: string;
+    network: "TestNet" | "MainNet";
+    arguments: Array<Argument>;
+    attachedAssets?: AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
+    triggerContractVerification?: boolean;
+}
+interface AttachedAssets {
+    [asset: string]: string;
 }
 interface AssetIntentOverrides {
     inputs: AssetInput[];
@@ -260,7 +281,9 @@ interface Asset {
 }
 interface InvokeGroup {
     merge: boolean;
-    group: Array<InvokeArgs>;
+    group: InvokeArgs[];
+}
+interface InvokeGroupOutup {
 }
 interface BalanceRequest {
     address: string;
@@ -279,19 +302,35 @@ interface Balance {
     symbol: string;
     amount: string;
 }
-declare enum Command {
-    isReady = "isReady",
-    getProvider = "getProvider",
-    getNetworks = "getNetworks",
-    getAccount = "getAccount",
-    getPublicKey = "getPublicKey",
-    getBalance = "getBalance",
-    getStorage = "getStorage",
-    invokeRead = "invokeRead",
-    send = "send",
-    invoke = "invoke",
-    invokeGroup = "invokeGroup",
-    event = "event",
-    disconnect = "disconnect"
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: string;
+}
+interface AccountOutput {
+    address: string;
+    label: string;
+}
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: string;
+}
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
+}
+interface Provider {
+    name: string;
+    version: string;
+    compatibility: string[];
+    website: string;
+    extra: {
+        theme: string;
+        currency: string;
+    };
 }
 //# sourceMappingURL=background.d.ts.map

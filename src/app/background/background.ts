@@ -1273,47 +1273,14 @@ const responseMessage =(request)=>
     })
 }
 
+/**
+ * 监听
+ */
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
-        console.log(request);
         //初始化鼠标随机方法
         // Neo.Cryptography.RandomNumberGenerator.startCollectors();
-        
-        const {ID,command,message,params}=request;
-        switch (request.command) {
-            case Command.getProvider:
-                getProvider();
-                break;        
-            case Command.getNetworks:
-                getNetworks();
-                break;
-            case Command.getAccount:
-                getAccount(message);
-            break;
-            case Command.getBalance:
-                getBalance(message,params)
-            break;
-            case Command.getStorage:
-                
-            break;
-            case Command.getPublicKey:
-                
-            break;
-            case Command.invoke:
-                invoke(message,params);
-                break;
-            case Command.send:
-                send(message,params);
-                break;
-            case Command.invokeRead:
-                
-                break;
-            case Command.invokeGroup:
-                invokeGroup(message,params);
-            default:
-                
-                break;
-        }
+        responseMessage(request);
     }
 );
 

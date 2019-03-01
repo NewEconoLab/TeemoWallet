@@ -30,18 +30,6 @@ const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
 class Result {
 }
-var ArgumentDataType;
-(function (ArgumentDataType) {
-    ArgumentDataType["STRING"] = "String";
-    ArgumentDataType["BOOLEAN"] = "Boolean";
-    ArgumentDataType["HASH160"] = "Hash160";
-    ArgumentDataType["HASH256"] = "Hash256";
-    ArgumentDataType["INTEGER"] = "Integer";
-    ArgumentDataType["BYTEARRAY"] = "ByteArray";
-    ArgumentDataType["ARRAY"] = "Array";
-    ArgumentDataType["ADDRESS"] = "Address";
-    ArgumentDataType["HOOKTXID"] = "Hook_Txid";
-})(ArgumentDataType || (ArgumentDataType = {}));
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -680,6 +668,13 @@ function EmitParamJson(script, argument) {
  */
 function groupScriptBuild(group) {
     let sb = new ThinNeo.ScriptBuilder();
+    // 生成随机数
+    const RANDOM_UINT8 = getWeakRandomValues(32);
+    const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+    console.log(RANDOM_INT.toString());
+    // 塞入随机数
+    sb.EmitPushNumber(RANDOM_INT);
+    sb.Emit(ThinNeo.OpCode.DROP);
     /**
      * 循环塞入数据
      */
@@ -805,16 +800,9 @@ function openNotify(call) {
     }, 1000);
 }
 const getAccount = (title) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    return new Promise((resolve, reject) => {
         if (!storage.account) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                return: Command.getAccount,
-                error: {
-                    type: "AccountError",
-                    description: "Account not logged in"
-                }
-            });
-            return;
+            reject({ type: "ACCOUNT_ERROR", deciphering: "Account not logged in " });
         }
         chrome.storage.local.set({
             label: "getAccount",
@@ -828,31 +816,22 @@ const getAccount = (title) => {
                 chrome.storage.local.get("confirm", res => {
                     if (res["confirm"] === "confirm") {
                         if (storage.account) {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.getAccount,
-                                data: {
-                                    address: storage.account.address,
-                                    label: storage.account.walletName
-                                }
+                            resolve({
+                                address: storage.account.address,
+                                label: storage.account.walletName
                             });
                         }
                         else {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.getAccount,
-                                error: {
-                                    type: "AccountError",
-                                    description: "Account not logged in"
-                                }
+                            reject({
+                                type: "AccountError",
+                                description: "Account not logged in"
                             });
                         }
                     }
                     else if (res["confirm"] === "cancel") {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            return: Command.getAccount,
-                            error: {
-                                type: "AccountError",
-                                description: "User cancel Authorization "
-                            }
+                        reject({
+                            type: "AccountError",
+                            description: "User cancel Authorization "
                         });
                     }
                 });
@@ -861,7 +840,7 @@ const getAccount = (title) => {
     });
 };
 const invokeGroup = (title, data) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    return new Promise((resolve, reject) => {
         chrome.storage.local.set({
             label: "invokeGroup",
             message: {
@@ -876,25 +855,16 @@ const invokeGroup = (title, data) => {
                     if (res["confirm"] === "confirm") {
                         invokeGroupBuild(data)
                             .then(result => {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invokeGroup,
-                                data: result
-                            });
+                            resolve(result);
                         })
                             .catch(error => {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invokeGroup,
-                                error
-                            });
+                            reject(error);
                         });
                     }
                     else if (res["confirm"] === "cancel") {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            return: Command.invokeGroup,
-                            error: {
-                                type: "TransactionError",
-                                description: "User cancel Authorization "
-                            }
+                        reject({
+                            type: "TransactionError",
+                            description: "User cancel Authorization "
                         });
                     }
                 });
@@ -903,7 +873,7 @@ const invokeGroup = (title, data) => {
     });
 };
 const invoke = (title, data) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    return new Promise((resolve, reject) => {
         chrome.storage.local.set({
             label: "invokeGroup",
             message: {
@@ -918,25 +888,16 @@ const invoke = (title, data) => {
                     if (res["confirm"] === "confirm") {
                         contractBuilder(data)
                             .then(result => {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invoke,
-                                data: result
-                            });
+                            resolve(result);
                         })
                             .catch(error => {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                return: Command.invoke,
-                                error
-                            });
+                            reject(error);
                         });
                     }
                     else if (res["confirm"] === "cancel") {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            return: Command.invoke,
-                            error: {
-                                type: "TransactionError",
-                                description: "User cancel Authorization "
-                            }
+                        reject({
+                            type: "TransactionError",
+                            description: "User cancel Authorization "
                         });
                     }
                 });
@@ -944,18 +905,16 @@ const invoke = (title, data) => {
         });
     });
 };
-const getNetworks = (title) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-            message: "getNetworks_R",
-            data: {
-                networks: ["mainnet", "testnet"],
-                defaultNetwork: storage.network ? storage.network : "testnet"
-            }
-        });
+const getNetworks = () => {
+    return new Promise((resolve, reject) => {
+        const network = {
+            networks: ["mainnet", "testnet"],
+            defaultNetwork: storage.network ? storage.network : "testnet"
+        };
+        resolve(network);
     });
 };
-const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* () {
+const getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     if (!Array.isArray(data.params)) {
         data.params = [data.params];
     }
@@ -986,17 +945,22 @@ const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* ()
             }
         }
         if (nep5asset.length) {
-            let res = yield Api.getallnep5assetofaddress(arg.address);
-            let assets = {};
-            for (const iterator of res) {
-                const { assetid, symbol, balance } = iterator;
-                const assetID = assetid.replace("0x", "");
-                assets[assetID] = { assetID, symbol, amount: balance };
-            }
-            for (const id of nep5asset) {
-                if (assets[id]) {
-                    assetArray.push(assets[id]);
+            try {
+                let res = yield Api.getallnep5assetofaddress(arg.address);
+                let assets = {};
+                for (const iterator of res) {
+                    const { assetid, symbol, balance } = iterator;
+                    const assetID = assetid.replace("0x", "");
+                    assets[assetID] = { assetID, symbol, amount: balance };
                 }
+                for (const id of nep5asset) {
+                    if (assets[id]) {
+                        assetArray.push(assets[id]);
+                    }
+                }
+            }
+            catch (error) {
+                throw { type: "NETWORK_ERROR", description: "余额查询失败", data: error };
             }
         }
         if (utxoasset.length) {
@@ -1029,53 +993,96 @@ const getBalance = (title, data) => __awaiter(this, void 0, void 0, function* ()
         }
         balances[arg.address] = assetArray;
     }
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-            return: Command.getBalance,
-            data: balances
-        });
-    });
+    return balances;
 });
 const send = (title, data) => {
+    return new Promise((resolve, reject) => {
+    });
 };
 const getProvider = () => {
+    return new Promise((resolve, reject) => {
+        let provider = {
+            "compatibility": [""],
+            "extra": { theme: "", currency: "" },
+            "name": "",
+            "version": "",
+            "website": ""
+        };
+        resolve(provider);
+    });
 };
+const responseMessage = (request) => {
+    const { ID, command, message, params } = request;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const sendResponse = (data) => {
+            data
+                .then(data => {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    return: command,
+                    ID, data
+                });
+            })
+                .catch(error => {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    return: command,
+                    ID, error
+                });
+            });
+        };
+        switch (request.command) {
+            case Command.getProvider:
+                sendResponse(getProvider());
+                break;
+            case Command.getNetworks:
+                sendResponse(getNetworks());
+                break;
+            case Command.getAccount:
+                sendResponse(getAccount(message));
+                break;
+            case Command.getBalance:
+                sendResponse(getBalance(params));
+                break;
+            case Command.getStorage:
+                break;
+            case Command.getPublicKey:
+                break;
+            case Command.invoke:
+                sendResponse(invoke(message, params));
+                break;
+            case Command.send:
+                sendResponse(send(message, params));
+                break;
+            case Command.invokeRead:
+                break;
+            case Command.invokeGroup:
+                sendResponse(invokeGroup(message, params));
+            default:
+                break;
+        }
+    });
+};
+/**
+ * 监听
+ */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log(request);
     //初始化鼠标随机方法
     // Neo.Cryptography.RandomNumberGenerator.startCollectors();
-    const { message, params, command } = request;
-    switch (request.command) {
-        case Command.getProvider:
-            getProvider();
-            break;
-        case Command.getNetworks:
-            getNetworks(message);
-            break;
-        case Command.getAccount:
-            getAccount(message);
-            break;
-        case Command.getBalance:
-            getBalance(message, params);
-            break;
-        case Command.getStorage:
-            break;
-        case Command.getPublicKey:
-            break;
-        case Command.invoke:
-            invoke(message, params);
-            break;
-        case Command.send:
-            send(message, params);
-            break;
-        case Command.invokeRead:
-            break;
-        case Command.invokeGroup:
-            invokeGroup(message, params);
-        default:
-            break;
-    }
+    responseMessage(request);
 });
+const BLOCKCHAIN = 'NEO';
+const VERSION = 'v1';
+var ArgumentDataType;
+(function (ArgumentDataType) {
+    ArgumentDataType["STRING"] = "String";
+    ArgumentDataType["BOOLEAN"] = "Boolean";
+    ArgumentDataType["HASH160"] = "Hash160";
+    ArgumentDataType["HASH256"] = "Hash256";
+    ArgumentDataType["INTEGER"] = "Integer";
+    ArgumentDataType["BYTEARRAY"] = "ByteArray";
+    ArgumentDataType["ARRAY"] = "Array";
+    ArgumentDataType["ADDRESS"] = "Address";
+    ArgumentDataType["HOOKTXID"] = "Hook_Txid";
+})(ArgumentDataType || (ArgumentDataType = {}));
 var Command;
 (function (Command) {
     Command["isReady"] = "isReady";
@@ -1092,6 +1099,14 @@ var Command;
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
 })(Command || (Command = {}));
+var EventName;
+(function (EventName) {
+    EventName["READY"] = "READY";
+    EventName["ACCOUNT_CHANGED"] = "ACCOUNT_CHANGED";
+    EventName["CONNECTED"] = "CONNECTED";
+    EventName["DISCONNECTED"] = "DISCONNECTED";
+    EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
+})(EventName || (EventName = {}));
 window.onload = () => {
     console.log("----------------------------------初始化 ");
     //初始化鼠标随机方法
