@@ -904,6 +904,8 @@ const sendInvoke = async (tran:Transaction)=>
         const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
         tran.AddWitness(signdata,common.account.pubkey,common.account.address);
         const data:Uint8Array = tran.GetRawData();
+        console.log(data.toHexString());
+        
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result[0].txid)
         {

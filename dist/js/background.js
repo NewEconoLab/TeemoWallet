@@ -732,6 +732,7 @@ const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
         const signdata = ThinNeo.Helper.Sign(message, common.account.prikey);
         tran.AddWitness(signdata, common.account.pubkey, common.account.address);
         const data = tran.GetRawData();
+        console.log(data.toHexString());
         const result = yield Api.sendrawtransaction(data.toHexString());
         if (result[0].txid) {
             let ouput = {
