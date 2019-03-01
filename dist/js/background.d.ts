@@ -171,6 +171,10 @@ declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     constructor();
+    /**
+     *
+     * @param argument
+     */
     emitInvoke(argument: Argument[]): ThinNeo.ScriptBuilder;
 }
 /**

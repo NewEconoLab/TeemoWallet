@@ -616,8 +616,12 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
     constructor() {
         super();
     }
+    /**
+     *
+     * @param argument
+     */
     emitInvoke(argument) {
-        this.EmitPushNumber(new Neo.BigInteger(argument.length));
+        this.EmitPushNumber(new Neo.BigInteger(argument.length + 1));
         this.Emit(ThinNeo.OpCode.PACK);
         for (let i = argument.length - 1; i >= 0; i--) {
             const param = argument[i];
@@ -672,22 +676,22 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
  * @param {InvokeArgs[]} group InvokeGroup参数
  */
 function groupScriptBuild(group) {
-    console.log("进入了groupScript");
+    // invoke 组合 调用
     let sb = new ScriptBuild();
     // 生成随机数
     const RANDOM_UINT8 = getWeakRandomValues(32);
     const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
     // 塞入随机数
-    sb.EmitPushNumber(RANDOM_INT);
-    sb.Emit(ThinNeo.OpCode.DROP);
+    sb.EmitPushNumber(RANDOM_INT); // 将随机数推入栈顶
+    sb.Emit(ThinNeo.OpCode.DROP); // 打包
     /**
-     * 循环塞入数据
+     * 循环塞入script参数
      */
     for (let index = 0; index < group.length; index++) {
         const invoke = group[index];
-        sb.emitInvoke(invoke.arguments);
-        sb.EmitPushString(invoke.operation);
-        sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+        sb.emitInvoke(invoke.arguments); // 调用emitInvoke方法编译并打包参数
+        sb.EmitPushString(invoke.operation); // 塞入方法名
+        sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入合约地址
     }
     return sb.ToArray();
 }
