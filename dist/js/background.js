@@ -621,8 +621,6 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
      * @param argument
      */
     emitInvoke(argument) {
-        this.EmitPushNumber(new Neo.BigInteger(argument.length + 1));
-        this.Emit(ThinNeo.OpCode.PACK);
         for (let i = argument.length - 1; i >= 0; i--) {
             const param = argument[i];
             if (param.type === ArgumentDataType.ARRAY) {
@@ -668,6 +666,8 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
                     throw new Error("No parameter of this type");
             }
         }
+        this.EmitPushNumber(new Neo.BigInteger(argument.length));
+        this.Emit(ThinNeo.OpCode.PACK);
         return this;
     }
 }
