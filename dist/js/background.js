@@ -612,62 +612,67 @@ const getWeakRandomValues = (array) => {
         buffer[i] = Math.random() * 256;
     return buffer;
 };
-function EmitParamJson(script, argument) {
-    for (let i = 0; i >= 0; i--) {
-        const param = argument[i];
-        if (param.type === ArgumentDataType.ARRAY) {
-            var list = param.value;
-            for (let i = list.length - 1; i >= 0; i--) {
-                script.EmitParamJson(list[i]);
-            }
-            script.EmitPushNumber(new Neo.BigInteger(list.length));
-            script.Emit(ThinNeo.OpCode.PACK);
-        }
-        switch (param.type) {
-            case ArgumentDataType.STRING:
-                script.EmitPushString(param.value);
-                break;
-            case ArgumentDataType.INTEGER:
-                var num = new Neo.BigInteger(param.value);
-                script.EmitPushNumber(num);
-                break;
-            case ArgumentDataType.HASH160:
-                var hex = param.value.replace('0x', '').hexToBytes();
-                if (hex.length != 20)
-                    throw new Error("not a int160");
-                script.EmitPushBytes(hex.reverse());
-                break;
-            case ArgumentDataType.BYTEARRAY:
-                var hex = param.value.replace('0x', '').hexToBytes();
-                script.EmitPushBytes(hex);
-                break;
-            case ArgumentDataType.BOOLEAN:
-                var num = new Neo.BigInteger(param.value ? 1 : 0);
-                script.EmitPushNumber(num);
-                break;
-            case ArgumentDataType.ADDRESS:
-                var hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value);
-                script.EmitPushBytes(hex);
-                break;
-            case ArgumentDataType.HOOKTXID:
-                script.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                script.EmitSysCall("Neo.Transaction.GetHash");
-                break;
-            case ArgumentDataType.ARRAY:
-                EmitParamJson(script, param.value);
-                break;
-            default:
-                throw new Error("No parameter of this type");
-        }
+class ScriptBuild extends ThinNeo.ScriptBuilder {
+    constructor() {
+        super();
     }
-    return script;
+    emitInvoke(argument) {
+        for (let i = 0; i >= 0; i--) {
+            const param = argument[i];
+            if (param.type === ArgumentDataType.ARRAY) {
+                var list = param.value;
+                for (let i = list.length - 1; i >= 0; i--) {
+                    this.EmitParamJson(list[i]);
+                }
+                this.EmitPushNumber(new Neo.BigInteger(list.length));
+                this.Emit(ThinNeo.OpCode.PACK);
+            }
+            switch (param.type) {
+                case ArgumentDataType.STRING:
+                    this.EmitPushString(param.value);
+                    break;
+                case ArgumentDataType.INTEGER:
+                    var num = new Neo.BigInteger(param.value);
+                    this.EmitPushNumber(num);
+                    break;
+                case ArgumentDataType.HASH160:
+                    var hex = param.value.replace('0x', '').hexToBytes();
+                    if (hex.length != 20)
+                        throw new Error("not a int160");
+                    this.EmitPushBytes(hex.reverse());
+                    break;
+                case ArgumentDataType.BYTEARRAY:
+                    var hex = param.value.replace('0x', '').hexToBytes();
+                    this.EmitPushBytes(hex);
+                    break;
+                case ArgumentDataType.BOOLEAN:
+                    var num = new Neo.BigInteger(param.value ? 1 : 0);
+                    this.EmitPushNumber(num);
+                    break;
+                case ArgumentDataType.ADDRESS:
+                    var hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value);
+                    this.EmitPushBytes(hex);
+                    break;
+                case ArgumentDataType.HOOKTXID:
+                    this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                    this.EmitSysCall("Neo.Transaction.GetHash");
+                    break;
+                case ArgumentDataType.ARRAY:
+                    this.emitInvoke(param.value);
+                    break;
+                default:
+                    throw new Error("No parameter of this type");
+            }
+        }
+        return this;
+    }
 }
 /**
  * 编译 invoke参数列表
  * @param {InvokeArgs[]} group InvokeGroup参数
  */
 function groupScriptBuild(group) {
-    let sb = new ThinNeo.ScriptBuilder();
+    let sb = new ScriptBuild();
     // 生成随机数
     const RANDOM_UINT8 = getWeakRandomValues(32);
     const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
@@ -680,7 +685,7 @@ function groupScriptBuild(group) {
      */
     for (let index = 0; index < group.length; index++) {
         const invoke = group[index];
-        EmitParamJson(sb, invoke.arguments);
+        sb.emitInvoke(invoke.arguments);
     }
     return sb.ToArray();
 }

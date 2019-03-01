@@ -169,7 +169,10 @@ declare const Api: {
 };
 declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
-declare function EmitParamJson(script: ThinNeo.ScriptBuilder, argument: Argument[]): ThinNeo.ScriptBuilder;
+declare class ScriptBuild extends ThinNeo.ScriptBuilder {
+    constructor();
+    emitInvoke(argument: Argument[]): ThinNeo.ScriptBuilder;
+}
 /**
  * 编译 invoke参数列表
  * @param {InvokeArgs[]} group InvokeGroup参数
