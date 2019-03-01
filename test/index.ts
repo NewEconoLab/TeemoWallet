@@ -18,7 +18,7 @@ class Main {
     async start(){        
         await this.getAccount()
         await this.getBalance()
-        await this.invoke()
+        await this.invokeGroup()
     }
 
     /**
@@ -72,6 +72,8 @@ class Main {
 
     public invokeGroup()
     {
+        console.log("this is InvokeGroup");
+        
         const params:InvokeGroup = {
             merge:true,
             group:[

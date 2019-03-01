@@ -20,7 +20,7 @@ class Main {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.getAccount();
             yield this.getBalance();
-            yield this.invoke();
+            yield this.invokeGroup();
         });
     }
     /**
@@ -68,6 +68,7 @@ class Main {
         });
     }
     invokeGroup() {
+        console.log("this is InvokeGroup");
         const params = {
             merge: true,
             group: [
