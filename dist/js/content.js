@@ -23,6 +23,7 @@ window.addEventListener("message", function (e) {
     var request = e.data;
     if (request.command) {
         request['message'] = message;
+        console.log("request:   this is content ID:" + request.ID);
         chrome.runtime.sendMessage(request);
     }
 }, false);
@@ -30,8 +31,10 @@ window.addEventListener("message", function (e) {
  * 发送返回值
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.return)
+    if (request.return) {
+        console.log("response:   this is content ID:" + request.ID);
         window.postMessage(request, '*');
+    }
 });
 window.onload = () => {
     injectCustomJs();

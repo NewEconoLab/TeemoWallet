@@ -271,8 +271,8 @@ namespace Teemmo
     }
 }
 
-var readyEvent = new CustomEvent('ready',{
-    detail:{title:'This is title!'},
+var readyEvent = new CustomEvent('Teemmo.NEO.READY',{
+    detail:{title:'This is Teemmo'},
 });
 
 if (window.dispatchEvent) {

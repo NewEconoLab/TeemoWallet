@@ -707,6 +707,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         let netfee = Neo.Fixed8.Zero;
         let transfer = {}; // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = yield MarkUtxo.getAllUtxo();
+        let assets;
         for (let index = 0; index < data.group.length; index++) // 循环算utxo资产对应的累加和相对应每笔要转走的money
          {
             const invoke = data.group[index];
@@ -735,6 +736,10 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
     }
     else {
+        let tranarr = [];
+        for (let index = 0; index < data.group.length; index++) {
+            let tran = new Transaction();
+        }
     }
 });
 const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
@@ -763,11 +768,15 @@ const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
 const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
     let tran = new Transaction();
     try {
-        const script = invokeScriptBuild(invoke);
-        tran.setScript(script);
+        // const script=invokeScriptBuild(invoke);
+        const script = new ScriptBuild();
+        script.emitInvoke(invoke.arguments); // 参数转换与打包
+        script.EmitPushString(invoke.operation); // 塞入需要调用的合约方法名
+        script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入需要调用的合约hex
+        tran.setScript(script.ToArray());
     }
     catch (error) {
-        console.log(error);
+        throw error;
     }
     if (!!invoke.fee && invoke.fee !== '' && invoke.fee != '0') {
         try {
@@ -776,7 +785,7 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
                 tran.creatInuptAndOutup(utxos, Neo.Fixed8.parse(invoke.fee));
         }
         catch (error) {
-            console.log(error);
+            throw error;
         }
     }
     try {
@@ -1024,6 +1033,7 @@ const getProvider = () => {
     });
 };
 const responseMessage = (request) => {
+    console.log("request:   this is background ID:" + request.ID);
     const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const sendResponse = (data) => {

@@ -20,17 +20,10 @@ const HASH_CONFIG = {
     saleContract: Neo.Uint160.parse("1b0ca9a908e07b20469917aed8d503049b420eeb"),
     ID_NNC: Neo.Uint160.parse('fc732edee1efdf968c23c20a9628eaa5a6ccb934'),
     ID_NNK: Neo.Uint160.parse('c36aee199dbba6c3f439983657558cfb67629599'),
-  }
+}
 
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-
-
-class Result
-{
-    err: boolean;
-    info: any;
-}
 
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -136,14 +129,11 @@ class AccountInfo extends NepAccount{
     }
 
     public get pubkey(): Uint8Array{
-        console.log("调用了我 我是pubkey get");
-        
         this._pubkey=this.pubkeyHex.hexToBytes();
         return this._pubkey;
     }
 
-    public get prikey(): Uint8Array{        
-        console.log("调用了我 我是prikey get");
+    public get prikey(): Uint8Array{
         this._prikey=this.prikeyHex.hexToBytes();
         return this._prikey
     }    
@@ -501,6 +491,7 @@ interface IOpts {
     baseUrl?:string, // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
     getAll?:boolean, // 是否获取所有返回结果
 }
+
 const makeRpcUrl=(url, method, params)=>
 {
 if (url[url.length - 1] != '/')
@@ -509,6 +500,10 @@ var urlout = url + "?jsonrpc=2.0&id=1&method=" + method + "&params="+JSON.string
 return urlout;
 }
 
+/**
+ * api 请求方法
+ * @param opts 请求参数
+ */
 async function request(opts: IOpts) {
     let url = [baseUrl,common.network].join('/');
     if (opts.baseUrl === 'common') {
@@ -546,7 +541,6 @@ async function request(opts: IOpts) {
         throw error;    
     }
 }
-  
 
 const Api = {
     /**
@@ -782,7 +776,7 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
      * 
      * @param argument 
      */
-    emitInvoke(argument: Argument[]): ThinNeo.ScriptBuilder {
+    emitInvoke(argument: Argument[],hookTxid?:string): ThinNeo.ScriptBuilder {
         for (let i = argument.length-1; i >=0; i--) {
             const param = argument[i];        
             if (param.type === ArgumentDataType.ARRAY) {
@@ -800,13 +794,19 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
                     this.EmitPushNumber(num);
                     break;
                 case ArgumentDataType.HASH160:
-                    var hex = (param.value as string).replace('0x','').hexToBytes();
+                    var hex = (param.value as string).hexToBytes();
                     if (hex.length != 20)
-                        throw new Error("not a int160");
+                        throw new Error("not a hex160");
+                    this.EmitPushBytes(hex.reverse());
+                    break;                    
+                case ArgumentDataType.HASH256:
+                    var hex = (param.value as string).hexToBytes();
+                    if (hex.length != 32)
+                        throw new Error("not a hex256");
                     this.EmitPushBytes(hex.reverse());
                     break;
                 case ArgumentDataType.BYTEARRAY:
-                    var hex = (param.value as string).replace('0x','').hexToBytes();
+                    var hex = (param.value as string).hexToBytes();
                     this.EmitPushBytes(hex);                 
                     break;
                 case ArgumentDataType.BOOLEAN:
@@ -818,9 +818,14 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
                     this.EmitPushBytes(hex);
                     break;         
                 case ArgumentDataType.HOOKTXID:
-                    this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                    this.EmitSysCall("Neo.Transaction.GetHash");
-                    break;    
+                    if(hookTxid){
+                        var hex = hookTxid.hexToBytes();
+                        this.EmitPushBytes(hex.reverse());
+                    }else{
+                        this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                        this.EmitSysCall("Neo.Transaction.GetHash");
+                    }
+                    break;
                 case ArgumentDataType.ARRAY:
                     this.emitInvoke(param.value as Argument[]);
                     break;
@@ -875,9 +880,10 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
         let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
         let transfer:{[toaddr:string]:AttachedAssets}={} // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = await MarkUtxo.getAllUtxo();
+        let assets:{[asset:string]:string};
         for (let index = 0; index < data.group.length; index++) // 循环算utxo资产对应的累加和相对应每笔要转走的money
         {
-            const invoke = data.group[index];   
+            const invoke = data.group[index];
             if(invoke.fee)  // 判断是否有手续费
                 netfee.add(Neo.Fixed8.parse(invoke.fee)) // 计算总共耗费多少手续费;
             if(invoke.attachedAssets)  // 判断是否有合约转账
@@ -888,7 +894,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                         const number = invoke.attachedAssets[id];
                         if(id===HASH_CONFIG.ID_GAS)
                         {
-
+                            
                         }
                         else
                         {
@@ -903,11 +909,44 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             let result = await sendInvoke(tran);
             return [result];
         } catch (error) {
-            
+            throw error
         }
-    } else {
-        
+    } 
+    else 
+    {
+        let txids:InvokeOutput[] = []
+        let trans:Transaction[] = [];
+        for (let index = 0; index < data.group.length; index++)
+        {
+            const invoke = data.group[index];
+            if(index==0)
+            {
+                try {
+                    let result = await contractBuilder(invoke);
+                    txids.push(result);
+                } catch (error) {
+                    throw error;
+                }
+            }
+            else
+            {
+                let tran = new Transaction();
+                let script = new ScriptBuild();
+                script.emitInvoke(invoke.arguments,txids[0].txid);
+                script.EmitPushString(invoke.operation);
+                script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+                tran.setScript(script.ToArray());
+                trans.push(tran);
+            }
+        }
+        return sendGroupTranstion(trans);
     }
+}
+
+const sendGroupTranstion=(trans:Transaction[])=>{
+    return new Promise<InvokeOutput[]>((resolve,reject)=>{
+
+    })
 }
 
 const sendInvoke = async (tran:Transaction)=>
@@ -940,22 +979,24 @@ const sendInvoke = async (tran:Transaction)=>
 }
 
 const contractBuilder = async (invoke:InvokeArgs)=>{
-    let tran = new Transaction();
-    
+    let tran = new Transaction();    
     try {
-        const script=invokeScriptBuild(invoke);
-        tran.setScript(script);
+        // const script=invokeScriptBuild(invoke);
+        const script = new ScriptBuild();
+        script.emitInvoke(invoke.arguments);        // 参数转换与打包
+        script.EmitPushString(invoke.operation);    // 塞入需要调用的合约方法名
+        script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));   // 塞入需要调用的合约hex
+        tran.setScript(script.ToArray());
     } catch (error) {
-        console.log(error);            
+        throw error;    
     }
-    if(!!invoke.fee && invoke.fee!=='' && invoke.fee!='0'){
-        
+    if(!!invoke.fee && invoke.fee!=='' && invoke.fee!='0'){        
         try {
             const utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
             if(utxos)
                 tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
         } catch (error) {
-            console.log(error);
+            throw error
         }
     }
     try {
@@ -985,77 +1026,101 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
     }
 }
 
-
-function openNotify(call) {
-    var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
-    
-    //获得关闭事件
-    var loop = setInterval(() => {
-           if(notify.closed) {
-                call();
-                clearInterval(loop);
-           }    
-        }, 1000
-    );
-    
+/**
+ * 打开notify页面并传递信息，返回调用
+ * @param call 回调方法
+ * @param data 通知信息
+ */
+const openNotify=(call,data?)=> {
+    if(data)
+    {        
+        chrome.storage.local.set(data,()=>
+        {
+            var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+            
+            //获得关闭事件
+            var loop = setInterval(() => {
+                   if(notify.closed) {
+                        call();
+                        clearInterval(loop);
+                   }    
+                }, 1000
+            );
+        })
+    }
+    else
+    {        
+        var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+        //获得关闭事件
+        var loop = setInterval(() => {
+               if(notify.closed) {
+                    call();
+                    clearInterval(loop);
+               }    
+            }, 1000
+        );
+    }    
 }
 
+/**
+ * 请求账户信息
+ */
 const getAccount=(title)=>{
     return new Promise((resolve,reject)=>{
         if(!storage.account){
             reject({type:"ACCOUNT_ERROR",deciphering:"Account not logged in "})
         }
-            
-        chrome.storage.local.set({
+        const data = {
             label:"getAccount",                        
             message:{
                 account:storage.account?{address:storage.account.address}:undefined,
                 title:title.refTitle,
                 domain:title.refDomain
             },
-        },
-        ()=>{
-            openNotify(()=>{                            
-                chrome.storage.local.get("confirm",res=>{
-                    if(res["confirm"]==="confirm")
-                    {
-                        if(storage.account){
-                            resolve({
-                                address : storage.account.address,
-                                label : storage.account.walletName
-                            })
-                        }else{
-                            reject({
-                                type : "AccountError",
-                                description : "Account not logged in"
-                            });
-                        }
-                    }else if(res["confirm"]==="cancel"){
+        }
+        openNotify(data,()=>{
+            chrome.storage.local.get("confirm",res=>{
+                if(res["confirm"]==="confirm")
+                {
+                    if(storage.account){
+                        resolve({
+                            address : storage.account.address,
+                            label : storage.account.walletName
+                        })
+                    }else{
                         reject({
                             type : "AccountError",
-                            description : "User cancel Authorization "
+                            description : "Account not logged in"
                         });
                     }
-                })
-            });
-        })
-
+                }else if(res["confirm"]==="cancel"){
+                    reject({
+                        type : "AccountError",
+                        description : "User cancel Authorization "
+                    });
+                }
+            })
+        });
     })
 }
 
+/**
+ * invokeGroup 合约调用
+ * @param title 请求的网页信息
+ * @param data 传递的数据
+ */
 const invokeGroup=(title,data)=>{
     return new Promise((resolve,reject)=>{
-        
-    chrome.storage.local.set({
-        label:"invokeGroup",
-        message:{
-            account:storage.account?{address:storage.account.address}:undefined,
-            title:title.refTitle,
-            domain:title.refDomain,
-            invoke:data.msg
-        }
-    },()=>{
-        openNotify(()=>{               
+        const message={
+            label:"invokeGroup",
+            message:{
+                account:storage.account?{address:storage.account.address}:undefined,
+                title:title.refTitle,
+                domain:title.refDomain,
+                invoke:data.msg
+            }
+        };
+        openNotify(message,()=>{              
             chrome.storage.local.get("confirm",res=>{
                 if(res["confirm"]==="confirm")
                 {
@@ -1074,14 +1139,17 @@ const invokeGroup=(title,data)=>{
                 }
             })
         })
-    });
     })
 }
 
+/**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
 const invoke=(title,data)=>{
     return new Promise((resolve,reject)=>{
-        
-        chrome.storage.local.set({
+        const message ={
             label:"invokeGroup",
             message:{
                 account:storage.account?{address:storage.account.address}:undefined,
@@ -1089,30 +1157,32 @@ const invoke=(title,data)=>{
                 domain:title.refDomain,
                 invoke:data.msg
             }
-        },()=>{
-            openNotify(()=>{               
-                chrome.storage.local.get("confirm",res=>{
-                    if(res["confirm"]==="confirm")
-                    {
-                        contractBuilder(data)
-                        .then(result=>{
-                            resolve(result);
-                        })
-                        .catch(error=>{
-                            reject(error);
-                        })
-                    }else if(res["confirm"]==="cancel"){       
-                        reject({
-                            type : "TransactionError",
-                            description : "User cancel Authorization "
-                        });
-                    }
-                })
+        };
+        openNotify(message,()=>{
+            chrome.storage.local.get("confirm",res=>{
+                if(res["confirm"]==="confirm")
+                {
+                    contractBuilder(data)
+                    .then(result=>{
+                        resolve(result);
+                    })
+                    .catch(error=>{
+                        reject(error);
+                    })
+                }else if(res["confirm"]==="cancel"){       
+                    reject({
+                        type : "TransactionError",
+                        description : "User cancel Authorization "
+                    });
+                }
             })
-        });
+        })
     })
 }
 
+/**
+ * 获得网络状态信息
+ */
 const getNetworks=():Promise<GetNetworksOutput>=>{
     return new Promise((resolve,reject)=>{
         const network:GetNetworksOutput={
@@ -1123,11 +1193,14 @@ const getNetworks=():Promise<GetNetworksOutput>=>{
     })
 }
 
+/**
+ * 余额获取
+ * @param data 请求的参数
+ */
 const getBalance= async(data:GetBalanceArgs)=>{
     if (!Array.isArray(data.params)) {
       data.params = [data.params];
     }
-  
     data.params.forEach(({address, assets, fetchUTXO}, index) => {
       if (assets && !Array.isArray(assets)) {
         data.params[index] = {
@@ -1137,7 +1210,6 @@ const getBalance= async(data:GetBalanceArgs)=>{
         };
       }
     });
-
     let balances:BalanceResults = {};
     
     if (!Array.isArray(data.params)) {
@@ -1213,14 +1285,20 @@ const getBalance= async(data:GetBalanceArgs)=>{
     return balances;
 }
 
-const send=(title,data)=>{
-    return new Promise((resolve,reject)=>{
+const send=(title,data)=>
+{
+    return new Promise((resolve,reject)=>
+    {
 
     })
 }
-const getProvider=()=>{
-    return new Promise((resolve,reject)=>{
-        let provider:Provider={
+
+const getProvider=()=>
+{
+    return new Promise((resolve,reject)=>
+    {
+        let provider:Provider=
+        {
             "compatibility":[""],
             "extra":{theme:"",currency:""},
             "name":"",
@@ -1234,9 +1312,11 @@ const getProvider=()=>{
 const responseMessage =(request)=>
 {
     const {ID,command,message,params}=request;
-    chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
-        const sendResponse=(data:Promise<any>)=>{
-            data
+    chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> 
+    {
+        const sendResponse=(result:Promise<any>)=>
+        {
+            result
             .then(data=>{
                 chrome.tabs.sendMessage(tabs[0].id, {
                     return:command,
@@ -1368,7 +1448,6 @@ interface InvokeArgs{
     triggerContractVerification?: boolean;
 }
 
-
 interface AttachedAssets {
     [asset: string]: string;
 }
@@ -1377,6 +1456,7 @@ interface AssetIntentOverrides {
     inputs: AssetInput[];
     outputs: AssetOutput[];
 }
+
 interface AssetInput {
     txid: string;
     index: number;
@@ -1387,6 +1467,7 @@ interface AssetOutput {
     address: number;
     value: string;
 }
+
 interface InvokeOutput {
     txid: string;
     nodeUrl: string;
@@ -1406,6 +1487,7 @@ interface InvokeGroup{
     merge:boolean;
     group:InvokeArgs[];
 }
+
 interface InvokeGroupOutup{
 
 }
@@ -1420,9 +1502,11 @@ interface GetBalanceArgs {
     params: BalanceRequest|BalanceRequest[];
     network: string;
 }
+
 interface BalanceResults {
     [address: string]: Balance[];
 }
+
 interface Balance {
     assetID: string;
     symbol: string;
@@ -1433,7 +1517,6 @@ interface GetNetworksOutput {
     networks: string[];
     defaultNetwork: string;
 }
-
 
 interface AccountOutput {
     address: string;
@@ -1466,12 +1549,3 @@ interface Provider {
         currency: string,
     };
 }
-  
-
-window.onload=()=>{
-    console.log("----------------------------------初始化 ");
-    
-    //初始化鼠标随机方法
-    Neo.Cryptography.RandomNumberGenerator.startCollectors();
-    
-  }
