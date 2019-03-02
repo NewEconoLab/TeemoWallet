@@ -872,6 +872,7 @@ function groupScriptBuild(group:InvokeArgs[])
  */
 const invokeGroupBuild = async(data:InvokeGroup)=>
 {
+    // 判断merge的值
     if (data.merge) 
     {
         let tran = new Transaction();
