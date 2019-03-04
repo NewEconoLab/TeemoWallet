@@ -1,6 +1,6 @@
 ///<reference path="./inject.d.ts"/>
 
-window.addEventListener('ready',()=>{
+window.addEventListener('Teemmo.NEO.READY',()=>{
     console.log("inject ready ");
     const main = new Main();
     main.start();

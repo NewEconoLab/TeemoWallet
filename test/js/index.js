@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-window.addEventListener('ready', () => {
+window.addEventListener('Teemmo.NEO.READY', () => {
     console.log("inject ready ");
     const main = new Main();
     main.start();

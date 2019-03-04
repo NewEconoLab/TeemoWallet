@@ -946,7 +946,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
 
 const sendGroupTranstion=(trans:Transaction[])=>{
     return new Promise<InvokeOutput[]>((resolve,reject)=>{
-
+        
     })
 }
 
