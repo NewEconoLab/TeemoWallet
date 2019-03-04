@@ -542,7 +542,7 @@ async function request(opts: IOpts) {
     }
 }
 
-const Api = {
+var Api = {
     /**
      * 获取nep5的资产（CGAS）
      */

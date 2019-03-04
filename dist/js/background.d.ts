@@ -126,7 +126,7 @@ declare const makeRpcUrl: (url: any, method: any, params: any) => string;
  * @param opts 请求参数
  */
 declare function request(opts: IOpts): Promise<any>;
-declare const Api: {
+declare var Api: {
     /**
      * 获取nep5的资产（CGAS）
      */
