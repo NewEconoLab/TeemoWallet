@@ -940,13 +940,24 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 trans.push(tran);
             }
         }
-        return sendGroupTranstion(trans);
+        let outups = await sendGroupTranstion(trans);
+        let arr = txids.concat(outups);
+        return arr;
     }
 }
 
 const sendGroupTranstion=(trans:Transaction[])=>{
     return new Promise<InvokeOutput[]>((resolve,reject)=>{
-        
+        let outputs:InvokeOutput[]=[];
+        for (let index = 0; index < trans.length; index++) {
+            const tran = trans[index];            
+            const message  = tran.GetMessage().clone();
+            const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
+            tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+            // const data:Uint8Array = tran.GetRawData();
+            console.log(tran.getTxid());
+            outputs.push({"txid": tran.getTxid(),nodeUrl:""});
+        }
     })
 }
 
@@ -1032,7 +1043,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
  * @param call 回调方法
  * @param data 通知信息
  */
-const openNotify=(call,data?)=> {
+const openNotify=(data,call)=> {
     if(data)
     {        
         chrome.storage.local.set(data,()=>

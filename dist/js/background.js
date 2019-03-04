@@ -28,8 +28,6 @@ const HASH_CONFIG = {
 };
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-class Result {
-}
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -100,12 +98,10 @@ class AccountInfo extends NepAccount {
         this.prikeyHex = v.toHexString();
     }
     get pubkey() {
-        console.log("调用了我 我是pubkey get");
         this._pubkey = this.pubkeyHex.hexToBytes();
         return this._pubkey;
     }
     get prikey() {
-        console.log("调用了我 我是prikey get");
         this._prikey = this.prikeyHex.hexToBytes();
         return this._prikey;
     }
@@ -367,6 +363,10 @@ const makeRpcUrl = (url, method, params) => {
     var urlout = url + "?jsonrpc=2.0&id=1&method=" + method + "&params=" + JSON.stringify(params);
     return urlout;
 };
+/**
+ * api 请求方法
+ * @param opts 请求参数
+ */
 function request(opts) {
     return __awaiter(this, void 0, void 0, function* () {
         let url = [baseUrl, common.network].join('/');
@@ -620,7 +620,7 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
      *
      * @param argument
      */
-    emitInvoke(argument) {
+    emitInvoke(argument, hookTxid) {
         for (let i = argument.length - 1; i >= 0; i--) {
             const param = argument[i];
             if (param.type === ArgumentDataType.ARRAY) {
@@ -638,13 +638,19 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
                     this.EmitPushNumber(num);
                     break;
                 case ArgumentDataType.HASH160:
-                    var hex = param.value.replace('0x', '').hexToBytes();
+                    var hex = param.value.hexToBytes();
                     if (hex.length != 20)
-                        throw new Error("not a int160");
+                        throw new Error("not a hex160");
+                    this.EmitPushBytes(hex.reverse());
+                    break;
+                case ArgumentDataType.HASH256:
+                    var hex = param.value.hexToBytes();
+                    if (hex.length != 32)
+                        throw new Error("not a hex256");
                     this.EmitPushBytes(hex.reverse());
                     break;
                 case ArgumentDataType.BYTEARRAY:
-                    var hex = param.value.replace('0x', '').hexToBytes();
+                    var hex = param.value.hexToBytes();
                     this.EmitPushBytes(hex);
                     break;
                 case ArgumentDataType.BOOLEAN:
@@ -656,8 +662,14 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
                     this.EmitPushBytes(hex);
                     break;
                 case ArgumentDataType.HOOKTXID:
-                    this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                    this.EmitSysCall("Neo.Transaction.GetHash");
+                    if (hookTxid) {
+                        var hex = hookTxid.hexToBytes();
+                        this.EmitPushBytes(hex.reverse());
+                    }
+                    else {
+                        this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                        this.EmitSysCall("Neo.Transaction.GetHash");
+                    }
                     break;
                 case ArgumentDataType.ARRAY:
                     this.emitInvoke(param.value);
@@ -700,6 +712,7 @@ function groupScriptBuild(group) {
  * @param data 合并合约调用参数
  */
 const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () {
+    // 判断merge的值
     if (data.merge) {
         let tran = new Transaction();
         let script = groupScriptBuild(data.group);
@@ -733,15 +746,52 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
             return [result];
         }
         catch (error) {
+            throw error;
         }
     }
     else {
-        let tranarr = [];
+        let txids = [];
+        let trans = [];
         for (let index = 0; index < data.group.length; index++) {
-            let tran = new Transaction();
+            const invoke = data.group[index];
+            if (index == 0) {
+                try {
+                    let result = yield contractBuilder(invoke);
+                    txids.push(result);
+                }
+                catch (error) {
+                    throw error;
+                }
+            }
+            else {
+                let tran = new Transaction();
+                let script = new ScriptBuild();
+                script.emitInvoke(invoke.arguments, txids[0].txid);
+                script.EmitPushString(invoke.operation);
+                script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
+                tran.setScript(script.ToArray());
+                trans.push(tran);
+            }
         }
+        let outups = yield sendGroupTranstion(trans);
+        let arr = txids.concat(outups);
+        return arr;
     }
 });
+const sendGroupTranstion = (trans) => {
+    return new Promise((resolve, reject) => {
+        let outputs = [];
+        for (let index = 0; index < trans.length; index++) {
+            const tran = trans[index];
+            const message = tran.GetMessage().clone();
+            const signdata = ThinNeo.Helper.Sign(message, common.account.prikey);
+            tran.AddWitness(signdata, common.account.pubkey, common.account.address);
+            // const data:Uint8Array = tran.GetRawData();
+            console.log(tran.getTxid());
+            outputs.push({ "txid": tran.getTxid(), nodeUrl: "" });
+        }
+    });
+};
 const sendInvoke = (tran) => __awaiter(this, void 0, void 0, function* () {
     try {
         const message = tran.GetMessage().clone();
@@ -810,59 +860,85 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
         throw error;
     }
 });
-function openNotify(call) {
-    var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
-    //获得关闭事件
-    var loop = setInterval(() => {
-        if (notify.closed) {
-            call();
-            clearInterval(loop);
-        }
-    }, 1000);
-}
+/**
+ * 打开notify页面并传递信息，返回调用
+ * @param call 回调方法
+ * @param data 通知信息
+ */
+const openNotify = (data, call) => {
+    if (data) {
+        chrome.storage.local.set(data, () => {
+            var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
+            //获得关闭事件
+            var loop = setInterval(() => {
+                if (notify.closed) {
+                    call();
+                    clearInterval(loop);
+                }
+            }, 1000);
+        });
+    }
+    else {
+        var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
+        //获得关闭事件
+        var loop = setInterval(() => {
+            if (notify.closed) {
+                call();
+                clearInterval(loop);
+            }
+        }, 1000);
+    }
+};
+/**
+ * 请求账户信息
+ */
 const getAccount = (title) => {
     return new Promise((resolve, reject) => {
         if (!storage.account) {
             reject({ type: "ACCOUNT_ERROR", deciphering: "Account not logged in " });
         }
-        chrome.storage.local.set({
+        const data = {
             label: "getAccount",
             message: {
                 account: storage.account ? { address: storage.account.address } : undefined,
                 title: title.refTitle,
                 domain: title.refDomain
             },
-        }, () => {
-            openNotify(() => {
-                chrome.storage.local.get("confirm", res => {
-                    if (res["confirm"] === "confirm") {
-                        if (storage.account) {
-                            resolve({
-                                address: storage.account.address,
-                                label: storage.account.walletName
-                            });
-                        }
-                        else {
-                            reject({
-                                type: "AccountError",
-                                description: "Account not logged in"
-                            });
-                        }
+        };
+        openNotify(data, () => {
+            chrome.storage.local.get("confirm", res => {
+                if (res["confirm"] === "confirm") {
+                    if (storage.account) {
+                        resolve({
+                            address: storage.account.address,
+                            label: storage.account.walletName
+                        });
                     }
-                    else if (res["confirm"] === "cancel") {
+                    else {
                         reject({
                             type: "AccountError",
-                            description: "User cancel Authorization "
+                            description: "Account not logged in"
                         });
                     }
-                });
+                }
+                else if (res["confirm"] === "cancel") {
+                    reject({
+                        type: "AccountError",
+                        description: "User cancel Authorization "
+                    });
+                }
             });
         });
     });
 };
+/**
+ * invokeGroup 合约调用
+ * @param title 请求的网页信息
+ * @param data 传递的数据
+ */
 const invokeGroup = (title, data) => {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.set({
+        const message = {
             label: "invokeGroup",
             message: {
                 account: storage.account ? { address: storage.account.address } : undefined,
@@ -870,32 +946,36 @@ const invokeGroup = (title, data) => {
                 domain: title.refDomain,
                 invoke: data.msg
             }
-        }, () => {
-            openNotify(() => {
-                chrome.storage.local.get("confirm", res => {
-                    if (res["confirm"] === "confirm") {
-                        invokeGroupBuild(data)
-                            .then(result => {
-                            resolve(result);
-                        })
-                            .catch(error => {
-                            reject(error);
-                        });
-                    }
-                    else if (res["confirm"] === "cancel") {
-                        reject({
-                            type: "TransactionError",
-                            description: "User cancel Authorization "
-                        });
-                    }
-                });
+        };
+        openNotify(message, () => {
+            chrome.storage.local.get("confirm", res => {
+                if (res["confirm"] === "confirm") {
+                    invokeGroupBuild(data)
+                        .then(result => {
+                        resolve(result);
+                    })
+                        .catch(error => {
+                        reject(error);
+                    });
+                }
+                else if (res["confirm"] === "cancel") {
+                    reject({
+                        type: "TransactionError",
+                        description: "User cancel Authorization "
+                    });
+                }
             });
         });
     });
 };
+/**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
 const invoke = (title, data) => {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.set({
+        const message = {
             label: "invokeGroup",
             message: {
                 account: storage.account ? { address: storage.account.address } : undefined,
@@ -903,29 +983,31 @@ const invoke = (title, data) => {
                 domain: title.refDomain,
                 invoke: data.msg
             }
-        }, () => {
-            openNotify(() => {
-                chrome.storage.local.get("confirm", res => {
-                    if (res["confirm"] === "confirm") {
-                        contractBuilder(data)
-                            .then(result => {
-                            resolve(result);
-                        })
-                            .catch(error => {
-                            reject(error);
-                        });
-                    }
-                    else if (res["confirm"] === "cancel") {
-                        reject({
-                            type: "TransactionError",
-                            description: "User cancel Authorization "
-                        });
-                    }
-                });
+        };
+        openNotify(message, () => {
+            chrome.storage.local.get("confirm", res => {
+                if (res["confirm"] === "confirm") {
+                    contractBuilder(data)
+                        .then(result => {
+                        resolve(result);
+                    })
+                        .catch(error => {
+                        reject(error);
+                    });
+                }
+                else if (res["confirm"] === "cancel") {
+                    reject({
+                        type: "TransactionError",
+                        description: "User cancel Authorization "
+                    });
+                }
             });
         });
     });
 };
+/**
+ * 获得网络状态信息
+ */
 const getNetworks = () => {
     return new Promise((resolve, reject) => {
         const network = {
@@ -935,6 +1017,10 @@ const getNetworks = () => {
         resolve(network);
     });
 };
+/**
+ * 余额获取
+ * @param data 请求的参数
+ */
 const getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     if (!Array.isArray(data.params)) {
         data.params = [data.params];
@@ -1033,11 +1119,10 @@ const getProvider = () => {
     });
 };
 const responseMessage = (request) => {
-    console.log("request:   this is background ID:" + request.ID);
     const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const sendResponse = (data) => {
-            data
+        const sendResponse = (result) => {
+            result
                 .then(data => {
                 chrome.tabs.sendMessage(tabs[0].id, {
                     return: command,
@@ -1129,9 +1214,4 @@ var EventName;
     EventName["DISCONNECTED"] = "DISCONNECTED";
     EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
 })(EventName || (EventName = {}));
-window.onload = () => {
-    console.log("----------------------------------初始化 ");
-    //初始化鼠标随机方法
-    Neo.Cryptography.RandomNumberGenerator.startCollectors();
-};
 //# sourceMappingURL=background.js.map

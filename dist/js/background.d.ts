@@ -14,10 +14,6 @@ declare const HASH_CONFIG: {
 };
 declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
-declare class Result {
-    err: boolean;
-    info: any;
-}
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -125,6 +121,10 @@ interface IOpts {
     getAll?: boolean;
 }
 declare const makeRpcUrl: (url: any, method: any, params: any) => string;
+/**
+ * api 请求方法
+ * @param opts 请求参数
+ */
 declare function request(opts: IOpts): Promise<any>;
 declare const Api: {
     /**
@@ -175,7 +175,7 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
      *
      * @param argument
      */
-    emitInvoke(argument: Argument[]): ThinNeo.ScriptBuilder;
+    emitInvoke(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
 }
 /**
  * 编译 invoke参数列表
@@ -187,13 +187,39 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  * @param data 合并合约调用参数
  */
 declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
+declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
 declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
-declare function openNotify(call: any): void;
+/**
+ * 打开notify页面并传递信息，返回调用
+ * @param call 回调方法
+ * @param data 通知信息
+ */
+declare const openNotify: (data: any, call: any) => void;
+/**
+ * 请求账户信息
+ */
 declare const getAccount: (title: any) => Promise<{}>;
+/**
+ * invokeGroup 合约调用
+ * @param title 请求的网页信息
+ * @param data 传递的数据
+ */
 declare const invokeGroup: (title: any, data: any) => Promise<{}>;
+/**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
 declare const invoke: (title: any, data: any) => Promise<{}>;
+/**
+ * 获得网络状态信息
+ */
 declare const getNetworks: () => Promise<GetNetworksOutput>;
+/**
+ * 余额获取
+ * @param data 请求的参数
+ */
 declare const getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
 declare const send: (title: any, data: any) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;

@@ -14,6 +14,7 @@ declare class Main {
      */
     getBalance(): Promise<{}>;
     invokeGroup(): Promise<{}>;
+    invokeGroup2(): Promise<{}>;
     /**
      * invoke 发送交易
      */
