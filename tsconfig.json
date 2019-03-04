@@ -11,5 +11,12 @@
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
         "alwaysStrict": true
-    }
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "webpack",
+        "src/app",
+        "test"
+    ]
 }

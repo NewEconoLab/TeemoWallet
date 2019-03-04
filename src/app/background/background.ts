@@ -1003,15 +1003,19 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
         throw error;    
     }
     if(!!invoke.fee && invoke.fee!=='' && invoke.fee!='0'){        
-        try {
+        try 
+        {
             const utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
             if(utxos)
                 tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
-        } catch (error) {
+        } 
+        catch (error) 
+        {
             throw error
         }
     }
-    try {
+    try 
+    {
         const message  = tran.GetMessage().clone();
         const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
         tran.AddWitness(signdata,common.account.pubkey,common.account.address);
@@ -1033,7 +1037,9 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
             throw {type:"TransactionError",description:result[0].errorMessage,data:data.toHexString()};            
         }
         
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         throw error;                  
     }
 }

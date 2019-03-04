@@ -5,7 +5,7 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
-import { Invoke } from '../../../../common/entity';
+import { Invoke, InvokeArgs } from '../../../../common/entity';
 // import { observer } from 'mobx-react';
 
 interface IProps{

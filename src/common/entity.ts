@@ -1,3 +1,7 @@
+import { Storage_internal } from "../view/popup/utils/storagetools";
+import { Api } from "../view/popup/store/api/common.api";
+import common from "../view/popup/store/common";
+
 export class Result
 {
     err: boolean;
@@ -143,16 +147,6 @@ export interface Invoke{
     network:"TestNet"|"MainNet"
 }
 
-export interface Argument{
-    type:"String"|"Boolean"|"Hash160"|"Integer"|"ByteArray"|"Array"|"Address"
-    value:string|number|boolean|Array<Argument>
-}
-
-export interface Asset{
-    NEO:string;
-    GAS:string;
-}
-
 /**
  * 
  */
@@ -190,6 +184,8 @@ export class MarkUtxo
         Storage_internal.set("utxo_manager",session);
 
     }
+
+    
 
     public static async getAllUtxo():Promise<{ [id: string]: Utxo[] }>
     {
@@ -270,4 +266,171 @@ export class Utxo{
     public n: number;
     public asset: string;
     public count: Neo.Fixed8;
+}
+
+
+enum ArgumentDataType {
+    STRING = 'String',
+    BOOLEAN = 'Boolean',
+    HASH160 = 'Hash160',
+    HASH256 = 'Hash256',
+    INTEGER = 'Integer',
+    BYTEARRAY = 'ByteArray',
+    ARRAY = 'Array',
+    ADDRESS = 'Address',
+    HOOKTXID = 'Hook_Txid',
+}
+
+enum Command {
+  isReady = 'isReady',
+  getProvider = 'getProvider',
+  getNetworks = 'getNetworks',
+  getAccount = 'getAccount',
+  getPublicKey = 'getPublicKey',
+  getBalance = 'getBalance',
+  getStorage = 'getStorage',
+  invokeRead = 'invokeRead',
+  send = 'send',
+  invoke = 'invoke',
+  invokeGroup="invokeGroup",
+  event = 'event',
+  disconnect = 'disconnect',
+}
+
+enum EventName {
+  READY = 'READY',
+  ACCOUNT_CHANGED = 'ACCOUNT_CHANGED',
+  CONNECTED = 'CONNECTED',
+  DISCONNECTED = 'DISCONNECTED',
+  NETWORK_CHANGED = 'NETWORK_CHANGED',
+}
+
+interface GetStorageArgs {
+    scriptHash: string;
+    key: string;
+    network: string;
+}
+
+interface GetStorageOutput {
+    result: string;
+}
+  
+/**
+ * invoke 请求参数
+ * @param {scriptHash} 合约hash
+ * @param {operation} 调用合约的方法名
+ * @param {stgring} 网络费
+ * 
+ */
+export interface InvokeArgs{
+    scriptHash:string;
+    operation:string;
+    fee?:string;
+    network:"TestNet"|"MainNet";
+    arguments:Array<Argument>;
+    attachedAssets?:AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
+    triggerContractVerification?: boolean;
+}
+
+interface AttachedAssets {
+    [asset: string]: string;
+}
+
+interface AssetIntentOverrides {
+    inputs: AssetInput[];
+    outputs: AssetOutput[];
+}
+
+interface AssetInput {
+    txid: string;
+    index: number;
+}
+
+interface AssetOutput {
+    asset: string;
+    address: number;
+    value: string;
+}
+
+interface InvokeOutput {
+    txid: string;
+    nodeUrl: string;
+}
+
+export interface Argument{
+    type:"String"|"Boolean"|"Hash160"|"Hash256"|"Integer"|"ByteArray"|"Array"|"Address"|"Hook_Txid";
+    value:string|number|boolean|Array<Argument>
+}
+
+export interface Asset{
+    NEO:string;
+    GAS:string;
+}
+
+interface InvokeGroup{
+    merge:boolean;
+    group:InvokeArgs[];
+}
+
+interface InvokeGroupOutup{
+
+}
+
+interface BalanceRequest {
+    address: string; // Address to check balance(s)
+    assets?: string[]; // Asset symbol or script hash to check balance
+    fetchUTXO?: boolean;
+}
+  
+interface GetBalanceArgs {
+    params: BalanceRequest|BalanceRequest[];
+    network: string;
+}
+
+interface BalanceResults {
+    [address: string]: Balance[];
+}
+
+interface Balance {
+    assetID: string;
+    symbol: string;
+    amount: string;
+}
+
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: string;
+}
+
+interface AccountOutput {
+    address: string;
+    label: string;
+}
+
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: string;
+}
+  
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
+}
+
+
+interface Provider {
+    name: string;
+    version: string;
+    compatibility: string[];
+    website: string;
+    extra: {
+        theme: string,
+        currency: string,
+    };
 }

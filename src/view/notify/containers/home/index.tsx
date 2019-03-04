@@ -9,6 +9,7 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
+import { InvokeArgs } from '../../../../common/entity';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
