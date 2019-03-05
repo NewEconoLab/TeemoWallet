@@ -1,5 +1,10 @@
 /// <reference path="../../src/lib/neo-thinsdk.d.ts" />
-declare var storage: any;
+interface BackStore {
+    network: "testnet" | "mainnet";
+    height: number;
+    account: AccountInfo;
+}
+declare var storage: BackStore;
 declare const HASH_CONFIG: {
     accountCGAS: Neo.Uint160;
     ID_CGAS: Neo.Uint160;
@@ -220,10 +225,51 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * 余额获取
  * @param data 请求的参数
  */
-declare const getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
+declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
 declare const send: (title: any, data: any) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
 declare const responseMessage: (request: any) => void;
+declare enum ConfirmType {
+    tranfer = 0,
+    contract = 1
+}
+declare enum TaskState {
+    watting = 0,
+    success = 1,
+    fail = 2,
+    watForLast = 3,
+    failForLast = 4
+}
+declare class Task {
+    height: number;
+    confirm: number;
+    type: ConfirmType;
+    txid: string;
+    message: any;
+    state: TaskState;
+    startTime: number;
+    constructor(type: ConfirmType, txid: string, messgae?: any);
+}
+declare class TransferGroup {
+    txid: string;
+    tran: {
+        txid: string;
+        txhex: Uint8Array;
+    }[];
+    index: number;
+    executeError: {
+        type: string;
+        data: string;
+    };
+    update(): void;
+}
+declare class TaskManager {
+    static shed: {
+        [txid: string]: Task;
+    };
+    static start(): void;
+    static update(): void;
+}
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
 declare enum ArgumentDataType {
