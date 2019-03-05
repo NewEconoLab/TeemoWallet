@@ -5,28 +5,36 @@ import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
 import Transfer from '../transfer';
+import QrCodeBox from '../qrcode';
 import { neotools } from '../../utils/neotools';
-// @observer
+import { observer } from 'mobx-react';
+
+@observer
 export default class Assets extends React.Component<any, {}> 
 {
 	constructor(props: any)
 	{
 		super(props);		
+    } 
+    public state={
+        showNumber:0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
     }
-
     componentDidMount(){
         
         neotools.invokeTest();
+    }   
+
+    public onShowQrcode = () =>
+	{
+        this.setState({showNumber:1})
     }
-    
-    public state={
-        transfer:false
+    public onCloseModel=()=>{
+        this.setState({showNumber:0});
     }
 
-	// 监控输入内容
-	public onClick = () =>
+	public onShowTransfer = () =>
 	{
-        this.setState({transfer:true})
+        this.setState({showNumber:2})
 	}
 
 	public render()
@@ -35,10 +43,10 @@ export default class Assets extends React.Component<any, {}>
             <div className="assets">
                 <div className="btn-list">
                     <div className="address">
-                        <Button text="收款" size="adaptation" />
+                        <Button text="收款" size="adaptation" onClick={this.onShowQrcode} />
                     </div>
                     <div className="transfer">
-                        <Button text="转账" size="adaptation" onClick={this.onClick} />
+                        <Button text="转账" size="adaptation" onClick={this.onShowTransfer} />
                     </div>
                 </div>
                 <div className="asset-list">
@@ -60,7 +68,8 @@ export default class Assets extends React.Component<any, {}>
                         <div className="asset-amount">999999.99999999</div>
                     </div>
                 </div>
-                <Transfer show={this.state.transfer}></Transfer>
+                <QrCodeBox show={this.state.showNumber === 1} onHide={this.onCloseModel} />
+                <Transfer show={this.state.showNumber === 2} onHide={this.onCloseModel} />                
             </div>
 		);
 	}
