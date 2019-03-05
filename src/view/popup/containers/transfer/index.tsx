@@ -12,7 +12,8 @@ import Button from '../../../components/Button';
 
 interface IProps
 {
-	show:boolean
+	show:boolean,
+	onHide?:()=>void
 }
 
 interface IState
@@ -49,7 +50,9 @@ export default class Transfer extends React.Component<IProps, IState>
 	{
 		this.setState({amount:event})
 	}
-
+	public onHide=()=>{
+		this.props.onHide?this.props.onHide():null;
+	}
 	public render()
 	{
 		return (
