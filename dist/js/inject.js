@@ -61,13 +61,11 @@ function sendMessage(command, params) {
     const ID = getMessageID();
     return new Promise((resolve, reject) => {
         const request = params ? { command, params, ID } : { command, ID };
-        console.log("request:   this is inject ID:" + ID);
         window.postMessage(request, "*");
         window.addEventListener("message", e => {
             const response = e.data;
             if (response.return == command && response.ID == ID) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
              {
-                console.log("response:   this is inject ID:" + ID);
                 if (response.error) {
                     reject(response.error);
                 }
@@ -126,6 +124,9 @@ var Teemmo;
         }
         static invokeGroup(params) {
             return sendMessage(Command.invokeGroup, params);
+        }
+        static invokeRead(params) {
+            return sendMessage(Command.invokeRead, params);
         }
     }
     NEO.getProvider = () => {

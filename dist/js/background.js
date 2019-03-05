@@ -32,6 +32,7 @@ const HASH_CONFIG = {
 };
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
+const testRpcUrl = "http://47.99.223.87:20332";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -377,6 +378,9 @@ function request(opts) {
         if (opts.baseUrl === 'common') {
             url = [baseCommonUrl, common.network].join('/');
         }
+        else if (opts.baseUrl === 'rpc') {
+            url = testRpcUrl;
+        }
         console.log(url);
         const input = opts.isGET ? makeRpcUrl(url, opts.method, opts.params) : url;
         const init = opts.isGET ? { method: 'GET' } : { method: 'POST', body: makeRpcPostBody(opts.method, opts.params) };
@@ -404,6 +408,14 @@ function request(opts) {
     });
 }
 var Api = {
+    getInvokeRead: (scriptHash) => {
+        const opts = {
+            method: 'invokescript',
+            params: [scriptHash],
+            baseUrl: 'rpc'
+        };
+        return request(opts);
+    },
     /**
      * 获取nep5的资产（CGAS）
      */
@@ -459,9 +471,7 @@ var Api = {
     sendrawtransaction: (data) => {
         const opts = {
             method: 'sendrawtransaction',
-            params: [
-                data
-            ],
+            params: [data],
             baseUrl: 'common'
         };
         return request(opts);
@@ -469,9 +479,7 @@ var Api = {
     getUtxo: (address) => {
         const opts = {
             method: "getutxo",
-            params: [
-                address
-            ],
+            params: [address],
             baseUrl: 'common'
         };
         return request(opts);
@@ -479,9 +487,7 @@ var Api = {
     getDomainInfo: (domain) => {
         const opts = {
             method: "getdomaininfo",
-            params: [
-                domain
-            ]
+            params: [domain]
         };
         return request(opts);
     },
@@ -492,9 +498,7 @@ var Api = {
     hasTx: (txid) => {
         const opts = {
             method: "hastx",
-            params: [
-                txid
-            ]
+            params: [txid]
         };
         return request(opts);
     },
@@ -505,9 +509,7 @@ var Api = {
     hasContract: (txid) => {
         const opts = {
             method: "hascontract",
-            params: [
-                txid
-            ]
+            params: [txid]
         };
         return request(opts);
     },
@@ -518,9 +520,7 @@ var Api = {
     getRehargeAndTransfer: (txid) => {
         const opts = {
             method: "getrechargeandtransfer",
-            params: [
-                txid
-            ]
+            params: [txid]
         };
         return request(opts);
     },
@@ -557,9 +557,7 @@ var Api = {
     getnep5asset: (asset) => {
         const opts = {
             method: "getnep5asset",
-            params: [
-                asset
-            ]
+            params: [asset]
         };
         return request(opts);
     }
@@ -747,6 +745,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         try {
             let result = yield sendInvoke(tran);
+            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid));
             return [result];
         }
         catch (error) {
@@ -1106,8 +1105,32 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     }
     return balances;
 });
-const send = (title, data) => {
+var send = (title, data) => {
     return new Promise((resolve, reject) => {
+    });
+};
+/**
+ * invoke试运行方法
+ * @param data invokeRead 的参数
+ */
+var invokeRead = (data) => {
+    return new Promise((r, j) => {
+        const script = new ScriptBuild();
+        try {
+            script.emitInvoke(invoke.arguments); // 参数转换与打包
+            script.EmitPushString(data.operation); // 塞入需要调用的合约方法名
+            script.EmitAppCall(Neo.Uint160.parse(data.scriptHash)); // 塞入需要调用的合约hex
+            Api.getInvokeRead(script.ToArray().toHexString())
+                .then(result => {
+                r(result);
+            })
+                .then(error => {
+                j(error);
+            });
+        }
+        catch (error) {
+            j(error);
+        }
     });
 };
 const getProvider = () => {
@@ -1164,6 +1187,7 @@ const responseMessage = (request) => {
                 sendResponse(send(message, params));
                 break;
             case Command.invokeRead:
+                sendResponse(invokeRead(params));
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(message, params));
@@ -1194,27 +1218,40 @@ var TaskState;
     TaskState[TaskState["failForLast"] = 4] = "failForLast";
 })(TaskState || (TaskState = {}));
 class Task {
-    constructor(type, txid, messgae) {
+    constructor(type, txid, next, state, messgae) {
         this.height = storage.height;
         this.type = type;
         this.confirm = 0;
         this.txid = txid;
-        this.state = TaskState.watting;
+        this.next = next;
+        this.state = state ? state : TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();
     }
 }
 class TransferGroup {
     update() {
-        Api.sendrawtransaction(this.tran[0].txhex)
+        Api.sendrawtransaction(this.txhex)
             .then(result => {
             if (result && result[0] && result[0].sendrawtransaction) {
-                console.log();
+                TaskManager.shed[this.txid].state = TaskState.watting;
+            }
+            else {
+                TaskManager.shed[this.txid].state = TaskState.fail;
+                this.executeError = {
+                    type: "TransferError",
+                    description: result[0].errorMessage,
+                    data: this.txhex
+                };
             }
         })
             .catch(error => {
             if (error) {
-                console.log(error);
+                this.executeError = {
+                    type: "TransferError",
+                    description: "",
+                    data: error
+                };
             }
         });
     }
@@ -1222,11 +1259,13 @@ class TransferGroup {
 class TaskManager {
     static start() {
         setInterval(() => {
+            console.log("-----------------进来了");
             Api.getBlockCount()
                 .then(result => {
                 const count = (parseInt(result[0].blockcount) - 1);
                 if (count - storage.height > 0) {
                     storage.height = count;
+                    console.log(storage.height);
                     this.update();
                 }
             })
@@ -1234,6 +1273,9 @@ class TaskManager {
                 console.log(error);
             });
         }, 15000);
+    }
+    static addTask(task) {
+        this.shed[task.txid] = task;
     }
     static update() {
         for (const key in this.shed) {
@@ -1243,8 +1285,9 @@ class TaskManager {
                 if (task.type === ConfirmType.tranfer) {
                     Api.hasTx(task.txid)
                         .then(result => {
-                        if (result.issucces) {
+                        if (result[0].issucces) {
                             task.state = TaskState.success;
+                            console.log(task);
                         }
                     })
                         .catch(result => {

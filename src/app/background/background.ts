@@ -9,6 +9,13 @@ interface BackStore
 
 }
 
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    args?: Argument[];
+    network: string;
+}
+
 var storage:BackStore=
 {
     network:"testnet",
@@ -38,6 +45,7 @@ const HASH_CONFIG = {
 
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
+const testRpcUrl = "http://47.99.223.87:20332";
 
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -521,7 +529,9 @@ return urlout;
 async function request(opts: IOpts) {
     let url = [baseUrl,common.network].join('/');
     if (opts.baseUrl === 'common') {
-      url = [baseCommonUrl,common.network].join('/')
+        url = [baseCommonUrl,common.network].join('/');
+    }else if(opts.baseUrl==='rpc'){
+        url = testRpcUrl;
     }
     console.log(url);
   
@@ -557,87 +567,90 @@ async function request(opts: IOpts) {
 }
 
 var Api = {
+    getInvokeRead:(scriptHash:string)=>{
+        const opts = {
+            method:'invokescript',
+            params:[scriptHash],
+            baseUrl:'rpc'
+        }
+        return request(opts)
+    },
+
     /**
      * 获取nep5的资产（CGAS）
      */
-    getnep5balanceofaddress :  (address,assetId) => {
-      const opts = {
-       method:'getnep5balanceofaddress',
-       params:[
-         assetId,
-         address
-       ],
-       baseUrl:'common'
-      }
-      return request(opts);
+    getnep5balanceofaddress : (address,assetId) => {
+        const opts = {
+            method:'getnep5balanceofaddress',
+            params:[
+                assetId,
+                address
+            ],
+            baseUrl:'common'
+        }
+        return request(opts);
     },
     /**
      * 获取nep5的资产（CGAS）
      */
     getallnep5assetofaddress :  (address) => {
-      const opts = {
-       method:'getallnep5assetofaddress',
-       params:[
-         address,1
-       ],
-       baseUrl:'common'
-      }
-      return request(opts);
+        const opts = {
+            method:'getallnep5assetofaddress',
+            params:[
+                address,1
+            ],
+            baseUrl:'common'
+        }
+        return request(opts);
     },
     /**
      * 获取nep5的资产（CGAS）
      */
     getUtxoBalance :  (address,assetId) => {
-      const opts = {
-       method:'getnep5balanceofaddress',
-       params:[
-         assetId,
-         address
-       ],
-       baseUrl:'common'
-      }
-      return request(opts);
+        const opts = {
+        method:'getnep5balanceofaddress',
+        params:[
+            assetId,
+            address
+        ],
+        baseUrl:'common'
+        }
+        return request(opts);
     },
     getregisteraddressbalance : (address,register) => {
       // alert(DomainSelling.RootNeo.register.toString())
-      const opts = {
-       method:'getregisteraddressbalance',
-       params:[
-        address,
-        register
-       ]
-      }
-      return request(opts);
+        const opts = {
+        method:'getregisteraddressbalance',
+        params:[
+            address,
+            register
+        ]
+        }
+        return request(opts);
     },
     sendrawtransaction : (data) => {
-      const opts = {
-       method:'sendrawtransaction',
-       params:[
-        data
-       ],
-       baseUrl:'common'
-      }
-      return request(opts);
+        const opts = {
+        method:'sendrawtransaction',
+        params:[data],
+        baseUrl:'common'
+        }
+        return request(opts);
     },
     getUtxo:(address)=>{
-      const opts={
-        method:"getutxo",
-        params:[
-          address
-        ],
-        baseUrl:'common'
-      }
-      return request(opts);
+        const opts={
+            method:"getutxo",
+            params:[address],
+            baseUrl:'common'
+        }
+        return request(opts);
     },
     
     getDomainInfo:(domain)=>{
-      const opts={
-        method:"getdomaininfo",
-        params:[
-          domain
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"getdomaininfo",
+            params:[domain]
+        }
+        return request(opts);
     },
     
     /**
@@ -645,13 +658,11 @@ var Api = {
      * @param txid 交易id
      */
     hasTx:(txid)=>{
-      const opts={
-        method:"hastx",
-        params:[
-          txid
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"hastx",
+            params:[txid]
+        }
+        return request(opts);
     },
     
     /**
@@ -659,13 +670,11 @@ var Api = {
      * @param txid 交易id
      */
     hasContract:(txid)=>{
-      const opts={
-        method:"hascontract",
-        params:[
-          txid
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"hascontract",
+            params:[txid]
+        }
+        return request(opts);
     },
     
     /**
@@ -673,22 +682,20 @@ var Api = {
      * @param txid 交易id
      */
     getRehargeAndTransfer:(txid)=>{
-      const opts={
-        method:"getrechargeandtransfer",
-        params:[
-          txid
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"getrechargeandtransfer",
+            params:[txid]
+        }
+        return request(opts);
     },
     
     getBlockCount:()=>{
-      const opts={
-        method:"getblockcount",
-        params:[],
-        baseUrl:"common"
-      }
-      return request(opts);
+        const opts={
+            method:"getblockcount",
+            params:[],
+            baseUrl:"common"
+        }
+        return request(opts);
     },
     
     getBalance:(addr)=>{
@@ -701,27 +708,25 @@ var Api = {
     },
 
     rechargeAndTransfer:(data1,data2)=>{
-      const opts={
-        method:"rechargeandtransfer",
-        params:[
-          data1,
-          data2
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"rechargeandtransfer",
+            params:[
+                data1,
+                data2
+            ]
+        }
+        return request(opts);
     },
     /**
      * @method 获得nep5资产信息
      * @param asset 资产id
      */
     getnep5asset:(asset)=>{
-      const opts={
-        method:"getnep5asset",
-        params:[
-          asset
-        ]
-      }
-      return request(opts);
+        const opts={
+            method:"getnep5asset",
+            params:[asset]
+        }
+        return request(opts);
     }
 }
 
@@ -922,6 +927,11 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
         }
         try {
             let result = await sendInvoke(tran);
+            TaskManager.addTask(
+                new Task(
+                ConfirmType.tranfer,
+                result.txid)
+            )
             return [result];
         } catch (error) {
             throw error
@@ -1061,7 +1071,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
 /**
  * 打开notify页面并传递信息，返回调用
  * @param call 回调方法
- * @param data 通知信息
+ * @param data 通知信息 
  */
 const openNotify=(data,call)=> {
     if(data)
@@ -1317,11 +1327,35 @@ var getBalance = async (data:GetBalanceArgs)=>{
     return balances;
 }
 
-const send=(title,data)=>
+var send=(title,data)=>
 {
     return new Promise((resolve,reject)=>
     {
 
+    })
+}
+
+/**
+ * invoke试运行方法
+ * @param data invokeRead 的参数
+ */
+var invokeRead=(data:InvokeReadInput)=>{
+    return new Promise((r,j)=>{
+        const script = new ScriptBuild();
+        try {
+            script.emitInvoke(invoke.arguments);        // 参数转换与打包
+            script.EmitPushString(data.operation);    // 塞入需要调用的合约方法名
+            script.EmitAppCall(Neo.Uint160.parse(data.scriptHash));   // 塞入需要调用的合约hex
+            Api.getInvokeRead(script.ToArray().toHexString())
+            .then(result=>{
+                r(result);
+            })
+            .then(error=>{
+                j(error);
+            })
+        } catch (error) {
+            j(error);
+        }
     })
 }
 
@@ -1381,7 +1415,7 @@ const responseMessage =(request)=>
                 break;
             case Command.getPublicKey:
                 
-            break;
+                break;
             case Command.invoke:
                 sendResponse(invoke(message,params));
                 break;
@@ -1389,7 +1423,7 @@ const responseMessage =(request)=>
                 sendResponse(send(message,params))
                 break;
             case Command.invokeRead:
-                
+                sendResponse(invokeRead(params));
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(message,params))
@@ -1435,17 +1469,21 @@ class Task
     message: any;
     state: TaskState;
     startTime: number;
+    next?:TransferGroup;
     constructor(
         type: ConfirmType,
         txid: string,
+        next?:TransferGroup,
+        state?:TaskState,
         messgae?
     )
     {
-        this.height = storage.height
+        this.height = storage.height;
         this.type = type;
         this.confirm = 0;
         this.txid = txid;
-        this.state = TaskState.watting;
+        this.next = next;
+        this.state = state?state:TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();
     }
@@ -1454,21 +1492,33 @@ class Task
 class TransferGroup
 {
     txid:string;
-    tran:{txid:string, txhex:Uint8Array}[];
-    index:number;
-    executeError:{type:string,data:string}
+    txhex:string;
+    executeError?:{type:string,data:string,description:string}
     update(){
-        Api.sendrawtransaction(this.tran[0].txhex)
+        Api.sendrawtransaction(this.txhex)
         .then(result=>{
             if(result && result[0] && result[0].sendrawtransaction)
             {
-                console.log();
-            }            
+                TaskManager.shed[this.txid].state = TaskState.watting;
+            }
+            else
+            {
+                TaskManager.shed[this.txid].state = TaskState.fail;
+                this.executeError={
+                    type:"TransferError",
+                    description:result[0].errorMessage,
+                    data:this.txhex
+                }
+            }
         })
         .catch(error=>{
             if(error)
             {
-                console.log(error);
+                this.executeError={
+                    type:"TransferError",
+                    description:"",
+                    data:error
+                }
             }
         })
     }
@@ -1481,12 +1531,16 @@ class TaskManager{
     public static start()
     {
         setInterval(()=>{
+            console.log("-----------------进来了");
+            
             Api.getBlockCount()
             .then(result=>{
                 const count = (parseInt(result[0].blockcount)-1);
                 if(count - storage.height>0)
                 {
                     storage.height=count;
+                    console.log(storage.height);
+                    
                     this.update()
                 }
             }) 
@@ -1494,6 +1548,11 @@ class TaskManager{
                 console.log(error);        
             })
         },15000)        
+    }
+
+    public static addTask(task:Task)
+    {
+        this.shed[task.txid] = task;
     }
 
     public static update()
@@ -1507,9 +1566,10 @@ class TaskManager{
                 if(task.type===ConfirmType.tranfer){
                     Api.hasTx(task.txid)
                     .then(result=>{
-                        if(result.issucces)
+                        if(result[0].issucces)
                         {
                             task.state = TaskState.success;
+                            console.log(task);                            
                         }
                     })
                     .catch(result=>{
@@ -1521,8 +1581,7 @@ class TaskManager{
                         console.log(result);                        
                     })
                     .catch(error=>{
-                        console.log(error);
-                        
+                        console.log(error);                        
                     })
                 }
             }
@@ -1689,7 +1748,6 @@ interface SendOutput {
     txid: string;
     nodeUrl: string;
 }
-
 
 interface Provider {
     name: string;

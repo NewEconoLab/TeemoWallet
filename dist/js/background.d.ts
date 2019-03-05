@@ -4,6 +4,12 @@ interface BackStore {
     height: number;
     account: AccountInfo;
 }
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    args?: Argument[];
+    network: string;
+}
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
     accountCGAS: Neo.Uint160;
@@ -19,6 +25,7 @@ declare const HASH_CONFIG: {
 };
 declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
+declare const testRpcUrl = "http://47.99.223.87:20332";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -132,6 +139,7 @@ declare const makeRpcUrl: (url: any, method: any, params: any) => string;
  */
 declare function request(opts: IOpts): Promise<any>;
 declare var Api: {
+    getInvokeRead: (scriptHash: string) => Promise<any>;
     /**
      * 获取nep5的资产（CGAS）
      */
@@ -226,7 +234,12 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * @param data 请求的参数
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
-declare const send: (title: any, data: any) => Promise<{}>;
+declare var send: (title: any, data: any) => Promise<{}>;
+/**
+ * invoke试运行方法
+ * @param data invokeRead 的参数
+ */
+declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
 declare const responseMessage: (request: any) => void;
 declare enum ConfirmType {
@@ -248,18 +261,16 @@ declare class Task {
     message: any;
     state: TaskState;
     startTime: number;
-    constructor(type: ConfirmType, txid: string, messgae?: any);
+    next?: TransferGroup;
+    constructor(type: ConfirmType, txid: string, next?: TransferGroup, state?: TaskState, messgae?: any);
 }
 declare class TransferGroup {
     txid: string;
-    tran: {
-        txid: string;
-        txhex: Uint8Array;
-    }[];
-    index: number;
-    executeError: {
+    txhex: string;
+    executeError?: {
         type: string;
         data: string;
+        description: string;
     };
     update(): void;
 }
@@ -268,6 +279,7 @@ declare class TaskManager {
         [txid: string]: Task;
     };
     static start(): void;
+    static addTask(task: Task): void;
     static update(): void;
 }
 declare const BLOCKCHAIN = "NEO";
