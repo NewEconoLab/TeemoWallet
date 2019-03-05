@@ -7,13 +7,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var storage;
-(function (storage) {
-    var account = null;
-    storage.account = account;
-    var network = "testnet";
-    storage.network = network;
-})(storage || (storage = {}));
+var storage = {
+    network: "testnet",
+    account: undefined,
+    height: 0
+};
+// (function(storage){
+//     var account = null
+//     storage.account=account;
+//     var network="testnet";
+//     storage.network=network;
+// })(storage || (storage = {}));
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -1021,7 +1025,7 @@ const getNetworks = () => {
  * 余额获取
  * @param data 请求的参数
  */
-const getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
+var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     if (!Array.isArray(data.params)) {
         data.params = [data.params];
     }
@@ -1111,8 +1115,8 @@ const getProvider = () => {
         let provider = {
             "compatibility": [""],
             "extra": { theme: "", currency: "" },
-            "name": "",
-            "version": "",
+            "name": "Teemmo.NEO",
+            "version": VERSION,
             "website": ""
         };
         resolve(provider);
@@ -1176,6 +1180,92 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Neo.Cryptography.RandomNumberGenerator.startCollectors();
     responseMessage(request);
 });
+var ConfirmType;
+(function (ConfirmType) {
+    ConfirmType[ConfirmType["tranfer"] = 0] = "tranfer";
+    ConfirmType[ConfirmType["contract"] = 1] = "contract";
+})(ConfirmType || (ConfirmType = {}));
+var TaskState;
+(function (TaskState) {
+    TaskState[TaskState["watting"] = 0] = "watting";
+    TaskState[TaskState["success"] = 1] = "success";
+    TaskState[TaskState["fail"] = 2] = "fail";
+    TaskState[TaskState["watForLast"] = 3] = "watForLast";
+    TaskState[TaskState["failForLast"] = 4] = "failForLast";
+})(TaskState || (TaskState = {}));
+class Task {
+    constructor(type, txid, messgae) {
+        this.height = storage.height;
+        this.type = type;
+        this.confirm = 0;
+        this.txid = txid;
+        this.state = TaskState.watting;
+        this.message = messgae;
+        this.startTime = new Date().getTime();
+    }
+}
+class TransferGroup {
+    update() {
+        Api.sendrawtransaction(this.tran[0].txhex)
+            .then(result => {
+            if (result && result[0] && result[0].sendrawtransaction) {
+                console.log();
+            }
+        })
+            .catch(error => {
+            if (error) {
+                console.log(error);
+            }
+        });
+    }
+}
+class TaskManager {
+    static start() {
+        setInterval(() => {
+            Api.getBlockCount()
+                .then(result => {
+                const count = (parseInt(result[0].blockcount) - 1);
+                if (count - storage.height > 0) {
+                    storage.height = count;
+                    this.update();
+                }
+            })
+                .catch(error => {
+                console.log(error);
+            });
+        }, 15000);
+    }
+    static update() {
+        for (const key in this.shed) {
+            const task = this.shed[key];
+            // task.state!=TaskState.fail && task.state != TaskState.failForLast && task.state != TaskState.watForLast && task.state != TaskState.success
+            if (task.state == TaskState.watting) {
+                if (task.type === ConfirmType.tranfer) {
+                    Api.hasTx(task.txid)
+                        .then(result => {
+                        if (result.issucces) {
+                            task.state = TaskState.success;
+                        }
+                    })
+                        .catch(result => {
+                        console.log(result);
+                    });
+                }
+                else {
+                    Api.hasContract(task.txid)
+                        .then(result => {
+                        console.log(result);
+                    })
+                        .catch(error => {
+                        console.log(error);
+                    });
+                }
+            }
+        }
+    }
+}
+TaskManager.shed = {};
+TaskManager.start();
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 var ArgumentDataType;

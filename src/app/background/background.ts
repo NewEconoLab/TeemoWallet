@@ -1,12 +1,26 @@
 ///<reference path="../../lib/neo-thinsdk.d.ts"/>
 
-var storage
-(function(storage){
-    var account = null
-    storage.account=account;
-    var network="testnet";
-    storage.network=network;
-})(storage || (storage = {}));
+interface BackStore
+{
+    // [name:string]:any
+    network:"testnet"|"mainnet",
+    height:number,
+    account:AccountInfo
+
+}
+
+var storage:BackStore=
+{
+    network:"testnet",
+    account:undefined,
+    height:0
+}
+// (function(storage){
+//     var account = null
+//     storage.account=account;
+//     var network="testnet";
+//     storage.network=network;
+// })(storage || (storage = {}));
 
 
 const HASH_CONFIG = {
@@ -1215,7 +1229,7 @@ const getNetworks=():Promise<GetNetworksOutput>=>{
  * 余额获取
  * @param data 请求的参数
  */
-const getBalance= async(data:GetBalanceArgs)=>{
+var getBalance = async (data:GetBalanceArgs)=>{
     if (!Array.isArray(data.params)) {
       data.params = [data.params];
     }
@@ -1319,8 +1333,8 @@ const getProvider=()=>
         {
             "compatibility":[""],
             "extra":{theme:"",currency:""},
-            "name":"",
-            "version":"",
+            "name":"Teemmo.NEO",
+            "version":VERSION,
             "website":""
         }
         resolve(provider);
@@ -1397,7 +1411,127 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+enum ConfirmType
+{
+    tranfer,    // 确认交易是否成功
+    contract,   // 确认合约是否成功，等待notify
+}
 
+enum TaskState
+{
+    watting,
+    success,
+    fail,
+    watForLast,
+    failForLast,
+}
+
+class Task
+{
+    height: number;
+    confirm: number;
+    type: ConfirmType;
+    txid: string;
+    message: any;
+    state: TaskState;
+    startTime: number;
+    constructor(
+        type: ConfirmType,
+        txid: string,
+        messgae?
+    )
+    {
+        this.height = storage.height
+        this.type = type;
+        this.confirm = 0;
+        this.txid = txid;
+        this.state = TaskState.watting;
+        this.message = messgae;
+        this.startTime = new Date().getTime();
+    }
+}
+
+class TransferGroup
+{
+    txid:string;
+    tran:{txid:string, txhex:Uint8Array}[];
+    index:number;
+    executeError:{type:string,data:string}
+    update(){
+        Api.sendrawtransaction(this.tran[0].txhex)
+        .then(result=>{
+            if(result && result[0] && result[0].sendrawtransaction)
+            {
+                console.log();
+            }            
+        })
+        .catch(error=>{
+            if(error)
+            {
+                console.log(error);
+            }
+        })
+    }
+}
+
+class TaskManager{
+
+    public static shed :{[txid:string]:Task} = {};
+
+    public static start()
+    {
+        setInterval(()=>{
+            Api.getBlockCount()
+            .then(result=>{
+                const count = (parseInt(result[0].blockcount)-1);
+                if(count - storage.height>0)
+                {
+                    storage.height=count;
+                    this.update()
+                }
+            }) 
+            .catch(error=>{
+                console.log(error);        
+            })
+        },15000)        
+    }
+
+    public static update()
+    {
+        for ( const key in this.shed) 
+        {
+            const task = this.shed[key];
+            // task.state!=TaskState.fail && task.state != TaskState.failForLast && task.state != TaskState.watForLast && task.state != TaskState.success
+            if(task.state==TaskState.watting)
+            {
+                if(task.type===ConfirmType.tranfer){
+                    Api.hasTx(task.txid)
+                    .then(result=>{
+                        if(result.issucces)
+                        {
+                            task.state = TaskState.success;
+                        }
+                    })
+                    .catch(result=>{
+                        console.log(result);                        
+                    })
+                }else{
+                    Api.hasContract(task.txid)
+                    .then(result=>{
+                        console.log(result);                        
+                    })
+                    .catch(error=>{
+                        console.log(error);
+                        
+                    })
+                }
+            }
+        }
+    }
+}
+
+
+TaskManager.start();
 
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
