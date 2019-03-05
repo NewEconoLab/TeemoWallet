@@ -941,6 +941,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
     {
         let txids:InvokeOutput[] = []
         let trans:Transaction[] = [];
+        let txhex:Uint8Array[]=[];
         for (let index = 0; index < data.group.length; index++)
         {
             const invoke = data.group[index];
@@ -962,6 +963,10 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
                 tran.setScript(script.ToArray());
                 trans.push(tran);
+                const message  = tran.GetMessage().clone();
+                const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
+                tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+                const data:Uint8Array = tran.GetRawData();
             }
         }
         let outups = await sendGroupTranstion(trans);
@@ -1569,7 +1574,7 @@ class TaskManager{
                         if(result[0].issucces)
                         {
                             task.state = TaskState.success;
-                            console.log(task);                            
+                            console.log(task);
                         }
                     })
                     .catch(result=>{
