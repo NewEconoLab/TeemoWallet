@@ -163,6 +163,15 @@ interface Provider {
         currency: string,
     };
 }
+
+
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    args?: Argument[];
+    network: string;
+}
+
 const ids = [];
 /**
  * 
@@ -267,6 +276,10 @@ namespace Teemmo
 
         static invokeGroup(params:InvokeGroup):Promise<InvokeOutput[]>{
             return sendMessage<InvokeOutput[]>(Command.invokeGroup,params);
+        }
+
+        static invokeRead(params: InvokeReadInput): Promise<any>{
+            return sendMessage(Command.invokeRead,params);
         }
     }
 }

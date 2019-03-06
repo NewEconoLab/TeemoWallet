@@ -140,6 +140,12 @@ interface Provider {
         currency: string;
     };
 }
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    args?: Argument[];
+    network: string;
+}
 declare const ids: any[];
 /**
  *
@@ -187,6 +193,7 @@ declare namespace Teemmo {
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
         static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
+        static invokeRead(params: InvokeReadInput): Promise<any>;
     }
 }
 declare var readyEvent: CustomEvent<{
