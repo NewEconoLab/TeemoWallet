@@ -293,7 +293,7 @@ enum ArgumentDataType {
     HOOKTXID = 'Hook_Txid',
 }
 
-enum Command {
+export enum Command {
   isReady = 'isReady',
   getProvider = 'getProvider',
   getNetworks = 'getNetworks',
