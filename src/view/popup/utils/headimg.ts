@@ -49,9 +49,9 @@ export default function HeadImgDemo(div: Element, address: string)
   this.content.innerHTML = "";
   this.content.appendChild(this.canvas);
   let bty = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(address);
-  draw((bty[11] % 12), (bty[2] % 21), (bty[7] % 21), (bty[18] % 21), bty[7], bty[2], bty[17]);
+  draw((bty[11] % 12), (bty[2] % 20), (bty[7] % 20), (bty[18] % 20));
 }
-const draw = (a, b, c, d, e, f, g) =>
+const draw = (a, b, c, d) =>
 {
   const PI = Math.PI;
 
