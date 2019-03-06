@@ -10,6 +10,9 @@ import QrCodeBox from '../qrcode';
 // import { neotools } from '../../utils/neotools';
 import { observer } from 'mobx-react';
 import { bg } from '../../utils/storagetools';
+import { GetBalanceArgs, BalanceRequest,BalanceResults } from '../../../../lib/background';
+import common from '../../store/common';
+import hashConfig from "../../../config/hash.config";
 
 @observer
 export default class Assets extends React.Component<any, {}> 
@@ -20,11 +23,62 @@ export default class Assets extends React.Component<any, {}>
     } 
     public state={
         showNumber:0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
+        balance:{
+            neo:"0",
+            gas:"0",
+            cgas:"0",
+            nnc:"0"
+        }
     }
-    componentDidMount(){        
+    async componentDidMount(){        
         // neotools.invokeTest();
-        // bg.getBalance()
+        const params: BalanceRequest = {
+            address: common.account.address,   // 你要查询的地址
+            assets: [hashConfig.ID_NEO.toString(),hashConfig.ID_GAS.toString(), hashConfig.ID_CGAS.toString(),hashConfig.ID_NNC.toString()],
+          }
+        const data:GetBalanceArgs=
+        {
+            "network":"testnet",
+            "params":[
+                params
+            ]
+        }
+        let result = await bg.getBalance(data);
+        if(result){
+            this.initBalance(result)
+        }
     }   
+
+    public initBalance(data:BalanceResults){
+        let neo = "0";
+        let gas = "0";
+        let cgas = "0";
+        let nnc = "0";
+        data[common.account.address].forEach((value,index)=>{
+            switch(value.symbol){
+                case 'NEO':
+                    neo = value.amount;
+                    break;
+                case 'GAS':
+                    gas = value.amount;
+                    break;
+                case 'CGAS':
+                    cgas = value.amount;
+                    break;
+                case 'NNC':
+                    nnc = value.amount;
+                    break;
+            }
+        })
+        this.setState({
+            balance:{
+                neo:neo,
+                gas:gas,
+                cgas:cgas,
+                nnc:nnc
+            }
+        })
+    }
 
     public onShowQrcode = () =>
 	{
@@ -55,19 +109,19 @@ export default class Assets extends React.Component<any, {}>
                     <div className="title">资产列表</div>
                     <div className="asset-panel">
                         <div className="asset-name">NEO</div>
-                        <div className="asset-amount">999999.99999999</div>
+                        <div className="asset-amount">{this.state.balance.neo}</div>
                     </div>
                     <div className="asset-panel">
                         <div className="asset-name">GAS</div>
-                        <div className="asset-amount">999999.99999999</div>
+                        <div className="asset-amount">{this.state.balance.gas}</div>
                     </div>
                     <div className="asset-panel">
                         <div className="asset-name">CGAS</div>
-                        <div className="asset-amount">999999.99999999</div>
+                        <div className="asset-amount">{this.state.balance.cgas}</div>
                     </div>
                     <div className="asset-panel">
-                        <div className="asset-name">CNEO</div>
-                        <div className="asset-amount">999999.99999999</div>
+                        <div className="asset-name">NNC</div>
+                        <div className="asset-amount">{this.state.balance.nnc}</div>
                     </div>
                 </div>
                 <QrCodeBox show={this.state.showNumber === 1} onHide={this.onCloseModel} />

@@ -1,6 +1,7 @@
 import { AccountInfo, NepAccount } from "../../../common/entity";
+import { Background } from "../../../lib/background";
 
-export const bg = chrome.extension.getBackgroundPage();
+export const bg = chrome.extension.getBackgroundPage() as Background;
 
 export const Storage_local = 
 {
