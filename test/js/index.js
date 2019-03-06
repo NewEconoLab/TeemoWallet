@@ -20,7 +20,7 @@ class Main {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.getAccount();
             yield this.getBalance();
-            yield this.invokeGroup();
+            // await this.invokeGroup()
             yield this.invokeGroup2();
         });
     }
@@ -124,23 +124,9 @@ class Main {
                     arguments: [
                         { type: "Address", value: "AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF" },
                         { type: "Address", value: "AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH" },
-                        { type: "Integer", value: "10" }
+                        { type: "Integer", value: "121" }
                     ],
                     network: "TestNet",
-                },
-                {
-                    scriptHash: "00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
-                    operation: "setmoneyin",
-                    arguments: [
-                        /**
-                         * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
-                            sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                            sb.EmitSysCall("Neo.Transaction.GetHash");
-                         */
-                        { type: "Hook_Txid", value: 0 },
-                        { type: "Hash160", value: "74f2dc36a68fdc4682034178eb2220729231db76" },
-                    ],
-                    network: "TestNet"
                 },
                 {
                     scriptHash: "74f2dc36a68fdc4682034178eb2220729231db76",
@@ -148,7 +134,17 @@ class Main {
                     arguments: [
                         { type: "Address", value: "AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF" },
                         { type: "Address", value: "AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH" },
-                        { type: "Integer", value: "10" }
+                        { type: "Integer", value: "123" }
+                    ],
+                    network: "TestNet",
+                },
+                {
+                    scriptHash: "74f2dc36a68fdc4682034178eb2220729231db76",
+                    operation: "transfer",
+                    arguments: [
+                        { type: "Address", value: "AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF" },
+                        { type: "Address", value: "AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH" },
+                        { type: "Integer", value: "321" }
                     ],
                     network: "TestNet",
                 }
