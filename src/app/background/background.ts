@@ -1109,15 +1109,27 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
     }
 }
 
+interface NotifyMessage{
+    header:{
+        title:string,
+        domain:string,
+    },
+    account:{
+        address:string,
+        walletName:string,
+    },
+    lable:Command
+    data?:any
+}
 /**
  * 打开notify页面并传递信息，返回调用
  * @param call 回调方法
  * @param data 通知信息 
  */
-const openNotify=(data,call)=> {
+const openNotify=(data:NotifyMessage,call)=> {
     if(data)
     {        
-        chrome.storage.local.set(data,()=>
+        chrome.storage.local.set({data},()=>
         {
             var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
             
@@ -1153,12 +1165,11 @@ const getAccount=(title)=>{
         if(!storage.account){
             reject({type:"ACCOUNT_ERROR",deciphering:"Account not logged in "})
         }
-        const data = {
-            label:"getAccount",
+        const {address,walletName} = storage.account;
+        const data:NotifyMessage = {
+            lable:Command.getAccount,
             header:title,
-            message:{
-                account:storage.account?{address:storage.account.address}:undefined
-            },
+            account:{address,walletName}
         }
         openNotify(data,()=>{
             chrome.storage.local.get("confirm",res=>{
@@ -1191,22 +1202,23 @@ const getAccount=(title)=>{
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-const invokeGroup=(title,data)=>{
+const invokeGroup=(title,params)=>{
     return new Promise((resolve,reject)=>{
-        const message={
-            label:"invokeGroup",
-            message:{
-                account:storage.account?{address:storage.account.address}:undefined,
-                title:title.refTitle,
-                domain:title.refDomain,
-                invoke:data.msg
-            }
-        };
-        openNotify(message,()=>{              
+        if(!storage.account){
+            reject({type:"ACCOUNT_ERROR",description:"this account is undefind"})
+        }
+        const {address,walletName} = storage.account;
+        const data:NotifyMessage = {
+            lable:Command.invokeGroup,
+            header:title,
+            account:{address,walletName},
+            data:params
+        }
+        openNotify(data,()=>{              
             chrome.storage.local.get("confirm",res=>{
                 if(res["confirm"]==="confirm")
                 {
-                    invokeGroupBuild(data)
+                    invokeGroupBuild(params)
                     .then(result=>{
                         resolve(result);
                     })
@@ -1229,22 +1241,23 @@ const invokeGroup=(title,data)=>{
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-const invoke=(title,data)=>{
+const invoke=(title,params)=>{
     return new Promise((resolve,reject)=>{
-        const message ={
-            label:"invokeGroup",
-            message:{
-                account:storage.account?{address:storage.account.address}:undefined,
-                title:title.refTitle,
-                domain:title.refDomain,
-                invoke:data.msg
-            }
-        };
-        openNotify(message,()=>{
+        if(!storage.account){
+            reject({type:"ACCOUNT_ERROR",description:"this account is undefind"})
+        }
+        const {address,walletName} = storage.account;
+        const data:NotifyMessage = {
+            lable:Command.invokeGroup,
+            header:title,
+            account:{address,walletName},
+            data:params
+        }
+        openNotify(data,()=>{
             chrome.storage.local.get("confirm",res=>{
                 if(res["confirm"]==="confirm")
                 {
-                    contractBuilder(data)
+                    contractBuilder(params)
                     .then(result=>{
                         resolve(result);
                     })
@@ -1733,6 +1746,7 @@ interface InvokeArgs{
     attachedAssets?:AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+    description?:string;
 }
 
 interface AttachedAssets {

@@ -8,6 +8,18 @@ export class Result
     info: any;
 }
 
+interface NotifyMessage{
+    header:{
+        title:string,
+        domain:string,
+    },
+    account:{
+        address:string,
+        walletName:string,
+    },
+    lable:Command
+    data?:any
+  }
 /**
  * -------------------------以下是账户所使用到的实体类
  */
