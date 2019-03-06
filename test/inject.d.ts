@@ -20,6 +20,7 @@ declare enum Command {
     getBalance = "getBalance",
     getStorage = "getStorage",
     invokeRead = "invokeRead",
+    invokeReadGroup = "invokeReadGroup",
     send = "send",
     invoke = "invoke",
     invokeGroup = "invokeGroup",
@@ -57,6 +58,15 @@ interface InvokeArgs {
     attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+}
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    arguments?: Argument[];
+    network: string;
+}
+interface InvokeReadGroup {
+    group: InvokeReadInput[];
 }
 interface AttachedAssets {
     [asset: string]: string;
@@ -140,6 +150,12 @@ interface Provider {
         currency: string;
     };
 }
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    args?: Argument[];
+    network: string;
+}
 declare const ids: any[];
 /**
  *
@@ -187,6 +203,8 @@ declare namespace Teemmo {
          */
         static invoke(params: InvokeArgs): Promise<InvokeOutput>;
         static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
+        static invokeRead(params: InvokeReadInput): Promise<any>;
+        static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
     }
 }
 declare var readyEvent: CustomEvent<{

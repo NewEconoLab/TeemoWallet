@@ -22,6 +22,7 @@ enum Command {
   getBalance = 'getBalance',
   getStorage = 'getStorage',
   invokeRead = 'invokeRead',
+  invokeReadGroup = 'invokeReadGroup',
   send = 'send',
   invoke = 'invoke',
   invokeGroup="invokeGroup",
@@ -63,6 +64,17 @@ interface InvokeArgs{
     attachedAssets?:AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+}
+
+
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    arguments?: Argument[];
+    network: string;
+}
+interface InvokeReadGroup{
+    group:InvokeReadInput[];
 }
 
 
@@ -280,6 +292,10 @@ namespace Teemmo
 
         static invokeRead(params: InvokeReadInput): Promise<any>{
             return sendMessage(Command.invokeRead,params);
+        }
+
+        static invokeReadGroup(params: InvokeReadGroup): Promise<any>{
+            return sendMessage(Command.invokeReadGroup,params);
         }
     }
 }

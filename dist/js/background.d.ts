@@ -4,12 +4,6 @@ interface BackStore {
     height: number;
     account: AccountInfo;
 }
-interface InvokeReadInput {
-    scriptHash: string;
-    operation: string;
-    args?: Argument[];
-    network: string;
-}
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
     accountCGAS: Neo.Uint160;
@@ -161,6 +155,7 @@ declare var Api: {
      * @param txid 交易id
      */
     hasTx: (txid: any) => Promise<any>;
+    getrawtransaction: (txid: any) => Promise<any>;
     /**
      * 判断合约调用是否抛出 notify
      * @param txid 交易id
@@ -240,6 +235,7 @@ declare var send: (title: any, data: any) => Promise<{}>;
  * @param data invokeRead 的参数
  */
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
+declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
 declare const responseMessage: (request: any) => void;
 declare enum ConfirmType {
@@ -304,6 +300,7 @@ declare enum Command {
     getBalance = "getBalance",
     getStorage = "getStorage",
     invokeRead = "invokeRead",
+    invokeReadGroup = "invokeReadGroup",
     send = "send",
     invoke = "invoke",
     invokeGroup = "invokeGroup",
@@ -373,6 +370,15 @@ interface Asset {
 interface InvokeGroup {
     merge: boolean;
     group: InvokeArgs[];
+}
+interface InvokeReadInput {
+    scriptHash: string;
+    operation: string;
+    arguments?: Argument[];
+    network: string;
+}
+interface InvokeReadGroup {
+    group: InvokeReadInput[];
 }
 interface InvokeGroupOutup {
 }

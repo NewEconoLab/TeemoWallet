@@ -502,6 +502,14 @@ var Api = {
         };
         return request(opts);
     },
+    getrawtransaction: (txid) => {
+        const opts = {
+            method: "getrawtransaction",
+            params: [txid],
+            baseUrl: 'rpc'
+        };
+        return request(opts);
+    },
     /**
      * 判断合约调用是否抛出 notify
      * @param txid 交易id
@@ -772,6 +780,12 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
             else {
                 let tran = new Transaction();
                 let script = new ScriptBuild();
+                // 生成随机数
+                const RANDOM_UINT8 = getWeakRandomValues(32);
+                const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+                // 塞入随机数
+                script.EmitPushNumber(RANDOM_INT); // 将随机数推入栈顶
+                script.Emit(ThinNeo.OpCode.DROP); // 打包
                 script.emitInvoke(invoke.arguments, txids[0].txid);
                 script.EmitPushString(invoke.operation);
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
@@ -843,6 +857,12 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
     try {
         // const script=invokeScriptBuild(invoke);
         const script = new ScriptBuild();
+        // 生成随机数
+        const RANDOM_UINT8 = getWeakRandomValues(32);
+        const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+        // 塞入随机数
+        script.EmitPushNumber(RANDOM_INT); // 将随机数推入栈顶
+        script.Emit(ThinNeo.OpCode.DROP); // 打包
         script.emitInvoke(invoke.arguments); // 参数转换与打包
         script.EmitPushString(invoke.operation); // 塞入需要调用的合约方法名
         script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入需要调用的合约hex
@@ -922,10 +942,9 @@ const getAccount = (title) => {
         }
         const data = {
             label: "getAccount",
+            header: title,
             message: {
-                account: storage.account ? { address: storage.account.address } : undefined,
-                title: title.refTitle,
-                domain: title.refDomain
+                account: storage.account ? { address: storage.account.address } : undefined
             },
         };
         openNotify(data, () => {
@@ -1137,9 +1156,31 @@ var invokeRead = (data) => {
     return new Promise((r, j) => {
         const script = new ScriptBuild();
         try {
-            script.emitInvoke(invoke.arguments); // 参数转换与打包
+            script.emitInvoke(data.arguments); // 参数转换与打包
             script.EmitPushString(data.operation); // 塞入需要调用的合约方法名
             script.EmitAppCall(Neo.Uint160.parse(data.scriptHash)); // 塞入需要调用的合约hex
+            Api.getInvokeRead(script.ToArray().toHexString())
+                .then(result => {
+                r(result);
+            })
+                .then(error => {
+                j(error);
+            });
+        }
+        catch (error) {
+            j(error);
+        }
+    });
+};
+var invokeReadGroup = (data) => {
+    return new Promise((r, j) => {
+        const script = new ScriptBuild();
+        try {
+            for (const invoke of data.group) {
+                script.emitInvoke(invoke.arguments); // 参数转换与打包
+                script.EmitPushString(invoke.operation); // 塞入需要调用的合约方法名
+                script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入需要调用的合约hex
+            }
             Api.getInvokeRead(script.ToArray().toHexString())
                 .then(result => {
                 r(result);
@@ -1211,6 +1252,8 @@ const responseMessage = (request) => {
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(message, params));
+            case Command.invokeReadGroup:
+                sendResponse(invokeReadGroup(params));
             default:
                 break;
         }
@@ -1254,7 +1297,7 @@ class TransferGroup {
         console.log("-------------------------------------TransferGroup-update");
         Api.sendrawtransaction(tran.txhex)
             .then(result => {
-            if (result && result[0] && result[0].sendrawtransaction) {
+            if (result) {
                 TaskManager.shed[tran.txid].state = TaskState.watting;
             }
             else {
@@ -1299,22 +1342,26 @@ class TaskManager {
         this.shed[task.txid] = task;
     }
     static update() {
+        console.log("------------------进入了 TaskManager.update ");
         for (const key in this.shed) {
             const task = this.shed[key];
-            // task.state!=TaskState.fail && task.state != TaskState.failForLast && task.state != TaskState.watForLast && task.state != TaskState.success
             if (task.state == TaskState.watting) {
                 if (task.type === ConfirmType.tranfer) {
-                    Api.hasTx(task.txid)
+                    Api.getrawtransaction(task.txid)
                         .then(result => {
-                        if (result[0].issucces) {
+                        if (result) {
+                            console.log(task.txid + "       该交易查询成功");
                             task.state = TaskState.success;
+                            console.log("状态变更");
+                            console.log(task);
+                            this.shed[key] = task;
                             if (task.next) {
                                 TransferGroup.update(task.next);
                             }
                         }
                     })
-                        .catch(result => {
-                        console.log(result);
+                        .catch(error => {
+                        console.log(error);
                     });
                 }
                 else {
@@ -1356,6 +1403,7 @@ var Command;
     Command["getBalance"] = "getBalance";
     Command["getStorage"] = "getStorage";
     Command["invokeRead"] = "invokeRead";
+    Command["invokeReadGroup"] = "invokeReadGroup";
     Command["send"] = "send";
     Command["invoke"] = "invoke";
     Command["invokeGroup"] = "invokeGroup";
