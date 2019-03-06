@@ -2,7 +2,7 @@
  * 提示组件
  */
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import  * as ReactDOM from 'react-dom';
 import './index.less';
 // import classnames from 'classnames';
 
@@ -15,7 +15,6 @@ interface IProps
 export default (message: string, type?: "success"|"error") =>
 {
   type = type ? type : 'success';
-  console.log(ReactDOM);
   // 释放组件
   const disposeNode = () =>
   {
@@ -38,7 +37,7 @@ export default (message: string, type?: "success"|"error") =>
       setTimeout(() =>
       {
         disposeNode();
-      }, 15000)
+      }, 5000)
     }
     public render()
     {
@@ -63,9 +62,6 @@ export default (message: string, type?: "success"|"error") =>
   const node = (   
     <Toast message={message} />
   );
-  console.log(node);
-  
-  
   // 渲染message
   ReactDOM.render(node, div);
 }

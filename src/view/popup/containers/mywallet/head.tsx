@@ -7,6 +7,7 @@ import Exchange from '../exchange';
 import classnames = require('classnames');
 import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
+import HeadImg from '../../utils/headimg';
 
 interface IProps{
     lableChange:(table:string)=>void
@@ -28,6 +29,10 @@ export default class WalletHeader extends React.Component<IProps, {}> {
         {id:'nns',name:'NNS',icon:ICON.nns},
         {id:'dice',name:'DICE',icon:ICON.nns}
     ]
+    public componentDidMount(){
+        const div = document.getElementById('headimg')
+		HeadImg(div,common.account.address);
+    }
 
     public cutFunction =(option:IOption)=>
     {
@@ -75,7 +80,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                 <div className="functionRow">
                     <div className="list">
                         <div className="walletCode">
-                            <img  width='30px' height='30px'/>
+                            <div className="headimg-wrapp" id="headimg" />
                             <span>{common.account.walletName?common.account.walletName: "我的钱包 "+(common.account.index+1)}</span>
                         </div>
                         <div className="function">

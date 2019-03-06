@@ -7,7 +7,6 @@ export default function QRCodeDemo(div:Element,address:string)
    */
   this.content = div;
   this.code = document.createElement('div');
-  // this.input = document.createElement('input');
 
   /**
    * 创建 二维码对象

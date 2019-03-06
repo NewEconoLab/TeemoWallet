@@ -27,7 +27,7 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 		super(props);
 	}	
 	public state = {
-		codeLink: '',
+		codeLink: common.account.address,
 	  }
 	public componentDidMount(){
 		const div = document.getElementById('qrcode')
