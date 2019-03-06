@@ -930,7 +930,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             TaskManager.addTask(
                 new Task(
                 ConfirmType.tranfer,
-                result.txid)
+                result.txid.replace('0x',''))
             )
             return [result];
         } catch (error) {
@@ -944,12 +944,18 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
         for (let index = 0; index < data.group.length; index++)
         {
             const invoke = data.group[index];
+            console.log(invoke);
+            
             if(index==0)
             {
                 try {
                     let result = await contractBuilder(invoke);
+                    console.log(result);
+                    
                     txids.push(result);
                 } catch (error) {
+                    console.log(error);
+                    
                     throw error;
                 }
             }
@@ -972,13 +978,13 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer,txids[0].txid,trans[0],TaskState.watting);
+        const task = new Task(ConfirmType.tranfer,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if(index<(trans.length-1)){
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,task[index+1],TaskState.watForLast
+                    ConfirmType.tranfer,tran.txid,trans[index+1],TaskState.watForLast
                 ))
             }else{
                 TaskManager.addTask(new Task(
@@ -1514,27 +1520,29 @@ class TransferGroup
     txid:string;
     txhex:string;
     executeError?:{type:string,data:string,description:string}
-    update(){
-        Api.sendrawtransaction(this.txhex)
+    static update(tran:TransferGroup){
+        console.log("-------------------------------------TransferGroup-update");
+        
+        Api.sendrawtransaction(tran.txhex)
         .then(result=>{
             if(result && result[0] && result[0].sendrawtransaction)
             {
-                TaskManager.shed[this.txid].state = TaskState.watting;
+                TaskManager.shed[tran.txid].state = TaskState.watting;
             }
             else
             {
-                TaskManager.shed[this.txid].state = TaskState.fail;
-                this.executeError={
+                TaskManager.shed[tran.txid].state = TaskState.fail;
+                tran.executeError={
                     type:"TransferError",
                     description:result[0].errorMessage,
-                    data:this.txhex
+                    data:tran.txhex
                 }
             }
         })
         .catch(error=>{
             if(error)
             {
-                this.executeError={
+                tran.executeError={
                     type:"TransferError",
                     description:"",
                     data:error
@@ -1589,7 +1597,10 @@ class TaskManager{
                         if(result[0].issucces)
                         {
                             task.state = TaskState.success;
-                            console.log(task);
+                            if(task.next)
+                            {
+                                TransferGroup.update(task.next);
+                            }
                         }
                     })
                     .catch(result=>{

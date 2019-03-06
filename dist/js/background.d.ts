@@ -272,7 +272,7 @@ declare class TransferGroup {
         data: string;
         description: string;
     };
-    update(): void;
+    static update(tran: TransferGroup): void;
 }
 declare class TaskManager {
     static shed: {
