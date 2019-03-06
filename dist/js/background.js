@@ -788,7 +788,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
-            if (index != trans.length) {
+            if (index < (trans.length - 1)) {
                 TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, task[index + 1], TaskState.watForLast));
             }
             else {
