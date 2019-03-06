@@ -773,12 +773,29 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 script.EmitPushString(invoke.operation);
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
                 tran.setScript(script.ToArray());
-                trans.push(tran);
+                const message = tran.GetMessage().clone();
+                const signdata = ThinNeo.Helper.Sign(message, common.account.prikey);
+                tran.AddWitness(signdata, common.account.pubkey, common.account.address);
+                const data = tran.GetRawData();
+                const nextTran = new TransferGroup();
+                nextTran.txhex = data.toHexString();
+                nextTran.txid = tran.getTxid();
+                txids.push({ txid: nextTran.txid, nodeUrl: "https://api.nel.group/api" });
+                trans.push(nextTran);
             }
         }
-        let outups = yield sendGroupTranstion(trans);
-        let arr = txids.concat(outups);
-        return arr;
+        const task = new Task(ConfirmType.tranfer, txids[0].txid, trans[0], TaskState.watting);
+        TaskManager.addTask(task);
+        for (let index = 0; index < trans.length; index++) {
+            const tran = trans[index];
+            if (index != trans.length) {
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, task[index + 1], TaskState.watForLast));
+            }
+            else {
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, undefined, TaskState.watForLast));
+            }
+        }
+        return txids;
     }
 });
 const sendGroupTranstion = (trans) => {
@@ -791,7 +808,7 @@ const sendGroupTranstion = (trans) => {
             tran.AddWitness(signdata, common.account.pubkey, common.account.address);
             // const data:Uint8Array = tran.GetRawData();
             console.log(tran.getTxid());
-            outputs.push({ "txid": tran.getTxid(), nodeUrl: "" });
+            outputs.push({ "txid": tran.getTxid(), nodeUrl: "https://api.nel.group/api" });
         }
     });
 };
