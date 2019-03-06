@@ -8,7 +8,7 @@ export class Result
     info: any;
 }
 
-interface NotifyMessage{
+export interface NotifyMessage{
     header:{
         title:string,
         domain:string,

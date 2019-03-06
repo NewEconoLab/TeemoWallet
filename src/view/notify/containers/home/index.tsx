@@ -9,18 +9,17 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
-import { InvokeArgs } from '../../../../common/entity';
+import { InvokeArgs,NotifyMessage } from '../../../../common/entity';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
 export default class Home extends React.Component<any, any> {
     
-  public state ={
-    label:"",
-    title:"",
-    domain:"",
-    address:"",
-    invoke:{} as InvokeArgs
+  public state={
+    lable:"",
+    header:{title:"",domain:""},
+    account:{address:"",walletName:""},
+    data:undefined,
   }
   public componentDidMount() 
   {
@@ -28,16 +27,9 @@ export default class Home extends React.Component<any, any> {
     console.log(chrome.storage.local)
       if(chrome.tabs)
       {
-          chrome.storage.local.get(['label','message','header'],result=>{
-            
-            console.log(result);            
-            this.setState({
-                label:result.label,
-                title:result.header.title,
-                domain:result.header.domain,
-                address:result.message.account.address
-            })
-          })
+        chrome.storage.local.get(['header','lable','data','account'],(result:NotifyMessage)=>{      
+          this.setState(result);
+        })
       }
   }
 
@@ -60,12 +52,12 @@ export default class Home extends React.Component<any, any> {
   public render() {
     return (
       <div className="notify-page">
-        <Header address={this.state.address} {...this.props} />
+        <Header address={this.state.account.address} {...this.props} />
         <div className="notify-content">
           {
-            this.state.label=="getAccount"?
-            <Dice title={this.state.title} domain={this.state.domain} />:
-            <ContractRequest title={this.state.title} domain={this.state.domain} invoek={this.state.invoke} {...this.props} />
+            this.state.lable=="getAccount"?
+            <Dice title={this.state.header.title} domain={this.state.header.domain} />:
+            <ContractRequest title={this.state.header.title} domain={this.state.header.domain} invoek={this.state.data} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>
