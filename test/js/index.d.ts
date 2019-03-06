@@ -19,5 +19,7 @@ declare class Main {
      * invoke 发送交易
      */
     invoke(): Promise<{}>;
+    testrun(): Promise<{}>;
+    testRunGroup(): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map

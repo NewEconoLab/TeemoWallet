@@ -18,8 +18,10 @@ class Main {
     async start(){        
         await this.getAccount()
         await this.getBalance()
+        // await this.testrun();
+        await this.testRunGroup();
         // await this.invokeGroup()
-        await this.invokeGroup2();
+        // await this.invokeGroup2();
     }
 
     /**
@@ -137,32 +139,24 @@ class Main {
                     arguments:[
                         {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
                         {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"121"}
+                        {type:"Integer",value:"1000"}
                     ],
                     network:"TestNet",
                     // assets: 暂时用不到
                 },
                 {
-                    scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
-                    operation:"transfer",
+                    scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+                    operation:"setmoneyin",
                     arguments:[
-                        {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                        {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"123"}
+                        /**
+                         * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
+                            sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                            sb.EmitSysCall("Neo.Transaction.GetHash");
+                         */
+                        {type:"Hook_Txid",value:0}, // 
+                        {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
                     ],
-                    network:"TestNet",
-                    // assets: 暂时用不到
-                },
-                {
-                    scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
-                    operation:"transfer",
-                    arguments:[
-                        {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                        {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"321"}
-                    ],
-                    network:"TestNet",
-                    // assets: 暂时用不到
+                    network:"TestNet"
                 }
             ]
         }
@@ -216,4 +210,71 @@ class Main {
         })
     }
     
+    public testrun()
+    {
+        const params:InvokeArgs = {
+            scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+            operation: 'symbol',
+            arguments: [],
+            network: 'TestNet'
+          }
+        return new Promise((resolve,reject)=>{            
+            Teemmo.NEO.invokeRead(params)
+            .then(result=>{
+                console.log(result);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
+    public testRunGroup()
+    {
+        const params:InvokeReadGroup={
+            group:[
+                {
+                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+                  operation: 'totalSupply',
+                  arguments: [],
+                  network: 'TestNet'
+                },
+                {
+                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+                  operation: 'name',
+                  arguments: [],
+                  network: 'TestNet'
+                },
+                {
+                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+                  operation: 'symbol',
+                  arguments:[],
+                  network: 'TestNet'
+                },
+                {
+                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+                  operation: 'decimals',
+                  arguments: [],
+                  network: 'TestNet'
+                }        
+            ]
+        }
+        return new Promise((resolve,reject)=>{            
+            Teemmo.NEO.invokeReadGroup(params)
+            .then(result=>{
+                console.log(result);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                reject();
+            })
+        })
+    }
 }

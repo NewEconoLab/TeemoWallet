@@ -22,6 +22,7 @@ var Command;
     Command["getBalance"] = "getBalance";
     Command["getStorage"] = "getStorage";
     Command["invokeRead"] = "invokeRead";
+    Command["invokeReadGroup"] = "invokeReadGroup";
     Command["send"] = "send";
     Command["invoke"] = "invoke";
     Command["invokeGroup"] = "invokeGroup";
@@ -127,6 +128,9 @@ var Teemmo;
         }
         static invokeRead(params) {
             return sendMessage(Command.invokeRead, params);
+        }
+        static invokeReadGroup(params) {
+            return sendMessage(Command.invokeReadGroup, params);
         }
     }
     NEO.getProvider = () => {
