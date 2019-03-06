@@ -1,13 +1,15 @@
 /**
  * 交易记录组件
  */
+/// <reference path="../../../../../src/lib/neo-thinsdk.d.ts" />
 import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
 import Transfer from '../transfer';
 import QrCodeBox from '../qrcode';
-import { neotools } from '../../utils/neotools';
+// import { neotools } from '../../utils/neotools';
 import { observer } from 'mobx-react';
+import { bg } from '../../utils/storagetools';
 
 @observer
 export default class Assets extends React.Component<any, {}> 
@@ -19,9 +21,9 @@ export default class Assets extends React.Component<any, {}>
     public state={
         showNumber:0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
     }
-    componentDidMount(){
-        
-        neotools.invokeTest();
+    componentDidMount(){        
+        // neotools.invokeTest();
+        // bg.getBalance()
     }   
 
     public onShowQrcode = () =>

@@ -71,7 +71,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				</div>
 				<div className="btn-list">
 					<div className="cancel">
-						<Button type="warn" text="取消" />
+						<Button type="warn" text="取消" onClick={this.onHide} />
 					</div>
 					<div className="confrim">
 						<Button type="primary" text="下一步" />
