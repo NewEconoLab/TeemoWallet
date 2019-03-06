@@ -9,13 +9,13 @@ import Button from '../../../components/Button';
 
 interface IPorps
 {
-  title:string;
-  domain:string;
+  title: string;
+  domain: string;
 }
 
 // @observer
 export default class Dice extends React.Component<IPorps>{
-  
+
   public render()
   {
     return (
