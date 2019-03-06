@@ -34,7 +34,7 @@ export default class Assets extends React.Component<any, {}>
         // neotools.invokeTest();
         const params: BalanceRequest = {
             address: common.account.address,   // 你要查询的地址
-            assets: [hashConfig.ID_NEO.toString(),hashConfig.ID_GAS.toString(), hashConfig.ID_CGAS.toString(),hashConfig.ID_NNC.toString()],
+            assets: [hashConfig.ID_NEO.replace('0x',''),hashConfig.ID_GAS.replace('0x',''), hashConfig.ID_CGAS.toString(),hashConfig.ID_NNC.toString()],
           }
         const data:GetBalanceArgs=
         {
@@ -44,6 +44,7 @@ export default class Assets extends React.Component<any, {}>
             ]
         }
         let result = await bg.getBalance(data);
+        console.log(result)
         if(result){
             this.initBalance(result)
         }

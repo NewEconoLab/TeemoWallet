@@ -28,13 +28,13 @@ export default class Home extends React.Component<any, any> {
     console.log(chrome.storage.local)
       if(chrome.tabs)
       {
-          chrome.storage.local.get(['label','message'],result=>{
+          chrome.storage.local.get(['label','message','header'],result=>{
             
             console.log(result);            
             this.setState({
                 label:result.label,
-                title:result.message.title,
-                domain:result.message.domain,
+                title:result.header.title,
+                domain:result.header.domain,
                 address:result.message.account.address
             })
           })
