@@ -1304,7 +1304,9 @@ class TaskManager {
                         .then(result => {
                         if (result[0].issucces) {
                             task.state = TaskState.success;
-                            console.log(task);
+                            if (task.next) {
+                                task.next.update();
+                            }
                         }
                     })
                         .catch(result => {

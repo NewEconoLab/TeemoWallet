@@ -137,7 +137,7 @@ class Main {
                     arguments:[
                         {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
                         {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"100000"}
+                        {type:"Integer",value:"10"}
                     ],
                     network:"TestNet",
                     // assets: 暂时用不到
@@ -155,6 +155,17 @@ class Main {
                         {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
                     ],
                     network:"TestNet"
+                },
+                {
+                    scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+                    operation:"transfer",
+                    arguments:[
+                        {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+                        {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+                        {type:"Integer",value:"10"}
+                    ],
+                    network:"TestNet",
+                    // assets: 暂时用不到
                 }
             ]
         }
