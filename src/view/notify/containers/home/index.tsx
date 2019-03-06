@@ -9,7 +9,7 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
-import { InvokeArgs,NotifyMessage } from '../../../../common/entity';
+import { Command,NotifyMessage } from '../../../../common/entity';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
@@ -28,6 +28,7 @@ export default class Home extends React.Component<any, any> {
       if(chrome.tabs)
       {
         chrome.storage.local.get(['header','lable','data','account'],(result:NotifyMessage)=>{      
+          console.log(result)
           this.setState(result);
         })
       }
@@ -55,7 +56,7 @@ export default class Home extends React.Component<any, any> {
         <Header address={this.state.account.address} {...this.props} />
         <div className="notify-content">
           {
-            this.state.lable=="getAccount"?
+            this.state.lable==Command.getAccount?
             <Dice title={this.state.header.title} domain={this.state.header.domain} />:
             <ContractRequest title={this.state.header.title} domain={this.state.header.domain} invoek={this.state.data} {...this.props} />
           }

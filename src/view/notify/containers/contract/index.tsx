@@ -36,7 +36,7 @@ export default class ContractRequest extends React.Component<IProps>
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
-          来自 www.dice.com
+          来自 {this.props.domain}
         </div>
         <div className="second-line">
           合约交互
