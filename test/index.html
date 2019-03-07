@@ -43,5 +43,108 @@
     <br />
     <button id="invokeRead_do">invokeRead</button>
     <pre id="invokeRead_R">invokeRead rerurn</pre>
+
+    <hr />
+    <p>input  invokeReadGroup params</p>
+    <textarea id="invokeReadGroup_input" rows="20" cols="120" placeholder="invokeReadGroup_input">
+    {
+        "group":[
+            {
+                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                "operation": "totalSupply",
+                "arguments": [],
+                "network": "TestNet"
+            },
+            {
+                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                "operation": "name",
+                "arguments": [],
+                "network": "TestNet"
+            },
+            {
+                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                "operation": "symbol",
+                "arguments":[],
+                "network": "TestNet"
+            },
+            {
+                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                "operation": "decimals",
+                "arguments": [],
+                "network": "TestNet"
+            }
+        ]
+    }
+    </textarea>
+    <br />
+    <button id="invokeReadGroup_do">invokeReadGroup</button>
+    <pre id="invokeReadGroup_R">invokeReadGroup rerurn</pre>
+
+    <hr />
+    <p>input  invoke params</p>
+    <textarea id="invoke_input" rows="10" cols="120" placeholder="invoke_input">
+    {
+        "scriptHash":"74f2dc36a68fdc4682034178eb2220729231db76",
+        "operation":"transfer",
+        "arguments":[
+            {"type":"Address","value":"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+            {"type":"Address","value":"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+            {"type":"Integer","value":"100000"}
+        ],
+        "fee":"0.001",
+        "network":"TestNet"
+    }
+    </textarea>
+    <br />
+    <button id="invoke_do">invoke</button>
+    <pre id="invoke_R">invoke rerurn</pre>
+
+    <hr name="invokeGroup" id="invokeGroup" />
+    <p>input  invokeGroup params</p>
+    <a id="merge" href="#invokeGroup">merge</a>  <a id="unmerge" href="#invokeGroup">unmerge</a>
+    <textarea id="invokeGroup_input" rows="20" cols="120" placeholder="invokeGroup_input">
+    {
+        "merge": true,
+        "group": [
+            {
+            "scriptHash": "74f2dc36a68fdc4682034178eb2220729231db76",
+            "operation": "transfer",
+            "arguments": [
+                {
+                "type": "Address",
+                "value": "AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"
+                },
+                {
+                "type": "Address",
+                "value": "AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"
+                },
+                {
+                "type": "Integer",
+                "value": "100000"
+                }
+            ],
+            "network": "TestNet"
+            },
+            {
+            "scriptHash": "00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+            "operation": "setmoneyin",
+            "arguments": [
+                {
+                "type": "Hook_Txid",
+                "value": 0
+                },
+                {
+                "type": "Hash160",
+                "value": "74f2dc36a68fdc4682034178eb2220729231db76"
+                }
+            ],
+            "network": "TestNet"
+            }
+        ]
+        }
+    </textarea>
+    <br />
+    <button id="invokeGroup_do">invokeGroup</button>
+    <pre id="invokeGroup_R">invokeGroup rerurn</pre>
 </body>
 </html>

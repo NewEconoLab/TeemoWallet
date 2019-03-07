@@ -4,7 +4,7 @@ window.addEventListener('Teemmo.NEO.READY',()=>{
     console.log("inject ready ");
     var myDate = new Date();
     var eventPool = document.getElementById("event") as HTMLTextAreaElement
-    eventPool.value = myDate.toLocaleTimeString() + "ready";
+    eventPool.value = myDate.toLocaleTimeString() + "  ready";
     const main = new Main();
     main.start();
     
@@ -35,6 +35,88 @@ class Main {
         document.getElementById("invokeRead_do").onclick = async () =>{ 
             var invokeRead_input = document.getElementById("invokeRead_input") as HTMLTextAreaElement;
             await this.invokeRead(invokeRead_input.value)
+        }
+
+        document.getElementById("invokeReadGroup_do").onclick = async () =>{ 
+            var invokeReadGroup_input = document.getElementById("invokeReadGroup_input") as HTMLTextAreaElement;
+            await this.invokeReadGroup(invokeReadGroup_input.value)
+        }
+
+        document.getElementById("invoke_do").onclick = async () =>{ 
+            var invoke_input = document.getElementById("invoke_input") as HTMLTextAreaElement;
+            await this.invoke(invoke_input.value)
+        }
+
+        document.getElementById("invokeGroup_do").onclick = async () =>{ 
+            var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
+            await this.invokeGroup(invokeGroup_input.value)
+        }
+
+        document.getElementById("merge").onclick = () =>{ 
+            var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
+            invokeGroup_input.value = JSON.stringify({
+                merge:true,
+                group:[
+                    {
+                        scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+                        operation:"transfer",
+                        arguments:[
+                            {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+                            {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+                            {type:"Integer",value:"100000"}
+                        ],
+                        network:"TestNet",
+                        // assets: 暂时用不到
+                    },
+                    {
+                        scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+                        operation:"setmoneyin",
+                        arguments:[
+                            /**
+                             * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
+                                sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                                sb.EmitSysCall("Neo.Transaction.GetHash");
+                             */
+                            {type:"Hook_Txid",value:0}, // 
+                            {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
+                        ],
+                        network:"TestNet"
+                    }
+                ]
+            },null,2)
+        }
+        document.getElementById("unmerge").onclick = () =>{ 
+            var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
+            invokeGroup_input.value = JSON.stringify({
+                merge:false,
+                group:[
+                    {
+                        scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+                        operation:"transfer",
+                        arguments:[
+                            {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+                            {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+                            {type:"Integer",value:"1000"}
+                        ],
+                        network:"TestNet",
+                        // assets: 暂时用不到
+                    },
+                    {
+                        scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+                        operation:"setmoneyin",
+                        arguments:[
+                            /**
+                             * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
+                                sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                                sb.EmitSysCall("Neo.Transaction.GetHash");
+                                */
+                            {type:"Hook_Txid",value:0}, // 
+                            {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
+                        ],
+                        network:"TestNet"
+                    }
+                ]
+            },null,2)
         }
         // await this.testrun();
         // await this.testRunGroup();
@@ -133,208 +215,236 @@ class Main {
         })
     }
 
-    public invokeGroup()
-    {
-        console.log("this is InvokeGroup");
-        
-        const params:InvokeGroup = {
-            merge:true,
-            group:[
-                {
-                    scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
-                    operation:"transfer",
-                    arguments:[
-                        {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                        {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"100000"}
-                    ],
-                    network:"TestNet",
-                    // assets: 暂时用不到
-                },
-                {
-                    scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
-                    operation:"setmoneyin",
-                    arguments:[
-                        /**
-                         * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
-                            sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                            sb.EmitSysCall("Neo.Transaction.GetHash");
-                         */
-                        {type:"Hook_Txid",value:0}, // 
-                        {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
-                    ],
-                    network:"TestNet"
-                }
-            ]
-        }
-        return new Promise((resolve,reject)=>{            
-            Teemmo.NEO.invokeGroup(params)
-            .then(result=>{
-                console.log(result);
-                console.log("这是交易id"+ result[0].txid);
-                
-                resolve();
-            })
-            .catch(error=>{
-                console.log("==============进入了异常流程");
-                
-                console.log(error);
-                reject();
-            })
-        })
-    }
-
-
-    
-    public invokeGroup2()
-    {
-        console.log("this is InvokeGroup");
-        
-        const params:InvokeGroup = {
-            merge:false,
-            group:[
-                {
-                    scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
-                    operation:"transfer",
-                    arguments:[
-                        {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                        {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                        {type:"Integer",value:"1000"}
-                    ],
-                    network:"TestNet",
-                    // assets: 暂时用不到
-                },
-                {
-                    scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
-                    operation:"setmoneyin",
-                    arguments:[
-                        /**
-                         * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
-                            sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
-                            sb.EmitSysCall("Neo.Transaction.GetHash");
-                         */
-                        {type:"Hook_Txid",value:0}, // 
-                        {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
-                    ],
-                    network:"TestNet"
-                }
-            ]
-        }
-        return new Promise((resolve,reject)=>{            
-            Teemmo.NEO.invokeGroup(params)
-            .then(result=>{
-                console.log(result);
-                console.log("这是交易id"+ result[0].txid);
-                
-                resolve();
-            })
-            .catch(error=>{
-                console.log("==============进入了异常流程");
-                
-                console.log(error);
-                reject();
-            })
-        })
-    }
     /**
-     * invoke 发送交易
+     * 试运行合约（多操作）
      */
-    public invoke()
+    public invokeReadGroup(params:string)
     {
-        const params:InvokeArgs = {
-            scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
-            operation:"transfer",
-            arguments:[
-                {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                {type:"Integer",value:"100000"}
-            ],
-            fee:'0.001',
-            network:"TestNet",
-            // assets: 暂时用不到
-        }
+        return new Promise((resolve,reject)=>{        
+            let json = JSON.parse(params);
+            console.log(json);
+                
+            Teemmo.NEO.invokeReadGroup(JSON.parse(params) as InvokeReadGroup)
+            .then(result=>{
+                console.log(result);
+                document.getElementById("invokeReadGroup_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
+    /**
+     * invoke 发送合约调用交易（单操作）
+     */
+    public invoke(params:string)
+    {
+        // const params:InvokeArgs = {
+        //     scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+        //     operation:"transfer",
+        //     arguments:[
+        //         {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        //         {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        //         {type:"Integer",value:"100000"}
+        //     ],
+        //     fee:'0.001',
+        //     network:"TestNet",
+        //     // assets: 暂时用不到
+        // }
         return new Promise((resolve,reject)=>{            
-            Teemmo.NEO.invoke(params)
+            Teemmo.NEO.invoke(JSON.parse(params) as InvokeArgs)
             .then(result=>{
                 console.log(result);
                 console.log("这是交易id"+ result.txid);
-                
+                document.getElementById("invoke_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                reject();
-            })
-        })
-    }
-    
-    public testrun()
-    {
-        const params:InvokeArgs = {
-            scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
-            operation: 'symbol',
-            arguments: [],
-            network: 'TestNet'
-          }
-        return new Promise((resolve,reject)=>{            
-            Teemmo.NEO.invokeRead(params)
-            .then(result=>{
-                console.log(result);
-                resolve();
-            })
-            .catch(error=>{
-                console.log("==============进入了异常流程");
-                
-                console.log(error);
+                document.getElementById("invoke_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
     }
 
-    public testRunGroup()
+    /**
+     * invoke 发送合约调用交易（多操作）
+     */
+
+    public invokeGroup(params:string)
     {
-        const params:InvokeReadGroup={
-            group:[
-                {
-                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
-                  operation: 'totalSupply',
-                  arguments: [],
-                  network: 'TestNet'
-                },
-                {
-                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
-                  operation: 'name',
-                  arguments: [],
-                  network: 'TestNet'
-                },
-                {
-                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
-                  operation: 'symbol',
-                  arguments:[],
-                  network: 'TestNet'
-                },
-                {
-                  scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
-                  operation: 'decimals',
-                  arguments: [],
-                  network: 'TestNet'
-                }        
-            ]
-        }
+        // console.log("this is InvokeGroup");
+        
+        // const params:InvokeGroup = {
+        //     merge:true,
+        //     group:[
+        //         {
+        //             scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+        //             operation:"transfer",
+        //             arguments:[
+        //                 {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        //                 {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        //                 {type:"Integer",value:"100000"}
+        //             ],
+        //             network:"TestNet",
+        //             // assets: 暂时用不到
+        //         },
+        //         {
+        //             scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+        //             operation:"setmoneyin",
+        //             arguments:[
+        //                 /**
+        //                  * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
+        //                     sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+        //                     sb.EmitSysCall("Neo.Transaction.GetHash");
+        //                  */
+        //                 {type:"Hook_Txid",value:0}, // 
+        //                 {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
+        //             ],
+        //             network:"TestNet"
+        //         }
+        //     ]
+        // }
         return new Promise((resolve,reject)=>{            
-            Teemmo.NEO.invokeReadGroup(params)
+            Teemmo.NEO.invokeGroup(JSON.parse(params) as InvokeGroup)
             .then(result=>{
                 console.log(result);
+                console.log("这是交易id"+ result[0].txid);
+                document.getElementById("invokeGroup_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
-                console.log("==============进入了异常流程");
-                
+                console.log("==============进入了异常流程");            
                 console.log(error);
+                document.getElementById("invokeGroup_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
     }
+
+
+    
+    // public invokeGroup2()
+    // {
+    //     console.log("this is InvokeGroup");
+        
+    //     const params:InvokeGroup = {
+    //         merge:false,
+    //         group:[
+    //             {
+    //                 scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+    //                 operation:"transfer",
+    //                 arguments:[
+    //                     {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+    //                     {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+    //                     {type:"Integer",value:"1000"}
+    //                 ],
+    //                 network:"TestNet",
+    //                 // assets: 暂时用不到
+    //             },
+    //             {
+    //                 scriptHash:"00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
+    //                 operation:"setmoneyin",
+    //                 arguments:[
+    //                     /**
+    //                      * 这个地方相当与使用了 Hook_Txid 类型 等同于当前的交易id 代替了 下面这几句
+    //                         sb.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+    //                         sb.EmitSysCall("Neo.Transaction.GetHash");
+    //                      */
+    //                     {type:"Hook_Txid",value:0}, // 
+    //                     {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
+    //                 ],
+    //                 network:"TestNet"
+    //             }
+    //         ]
+    //     }
+    //     return new Promise((resolve,reject)=>{            
+    //         Teemmo.NEO.invokeGroup(params)
+    //         .then(result=>{
+    //             console.log(result);
+    //             console.log("这是交易id"+ result[0].txid);
+                
+    //             resolve();
+    //         })
+    //         .catch(error=>{
+    //             console.log("==============进入了异常流程");
+                
+    //             console.log(error);
+    //             reject();
+    //         })
+    //     })
+    // }
+    
+    // public testrun()
+    // {
+    //     const params:InvokeArgs = {
+    //         scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+    //         operation: 'symbol',
+    //         arguments: [],
+    //         network: 'TestNet'
+    //       }
+    //     return new Promise((resolve,reject)=>{            
+    //         Teemmo.NEO.invokeRead(params)
+    //         .then(result=>{
+    //             console.log(result);
+    //             resolve();
+    //         })
+    //         .catch(error=>{
+    //             console.log("==============进入了异常流程");
+                
+    //             console.log(error);
+    //             reject();
+    //         })
+    //     })
+    // }
+
+    // public testRunGroup()
+    // {
+    //     const params:InvokeReadGroup={
+    //         group:[
+    //             {
+    //               scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+    //               operation: 'totalSupply',
+    //               arguments: [],
+    //               network: 'TestNet'
+    //             },
+    //             {
+    //               scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+    //               operation: 'name',
+    //               arguments: [],
+    //               network: 'TestNet'
+    //             },
+    //             {
+    //               scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+    //               operation: 'symbol',
+    //               arguments:[],
+    //               network: 'TestNet'
+    //             },
+    //             {
+    //               scriptHash: 'fc732edee1efdf968c23c20a9628eaa5a6ccb934',
+    //               operation: 'decimals',
+    //               arguments: [],
+    //               network: 'TestNet'
+    //             }        
+    //         ]
+    //     }
+    //     return new Promise((resolve,reject)=>{            
+    //         Teemmo.NEO.invokeReadGroup(params)
+    //         .then(result=>{
+    //             console.log(result);
+    //             resolve();
+    //         })
+    //         .catch(error=>{
+    //             console.log("==============进入了异常流程");
+                
+    //             console.log(error);
+    //             reject();
+    //         })
+    //     })
+    // }
 }
