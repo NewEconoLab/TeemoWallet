@@ -10,7 +10,7 @@ interface BackStore
 }
 
 
-var storage:BackStore=
+const storage:BackStore=
 {
     network:"testnet",
     account:undefined,
@@ -268,8 +268,6 @@ class Utxo{
     public count: Neo.Fixed8;
 }
 
-const bg = chrome.extension.getBackgroundPage();
-
 const Storage_local = 
 {
     setAccount:(account:AccountInfo)=>{
@@ -324,11 +322,11 @@ const Storage_local =
 class Storage_internal
 {
     public static set=(key:string,value:any)=>{
-        bg['storage'][key]=value;
+        storage[key]=value;
     };
     public static get<T>(key:string,):T
     {
-        return bg['storage'][key];
+        return storage[key];
     }
 }
 class Transaction extends ThinNeo.Transaction

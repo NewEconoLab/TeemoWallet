@@ -1,4 +1,3 @@
-///<reference path="../../lib/neo-thinsdk.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -7,17 +6,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var storage = {
+const storage = {
     network: "testnet",
     account: undefined,
     height: 0
 };
-// (function(storage){
-//     var account = null
-//     storage.account=account;
-//     var network="testnet";
-//     storage.network=network;
-// })(storage || (storage = {}));
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -189,7 +182,6 @@ class MarkUtxo {
 }
 class Utxo {
 }
-const bg = chrome.extension.getBackgroundPage();
 const Storage_local = {
     setAccount: (account) => {
         let arr = Storage_local.getAccount();
@@ -233,11 +225,11 @@ const Storage_local = {
  */
 class Storage_internal {
     static get(key) {
-        return bg['storage'][key];
+        return storage[key];
     }
 }
 Storage_internal.set = (key, value) => {
-    bg['storage'][key] = value;
+    storage[key] = value;
 };
 class Transaction extends ThinNeo.Transaction {
     constructor(type) {

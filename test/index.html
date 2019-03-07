@@ -9,6 +9,20 @@
     <script src="js/index.js"></script>
 </head>
 <body>
-    <div id="index"></div>
+    <textarea id="event" rows="3" cols="60" placeholder="event pool"></textarea>
+    <hr />
+    <button id="getAccount_do">getAccount</button>
+    <pre id="getAccount_R">getAccount return</pre>
+    <hr />
+    <p>input  getBalance params</p>
+    <textarea id="getBalance_input" rows="5" cols="150" placeholder="getBalance_input">
+        {  
+            "address": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",  
+            "assets": ["602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"]
+        }
+    </textarea>
+    <br />
+    <button id="getBalance_do">getBalance</button>
+    <pre id="getBalance_R">getBalance rerurn</pre>
 </body>
 </html>

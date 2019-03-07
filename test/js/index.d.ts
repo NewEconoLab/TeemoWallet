@@ -1,6 +1,6 @@
 /// <reference path="../inject.d.ts" />
 declare class Main {
-    index: HTMLDivElement;
+    getAccount_R: HTMLDivElement;
     address: string;
     name: string;
     constructor();
@@ -12,7 +12,7 @@ declare class Main {
     /**
      * 获得余额信息
      */
-    getBalance(): Promise<{}>;
+    getBalance(params: string): Promise<{}>;
     invokeGroup(): Promise<{}>;
     invokeGroup2(): Promise<{}>;
     /**

@@ -9,19 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 window.addEventListener('Teemmo.NEO.READY', () => {
     console.log("inject ready ");
+    document.getElementById("event").innerText = "ready";
     const main = new Main();
     main.start();
 });
 class Main {
     constructor() {
-        this.index = document.getElementById("index");
+        this.getAccount_R = document.getElementById("getAccount_R");
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.getAccount();
-            yield this.getBalance();
+            document.getElementById("getAccount_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                yield this.getAccount();
+            });
+            document.getElementById("getBalance_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getBalance_input = document.getElementById("getBalance_input");
+                yield this.getBalance(getBalance_input.value);
+            });
             // await this.testrun();
-            yield this.testRunGroup();
+            // await this.testRunGroup();
             // await this.invokeGroup()
             // await this.invokeGroup2();
         });
@@ -34,7 +40,7 @@ class Main {
             Teemmo.NEO.getAccount()
                 .then(result => {
                 console.log(result);
-                this.index.textContent = JSON.stringify(result);
+                this.getAccount_R.textContent = JSON.stringify(result, null, 2);
                 this.address = result.address; // 当前登陆的地址
                 this.name = result.label; // 当前钱包的名字
                 resolve();
@@ -48,20 +54,22 @@ class Main {
     /**
      * 获得余额信息
      */
-    getBalance() {
-        const params = {
-            address: this.address,
-            assets: ["602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"],
-        };
+    getBalance(params) {
+        // const params:BalanceRequest={
+        //     address:this.address,   // 你要查询的地址
+        //     assets:["602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"], // 不填则默认查四个资产 NEO　GAS　NNC NNK 可能之后要改一下
+        //     // fetchUTXO 可以不填的
+        // }
         // 获得余额的参数
         const data = {
             network: "TestNet",
-            params: params
+            params: JSON.parse(params)
         };
         return new Promise((resolve, reject) => {
             Teemmo.NEO.getBalance(data) // 获得余额的方法
                 .then(result => {
                 console.log(result);
+                document.getElementById("getBalance_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
                 .catch(error => {
