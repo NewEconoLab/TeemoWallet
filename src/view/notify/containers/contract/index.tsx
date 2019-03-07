@@ -17,8 +17,9 @@ interface IProps{
 export default class ContractRequest extends React.Component<IProps>
 {
   public state = {
-    pageNumber: 0 // 0为上一页，1为下一页
+    pageNumber: 0, // 0为上一页，1为下一页
   }
+  
   public nextPage = () =>
   {
     this.setState({
@@ -41,9 +42,9 @@ export default class ContractRequest extends React.Component<IProps>
         <div className="second-line">
           合约交互
         </div>
-        <div className="second-line">
+        {/* <div className="second-line">
           请求签名 
-        </div>
+        </div> */}
         {
           this.state.pageNumber === 0 && (
             <>
@@ -72,7 +73,7 @@ export default class ContractRequest extends React.Component<IProps>
                 <Checkbox text="优先确认交易（支付0.001 GAS）"></Checkbox>
               </div>
               <div className="contract-title">来自应用的备注</div>
-              <div className="remark-content white-wrap">游戏充值</div>
+              <div className="remark-content white-wrap">游戏充值/-</div>
               <div className="previous-img" onClick={this.nextPage}>
                 <img src={require('../../../image/previous.png')} alt="" />
               </div>
@@ -82,10 +83,10 @@ export default class ContractRequest extends React.Component<IProps>
         {
           this.state.pageNumber === 1 && (
             <>
-              <div className="contract-title">交易数据</div>
+              {/* <div className="contract-title">交易数据</div> */}
               <div className="contract-title">签名消息</div>
                
-              {/* <div className="transaction-wrap white-wrap">
+              <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">合约hash</div>
                   <div className="line-right">
@@ -112,10 +113,10 @@ export default class ContractRequest extends React.Component<IProps>
                       <p className="second-p">0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</p>
                     </div>
                 </div>
-              </div> */}
-              <div className="transaction-content">
-                <span>内容</span>
               </div>
+              {/* <div className="transaction-content">
+                <span>内容</span>
+              </div> */}
               <div className="previous-img" onClick={this.previousPage}>
                 <img src={require('../../../image/next.png')} alt="" />
               </div>
