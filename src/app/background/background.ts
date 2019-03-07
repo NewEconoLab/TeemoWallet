@@ -1533,9 +1533,11 @@ const responseMessage =(request)=>
                 sendResponse(invokeRead(params));
                 break;
             case Command.invokeGroup:
-                sendResponse(invokeGroup(message,params))
+                sendResponse(invokeGroup(message,params));
+                break;
             case Command.invokeReadGroup:
-                sendResponse(invokeReadGroup(params))
+                sendResponse(invokeReadGroup(params));
+                break;
             default:
                 
                 break;

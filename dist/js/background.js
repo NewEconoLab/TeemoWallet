@@ -1279,8 +1279,10 @@ const responseMessage = (request) => {
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(message, params));
+                break;
             case Command.invokeReadGroup:
                 sendResponse(invokeReadGroup(params));
+                break;
             default:
                 break;
         }
