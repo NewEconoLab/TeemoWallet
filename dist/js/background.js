@@ -1144,8 +1144,35 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     }
     return balances;
 });
-var send = (title, data) => {
+const sendTransaction = (data) => __awaiter(this, void 0, void 0, function* () {
+    if (data.asset.hexToBytes().length == 20) { // 此资产是 nep5资产
+    }
+    else if (data.asset.hexToBytes().length == 32)
+        try {
+            let tran = new Transaction();
+            data.asset;
+            const utxos = yield MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
+            if (utxos)
+                tran.creatInuptAndOutup(utxos, Neo.Fixed8.parse(data.amount));
+        }
+        catch (error) {
+            throw error;
+        }
+});
+var send = (title, params) => {
     return new Promise((resolve, reject) => {
+        if (!storage.account) {
+            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
+        }
+        const { address, walletName } = storage.account;
+        const data = {
+            lable: Command.send,
+            header: title,
+            account: { address, walletName },
+            data: params
+        };
+        openNotify(data, () => {
+        });
     });
 };
 /**

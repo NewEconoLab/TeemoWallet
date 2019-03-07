@@ -240,7 +240,8 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * @param data 请求的参数
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
-declare var send: (title: any, data: any) => Promise<{}>;
+declare const sendTransaction: (data: SendArgs) => Promise<void>;
+declare var send: (title: any, params: any) => Promise<{}>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
