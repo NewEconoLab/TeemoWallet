@@ -21,13 +21,17 @@ declare class Main {
      * 试运行合约（单操作）
      */
     invokeRead(params: string): Promise<{}>;
-    invokeGroup(): Promise<{}>;
-    invokeGroup2(): Promise<{}>;
     /**
-     * invoke 发送交易
+     * 试运行合约（多操作）
      */
-    invoke(): Promise<{}>;
-    testrun(): Promise<{}>;
-    testRunGroup(): Promise<{}>;
+    invokeReadGroup(params: string): Promise<{}>;
+    /**
+     * invoke 发送合约调用交易（单操作）
+     */
+    invoke(params: string): Promise<{}>;
+    /**
+     * invoke 发送合约调用交易（多操作）
+     */
+    invokeGroup(params: string): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map
