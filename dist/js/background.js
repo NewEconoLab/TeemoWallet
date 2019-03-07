@@ -907,9 +907,9 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
  * @param call 回调方法
  * @param data 通知信息
  */
-const openNotify = (data, call) => {
-    if (data) {
-        chrome.storage.local.set({ data }, () => {
+const openNotify = (notifyData, call) => {
+    if (notifyData) {
+        chrome.storage.local.set({ notifyData }, () => {
             var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
             //获得关闭事件
             var loop = setInterval(() => {
@@ -988,6 +988,7 @@ const invokeGroup = (title, params) => {
             account: { address, walletName },
             data: params
         };
+        console.log(data);
         openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
@@ -1144,7 +1145,7 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
     }
     return balances;
 });
-const sendTransaction = (data) => __awaiter(this, void 0, void 0, function* () {
+var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
     if (data.asset.hexToBytes().length == 20) { // 此资产是 nep5资产
     }
     else if (data.asset.hexToBytes().length == 32)
@@ -1154,6 +1155,7 @@ const sendTransaction = (data) => __awaiter(this, void 0, void 0, function* () {
             const utxos = yield MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
             if (utxos)
                 tran.creatInuptAndOutup(utxos, Neo.Fixed8.parse(data.amount));
+            return sendInvoke(tran);
         }
         catch (error) {
             throw error;
@@ -1172,6 +1174,13 @@ var send = (title, params) => {
             data: params
         };
         openNotify(data, () => {
+            transfer(params)
+                .then(result => {
+                resolve(result);
+            })
+                .catch(error => {
+                reject(error);
+            });
         });
     });
 };
@@ -1284,6 +1293,7 @@ const responseMessage = (request) => {
                 sendResponse(invokeReadGroup(params));
                 break;
             default:
+                sendResponse(new Promise((r, j) => j({ type: "REQUEST_ERROR", description: "This method is not available" })));
                 break;
         }
     });

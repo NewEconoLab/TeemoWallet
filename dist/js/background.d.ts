@@ -214,7 +214,7 @@ interface NotifyMessage {
  * @param call 回调方法
  * @param data 通知信息
  */
-declare const openNotify: (data: NotifyMessage, call: any) => void;
+declare const openNotify: (notifyData: NotifyMessage, call: any) => void;
 /**
  * 请求账户信息
  */
@@ -240,8 +240,8 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * @param data 请求的参数
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
-declare const sendTransaction: (data: SendArgs) => Promise<void>;
-declare var send: (title: any, params: any) => Promise<{}>;
+declare var transfer: (data: SendArgs) => Promise<SendOutput>;
+declare var send: (title: any, params: SendArgs) => Promise<{}>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
