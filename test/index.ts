@@ -2,13 +2,13 @@
 
 window.addEventListener('Teemmo.NEO.READY',()=>{
     console.log("inject ready ");
-    document.getElementById("event").innerText = "ready";
+    var myDate = new Date();
+    var eventPool = document.getElementById("event") as HTMLTextAreaElement
+    eventPool.value = myDate.toLocaleTimeString() + "ready";
     const main = new Main();
     main.start();
     
 })
-
-
 
 class Main {
     getAccount_R:HTMLDivElement;
@@ -19,6 +19,10 @@ class Main {
     }
 
     async start(){
+        document.getElementById("getNetworks_do").onclick = async () =>{
+            await this.getNetworks();
+        }   
+
         document.getElementById("getAccount_do").onclick = async () =>{
             await this.getAccount();
         }        
@@ -27,11 +31,36 @@ class Main {
             var getBalance_input = document.getElementById("getBalance_input") as HTMLTextAreaElement;
             await this.getBalance(getBalance_input.value)
         }
+
+        document.getElementById("invokeRead_do").onclick = async () =>{ 
+            var invokeRead_input = document.getElementById("invokeRead_input") as HTMLTextAreaElement;
+            await this.invokeRead(invokeRead_input.value)
+        }
         // await this.testrun();
         // await this.testRunGroup();
         // await this.invokeGroup()
         // await this.invokeGroup2();
     }
+
+    /**
+     * 获得网络配置
+     */
+    public getNetworks()
+    {
+        return new Promise((resolve,reject)=>{            
+            Teemmo.NEO.getNetworks()
+            .then(result=>{
+                console.log(result);
+                document.getElementById("getNetworks_R").textContent=JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
     /**
      * 获得账户信息
      */
@@ -73,6 +102,28 @@ class Main {
             .then(result=>{
                 console.log(result);
                 document.getElementById("getBalance_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
+    /**
+     * 试运行合约（单操作）
+     */
+    public invokeRead(params:string)
+    {
+        return new Promise((resolve,reject)=>{        
+            let json = JSON.parse(params);
+            console.log(json);
+                
+            Teemmo.NEO.invokeRead(JSON.parse(params) as InvokeReadInput)
+            .then(result=>{
+                console.log(result);
+                document.getElementById("invokeRead_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
