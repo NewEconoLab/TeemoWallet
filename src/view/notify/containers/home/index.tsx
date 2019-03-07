@@ -23,8 +23,6 @@ export default class Home extends React.Component<any, any> {
   }
   public componentDidMount() 
   {
-    console.log("打印chrome.storage.local");
-    console.log(chrome.storage.local)
       if(chrome.tabs)
       {
         chrome.storage.local.get(['header','lable','data','account'],(result:NotifyMessage)=>{      
