@@ -1,3 +1,4 @@
+///<reference path="../../lib/neo-thinsdk.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -6,11 +7,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const storage = {
+var storage = {
     network: "testnet",
     account: undefined,
     height: 0
 };
+// (function(storage){
+//     var account = null
+//     storage.account=account;
+//     var network="testnet";
+//     storage.network=network;
+// })(storage || (storage = {}));
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -902,7 +909,7 @@ const contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* ()
  */
 const openNotify = (data, call) => {
     if (data) {
-        chrome.storage.local.set(data, () => {
+        chrome.storage.local.set({ data }, () => {
             var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
             //获得关闭事件
             var loop = setInterval(() => {
@@ -932,12 +939,11 @@ const getAccount = (title) => {
         if (!storage.account) {
             reject({ type: "ACCOUNT_ERROR", deciphering: "Account not logged in " });
         }
+        const { address, walletName } = storage.account;
         const data = {
-            label: "getAccount",
+            lable: Command.getAccount,
             header: title,
-            message: {
-                account: storage.account ? { address: storage.account.address } : undefined
-            },
+            account: { address, walletName }
         };
         openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
@@ -970,21 +976,22 @@ const getAccount = (title) => {
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-const invokeGroup = (title, data) => {
+const invokeGroup = (title, params) => {
     return new Promise((resolve, reject) => {
-        const message = {
-            label: "invokeGroup",
-            message: {
-                account: storage.account ? { address: storage.account.address } : undefined,
-                title: title.refTitle,
-                domain: title.refDomain,
-                invoke: data.msg
-            }
+        if (!storage.account) {
+            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
+        }
+        const { address, walletName } = storage.account;
+        const data = {
+            lable: Command.invokeGroup,
+            header: title,
+            account: { address, walletName },
+            data: params
         };
-        openNotify(message, () => {
+        openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
-                    invokeGroupBuild(data)
+                    invokeGroupBuild(params)
                         .then(result => {
                         resolve(result);
                     })
@@ -1007,21 +1014,22 @@ const invokeGroup = (title, data) => {
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-const invoke = (title, data) => {
+const invoke = (title, params) => {
     return new Promise((resolve, reject) => {
-        const message = {
-            label: "invokeGroup",
-            message: {
-                account: storage.account ? { address: storage.account.address } : undefined,
-                title: title.refTitle,
-                domain: title.refDomain,
-                invoke: data.msg
-            }
+        if (!storage.account) {
+            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
+        }
+        const { address, walletName } = storage.account;
+        const data = {
+            lable: Command.invokeGroup,
+            header: title,
+            account: { address, walletName },
+            data: params
         };
-        openNotify(message, () => {
+        openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
-                    contractBuilder(data)
+                    contractBuilder(params)
                         .then(result => {
                         resolve(result);
                     })

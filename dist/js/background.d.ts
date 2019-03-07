@@ -76,7 +76,6 @@ declare class Utxo {
     asset: string;
     count: Neo.Fixed8;
 }
-declare const bg: Window;
 declare const Storage_local: {
     setAccount: (account: AccountInfo) => number;
     getAccount: () => NepAccount[];
@@ -198,12 +197,24 @@ declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
 declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
+interface NotifyMessage {
+    header: {
+        title: string;
+        domain: string;
+    };
+    account: {
+        address: string;
+        walletName: string;
+    };
+    lable: Command;
+    data?: any;
+}
 /**
  * 打开notify页面并传递信息，返回调用
  * @param call 回调方法
  * @param data 通知信息
  */
-declare const openNotify: (data: any, call: any) => void;
+declare const openNotify: (data: NotifyMessage, call: any) => void;
 /**
  * 请求账户信息
  */
@@ -213,13 +224,13 @@ declare const getAccount: (title: any) => Promise<{}>;
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-declare const invokeGroup: (title: any, data: any) => Promise<{}>;
+declare const invokeGroup: (title: any, params: any) => Promise<{}>;
 /**
  * invoke 合约调用
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-declare const invoke: (title: any, data: any) => Promise<{}>;
+declare const invoke: (title: any, params: any) => Promise<{}>;
 /**
  * 获得网络状态信息
  */
@@ -338,6 +349,7 @@ interface InvokeArgs {
     attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+    description?: string;
 }
 interface AttachedAssets {
     [asset: string]: string;

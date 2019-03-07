@@ -10,7 +10,7 @@ interface BackStore
 }
 
 
-const storage:BackStore=
+var storage:BackStore=
 {
     network:"testnet",
     account:undefined,
