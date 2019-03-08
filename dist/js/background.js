@@ -105,13 +105,13 @@ class MarkUtxo {
                     const mark = marks ? marks[item["txid"]] : undefined;
                     if (!mark || !mark.join(",").includes(item.n)) // 排除已经标记的utxo返回给调用放
                      {
-                        const asset = item.asset;
+                        const asset = item.asset.replace('0x', '');
                         if (assets[asset] === undefined || assets[asset] == null) {
                             assets[asset] = [];
                         }
                         const utxo = new Utxo();
                         utxo.addr = item.addr;
-                        utxo.asset = item.asset;
+                        utxo.asset = asset;
                         utxo.n = item.n;
                         utxo.txid = item.txid;
                         utxo.count = Neo.Fixed8.parse(item.value);
@@ -182,12 +182,6 @@ const Storage_local = {
         }
         return accounts;
     }
-};
-var mytest = (data) => {
-    console.log(data.toHexString());
-    console.log(data.toHexString().hexToBytes() instanceof Uint8Array);
-    console.log("--------------------------这里是测试，看popup传过来的类型是否发生改变 是不是Uint8Array?");
-    console.log(data instanceof Uint8Array);
 };
 /**
  * 主要用于background的内存数据的存储和读取
@@ -1120,7 +1114,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             if (result['state'] == 'HALT, BREAK') {
                 let stack = result['stack'];
                 let dicelams = stack[0]['value'];
-                amount = parseFloat(data.amount).toFixed(dicelams);
+                amount = parseFloat(data.amount).toFixed(dicelams).replace('.', '');
             }
             else {
                 throw { type: 'ASSET_ERROR', description: "This asset information undefined" };
@@ -1153,7 +1147,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
                 if (data.asset == HASH_CONFIG.ID_GAS) {
                     const sum = fee.add(Neo.Fixed8.parse(data.amount));
                     tran.creatInuptAndOutup(gass, sum, data.toAddress);
-                    tran.outputs[0].value.subtract(fee);
+                    tran.outputs[0].value = tran.outputs[0].value.subtract(fee);
                 }
                 else {
                     const asset = utxos[data.asset];

@@ -304,7 +304,21 @@ var readyEvent = new CustomEvent('Teemmo.NEO.READY',{
     detail:{title:'This is Teemmo'},
 });
 
-var accountChange = new CustomEvent('Teemmo.NEO.ACCOUNT_CHANGED',{detail:{address:"",lable:""}})
+var accountEvent = new CustomEvent('Teemmo.NEO.ACCOUNT_CHANGED',{
+    detail:{title:'This is Teemmo'},
+});
+
+var connectedEvent = new CustomEvent('Teemmo.NEO.CONNECTED',{
+    detail:{title:'This is Teemmo'},
+});
+
+var disconnectedEvent = new CustomEvent('Teemmo.NEO.DISCONNECTED',{
+    detail:{title:'This is Teemmo'},
+});
+
+var networkEvent = new CustomEvent('Teemmo.NEO.NETWORK_CHANGED',{
+    detail:{title:'This is Teemmo'},
+});
 
 if (window.dispatchEvent) {
     window.dispatchEvent(readyEvent);
