@@ -8,36 +8,92 @@ import Checkbox from '../../../components/Checkbox';
 import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 // import { observer } from 'mobx-react';
 
-interface IProps{
-  title:string,
-  domain:string,
-  data:any
+interface IProps
+{
+  title: string,
+  domain: string,
+  data: any
 }
-interface IState{
-  pageNumber:number,
-  invoke:InvokeArgs[],
-  description:string[],
-  scriptHash:string[],
-  fee:string,
-  operation:string,
-  arguments:Array<Argument>
+interface IState
+{
+  pageNumber: number,
+  data: any,
+  description: string[],
+  scriptHash: string[],
+  fee: string,
+  operation: string[],
+  arguments: Array<Argument>
 }
 // @observer
-export default class ContractRequest extends React.Component<IProps,IState>
+export default class ContractRequest extends React.Component<IProps, IState>
 {
   public state = {
     pageNumber: 0, // 0为上一页，1为下一页
-    invoke:null,
-    description:[],
-    scriptHash:[],
-    fee:'0',
-    operation:'',
-    arguments:[]
+    data: null,
+    description: [],
+    scriptHash: [],
+    fee: '0',
+    operation: [],
+    arguments: []
   }
-  constructor(props:IProps){
-    super(props);
-    console.log("data")
+  public componentWillReceiveProps(nextProps)
+  {
+    this.setState({
+      data: nextProps.data
+    }, () =>
+      {
+        this.getRenderState();
+      })
+  }
+  // 更新数据
+  public getRenderState = () =>
+  {
+    console.log("渲染hash");
     console.log(this.props.data);
+    console.log(JSON.stringify(this.state.data))
+    let invoke: InvokeArgs[] = [];
+    if (this.state.data && this.state.data.group)
+    {
+      console.log("发送的是多条的交易");
+      invoke = this.props.data.group;
+      this.initData(invoke);
+    }
+    else if (this.state.data)
+    {
+      console.log("发送的是单条的交易");
+      invoke[0] = this.props.data;
+      this.initData(invoke);
+    }
+  }
+  // 初始化state
+  public initData = (invoke: InvokeArgs[]) =>
+  {
+    let description = [];
+    let scriptHash = [];
+    let fee = 0;
+    let operation = [];
+    let argument = [];
+    invoke.map((key, value) =>
+    {
+      console.log(key);
+      console.log(value);
+      description[value] = key.description;
+      scriptHash[value] = key.scriptHash;
+      fee = key.fee ? parseFloat(key.fee) : 0 + fee;
+      operation[value] = key.operation;
+      argument[value] = key.arguments;
+    })
+    this.setState({
+      description: description,
+      scriptHash: scriptHash,
+      fee: fee.toString(),
+      operation: operation,
+      arguments: argument
+    }, () =>
+      {
+        console.log("打印state");
+        console.log(this.state);
+      });
   }
 
   public nextPage = () =>
@@ -74,31 +130,46 @@ export default class ContractRequest extends React.Component<IProps,IState>
                   <div className="line-left">合约hash</div>
                   <div className="line-right">
                     {
-                      this.state.scriptHash.map((k,v)=>{
-                        console.log(k);
-                        return <a href="#">{k}</a>
+                      this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
+                      {
+                        return <a href="#">{k.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}{(this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "," : ""}</a>
                       })
-                    }                    
+                    }
                   </div>
                 </div>
                 <div className="line-wrap">
                   <div className="line-left">花费</div>
                   <div className="line-right">
-                    <span>5 GAS</span>
+                    <span>0 GAS</span>
                   </div>
                 </div>
-                <div className="line-wrap">
-                  <div className="line-left">手续费</div>
-                  <div className="line-right">
-                    <span>0.001 GAS</span>
+                {
+                  parseFloat(this.state.fee) !== 0 && (
+                    <div className="line-wrap">
+                      <div className="line-left">手续费</div>
+                      <div className="line-right">
+                        <span>{this.state.fee} GAS</span>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+              {
+                parseFloat(this.state.fee) === 0 && (
+                  <div className="check-fee">
+                    <Checkbox text="优先确认交易（支付0.001 GAS）"></Checkbox>
                   </div>
-                </div>
-              </div>
-              <div className="check-fee">
-                <Checkbox text="优先确认交易（支付0.001 GAS）"></Checkbox>
-              </div>
+                )
+              }
               <div className="contract-title">来自应用的备注</div>
-              <div className="remark-content white-wrap">游戏充值/-</div>
+              <div className="remark-content white-wrap">
+                {
+                  this.state.description.length !== 0 && this.state.description.map((k, v) =>
+                  {
+                    return k + ((this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "/" : "")
+                  })
+                }
+              </div>
               <div className="previous-img" onClick={this.nextPage}>
                 <img src={require('../../../image/previous.png')} alt="" />
               </div>
@@ -110,34 +181,52 @@ export default class ContractRequest extends React.Component<IProps,IState>
             <>
               {/* <div className="contract-title">交易数据</div> */}
               <div className="contract-title">签名消息</div>
-               
+
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">合约hash</div>
                   <div className="line-right">
-                    <a href="#">2a69...1cbd,2a69...1cbd</a>
+                  {
+                      this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
+                      {
+                        return <a href="#">{k.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}{(this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "," : ""}</a>
+                      })
+                    }
                   </div>
                 </div>
-                <div className="line-wrap">
-                    <div className="line-left">
-                      <p className="first-p">方法</p>
-                      <p className="second-p">参数hash</p>
-                    </div>
-                    <div className="line-right">
-                      <p className="first-p">aaa</p>
-                      <p className="second-p">0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</p>
-                    </div>
-                </div>
-                <div className="line-wrap">
-                    <div className="line-left">
-                      <p className="first-p">方法</p>
-                      <p className="second-p">参数hash</p>
-                    </div>
-                    <div className="line-right">
-                      <p className="first-p">aaa</p>
-                      <p className="second-p">0xa3ca3c748d22c97381b18a249dd1ece4dec4681ff4721bb6ba0025b75b51c77a</p>
-                    </div>
-                </div>
+                {
+                  this.state.operation.length !== 0 && this.state.operation.map((okey, oindex) =>
+                  {
+                    console.log("ok:" + okey)
+                    return (
+                      <div className="line-wrap line-method">
+                        <div className="one-line">
+                          <div className="line-left">
+                            <p className="first-p">方法</p>
+                          </div>
+                          <div className="line-right">
+                            <p className="first-p">{okey}</p>
+                          </div>
+                        </div>
+                        {
+                          this.state.arguments.length !== 0 && Object.keys(this.state.arguments[oindex]).map((akey, aindex) =>
+                          {
+                            return (
+                              <div className="one-line">
+                                <div className="line-left">
+                                  <p className="first-p">{this.state.arguments[oindex][akey].type}</p>
+                                </div>
+                                <div className="line-right">
+                                  <p className="second-p">{this.state.arguments[oindex][akey].value}</p>
+                                </div>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    )
+                  })
+                }
               </div>
               {/* <div className="transaction-content">
                 <span>内容</span>
