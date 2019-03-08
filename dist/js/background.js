@@ -105,13 +105,13 @@ class MarkUtxo {
                     const mark = marks ? marks[item["txid"]] : undefined;
                     if (!mark || !mark.join(",").includes(item.n)) // 排除已经标记的utxo返回给调用放
                      {
-                        const asset = item.asset;
+                        const asset = item.asset.replace('0x', '');
                         if (assets[asset] === undefined || assets[asset] == null) {
                             assets[asset] = [];
                         }
                         const utxo = new Utxo();
                         utxo.addr = item.addr;
-                        utxo.asset = item.asset;
+                        utxo.asset = asset;
                         utxo.n = item.n;
                         utxo.txid = item.txid;
                         utxo.count = Neo.Fixed8.parse(item.value);
@@ -1151,7 +1151,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
                 if (data.asset == HASH_CONFIG.ID_GAS) {
                     const sum = fee.add(Neo.Fixed8.parse(data.amount));
                     tran.creatInuptAndOutup(gass, sum, data.toAddress);
-                    tran.outputs[0].value.subtract(fee);
+                    tran.outputs[0].value = tran.outputs[0].value.subtract(fee);
                 }
                 else {
                     const asset = utxos[data.asset];
