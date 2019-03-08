@@ -16,13 +16,6 @@ var storage:BackStore=
     account:undefined,
     height:0
 }
-// (function(storage){
-//     var account = null
-//     storage.account=account;
-//     var network="testnet";
-//     storage.network=network;
-// })(storage || (storage = {}));
-
 
 const HASH_CONFIG = {
     accountCGAS:Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
@@ -59,63 +52,6 @@ class NepAccount{
         if(index!==undefined)
             this.index=index;
     }
-
-    static deciphering= async (password:string,nepaccount:NepAccount)=>{
-        return new Promise<AccountInfo>((resolve, reject) =>
-        {
-            ThinNeo.Helper.GetPrivateKeyFromNep2(nepaccount.nep2key, password, nepaccount.scrypt.N, nepaccount.scrypt.r, nepaccount.scrypt.p, (info, result) =>
-            {
-                if ("nep2 hash not match." == result)
-                    reject(result);
-                const prikey = result as Uint8Array;
-                if (prikey != null)
-                {
-                    const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-                    let account = new AccountInfo(
-                        nepaccount,
-                        prikey,
-                        pubkey
-                    );
-                    resolve(account);
-                }
-                else
-                {
-                    reject("prikey is null");
-                }
-            });
-        })
-    }
-
-    static encryption=async(password:string,prikey:Uint8Array)=>{
-
-        return new Promise<AccountInfo>((resolve, reject) =>
-        {
-            var array = new Uint8Array(32);
-            var key = Neo.Cryptography.RandomNumberGenerator.getRandomValues<Uint8Array>(array);
-            // spanPri.textContent = key.toHexString();
-            const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(key);
-            const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-            const scrypt = new ThinNeo.nep6ScryptParameters();
-            scrypt.N = 16384;
-            scrypt.r = 8;
-            scrypt.p = 8;
-            ThinNeo.Helper.GetNep2FromPrivateKey(key, password, scrypt.N, scrypt.r, scrypt.p, (info, result) =>
-            {
-                if (info == "finish")
-                {                    
-                    resolve(new AccountInfo(
-                        new NepAccount("",address,result,scrypt),
-                        prikey,
-                        pubkey
-                    ));
-                }
-                else
-                {
-                    reject(result);
-                }
-            });
-        })
-    }
 }
 
 class AccountInfo extends NepAccount{
@@ -128,7 +64,7 @@ class AccountInfo extends NepAccount{
     private _pubkey:Uint8Array;
     public pubkeyHex:string;
     public prikeyHex:string;
-    public address: string;
+    public address: string; 
 
     public getPrikey():Uint8Array{
         return this.prikeyHex.hexToBytes();
@@ -315,7 +251,6 @@ const Storage_local =
         return accounts;
     }
 }
-
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -927,7 +862,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             }
         }
         try {
-            let result = await sendInvoke(tran);
+            let result = await sendTransaction(tran);
             TaskManager.addTask(
                 new Task(
                 ConfirmType.tranfer,
@@ -1018,7 +953,7 @@ const sendGroupTranstion=(trans:Transaction[])=>{
     })
 }
 
-const sendInvoke = async (tran:Transaction)=>
+const sendTransaction = async (tran:Transaction)=>
 {
     try {
         const message  = tran.GetMessage().clone();
@@ -1382,28 +1317,93 @@ var getBalance = async (data:GetBalanceArgs)=>{
 
 var transfer= async(data:SendArgs):Promise<SendOutput>=>{
     if(data.asset.hexToBytes().length==20)
-    {   // 此资产是 nep5资产
+    {
+        let amount;
+        try {
+            
+            const result = await invokeRead(
+                {
+                    "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                    "operation": "decimals",
+                    "arguments": [],
+                    "network": "TestNet"
+                }
+            );
+            if(result['state']=='HALT, BREAK')
+            {
+                let stack = result['stack']
+                let dicelams = stack[0]['value'];
+                amount = parseFloat(data.amount).toFixed(dicelams)
+            }
+            else
+            {
+                throw {type:'ASSET_ERROR',description:"This asset information undefined"}
+            }
 
+        } catch (error) {
+            throw error;
+        }
+        
+        try {
+            
+        } catch (error) {
+            
+        }
+        // 此资产是 nep5资产
+        const outupt = await contractBuilder(
+            {
+                "scriptHash":data.asset,
+                "operation":"transfer",
+                "arguments":[
+                    {"type":"Address","value":data.fromAddress},
+                    {"type":"Address","value":data.toAddress},
+                    {"type":"Integer","value":amount}
+                ],
+                "fee":data.fee,
+                "network":data.network
+            }
+        )
+        return outupt;
     }
     else if(data.asset.hexToBytes().length==32)
-    try 
     {
-        let tran = new Transaction();
-        data.asset
-        const utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
-        if(utxos)
-            tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(data.amount));
-        return sendInvoke(tran);
-    } 
-    catch (error) 
-    {
-        throw error
+        try 
+        {
+            let tran = new Transaction();
+            const utxos = await MarkUtxo.getAllUtxo();
+            if(data.fee){
+                const fee = Neo.Fixed8.parse(data.fee);
+                const gass = utxos[data.asset];
+                if(data.asset==HASH_CONFIG.ID_GAS)
+                {
+                    const sum =fee.add(Neo.Fixed8.parse(data.amount));
+                    tran.creatInuptAndOutup(gass,sum,data.toAddress);
+                    tran.outputs[0].value.subtract(fee);
+                }
+                else
+                {
+                    const asset = utxos[data.asset];
+                    tran.creatInuptAndOutup(asset,Neo.Fixed8.parse(data.amount),data.toAddress);
+                    tran.creatInuptAndOutup(gass,fee);
+                }
+                return sendTransaction(tran);
+            }else{                
+                const asset = utxos[data.asset];
+                const amount = Neo.Fixed8.parse(data.amount);
+                tran.creatInuptAndOutup(asset,amount);
+                return sendTransaction(tran);
+            }
+        } 
+        catch (error) 
+        {
+            throw error
+        }
     }
 }
 
 var send = (title,params:SendArgs) =>
 {
-    return new Promise((resolve,reject)=>
+    return new Promise<SendOutput>((resolve,reject)=>
     {
         if(!storage.account){
             reject({type:"ACCOUNT_ERROR",description:"this account is undefind"})
@@ -1884,7 +1884,7 @@ interface SendArgs {
     amount: string;
     remark?: string;
     fee?: string;
-    network: string;
+    network: "TestNet"|"MainNet";
 }
   
 interface SendOutput {
@@ -1902,3 +1902,316 @@ interface Provider {
         currency: string,
     };
 }
+
+enum DataType
+{
+    Array = 'Array',
+    ByteArray = 'ByteArray',
+    Integer = 'Integer',
+    Boolean = 'Boolean',
+    String = 'String'
+}
+
+class ResultItem
+{
+    public data: Uint8Array;
+    public subItem: ResultItem[];
+
+    public static FromJson(type: string, value: any): ResultItem
+    {
+        let item: ResultItem = new ResultItem();
+        if (type === DataType.Array)
+        {
+            item.subItem = []//new ResultItem[(value as Array<any>).length];
+            for (let i = 0; i < (value as any[]).length; i++)
+            {
+                let subjson = ((value as any)[i] as Map<string, any>);
+                let subtype = (subjson["type"] as string);
+                item.subItem.push(ResultItem.FromJson(subtype, subjson["value"]));
+            }
+        }
+        else if (type === DataType.ByteArray)
+        {
+            item.data = (value as string).hexToBytes()
+        }
+        else if (type === DataType.Integer)
+        {
+            item.data = Neo.BigInteger.parse(value as string).toUint8Array();
+        }
+        else if (type === DataType.Boolean)
+        {
+            if ((value as number) != 0)
+                item.data = new Uint8Array(0x01);
+            else
+                item.data = new Uint8Array(0x00);
+        }
+        else if (type === DataType.String)
+        {
+            item.data = ThinNeo.Helper.String2Bytes(value as string);
+        }
+        else
+        {
+            console.log("not support type:" + type);
+        }
+        return item;
+    }
+
+
+    public AsHexString(): string
+    {
+        return (this.data).toHexString();
+    }
+    public AsHashString(): string
+    {
+        return "0x" + this.data.reverse().toHexString();
+    }
+    public AsString(): string
+    {
+        return ThinNeo.Helper.Bytes2String(this.data);
+    }
+    public AsHash160(): Neo.Uint160
+    {
+        if (this.data.length === 0)
+            return null;
+        return new Neo.Uint160(this.data.buffer);
+    }
+
+    public AsHash256(): Neo.Uint256
+    {
+        if (this.data.length === 0)
+            return null;
+        return new Neo.Uint256(this.data.buffer)
+    }
+    public AsBoolean(): boolean
+    {
+        if (this.data.length === 0 || this.data[0] === 0)
+            return false;
+        return true;
+    }
+
+    public AsInteger(): Neo.BigInteger
+    {
+        return new Neo.BigInteger(this.data);
+    }
+}
+
+// namespace Account{
+//     /**
+//      * verifyAddress
+//      * @param addr
+//      */
+//     var verifyAddress=(addr: string): boolean=>
+//     {
+//         var verify = /^[a-zA-Z0-9]{34,34}$/;
+//         var res: boolean = verify.test(addr) ? verifyPublicKey(addr) : verify.test(addr);
+//         return res;
+//     }
+
+//     /**
+//      * verifyPublicKey 验证地址
+//      * @param publicKey 公钥
+//      */
+//     var verifyPublicKey(publicKey: string)
+//     {
+//         var array: Uint8Array = Neo.Cryptography.Base58.decode(publicKey);
+//         var check = array.subarray(21, 21 + 4); //
+
+//         var checkdata = array.subarray(0, 21);//
+//         var hashd = Neo.Cryptography.Sha256.computeHash(checkdata);//
+//         hashd = Neo.Cryptography.Sha256.computeHash(hashd);//
+//         var hashd = hashd.slice(0, 4);//    
+//         var checked = new Uint8Array(hashd);//
+
+//         var error = false;
+//         for (var i = 0; i < 4; i++)
+//         {
+//             if (checked[i] != check[i])
+//             {
+//                 error = true;
+//                 break;
+//             }
+//         }
+//         return !error;
+//     }
+
+//     /**
+//      * wifDecode wif解码
+//      * @param wif wif私钥
+//      */
+//     var wifDecode = (wif: string)=>
+//     {
+//         let result: Result = new Result();
+//         let login = {} as LoginInfo;
+//         try
+//         {
+//             login.prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
+//         }
+//         catch (e)
+//         {
+//             result.err = true;
+//             result.info = e.message;
+//             return result
+//         }
+//         try
+//         {
+//             login.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(login.prikey);
+//         }
+//         catch (e)
+//         {
+//             result.err = true;
+//             result.info = e.message;
+//             return result
+//         }
+//         try
+//         {
+//             login.address = ThinNeo.Helper.GetAddressFromPublicKey(login.pubkey);
+//         }
+//         catch (e)
+//         {
+//             result.err = true;
+//             result.info = e.message;
+//             return result
+//         }
+//         result.info = login;
+//         return result;
+//     }
+//     /**
+//      * nep2FromWif
+//      */
+//     var nep2FromWif = (wif: string, password: string): Result=>
+//     {
+//         var prikey: Uint8Array;
+//         var pubkey: Uint8Array;
+//         var address: string;
+//         let res: Result = new Result();
+//         try
+//         {
+//             prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
+//             var n = 16384;
+//             var r = 8;
+//             var p = 8
+//             ThinNeo.Helper.GetNep2FromPrivateKey(prikey, password, n, r, p, (info, result) =>
+//             {
+//                 res.err = false;
+//                 res.info.nep2 = result;
+//                 pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+//                 var hexstr = pubkey.toHexString();
+//                 address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+//                 res.info.address = address
+//                 return res;
+//             });
+//         }
+//         catch (e)
+//         {
+//             res.err = true;
+//             res.info = e.message;
+//             return res;
+//         }
+//     }
+
+//     /**
+//      * nep2TOWif
+//      */
+//     var nep2Load = (nep2: string, password: string): Promise<AccountInfo>=>
+//     {
+//         let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
+//         {
+//             const scrypt={N:16384,r:8,p:8};
+//             ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, scrypt.N, scrypt.r, scrypt.p, (info, result) =>
+//             {
+//                 if ("nep2 hash not match." == result)
+//                     reject(result);
+//                 const prikey = result as Uint8Array;
+//                 if (prikey != null)
+//                 {
+//                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+//                     const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+//                     resolve(new AccountInfo(
+//                         new NepAccount("",address,nep2,scrypt),
+//                         prikey,
+//                         pubkey
+//                     ));
+//                 }
+//                 else
+//                 {
+//                     reject("");
+//                 }
+//             });
+//         });
+//         return promise;
+//     }
+
+//     /**
+//      * nep6Load
+//      */
+//     var nep6Load=async(wallet: ThinNeo.nep6wallet, password: string): Promise< Array< AccountInfo > >=>
+//     {
+//         try
+//         {
+//             //getPrivateKey 是异步方法，且同时只能执行一个
+//             let arr:AccountInfo[]=[]
+//             if (wallet.accounts)
+//             {
+//                 for (let keyindex = 0; keyindex < wallet.accounts.length; keyindex++)
+//                 {
+//                     let account = wallet.accounts[keyindex];
+//                     if (account.nep2key == null)
+//                     {
+//                         continue;
+//                     }
+//                     try
+//                     {
+//                         const info = await getPriKeyfromAccount(wallet.scrypt, password, account);                        
+//                         arr.push(new AccountInfo(
+//                             new NepAccount("",account.address,account.nep2key,wallet.scrypt),
+//                             info.prikey,
+//                             info.pubkey
+//                         ));
+//                         return arr;
+//                     } catch (error)
+//                     {
+//                         throw error;
+//                     }
+//                 }
+//             } else
+//             {
+//                 throw console.error("The account cannot be empty");
+
+//             }
+//         }
+//         catch (e)
+//         {
+//             throw e.result;
+
+//         }
+//     }
+
+//     /**
+//      * getPriKeyform
+//      */
+//     var getPriKeyfromAccount = async(
+//         scrypt: ThinNeo.nep6ScryptParameters, 
+//         password: string, 
+//         account: ThinNeo.nep6account): Promise<LoginInfo>=>
+//     {
+//         let promise: Promise<LoginInfo> =
+//             new Promise((resolve, reject) =>
+//             {
+//                 account.getPrivateKey(scrypt, password, (info, result) =>
+//                 {
+//                     if (info == "finish")
+//                     {
+//                         var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(result as Uint8Array);
+//                         var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+//                         resolve({ pubkey, address: address, prikey: result as Uint8Array });
+//                     }
+//                     else
+//                     {
+//                         reject(result);
+//                     }
+
+//                 });
+//             })
+//         return promise;
+//     }
+// }

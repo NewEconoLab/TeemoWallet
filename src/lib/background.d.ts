@@ -3,6 +3,7 @@ import { MyStorage } from "../app/storage";
 declare interface Background extends Window{
     storage:MyStorage,
     getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>
+    mytest:(data:Uint8Array)=>void;
 }
 interface BalanceRequest {
     address: string; // Address to check balance(s)

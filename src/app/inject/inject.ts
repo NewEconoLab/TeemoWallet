@@ -304,6 +304,9 @@ var readyEvent = new CustomEvent('Teemmo.NEO.READY',{
     detail:{title:'This is Teemmo'},
 });
 
+var accountChange = new CustomEvent('Teemmo.NEO.ACCOUNT_CHANGED',{detail:{address:"",lable:""}})
+
 if (window.dispatchEvent) {
     window.dispatchEvent(readyEvent);
 }
+

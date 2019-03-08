@@ -30,8 +30,6 @@ declare class NepAccount {
     nep2key: string;
     scrypt: ThinNeo.nep6ScryptParameters;
     constructor(name: string, addr: string, nep2: string, scrypt: ThinNeo.nep6ScryptParameters, index?: number);
-    static deciphering: (password: string, nepaccount: NepAccount) => Promise<AccountInfo>;
-    static encryption: (password: string, prikey: Uint8Array) => Promise<AccountInfo>;
 }
 declare class AccountInfo extends NepAccount {
     constructor(nepaccount: NepAccount, prikey: Uint8Array, pubkey: Uint8Array);
@@ -80,6 +78,7 @@ declare const Storage_local: {
     setAccount: (account: AccountInfo) => number;
     getAccount: () => NepAccount[];
 };
+declare var mytest: (data: Uint8Array) => void;
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -195,7 +194,7 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  */
 declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
-declare const sendInvoke: (tran: Transaction) => Promise<InvokeOutput>;
+declare const sendTransaction: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 interface NotifyMessage {
     header: {
@@ -427,7 +426,7 @@ interface SendArgs {
     amount: string;
     remark?: string;
     fee?: string;
-    network: string;
+    network: "TestNet" | "MainNet";
 }
 interface SendOutput {
     txid: string;
@@ -442,5 +441,24 @@ interface Provider {
         theme: string;
         currency: string;
     };
+}
+declare enum DataType {
+    Array = "Array",
+    ByteArray = "ByteArray",
+    Integer = "Integer",
+    Boolean = "Boolean",
+    String = "String"
+}
+declare class ResultItem {
+    data: Uint8Array;
+    subItem: ResultItem[];
+    static FromJson(type: string, value: any): ResultItem;
+    AsHexString(): string;
+    AsHashString(): string;
+    AsString(): string;
+    AsHash160(): Neo.Uint160;
+    AsHash256(): Neo.Uint256;
+    AsBoolean(): boolean;
+    AsInteger(): Neo.BigInteger;
 }
 //# sourceMappingURL=background.d.ts.map
