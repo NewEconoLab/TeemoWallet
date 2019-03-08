@@ -19,16 +19,18 @@ export default class Home extends React.Component<any, any> {
     lable:"",
     header:{title:"",domain:""},
     account:{address:"",walletName:""},
-    data:undefined,
+    data:null,
   }
   public componentDidMount() 
   {
       if(chrome.tabs)
       {
-        chrome.storage.local.get(['header','lable','data','account'],(result:NotifyMessage)=>{      
-          console.log(result)
-          this.setState(result);
-        })
+        chrome.storage.local.get(['notifyData'],(result:NotifyMessage)=>{
+          this.setState(result["notifyData"],()=>{
+            console.log(this.state)
+            console.log(this.state.data)
+          });       
+        })       
       }
   }
 
@@ -56,7 +58,7 @@ export default class Home extends React.Component<any, any> {
           {
             this.state.lable==Command.getAccount?
             <Dice title={this.state.header.title} domain={this.state.header.domain} />:
-            <ContractRequest title={this.state.header.title} domain={this.state.header.domain} invoek={this.state.data} {...this.props} />
+            <ContractRequest title={this.state.header.title} domain={this.state.header.domain} data={this.state.data} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>
