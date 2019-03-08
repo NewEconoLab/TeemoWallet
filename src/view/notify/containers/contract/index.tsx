@@ -166,7 +166,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
                 {
                   this.state.description.length !== 0 && this.state.description.map((k, v) =>
                   {
-                    return k + ((this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "/" : "")
+                    return k + ((this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length&&k!=='') ? "/" : "")
                   })
                 }
               </div>
