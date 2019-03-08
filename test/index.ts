@@ -4,7 +4,7 @@ window.addEventListener('Teemmo.NEO.READY',()=>{
     console.log("inject ready ");
     var myDate = new Date();
     var eventPool = document.getElementById("event") as HTMLTextAreaElement
-    eventPool.value = myDate.toLocaleTimeString() + "  ready";
+    eventPool.value = myDate.toLocaleTimeString()+ "  ready" + "\n" + eventPool.value;
     const main = new Main();
     main.start();
     
@@ -40,6 +40,11 @@ class Main {
         document.getElementById("invokeReadGroup_do").onclick = async () =>{ 
             var invokeReadGroup_input = document.getElementById("invokeReadGroup_input") as HTMLTextAreaElement;
             await this.invokeReadGroup(invokeReadGroup_input.value)
+        }
+
+        document.getElementById("send_do").onclick = async () =>{ 
+            var send_input = document.getElementById("send_input") as HTMLTextAreaElement;
+            await this.send(send_input.value)
         }
 
         document.getElementById("invoke_do").onclick = async () =>{ 
@@ -237,6 +242,30 @@ class Main {
         })
     }
 
+
+    /**
+     * send 发送转账交易
+     */
+
+    public send(params:string)
+    {
+        return new Promise((resolve,reject)=>{
+            Teemmo.NEO.send(JSON.parse(params) as SendArgs)
+            .then(result =>{
+                console.log(result);
+                document.getElementById("send_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error =>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("send_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
     /**
      * invoke 发送合约调用交易（单操作）
      */
@@ -314,7 +343,7 @@ class Main {
             Teemmo.NEO.invokeGroup(JSON.parse(params) as InvokeGroup)
             .then(result=>{
                 console.log(result);
-                console.log("这是交易id"+ result[0].txid);
+                //console.log("这是交易id"+ result[0].txid);
                 document.getElementById("invokeGroup_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })

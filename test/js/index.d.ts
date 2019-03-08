@@ -26,6 +26,10 @@ declare class Main {
      */
     invokeReadGroup(params: string): Promise<{}>;
     /**
+     * send 发送转账交易
+     */
+    send(params: string): Promise<{}>;
+    /**
      * invoke 发送合约调用交易（单操作）
      */
     invoke(params: string): Promise<{}>;
