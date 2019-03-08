@@ -5,21 +5,41 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
-import { Invoke, InvokeArgs } from '../../../../common/entity';
+import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 // import { observer } from 'mobx-react';
 
 interface IProps{
   title:string,
   domain:string,
-  invoek:InvokeArgs
+  data:any
+}
+interface IState{
+  pageNumber:number,
+  invoke:InvokeArgs[],
+  description:string[],
+  scriptHash:string[],
+  fee:string,
+  operation:string,
+  arguments:Array<Argument>
 }
 // @observer
-export default class ContractRequest extends React.Component<IProps>
+export default class ContractRequest extends React.Component<IProps,IState>
 {
   public state = {
     pageNumber: 0, // 0为上一页，1为下一页
+    invoke:null,
+    description:[],
+    scriptHash:[],
+    fee:'0',
+    operation:'',
+    arguments:[]
   }
-  
+  constructor(props:IProps){
+    super(props);
+    console.log("data")
+    console.log(this.props.data);
+  }
+
   public nextPage = () =>
   {
     this.setState({
@@ -53,7 +73,12 @@ export default class ContractRequest extends React.Component<IProps>
                 <div className="line-wrap">
                   <div className="line-left">合约hash</div>
                   <div className="line-right">
-                    <a href="#">2a69...1cbd,2a69...1cbd</a>
+                    {
+                      this.state.scriptHash.map((k,v)=>{
+                        console.log(k);
+                        return <a href="#">{k}</a>
+                      })
+                    }                    
                   </div>
                 </div>
                 <div className="line-wrap">
