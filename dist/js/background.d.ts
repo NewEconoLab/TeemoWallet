@@ -78,7 +78,6 @@ declare const Storage_local: {
     setAccount: (account: AccountInfo) => number;
     getAccount: () => NepAccount[];
 };
-declare var mytest: (data: Uint8Array) => void;
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -240,7 +239,7 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
-declare var send: (title: any, params: SendArgs) => Promise<{}>;
+declare var send: (title: any, params: SendArgs) => Promise<SendOutput>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数

@@ -183,12 +183,6 @@ const Storage_local = {
         return accounts;
     }
 };
-var mytest = (data) => {
-    console.log(data.toHexString());
-    console.log(data.toHexString().hexToBytes() instanceof Uint8Array);
-    console.log("--------------------------这里是测试，看popup传过来的类型是否发生改变 是不是Uint8Array?");
-    console.log(data instanceof Uint8Array);
-};
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -1128,6 +1122,10 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         }
         catch (error) {
             throw error;
+        }
+        try {
+        }
+        catch (error) {
         }
         // 此资产是 nep5资产
         const outupt = yield contractBuilder({
