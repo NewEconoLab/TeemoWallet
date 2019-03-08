@@ -1333,7 +1333,7 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
             {
                 let stack = result['stack']
                 let dicelams = stack[0]['value'];
-                amount = parseFloat(data.amount).toFixed(dicelams)
+                amount = parseFloat(data.amount).toFixed(dicelams).replace('.','')
             }
             else
             {
@@ -1342,12 +1342,6 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
 
         } catch (error) {
             throw error;
-        }
-        
-        try {
-            
-        } catch (error) {
-            
         }
         // 此资产是 nep5资产
         const outupt = await contractBuilder(

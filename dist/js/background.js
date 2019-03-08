@@ -1114,7 +1114,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             if (result['state'] == 'HALT, BREAK') {
                 let stack = result['stack'];
                 let dicelams = stack[0]['value'];
-                amount = parseFloat(data.amount).toFixed(dicelams);
+                amount = parseFloat(data.amount).toFixed(dicelams).replace('.', '');
             }
             else {
                 throw { type: 'ASSET_ERROR', description: "This asset information undefined" };
@@ -1122,10 +1122,6 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         }
         catch (error) {
             throw error;
-        }
-        try {
-        }
-        catch (error) {
         }
         // 此资产是 nep5资产
         const outupt = yield contractBuilder({
