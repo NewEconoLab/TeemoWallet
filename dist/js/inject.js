@@ -1,5 +1,13 @@
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
+var WalletEvents;
+(function (WalletEvents) {
+    WalletEvents["READY"] = "Teemmo.NEO.READY";
+    WalletEvents["CONNECTED"] = "Teemmo.NEO.CONNECTED";
+    WalletEvents["DISCONNECTED"] = "Teemmo.NEO.DISCONNECTED";
+    WalletEvents["NETWORK_CHANGED"] = "Teemmo.NEO.NETWORK_CHANGED";
+    WalletEvents["ACCOUNT_CHANGED"] = "Teemmo.NEO.ACCOUNT_CHANGED";
+})(WalletEvents || (WalletEvents = {}));
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";
@@ -138,10 +146,46 @@ var Teemmo;
     };
     Teemmo.NEO = NEO;
 })(Teemmo || (Teemmo = {}));
-var readyEvent = new CustomEvent('Teemmo.NEO.READY', {
-    detail: { title: 'This is Teemmo' },
+const EventChange = () => {
+    const request = { eventname: EventName.CONNECTED };
+    window.postMessage(request, "*");
+    window.addEventListener("message", e => {
+        const response = e.data;
+        if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+         {
+            console.log("接收到值了");
+            switch (response.EventName) {
+                case EventName.CONNECTED:
+                    console.log("重新链接了,链接账户信息如下");
+                    console.log(response.data);
+                    break;
+                default:
+                    break;
+            }
+        }
+    });
+};
+window.addEventListener("message", e => {
+    const response = e.data;
+    if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+     {
+        window.dispatchEvent(new CustomEvent(response.EventName, { "detail": response.data }));
+    }
 });
+const provider = {
+    "name": "TeemmoWallet",
+    "version": "0.1",
+    "website": "nel.group",
+    "compatibility": ["typescript", "javascript"],
+    "extra": {
+        "theme": "",
+        "currency": ""
+    }
+};
 if (window.dispatchEvent) {
-    window.dispatchEvent(readyEvent);
+    window.dispatchEvent(new CustomEvent(WalletEvents.READY, {
+        detail: provider,
+    }));
 }
+EventChange();
 //# sourceMappingURL=inject.js.map

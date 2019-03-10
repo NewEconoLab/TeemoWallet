@@ -1,24 +1,25 @@
-declare var AccountManager: {
+/// <reference path="./background.d.ts" />
+declare interface AccountManager{
     createWallet: (key: Uint8Array) => void;
-    deciphering: (password: string, nepaccount: NepAccount) => Promise<NepAccount>;
-    encryption: (password: string, wif: string) => Promise<AccountInfo>;
-    nep2Load: (nep2: string, password: string) => Promise<boolean>;
-    nep6Load: (str: string, password: string) => Promise<{
-        address: string;
-        lable: string;
-    }>;
+    deciphering: (password: string, nepaccount: NepAccount) => Promise<WalletAccount>;
+    encryption: (password: string, wif: string) => Promise<WalletAccount>;
+    nep2Load: (nep2: string, password: string) => Promise<WalletAccount>;
+    nep6Load: (walletstr: string, password: string) => Promise<WalletAccount>;
+    /**
+     * 获得账户私钥等信息从account解密
+     */
     getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
-    setAccount: (account: AccountInfo) => void;
+    netWorkChange: (network: "mainnet" | "testnet") => void;
     logout: () => void;
-    netWorkChange: (network: "testnet" | "mainnet") => void;
-};
+    setAccount: (account: AccountInfo) => void;
+    getCurrent: () => WalletAccount;
+}
 /**
  * 事件出发返回方法
  * @param event 事件名称
  * @param data 传递参数
  */
 declare const EventsOnChange: (event: WalletEvents, data?: any) => void;
-declare const EventInit: () => void;
 declare enum WalletEvents {
     READY = "Teemmo.NEO.READY",
     CONNECTED = "Teemmo.NEO.CONNECTED",
@@ -30,4 +31,5 @@ interface WalletAccount {
     address: string;
     label: string;
 }
+//# sourceMappingURL=account.d.ts.map
 //# sourceMappingURL=account.d.ts.map

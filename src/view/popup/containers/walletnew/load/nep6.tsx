@@ -3,11 +3,12 @@ import * as React from 'react';
 import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
 import { neotools } from '../../../utils/neotools';
-import { Storage_local } from '../../../utils/storagetools';
+import { Storage_local, bg } from '../../../utils/storagetools';
 import common from '../../../store/common';
 
 interface IState{
     file:File,
+    walletString:string,
     password:string,
     filename:string,    
     file_error:boolean,
@@ -28,7 +29,7 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
     {
         // Example of how to send a message to eventPage.ts.
         this.reader.onload=()=>{            
-            this.wallet.fromJsonStr(this.reader.result as string);
+            this.setState({ walletString: this.reader.result as string});
 
         }
     }
@@ -38,7 +39,8 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
     public state:IState={
         file:null,
         password:"",
-        filename:"",    
+        filename:"",
+        walletString:"",
         file_error:false,
         password_error:false
     }
@@ -80,21 +82,9 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
      */
     loadWallet =()=>
     {
-        neotools.nep6Load(this.wallet,this.state.password)
-        .then(accounts =>{
-            if(accounts && accounts.length)
-            {
-                common.account = accounts[0]
-                for (let i = 0; i < accounts.length; i++) {
-                    const account = accounts[i];                
-                    common.account.index = Storage_local.setAccount(account);
-                }
-                this.goMyWallet();
-            }else{
-                this.setState({
-                    password_error:true
-                });
-            }
+        bg.AccountManager.nep6Load(this.state.walletString,this.state.password)
+        .then(account =>{
+            this.goMyWallet();
         })
         .catch(error =>{
             this.setState({

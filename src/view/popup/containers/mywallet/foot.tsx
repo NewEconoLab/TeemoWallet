@@ -2,6 +2,7 @@
 import * as React from 'react';
 import Select, { IOption } from '../../../components/Select';
 import common from '../../store/common';
+import { bg } from '../../utils/storagetools';
 
 // @observer
 export default class WalletFoot extends React.Component<any, {}> {
@@ -10,7 +11,9 @@ export default class WalletFoot extends React.Component<any, {}> {
 	}
 	
 	public onSelect=(option:IOption)=>{
-		common.network=option.id
+		let network = option.id as "testnet"|"mainnet"
+        bg.AccountManager.netWorkChange(network);
+		common.network=network
 	}
 
     public options:IOption[]=
@@ -23,7 +26,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 		return (
 			<div className="foot">
 				<div className="content">
-					<Select defaultValue={common.network} options={this.options} text='当前网络' up={true} />
+					<Select defaultValue={common.network} options={this.options} onCallback={this.onSelect} text='当前网络' up={true} />
 				</div>
 			</div>
 		);

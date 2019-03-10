@@ -16,6 +16,16 @@ function sendMsgTest() {
 }
 // 接收向页面注入的JS
 window.addEventListener("message", function (e) {
+    var icon = "";
+    var links = document.getElementsByTagName("link");
+    for (const link of links) {
+        if (link.type.includes('image')) {
+            getBase64ByUrl(link.href)
+                .then(result => {
+                console.log(result);
+            });
+        }
+    }
     //获取Dapp页面信息
     var title = document.title;
     var domain = document.URL;
@@ -25,16 +35,55 @@ window.addEventListener("message", function (e) {
         request['message'] = message;
         chrome.runtime.sendMessage(request);
     }
+    if (request.eventname) {
+        chrome.runtime.sendMessage(request);
+    }
 }, false);
 /**
  * 发送返回值
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log(request);
     if (request.return)
         window.postMessage(request, '*');
+    if (request.EventName) {
+        window.postMessage(request, '*');
+    }
+});
+var WalletEventsName;
+(function (WalletEventsName) {
+    WalletEventsName["READY"] = "Teemmo.NEO.READY";
+    WalletEventsName["CONNECTED"] = "Teemmo.NEO.CONNECTED";
+    WalletEventsName["DISCONNECTED"] = "Teemmo.NEO.DISCONNECTED";
+    WalletEventsName["NETWORK_CHANGED"] = "Teemmo.NEO.NETWORK_CHANGED";
+    WalletEventsName["ACCOUNT_CHANGED"] = "Teemmo.NEO.ACCOUNT_CHANGED";
+})(WalletEventsName || (WalletEventsName = {}));
+window.addEventListener(WalletEventsName.CONNECTED, (event) => {
+    console.log("这里是Content 这里竟然监听到了" + WalletEventsName.CONNECTED);
+    console.log("监听到的数据是 " + event);
 });
 window.onload = () => {
     injectCustomJs();
     sendMsgTest();
 };
+function getBase64Image(img) {
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    var ext = img.src.substring(img.src.lastIndexOf(".") + 1).toLowerCase();
+    var dataURL = canvas.toDataURL("image/" + ext);
+    return dataURL;
+}
+function getBase64ByUrl(url) {
+    return new Promise((r, j) => {
+        var image = new Image();
+        image.src = url;
+        image.onload = () => {
+            let base64 = getBase64Image(image);
+            r(base64);
+        };
+    });
+}
 //# sourceMappingURL=content.js.map

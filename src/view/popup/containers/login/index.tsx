@@ -107,9 +107,9 @@ export default class Login extends React.Component<AppProps,AppState> {
         console.log("--------state-currentAccount");
         console.log(this.state.currentAccount);
         
-        NepAccount.deciphering(this.state.password,this.state.currentAccount)
+        bg.AccountManager.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
-            bg['storage'].account = account;
+            // bg['storage'].account = account;
             this.props.history.push('/mywallet')
         })
         .catch(error=>{

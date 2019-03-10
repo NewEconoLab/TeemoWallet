@@ -1,5 +1,5 @@
 import { AccountInfo, NepAccount } from "../../../common/entity";
-import { Storage_internal, Storage_local } from "../utils/storagetools";
+import { Storage_internal, Storage_local, bg } from "../utils/storagetools";
 
 /**
  * 我的账户管理
@@ -19,13 +19,12 @@ class Common
     private _accountList:NepAccount[];
     
     
-    public set network(v : string) {
-        Storage_internal.set("network",v);
+    public set network(v : "testnet"|"mainnet") {
         this._network = v;
     }    
     
-    public get network() : string {
-        return this._network = Storage_internal.get("network");
+    public get network() : "testnet"|"mainnet" {
+        return this._network = Storage_internal.get<"testnet"|"mainnet">("network");
     }
     
 

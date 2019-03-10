@@ -63,10 +63,8 @@ export default class Nep2Import extends React.Component<IPorps, IState> {
      */
     loadWallet =()=>
     {
-        neotools.nep2Load(this.state.nep2,this.state.password)
+        bg.AccountManager.nep2Load(this.state.nep2,this.state.password)
         .then(accounts =>{
-            bg['storage'].account = accounts;
-            Storage_local.setAccount(accounts);
             this.goMyWallet();
         })
         .catch(error =>{

@@ -61,7 +61,7 @@ var AccountManager = {
                 if (prikey != null) {
                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
                     const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-                    storage.account = new AccountInfo(new NepAccount("", address, nep2, scrypt), prikey, pubkey);
+                    AccountManager.setAccount(new AccountInfo(new NepAccount("", address, nep2, scrypt), prikey, pubkey));
                     resolve(true);
                 }
                 else {
@@ -71,8 +71,10 @@ var AccountManager = {
         });
         return promise;
     },
-    nep6Load: (wallet, password) => __awaiter(this, void 0, void 0, function* () {
+    nep6Load: (str, password) => __awaiter(this, void 0, void 0, function* () {
         try {
+            let wallet = new ThinNeo.nep6wallet();
+            wallet.fromJsonStr(str);
             //getPrivateKey 是异步方法，且同时只能执行一个
             let arr = [];
             if (wallet.accounts) {
@@ -82,9 +84,14 @@ var AccountManager = {
                         continue;
                     }
                     try {
-                        const info = yield this.getPriKeyfromAccount(wallet.scrypt, password, account);
+                        const info = yield AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);
                         arr.push(new AccountInfo(new NepAccount("", account.address, account.nep2key, wallet.scrypt), info.prikey, info.pubkey));
-                        return arr;
+                        for (let i = 0; i < arr.length; i++) {
+                            const account = arr[i];
+                            Storage_local.setAccount(account);
+                        }
+                        AccountManager.setAccount(arr[0]);
+                        return { address: arr[0].address, lable: arr[0].walletName };
                     }
                     catch (error) {
                         throw error;
@@ -100,8 +107,9 @@ var AccountManager = {
         }
     }),
     getPriKeyfromAccount: (scrypt, password, account) => {
+        const { N, r, p } = scrypt;
         let promise = new Promise((resolve, reject) => {
-            account.getPrivateKey(scrypt, password, (info, result) => {
+            ThinNeo.Helper.GetPrivateKeyFromNep2(account.nep2key, password, N, r, p, (info, result) => {
                 if (info == "finish") {
                     var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(result);
                     var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
@@ -113,6 +121,66 @@ var AccountManager = {
             });
         });
         return promise;
+    },
+    setAccount: (account) => {
+        storage.account = account;
+        EventsOnChange(WalletEvents.CONNECTED, { address: account.address, label: account.walletName });
+    },
+    logout: () => {
+        storage.account = null;
+        EventsOnChange(WalletEvents.DISCONNECTED);
+    },
+    netWorkChange: (network) => {
+        storage.network = network;
+        EventsOnChange(WalletEvents.NETWORK_CHANGED, { networks: ["testnet", "mainnet"], defaultNetwork: network });
     }
 };
+/**
+ * 事件出发返回方法
+ * @param event 事件名称
+ * @param data 传递参数
+ */
+const EventsOnChange = (event, data) => {
+    window.dispatchEvent(new CustomEvent(event, {
+        detail: data,
+    }));
+};
+const EventInit = () => {
+    let tabId;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        tabId = tabs[0].id;
+    });
+    window.addEventListener(WalletEvents.ACCOUNT_CHANGED, (event) => {
+        chrome.runtime.sendMessage({
+            EventName: WalletEvents.ACCOUNT_CHANGED,
+            data: event.detail
+        });
+    });
+    window.addEventListener(WalletEvents.CONNECTED, (event) => {
+        chrome.runtime.sendMessage({
+            EventName: WalletEvents.CONNECTED,
+            data: event.detail
+        });
+    });
+    window.addEventListener(WalletEvents.DISCONNECTED, (event) => {
+        chrome.runtime.sendMessage({
+            EventName: WalletEvents.DISCONNECTED,
+            data: event.detail
+        });
+    });
+    window.addEventListener(WalletEvents.NETWORK_CHANGED, (event) => {
+        chrome.runtime.sendMessage({
+            EventName: WalletEvents.NETWORK_CHANGED,
+            data: event.detail
+        });
+    });
+};
+var WalletEvents;
+(function (WalletEvents) {
+    WalletEvents["READY"] = "Teemmo.NEO.READY";
+    WalletEvents["CONNECTED"] = "Teemmo.NEO.CONNECTED";
+    WalletEvents["DISCONNECTED"] = "Teemmo.NEO.DISCONNECTED";
+    WalletEvents["NETWORK_CHANGED"] = "Teemmo.NEO.NETWORK_CHANGED";
+    WalletEvents["ACCOUNT_CHANGED"] = "Teemmo.NEO.ACCOUNT_CHANGED";
+})(WalletEvents || (WalletEvents = {}));
 //# sourceMappingURL=account.js.map

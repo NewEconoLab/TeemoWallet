@@ -1,6 +1,15 @@
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 
+enum WalletEvents
+{
+    READY="Teemmo.NEO.READY",
+    CONNECTED="Teemmo.NEO.CONNECTED",
+    DISCONNECTED="Teemmo.NEO.DISCONNECTED",
+    NETWORK_CHANGED="Teemmo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED="Teemmo.NEO.ACCOUNT_CHANGED"
+}
+
 enum ArgumentDataType {
     STRING = 'String',
     BOOLEAN = 'Boolean',
@@ -170,7 +179,7 @@ interface Provider {
     version: string;
     compatibility: string[];
     website: string;
-    extra: {
+    extra?: {
         theme: string,
         currency: string,
     };
@@ -300,27 +309,57 @@ namespace Teemmo
     }
 }
 
-var readyEvent = new CustomEvent('Teemmo.NEO.READY',{
-    detail:{title:'This is Teemmo'},
-});
-
-var accountEvent = new CustomEvent('Teemmo.NEO.ACCOUNT_CHANGED',{
-    detail:{title:'This is Teemmo'},
-});
-
-var connectedEvent = new CustomEvent('Teemmo.NEO.CONNECTED',{
-    detail:{title:'This is Teemmo'},
-});
-
-var disconnectedEvent = new CustomEvent('Teemmo.NEO.DISCONNECTED',{
-    detail:{title:'This is Teemmo'},
-});
-
-var networkEvent = new CustomEvent('Teemmo.NEO.NETWORK_CHANGED',{
-    detail:{title:'This is Teemmo'},
-});
-
-if (window.dispatchEvent) {
-    window.dispatchEvent(readyEvent);
+const EventChange=()=>{
+    const request = {eventname:EventName.CONNECTED};
+    window.postMessage(request,"*");
+    window.addEventListener("message",e=>
+    {
+        const response = e.data;            
+        if(response.EventName)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+        {
+            console.log("接收到值了");
+            
+            switch (response.EventName) {
+                case EventName.CONNECTED:
+                    console.log("重新链接了,链接账户信息如下");
+                    console.log(response.data);
+                    
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+    })
 }
 
+window.addEventListener("message",e=>
+{
+    const response = e.data;            
+    if(response.EventName)   // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
+    {
+        window.dispatchEvent(new CustomEvent(
+            response.EventName,
+            {"detail":response.data}
+        ))
+    }
+})
+const provider:Provider = {
+    "name":"TeemmoWallet",
+    "version":"0.1",
+    "website":"nel.group",
+    "compatibility":["typescript","javascript"],
+    "extra":{
+        "theme":"",
+        "currency":""
+    }
+}
+if (window.dispatchEvent) {
+    window.dispatchEvent(
+        new CustomEvent(WalletEvents.READY,{
+            detail:provider,
+        })
+    );
+}
+
+EventChange();

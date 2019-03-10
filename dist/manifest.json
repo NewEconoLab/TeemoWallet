@@ -15,7 +15,7 @@
     ],
     "background": {
         "scripts": [
-            "lib/neo-thinsdk.min.js",
+            "lib/neo-thinsdk.js",
             "js/account.js",
             "js/background.js"
         ],

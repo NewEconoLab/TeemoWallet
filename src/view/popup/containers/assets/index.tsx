@@ -10,7 +10,6 @@ import QrCodeBox from '../qrcode';
 // import { neotools } from '../../utils/neotools';
 import { observer } from 'mobx-react';
 import { bg } from '../../utils/storagetools';
-import { GetBalanceArgs, BalanceRequest,BalanceResults } from '../../../../lib/background';
 import common from '../../store/common';
 import hashConfig from "../../../config/hash.config";
 

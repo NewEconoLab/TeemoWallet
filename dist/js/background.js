@@ -905,6 +905,7 @@ const getAccount = (title) => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
                     if (storage.account) {
+                        chrome.storage.local.set({ trust: title });
                         resolve({
                             address: storage.account.address,
                             label: storage.account.walletName
@@ -1310,8 +1311,10 @@ const responseMessage = (request) => {
  */
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     //初始化鼠标随机方法
-    // Neo.Cryptography.RandomNumberGenerator.startCollectors();
-    responseMessage(request);
+    if (request.command)
+        responseMessage(request);
+    if (request.eventname)
+        EventInit();
 });
 var ConfirmType;
 (function (ConfirmType) {

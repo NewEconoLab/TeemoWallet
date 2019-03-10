@@ -1,5 +1,12 @@
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
+declare enum WalletEvents {
+    READY = "Teemmo.NEO.READY",
+    CONNECTED = "Teemmo.NEO.CONNECTED",
+    DISCONNECTED = "Teemmo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemmo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemmo.NEO.ACCOUNT_CHANGED"
+}
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -145,7 +152,7 @@ interface Provider {
     version: string;
     compatibility: string[];
     website: string;
-    extra: {
+    extra?: {
         theme: string;
         currency: string;
     };
@@ -207,7 +214,6 @@ declare namespace Teemmo {
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
     }
 }
-declare var readyEvent: CustomEvent<{
-    title: string;
-}>;
+declare const EventChange: () => void;
+declare const provider: Provider;
 //# sourceMappingURL=inject.d.ts.map
