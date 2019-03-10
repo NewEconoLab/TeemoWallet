@@ -26,10 +26,7 @@ export default class Home extends React.Component<any, any> {
       if(chrome.tabs)
       {
         chrome.storage.local.get(['notifyData'],(result:NotifyMessage)=>{
-          this.setState(result["notifyData"],()=>{
-            console.log(this.state)
-            console.log(this.state.data)
-          });       
+          this.setState(result["notifyData"]);       
         })       
       }
   }

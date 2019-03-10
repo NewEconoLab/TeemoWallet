@@ -343,6 +343,7 @@ export interface InvokeArgs{
     attachedAssets?:AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
+    description?: string;
 }
 
 interface AttachedAssets {
