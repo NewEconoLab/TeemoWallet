@@ -1,3 +1,4 @@
+import { NepAccount } from "./entity";
 
 export class Storage_local
 {

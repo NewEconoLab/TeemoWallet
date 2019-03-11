@@ -11,6 +11,7 @@ interface IPorps
 {
   title: string;
   domain: string;
+  icon:string;
 }
 
 // @observer
@@ -26,7 +27,12 @@ export default class Dice extends React.Component<IPorps>{
         <div className="second-line">
           {this.props.domain}
         </div>
-        <div className="dice-logo" />
+        <div className="dice-logo">
+        {this.props.icon?        
+        <img src={this.props.icon} alt="" />:
+        <></>
+        }
+        </div>
         <div className="third-line">
           <p>想要连接到您的钱包</p>
           <p>请检查您是否在正确的站点</p>

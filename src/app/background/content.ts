@@ -22,20 +22,47 @@ function sendMsgTest() {
 // 接收向页面注入的JS
 window.addEventListener("message", function(e)
 {
+    sendMesageToBackground(e);
+    // var icon = "";
+    // var links = document.getElementsByTagName("link");
+    // for (const link of links) {
+    //     if(link.type.includes('image')){         
+    //         getBase64ByUrl(link.href)
+    //         .then(result=>{
+    //             console.log(result);                
+    //         })
+    //     }
+    // }
+    // //获取Dapp页面信息
+    // var title = document.title;
+    // var domain = document.URL;
+    // var message = {title,domain}
+    // var request = e.data;
+    
+    // if(request.command)
+    // {
+    //     request['message']=message;
+    //     chrome.runtime.sendMessage(request);
+    // }
+    // if(request.eventInit)
+    // {
+    //     chrome.runtime.sendMessage(request);
+    // }
+
+}, false);
+
+const sendMesageToBackground = async(e)=>{
     var icon = "";
     var links = document.getElementsByTagName("link");
     for (const link of links) {
         if(link.type.includes('image')){         
-            getBase64ByUrl(link.href)
-            .then(result=>{
-                console.log(result);                
-            })
+            icon = await getBase64ByUrl(link.href);
         }
     }
     //获取Dapp页面信息
     var title = document.title;
     var domain = document.URL;
-    var message = {title,domain}
+    var message = {title,domain,icon}
     var request = e.data;
     
     if(request.command)
@@ -43,12 +70,11 @@ window.addEventListener("message", function(e)
         request['message']=message;
         chrome.runtime.sendMessage(request);
     }
-    if(request.eventname)
+    if(request.eventInit)
     {
         chrome.runtime.sendMessage(request);
     }
-
-}, false);
+}
 
 /**
  * 发送返回值
@@ -66,6 +92,10 @@ chrome.runtime.onMessage.addListener(
         }
     }
 );
+
+chrome.extension.onRequest.addListener((request, sender, sendResponse)=>{
+    console.log(request);
+})
 
 enum WalletEventsName
 {

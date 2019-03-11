@@ -1,5 +1,6 @@
 declare function injectCustomJs(jsPath?: any): void;
 declare function sendMsgTest(): void;
+declare const sendMesageToBackground: (e: any) => Promise<void>;
 declare enum WalletEventsName {
     READY = "Teemmo.NEO.READY",
     CONNECTED = "Teemmo.NEO.CONNECTED",

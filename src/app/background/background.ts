@@ -1047,7 +1047,7 @@ interface NotifyMessage{
         title:string,
         domain:string,
     },
-    account:{
+    account?:{
         address:string,
         walletName:string,
     },
@@ -1095,15 +1095,14 @@ const openNotify=(notifyData:NotifyMessage,call)=> {
  */
 const getAccount=(title)=>{    
     return new Promise((resolve,reject)=>{
-        if(!storage.account){
-            reject({type:"ACCOUNT_ERROR",deciphering:"Account not logged in "})
-        }
-        const {address,walletName} = storage.account;
+        // const {address,walletName} = storage.account;
         const data:NotifyMessage = {
             lable:Command.getAccount,
             header:title,
-            account:{address,walletName}
+            // account:{address,walletName}
         }
+        console.log("---------进入了 getAccount 方法");
+        
         openNotify(data,()=>{
             chrome.storage.local.get("confirm",res=>{
                 if(res["confirm"]==="confirm")
@@ -1557,8 +1556,6 @@ chrome.runtime.onMessage.addListener(
         //初始化鼠标随机方法
         if(request.command)
             responseMessage(request);
-        if(request.eventname)
-            EventInit()
     }
 );
 

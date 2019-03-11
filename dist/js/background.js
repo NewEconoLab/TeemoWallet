@@ -892,15 +892,12 @@ const openNotify = (notifyData, call) => {
  */
 const getAccount = (title) => {
     return new Promise((resolve, reject) => {
-        if (!storage.account) {
-            reject({ type: "ACCOUNT_ERROR", deciphering: "Account not logged in " });
-        }
-        const { address, walletName } = storage.account;
+        // const {address,walletName} = storage.account;
         const data = {
             lable: Command.getAccount,
             header: title,
-            account: { address, walletName }
         };
+        console.log("---------进入了 getAccount 方法");
         openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
@@ -1313,8 +1310,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     //初始化鼠标随机方法
     if (request.command)
         responseMessage(request);
-    if (request.eventname)
-        EventInit();
 });
 var ConfirmType;
 (function (ConfirmType) {

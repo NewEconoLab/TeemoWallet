@@ -12,11 +12,13 @@ interface IProps
   address: string;
 }
 export default class Header extends React.Component<IProps>{
-  // public componentDidMount()
-  // {
-  //   const div = document.getElementById('mywalletimg')
-  //   HeadImg(div, this.props.address);
-  // }
+  public componentDidMount()
+  {
+    if(this.props.address){
+      console.log(this.props.address);      
+      const div = document.getElementById('mywalletimg')
+      HeadImg(div, this.props.address);}
+  }
   public render()
   {
     return (

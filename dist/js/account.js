@@ -145,33 +145,39 @@ const EventsOnChange = (event, data) => {
         detail: data,
     }));
 };
+/**
+ * 监听
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.eventInit)
+        EventInit();
+});
 const EventInit = () => {
-    let tabId;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        tabId = tabs[0].id;
-    });
-    window.addEventListener(WalletEvents.ACCOUNT_CHANGED, (event) => {
-        chrome.runtime.sendMessage({
-            EventName: WalletEvents.ACCOUNT_CHANGED,
-            data: event.detail
+        const tabId = tabs[0].id;
+        window.addEventListener(WalletEvents.ACCOUNT_CHANGED, (event) => {
+            chrome.extension.sendRequest({
+                EventName: WalletEvents.ACCOUNT_CHANGED,
+                data: event.detail
+            });
         });
-    });
-    window.addEventListener(WalletEvents.CONNECTED, (event) => {
-        chrome.runtime.sendMessage({
-            EventName: WalletEvents.CONNECTED,
-            data: event.detail
+        window.addEventListener(WalletEvents.CONNECTED, (event) => {
+            chrome.extension.sendRequest({
+                EventName: WalletEvents.CONNECTED,
+                data: event.detail
+            });
         });
-    });
-    window.addEventListener(WalletEvents.DISCONNECTED, (event) => {
-        chrome.runtime.sendMessage({
-            EventName: WalletEvents.DISCONNECTED,
-            data: event.detail
+        window.addEventListener(WalletEvents.DISCONNECTED, (event) => {
+            chrome.runtime.sendMessage({
+                EventName: WalletEvents.DISCONNECTED,
+                data: event.detail
+            });
         });
-    });
-    window.addEventListener(WalletEvents.NETWORK_CHANGED, (event) => {
-        chrome.runtime.sendMessage({
-            EventName: WalletEvents.NETWORK_CHANGED,
-            data: event.detail
+        window.addEventListener(WalletEvents.NETWORK_CHANGED, (event) => {
+            chrome.runtime.sendMessage({
+                EventName: WalletEvents.NETWORK_CHANGED,
+                data: event.detail
+            });
         });
     });
 };

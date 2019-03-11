@@ -10,24 +10,55 @@ import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
 import { Command,NotifyMessage } from '../../../../common/entity';
+import Login from '../login';
+import Label from '../../../components/Label';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
 export default class Home extends React.Component<any, any> {
     
   public state={
-    lable:"",
-    header:{title:"",domain:""},
+    label:"",
+    header:{title:"",domain:"",icon:""},
     account:{address:"",walletName:""},
     data:null,
+    login:false
   }
   public componentDidMount() 
   {
       if(chrome.tabs)
       {
-        chrome.storage.local.get(['notifyData'],(result:NotifyMessage)=>{
-          this.setState(result["notifyData"]);       
-        })       
+        const bg = chrome.extension.getBackgroundPage() as Background;
+        const account = {address:bg.storage.account.address,label:bg.storage.account.walletName}
+        chrome.storage.local.get(['notifyData'],(result)=>{
+          const label = result.notifyData.lable;
+          const header = result.notifyData.header;
+          const data = result.notifyData.data;
+          console.log({label});
+          console.log(header);
+          
+          this.setState(
+            {
+              account,
+              label,
+              data,
+              header
+            })  
+        })
+        if(bg.storage.account)
+        {
+          this.setState({
+            login:true
+          })
+        }
+        else
+        {
+          console.log("------进入了 else "+ bg.storage.account);
+          
+          this.setState({
+            login:false
+          })
+        }    
       }
   }
 
@@ -46,21 +77,33 @@ export default class Home extends React.Component<any, any> {
       window.close();
     });
   }
+
+  public goHome=(account:{address:string,label:string})=>{
+    this.setState({
+      account,
+      login:true
+    })
+  }
   
   public render() {
     return (
+      <>
+      {this.state.login?
       <div className="notify-page">
         <Header address={this.state.account.address} {...this.props} />
         <div className="notify-content">
           {
-            this.state.lable==Command.getAccount?
-            <Dice title={this.state.header.title} domain={this.state.header.domain} />:
+            this.state.label==Command.getAccount?
+            <Dice title={this.state.header.title} domain={this.state.header.domain} icon={this.state.header.icon} />:
             <ContractRequest title={this.state.header.title} domain={this.state.header.domain} data={this.state.data} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>
         <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} />
-      </div>
+      </div>:
+      <Login goHome={this.goHome}/>
+      }
+      </>
     );
   } 
 }

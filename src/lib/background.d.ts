@@ -23,10 +23,15 @@ interface LoginInfo {
     prikey: Uint8Array;
     address: string;
 }
+interface BackStore {
+    network: "testnet" | "mainnet";
+    height: number;
+    account: AccountInfo;
+}
 declare interface Background extends Window{
     getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>
     mytest:(data:Uint8Array)=>void;
-
+    storage: BackStore;
     AccountManager: AccountManager
 }
 

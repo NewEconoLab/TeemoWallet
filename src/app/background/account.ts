@@ -193,35 +193,43 @@ const EventsOnChange= (event: WalletEvents, data?: any) => {
     );
 };
 
+/**
+ * 监听
+ */
+chrome.runtime.onMessage.addListener(
+    (request, sender, sendResponse) => {
+        if(request.eventInit)
+            EventInit()
+    }
+);
 const EventInit=()=>{    
-    let tabId;
     chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
-        tabId= tabs[0].id;
-    })
-    window.addEventListener(WalletEvents.ACCOUNT_CHANGED,(event:CustomEvent)=>{
-        chrome.runtime.sendMessage({
-            EventName:WalletEvents.ACCOUNT_CHANGED,
-            data:event.detail
-        });
-    })
-    window.addEventListener(WalletEvents.CONNECTED,(event:CustomEvent)=>{
-        chrome.runtime.sendMessage({
-            EventName:WalletEvents.CONNECTED,
-            data:event.detail
-        });   
-    })
-    window.addEventListener(WalletEvents.DISCONNECTED,(event:CustomEvent)=>{
-        chrome.runtime.sendMessage({
-            EventName:WalletEvents.DISCONNECTED,
-            data:event.detail
-        });    
-        
-    })
-    window.addEventListener(WalletEvents.NETWORK_CHANGED,(event:CustomEvent)=>{
-        chrome.runtime.sendMessage({
-            EventName:WalletEvents.NETWORK_CHANGED,
-            data:event.detail
-        });     
+        const tabId= tabs[0].id;
+        window.addEventListener(WalletEvents.ACCOUNT_CHANGED,(event:CustomEvent)=>{
+            chrome.extension.sendRequest({
+                EventName:WalletEvents.ACCOUNT_CHANGED,
+                data:event.detail
+            });
+        })
+        window.addEventListener(WalletEvents.CONNECTED,(event:CustomEvent)=>{
+            chrome.extension.sendRequest({
+                EventName:WalletEvents.CONNECTED,
+                data:event.detail
+            });   
+        })
+        window.addEventListener(WalletEvents.DISCONNECTED,(event:CustomEvent)=>{
+            chrome.runtime.sendMessage({
+                EventName:WalletEvents.DISCONNECTED,
+                data:event.detail
+            });    
+            
+        })
+        window.addEventListener(WalletEvents.NETWORK_CHANGED,(event:CustomEvent)=>{
+            chrome.runtime.sendMessage({
+                EventName:WalletEvents.NETWORK_CHANGED,
+                data:event.detail
+            });     
+        })
     })
 }
 enum WalletEvents {

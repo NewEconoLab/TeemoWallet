@@ -200,7 +200,7 @@ interface NotifyMessage {
         title: string;
         domain: string;
     };
-    account: {
+    account?: {
         address: string;
         walletName: string;
     };

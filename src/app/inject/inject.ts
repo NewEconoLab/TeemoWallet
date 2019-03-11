@@ -310,8 +310,7 @@ namespace Teemmo
 }
 
 const EventChange=()=>{
-    const request = {eventname:EventName.CONNECTED};
-    window.postMessage(request,"*");
+    window.postMessage({eventInit:true},"*");
     window.addEventListener("message",e=>
     {
         const response = e.data;            

@@ -1,3 +1,11 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // 向页面注入JS
 function injectCustomJs(jsPath) {
     jsPath = jsPath || 'js/inject.js';
@@ -16,29 +24,53 @@ function sendMsgTest() {
 }
 // 接收向页面注入的JS
 window.addEventListener("message", function (e) {
+    sendMesageToBackground(e);
+    // var icon = "";
+    // var links = document.getElementsByTagName("link");
+    // for (const link of links) {
+    //     if(link.type.includes('image')){         
+    //         getBase64ByUrl(link.href)
+    //         .then(result=>{
+    //             console.log(result);                
+    //         })
+    //     }
+    // }
+    // //获取Dapp页面信息
+    // var title = document.title;
+    // var domain = document.URL;
+    // var message = {title,domain}
+    // var request = e.data;
+    // if(request.command)
+    // {
+    //     request['message']=message;
+    //     chrome.runtime.sendMessage(request);
+    // }
+    // if(request.eventInit)
+    // {
+    //     chrome.runtime.sendMessage(request);
+    // }
+}, false);
+const sendMesageToBackground = (e) => __awaiter(this, void 0, void 0, function* () {
     var icon = "";
     var links = document.getElementsByTagName("link");
     for (const link of links) {
         if (link.type.includes('image')) {
-            getBase64ByUrl(link.href)
-                .then(result => {
-                console.log(result);
-            });
+            icon = yield getBase64ByUrl(link.href);
         }
     }
     //获取Dapp页面信息
     var title = document.title;
     var domain = document.URL;
-    var message = { title, domain };
+    var message = { title, domain, icon };
     var request = e.data;
     if (request.command) {
         request['message'] = message;
         chrome.runtime.sendMessage(request);
     }
-    if (request.eventname) {
+    if (request.eventInit) {
         chrome.runtime.sendMessage(request);
     }
-}, false);
+});
 /**
  * 发送返回值
  */
@@ -49,6 +81,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.EventName) {
         window.postMessage(request, '*');
     }
+});
+chrome.extension.onRequest.addListener((request, sender, sendResponse) => {
+    console.log(request);
 });
 var WalletEventsName;
 (function (WalletEventsName) {
