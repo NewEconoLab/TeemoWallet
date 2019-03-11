@@ -24,7 +24,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 
 	public render() {
 		return (
-			<div className="foot">
+			<div className="home-foot">
 				<div className="content">
 					<Select defaultValue={common.network} options={this.options} onCallback={this.onSelect} text='当前网络' up={true} />
 				</div>

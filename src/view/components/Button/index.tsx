@@ -4,6 +4,7 @@
 import * as React from 'react';
 // import { observer } from 'mobx-react';
 import './index.less';
+import classnames from 'classnames';
 
 interface IProps
 {
@@ -33,13 +34,19 @@ export default class Button extends React.Component<IProps, {}>
 
 	public render()
 	{
-        const type = this.props.type?this.props.type:'primary';
-        const size = this.props.size?this.props.size:'normal'
-        const name = [type,size,this.props.disabled?'disable':''].join(" ");
+		const btnClassName = classnames('primary',this.props.type?this.props.type:'',this.props.size?this.props.size:'normal');
+			// {
+			// 	'search-btn': this.props.search ? this.props.search : false,
+			// 	'bg-btn': this.props.bgBtn ? this.props.bgBtn : false,
+			// 	'mobile-btn': this.props.mobileBtn ? this.props.mobileBtn : false
+		// 	})
+        // const type = this.props.type?this.props.type:'primary';
+        // const size = this.props.size?this.props.size:'normal'
+        // const name = [type,size,this.props.disabled?'disable':''].join(" ");
         
 		return (
             <div 
-                className={name}
+                className={btnClassName}
 				onClick={this.onClick}
 				style={this.props.style}
             >

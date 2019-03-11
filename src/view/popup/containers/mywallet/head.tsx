@@ -9,79 +9,91 @@ import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import HeadImg from '../../utils/headimg';
 
-interface IProps{
-    lableChange:(table:string)=>void
+interface IProps
+{
+    lableChange: (table: string) => void
 }
 
 export default class WalletHeader extends React.Component<IProps, {}> {
-	constructor(props: any) {
-		super(props);
-    }
-
-    public state={
-        exchange:false,
-        activeLable:"history"
-    }
-
-    public options:IOption[]=[
-        {id:'exchange',name:'CGAS兑换',icon:ICON.exchange},
-        {id:'browser',name:'区块链浏览器',icon:ICON.bc},
-        {id:'nns',name:'NNS',icon:ICON.nns},
-        {id:'dice',name:'DICE',icon:ICON.nns}
-    ]
-    public componentDidMount(){
-        const div = document.getElementById('headimg')
-		HeadImg(div,common.account.address);
-    }
-
-    public cutFunction =(option:IOption)=>
+    constructor(props: any)
     {
-        if(option.id == 'exchange')
+        super(props);
+    }
+
+    public state = {
+        exchange: false,
+        activeLable: "history"
+    }
+
+    public options: IOption[] = [
+        { id: 'exchange', name: 'CGAS兑换', icon: ICON.exchange },
+        { id: 'browser', name: '区块链浏览器', icon: ICON.bc },
+        { id: 'nns', name: 'NNS', icon: ICON.nns },
+        { id: 'dice', name: 'DICE', icon: ICON.nns }
+    ]
+    public componentDidMount()
+    {
+        const div = document.getElementById('headimg')
+        HeadImg(div, common.account.address);
+    }
+
+    public cutFunction = (option: IOption) =>
+    {
+        if (option.id == 'exchange')
         {
             this.setState({
-                exchange:true
+                exchange: true
             })
         }
     }
 
-    public showHistory=()=>{
+    public showHistory = () =>
+    {
         this.setState({
-            activeLable:"history"
+            activeLable: "history"
         })
-        if(this.props.lableChange){
+        if (this.props.lableChange)
+        {
             this.props.lableChange('history');
         }
     }
 
-    public showAssets=()=>{
+    public showAssets = () =>
+    {
         this.setState({
-            activeLable:"assets"
+            activeLable: "assets"
         })
-        if(this.props.lableChange){
+        if (this.props.lableChange)
+        {
             this.props.lableChange('assets');
         }
     }
 
-    public goOut=()=>{
-        if(this.props.lableChange){
+    public goOut = () =>
+    {
+        if (this.props.lableChange)
+        {
             bg.AccountManager.logout();
             this.props.lableChange('out');
         }
     }
-    public closeExchange=()=>{
-        this.setState({exchange:false});
+    public closeExchange = () =>
+    {
+        this.setState({ exchange: false });
     }
 
-	public render() {
-        const history = classnames("lable",{"active":this.state.activeLable=="history"});
-        const assets = classnames("lable",{"active":this.state.activeLable=="assets"});
-		return (
+    public render()
+    {
+        // const history = classnames("lable", { "active": this.state.activeLable == "history" });
+        // const assets = classnames("lable", { "active": this.state.activeLable == "assets" });
+        // const manage = classnames("lable", { "active": this.state.activeLable == "manage" });
+        return (
             <div className="head">
                 <div className="functionRow">
                     <div className="list">
                         <div className="walletCode">
                             <div className="headimg-wrapp" id="headimg" />
-                            <span>{common.account.walletName?common.account.walletName: "我的钱包 "+(common.account.index+1)}</span>
+                            <span>{common.account.walletName ? common.account.walletName : "我的钱包 " + (common.account.index + 1)}</span>
                         </div>
                         <div className="function">
                             <Chooser options={this.options} onCallback={this.cutFunction} >
@@ -89,17 +101,26 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             </Chooser>
                         </div>
                         <div className="out" onClick={this.goOut}>
-                            <img src={ICON.LOGOUT} height={24}/>
+                            <img src={ICON.LOGOUT} height={24} />
                         </div>
                     </div>
                     <div className="address">{common.account.address}</div>
                 </div>
-                <div className="lablelist">
-                    <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
-                    <div className={assets} onClick={this.showAssets}><span>资产</span></div>
-                </div>
+                {/* <div className="lablelist">
+                    {
+                        this.state.activeLable !== 'manage' && (
+                            <>
+                                <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
+                                <div className={assets} onClick={this.showAssets}><span>资产</span></div>
+                            </>
+                        )
+                    }
+                    {
+                        this.state.activeLable === 'manage' && <div className={manage} onClick={this.showAssets}><span>管理代币</span></div>
+                    }
+                </div> */}
                 <Exchange show={this.state.exchange} onHide={this.closeExchange}></Exchange>
             </div>
-		);
-	}
+        );
+    }
 }
