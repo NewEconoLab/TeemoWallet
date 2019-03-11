@@ -88,14 +88,13 @@ chrome.runtime.onMessage.addListener(
             window.postMessage(request,'*');
         if(request.EventName)
         {
+            console.log("收到了Event名称："+request.EventName);
+            
             window.postMessage(request,'*');
         }
     }
 );
 
-chrome.extension.onRequest.addListener((request, sender, sendResponse)=>{
-    console.log(request);
-})
 
 enum WalletEventsName
 {

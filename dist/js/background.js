@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var storage = {
     network: "testnet",
     account: undefined,
-    height: 0
+    height: 0,
+    domain: []
 };
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
@@ -898,30 +899,28 @@ const getAccount = (title) => {
             header: title,
         };
         console.log("---------进入了 getAccount 方法");
-        openNotify(data, () => {
-            chrome.storage.local.get("confirm", res => {
-                if (res["confirm"] === "confirm") {
-                    if (storage.account) {
-                        chrome.storage.local.set({ trust: title });
-                        resolve({
-                            address: storage.account.address,
-                            label: storage.account.walletName
-                        });
-                    }
-                    else {
-                        reject({
-                            type: "AccountError",
-                            description: "Account not logged in"
-                        });
-                    }
-                }
-                else if (res["confirm"] === "cancel") {
-                    reject({
-                        type: "AccountError",
-                        description: "User cancel Authorization "
+        chrome.storage.local.get("confirm", res => {
+            if (res["confirm"] === "confirm") {
+                if (storage.account) {
+                    chrome.storage.local.set({ trust: title });
+                    resolve({
+                        address: storage.account.address,
+                        label: storage.account.walletName
                     });
                 }
-            });
+                else {
+                    reject({
+                        type: "AccountError",
+                        description: "Account not logged in"
+                    });
+                }
+            }
+            else if (res["confirm"] === "cancel") {
+                reject({
+                    type: "AccountError",
+                    description: "User cancel Authorization "
+                });
+            }
         });
     });
 };
@@ -1248,6 +1247,126 @@ const getProvider = () => {
     });
 };
 const responseMessage = (request) => {
+    const { ID, command, message, params } = request;
+    if (!storage.domain.includes(message.domain)) {
+        const notifymsg = {
+            "lable": Command.getAccount,
+            "header": message
+        };
+        openNotify(notifymsg, () => {
+            storage.domain.push(message.domain);
+            selectCall(request);
+        });
+    }
+    else {
+        selectCall(request);
+    }
+    // chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> 
+    // {
+    //     const sendResponse=(result:Promise<any>)=>
+    //     {
+    //         result
+    //         .then(data=>{
+    //             chrome.tabs.sendMessage(tabs[0].id, {
+    //                 return:command,
+    //                 ID,data
+    //             });  
+    //         })
+    //         .catch(error=>{
+    //             chrome.tabs.sendMessage(tabs[0].id, {
+    //                 return:command,
+    //                 ID,error
+    //             });  
+    //         })
+    //     }
+    //     if(!storage.domain.includes(message.domain))
+    //     {
+    //         const notifymsg:NotifyMessage = {
+    //             "lable":Command.getAccount,
+    //             "header":message
+    //         }
+    //         openNotify(notifymsg,()=>{
+    //             storage.domain.push(message.domain)
+    //             switch (request.command) {
+    //                 case Command.getProvider:
+    //                     sendResponse(getProvider());
+    //                     break;        
+    //                 case Command.getNetworks:
+    //                     sendResponse(getNetworks());
+    //                     break;
+    //                 case Command.getAccount:
+    //                     sendResponse(getAccount(message));
+    //                     break;
+    //                 case Command.getBalance:
+    //                     sendResponse(getBalance(params));
+    //                     break;
+    //                 case Command.getStorage:
+    //                     break;
+    //                 case Command.getPublicKey:
+    //                     break;
+    //                 case Command.invoke:
+    //                     sendResponse(invoke(message,params));
+    //                     break;
+    //                 case Command.send:
+    //                     sendResponse(send(message,params))
+    //                     break;
+    //                 case Command.invokeRead:
+    //                     sendResponse(invokeRead(params));
+    //                     break;
+    //                 case Command.invokeGroup:
+    //                     sendResponse(invokeGroup(message,params));
+    //                     break;
+    //                 case Command.invokeReadGroup:
+    //                     sendResponse(invokeReadGroup(params));
+    //                     break;
+    //                 default:
+    //                     sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
+    //                     break;
+    //             }
+    //         })
+    //     }
+    //     else
+    //     {            
+    //         switch (request.command) {
+    //             case Command.getProvider:
+    //                 sendResponse(getProvider());
+    //                 break;        
+    //             case Command.getNetworks:
+    //                 sendResponse(getNetworks());
+    //                 break;
+    //             case Command.getAccount:
+    //                 sendResponse(getAccount(message));
+    //                 break;
+    //             case Command.getBalance:
+    //                 sendResponse(getBalance(params));
+    //                 break;
+    //             case Command.getStorage:
+    //                 break;
+    //             case Command.getPublicKey:
+    //                 break;
+    //             case Command.invoke:
+    //                 sendResponse(invoke(message,params));
+    //                 break;
+    //             case Command.send:
+    //                 sendResponse(send(message,params))
+    //                 break;
+    //             case Command.invokeRead:
+    //                 sendResponse(invokeRead(params));
+    //                 break;
+    //             case Command.invokeGroup:
+    //                 sendResponse(invokeGroup(message,params));
+    //                 break;
+    //             case Command.invokeReadGroup:
+    //                 sendResponse(invokeReadGroup(params));
+    //                 break;
+    //             default:
+    //                 sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
+    //                 break;
+    //         }
+    //     }
+    // })
+};
+const selectCall = (request) => {
     const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const sendResponse = (result) => {

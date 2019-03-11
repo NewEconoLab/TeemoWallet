@@ -3,6 +3,7 @@ interface BackStore {
     network: "testnet" | "mainnet";
     height: number;
     account: AccountInfo;
+    domain: string[];
 }
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
@@ -248,6 +249,7 @@ declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
 declare const responseMessage: (request: any) => void;
+declare const selectCall: (request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,
     contract = 1
