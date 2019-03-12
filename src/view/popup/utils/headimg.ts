@@ -1,4 +1,4 @@
-export default function HeadImgDemo(div: Element, address: string)
+export default function HeadImgDemo(div: Element, address: string,width:number,height:number)
 {
 
   /**
@@ -8,8 +8,8 @@ export default function HeadImgDemo(div: Element, address: string)
   this.canvas = document.createElement("canvas");
   this.ctx = this.canvas.getContext('2d');
 
-  this.canvas.height = 30;
-  this.canvas.width = 30;
+  this.canvas.height = height;
+  this.canvas.width = width;
   this.xylist = [
     [10, 0, 20, 20],
     [0, 0, 5, 15],
@@ -63,8 +63,8 @@ const draw = (a, b, c, d) =>
 
   this.ctx.save();
   this.ctx.beginPath();
-  this.ctx.moveTo(100, 100);
-  this.ctx.arc(15, 15, 15, PI * 4 / 4, 120, false);
+  this.ctx.moveTo(0, 0);
+  this.ctx.arc(this.canvas.width/2, this.canvas.width/2, this.canvas.width/2,0 , PI * 2, false);
   this.ctx.closePath();
   this.ctx.restore();
   this.ctx.fill();

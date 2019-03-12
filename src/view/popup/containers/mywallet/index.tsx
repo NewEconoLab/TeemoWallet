@@ -8,6 +8,7 @@ import Assets from '../assets';
 // import { neotools } from '../../utils/neotools';
 import common from '../../store/common';
 import ManageAsset from '../manage';
+import Setting from '../setting';
 import classnames = require('classnames');
 
 interface AppProps extends RouteComponentProps
@@ -29,7 +30,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
 
     public state = {
         value: "",
-        label: "manage" // history,assets,manage,setting,wallet
+        label: "setting" // history,assets,manage,setting,wallet
     }
 
     public componentDidMount()
@@ -73,7 +74,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
         const assets = classnames("lable", { "active": this.state.label == "assets" });
         return (
             <div className="mywallet">
-                <WalletHeader lableChange={this.labelChange} />
+                <WalletHeader lableChange={this.labelChange} {...this.props}/>
                 <div className="menu-wrapper">
                     {
                         (this.state.label === 'history' || this.state.label === 'assets') && (
@@ -108,6 +109,9 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                 }
                 {
                     this.state.label === 'manage' && <ManageAsset />
+                }
+                {
+                    this.state.label === 'setting' && <Setting />
                 }
             </div>
         )
