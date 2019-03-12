@@ -152,25 +152,10 @@ const EventChange = () => {
         const response = e.data;
         if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
          {
-            console.log("接收到值了");
-            switch (response.EventName) {
-                case EventName.CONNECTED:
-                    console.log("重新链接了,链接账户信息如下");
-                    console.log(response.data);
-                    break;
-                default:
-                    break;
-            }
+            window.dispatchEvent(new CustomEvent(response.EventName, { "detail": response.data }));
         }
     });
 };
-window.addEventListener("message", e => {
-    const response = e.data;
-    if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
-     {
-        window.dispatchEvent(new CustomEvent(response.EventName, { "detail": response.data }));
-    }
-});
 const provider = {
     "name": "TeemmoWallet",
     "version": "0.1",
