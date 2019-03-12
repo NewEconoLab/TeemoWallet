@@ -3,7 +3,7 @@
 interface BackStore
 {
     // [name:string]:any
-    network:"testnet"|"mainnet",
+    network:"TestNet"|"MainNet",
     height:number,
     account:AccountInfo,
     domains:string[],
@@ -13,7 +13,7 @@ interface BackStore
 
 var storage:BackStore=
 {
-    network:"testnet",
+    network:"TestNet",
     account:undefined,
     height:0,
     domains:[],
@@ -497,6 +497,20 @@ async function request(opts: IOpts) {
 }
 
 var Api = {
+    getcontractstate:(scriptaddr: string)=>{
+        return request({
+            method:"getcontractstate",
+            params:[scriptaddr]
+        })
+    },
+
+    getavailableutxos:(address: string, count: number)=>{
+        return request({
+            method:"getavailableutxos",
+            params:[address,count],            
+        })
+    },
+
     getInvokeRead:(scriptHash:string)=>{
         const opts:IOpts = {
             method:'invokescript',
@@ -746,7 +760,7 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
      * 
      * @param argument 
      */
-    emitInvoke(argument: Argument[],hookTxid?:string): ThinNeo.ScriptBuilder {
+    EmitArguments(argument: Argument[],hookTxid?:string): ThinNeo.ScriptBuilder {
         for (let i = argument.length-1; i >=0; i--) {
             const param = argument[i];        
             if (param.type === ArgumentDataType.ARRAY) {
@@ -797,7 +811,7 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
                     }
                     break;
                 case ArgumentDataType.ARRAY:
-                    this.emitInvoke(param.value as Argument[]);
+                    this.EmitArguments(param.value as Argument[]);
                     break;
                 default:
                     throw new Error("No parameter of this type");
@@ -808,6 +822,20 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
         return this;
     }
 
+    EmitInvokeArgs(...invokes:InvokeArgs[]){            
+        const RANDOM_UINT8:Uint8Array = getWeakRandomValues(32);
+        const RANDOM_INT:Neo.BigInteger = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+        // 塞入随机数
+        this.EmitPushNumber(RANDOM_INT);  // 将随机数推入栈顶
+        this.Emit(ThinNeo.OpCode.DROP);   // 打包
+        for (let index = 0; index < invokes.length; index++) {
+            const invoke = invokes[index];
+            this.EmitArguments(invoke.arguments);    // 调用EmitArguments方法编译并打包参数
+            this.EmitPushString(invoke.operation) // 塞入方法名
+            this.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));   // 塞入合约地址
+        }
+        return this.ToArray();
+    }
 }
 
 /**
@@ -829,7 +857,7 @@ function groupScriptBuild(group:InvokeArgs[])
      */
     for (let index = 0; index < group.length; index++) {
         const invoke = group[index];
-        sb.emitInvoke(invoke.arguments);    // 调用emitInvoke方法编译并打包参数
+        sb.EmitArguments(invoke.arguments);    // 调用EmitArguments方法编译并打包参数
         sb.EmitPushString(invoke.operation) // 塞入方法名
         sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));   // 塞入合约地址
     }
@@ -920,7 +948,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 // 塞入随机数
                 script.EmitPushNumber(RANDOM_INT);  // 将随机数推入栈顶
                 script.Emit(ThinNeo.OpCode.DROP);   // 打包
-                script.emitInvoke(invoke.arguments,txids[0].txid);
+                script.EmitArguments(invoke.arguments,txids[0].txid);
                 script.EmitPushString(invoke.operation);
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
                 tran.setScript(script.ToArray());
@@ -968,6 +996,132 @@ const sendGroupTranstion=(trans:Transaction[])=>{
     })
 }
 
+var makeRefundTransaction = async (transcount:number,netfee:number)=>
+{
+    //获取sgas合约地址的资产列表
+    let utxos_current = await MarkUtxo.getAllUtxo();
+    let utxos_cgas = await Api.getavailableutxos(storage.account.address, transcount);
+    var nepAddress = ThinNeo.Helper.GetAddressFromScriptHash(HASH_CONFIG.ID_CGAS);
+    let gass: Utxo[] = utxos_current[HASH_CONFIG.ID_GAS];
+    var cgass: Utxo[] = []
+    for (var i in utxos_cgas)
+    {
+        var item = utxos_cgas[i];
+        let utxo = new Utxo();
+        utxo.addr = nepAddress;
+        utxo.asset = HASH_CONFIG.ID_GAS;
+        utxo.n = item.n;
+        utxo.txid = item.txid;
+        utxo.count = Neo.Fixed8.parse(item.value);
+        cgass.push(utxo);
+    }
+    var tran = new Transaction();
+
+    //sgas 自己给自己转账   用来生成一个utxo  合约会把这个utxo标记给发起的地址使用
+    try
+    {
+        tran.creatInuptAndOutup(cgass, Neo.Fixed8.fromNumber(transcount), nepAddress);
+        if (netfee>0)
+        {
+            tran.creatInuptAndOutup(gass, Neo.Fixed8.fromNumber(netfee));
+        }
+        for (const i in tran.inputs)
+        {
+            tran.inputs[i].hash = tran.inputs[i].hash.reverse();
+        }
+    }
+    catch (e)
+    {
+        throw "";
+    }
+
+    var r = await Api.getcontractstate(HASH_CONFIG.ID_CGAS.toString())
+    if (r && r['script'])
+    {
+        var sgasScript = r['script'].hexToBytes();
+
+        var scriptHash = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
+        var script = new ScriptBuild();
+        const refund:InvokeArgs = {
+            scriptHash:HASH_CONFIG.ID_CGAS.toString(),
+            operation:'refund',
+            arguments:[{type:"ByteArray",value:scriptHash.toHexString()}],
+            network:storage.network
+        }
+        script.EmitInvokeArgs(refund);
+        tran.setScript(script.ToArray())
+
+        //构建一个script
+        let sb = new ScriptBuild();
+        sb.EmitArguments([{type:"String",value:"whatever"},{type:'Integer',value:250}])
+        tran.AddWitnessScript(sgasScript, sb.ToArray());
+        let result = sendTransaction(tran);
+        return result;
+    }
+    else
+    {
+        throw "Contract acquisition failure";
+    }
+
+
+}
+/**
+ * 
+ * @param utxo 兑换gas的utxo
+ * @param transcount 兑换的数量
+ */
+var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:Neo.Fixed8,netfee:number)=>
+{
+    var tran: Transaction = new Transaction();
+    //合约类型
+    tran.inputs = [];
+    tran.outputs = [];
+    tran.type = ThinNeo.TransactionType.ContractTransaction;
+    tran.version = 0;
+    tran.extdata = null;
+    tran.attributes = []
+
+    try
+    {
+        let sendcount = transcount;
+        if (netfee)
+        {
+            let fee = Neo.Fixed8.fromNumber(netfee);                //网络费用
+            sendcount = transcount.subtract(fee);    //由于转账使用的utxo和需要转换的金额一样大所以输入只需要塞入减去交易费的金额，utxo也足够使用交易费
+        }
+        tran.creatInuptAndOutup([utxo], sendcount, storage.account.address);   //创建交易
+        tran.outputs.length = 1;  //去掉找零的部分，只保留一个转账位
+        for (const n in tran.inputs)
+        {
+            tran.inputs[n].hash = tran.inputs[n].hash.reverse();
+        }
+    }
+    catch (error)
+    {
+        console.log(error);
+    }
+    //sign and broadcast
+    //做智能合约的签名
+    var r = await Api.getcontractstate(HASH_CONFIG.ID_CGAS.toString())
+
+    if (r && r['script'])
+    {
+        var sgasScript = r['script'].hexToBytes();
+        var sb = new ThinNeo.ScriptBuilder();
+        sb.EmitPushNumber(new Neo.BigInteger(0));
+        sb.EmitPushNumber(new Neo.BigInteger(0));
+        tran.AddWitnessScript(sgasScript, sb.ToArray());
+        var trandata = tran.GetRawData();
+
+        return trandata;
+    }
+    else
+    {
+        // this.makeRefundTransaction_error("获取转换合约失败！")
+    }
+
+}
+
 const sendTransaction = async (tran:Transaction)=>
 {
     try {
@@ -980,11 +1134,9 @@ const sendTransaction = async (tran:Transaction)=>
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result[0].txid)
         {
-            let ouput:InvokeOutput =
-            {
-                txid:result[0].txid,
-                nodeUrl:"https://api.nel.group/api"
-            }
+            const txid:string = (result[0].txid as string).replace('0x','');
+            const nodeUrl:string="https://api.nel.group/api";
+            let ouput:InvokeOutput ={txid,nodeUrl}
             return ouput;            
         }
         else
@@ -997,7 +1149,7 @@ const sendTransaction = async (tran:Transaction)=>
     }
 }
 
-const contractBuilder = async (invoke:InvokeArgs)=>{
+var contractBuilder = async (invoke:InvokeArgs)=>{
     let tran = new Transaction();    
     try {
         // const script=invokeScriptBuild(invoke);
@@ -1008,7 +1160,7 @@ const contractBuilder = async (invoke:InvokeArgs)=>{
         // 塞入随机数
         script.EmitPushNumber(RANDOM_INT);  // 将随机数推入栈顶
         script.Emit(ThinNeo.OpCode.DROP);   // 打包
-        script.emitInvoke(invoke.arguments);        // 参数转换与打包
+        script.EmitArguments(invoke.arguments);        // 参数转换与打包
         script.EmitPushString(invoke.operation);    // 塞入需要调用的合约方法名
         script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));   // 塞入需要调用的合约hex
         tran.setScript(script.ToArray());
@@ -1417,7 +1569,7 @@ var invokeRead=(data:InvokeReadInput)=>{
     return new Promise((r,j)=>{
         const script = new ScriptBuild();
         try {
-            script.emitInvoke(data.arguments);        // 参数转换与打包
+            script.EmitArguments(data.arguments);        // 参数转换与打包
             script.EmitPushString(data.operation);    // 塞入需要调用的合约方法名
             script.EmitAppCall(Neo.Uint160.parse(data.scriptHash));   // 塞入需要调用的合约hex
             Api.getInvokeRead(script.ToArray().toHexString())
@@ -1438,7 +1590,7 @@ var invokeReadGroup=(data:InvokeReadGroup)=>{
         const script = new ScriptBuild();
         try {
             for (const invoke of data.group) {
-                script.emitInvoke(invoke.arguments);        // 参数转换与打包
+                script.EmitArguments(invoke.arguments);        // 参数转换与打包
                 script.EmitPushString(invoke.operation);    // 塞入需要调用的合约方法名
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));   // 塞入需要调用的合约hex
             }
@@ -1705,7 +1857,7 @@ class TaskManager{
                 if(task.type===ConfirmType.tranfer){
                     Api.getrawtransaction(task.txid)
                     .then(result=>{
-                        console.log('-------------------------------------------------------------------------请注意这里是任务管理器正在处理交易');
+                        console.log('----------------------------------------请注意这里是任务管理器正在处理交易---------------------------------');
                         
                         console.log(result);
                         

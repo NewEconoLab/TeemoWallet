@@ -1,6 +1,6 @@
 /// <reference path="../../src/lib/neo-thinsdk.d.ts" />
 interface BackStore {
-    network: "testnet" | "mainnet";
+    network: "TestNet" | "MainNet";
     height: number;
     account: AccountInfo;
     domains: string[];
@@ -132,6 +132,8 @@ declare const makeRpcUrl: (url: any, method: any, params: any) => string;
  */
 declare function request(opts: IOpts): Promise<any>;
 declare var Api: {
+    getcontractstate: (scriptaddr: string) => Promise<any>;
+    getavailableutxos: (address: string, count: number) => Promise<any>;
     getInvokeRead: (scriptHash: string) => Promise<any>;
     /**
      * 获取nep5的资产（CGAS）
@@ -186,7 +188,8 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
      *
      * @param argument
      */
-    emitInvoke(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
+    EmitArguments(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
+    EmitInvokeArgs(...invokes: InvokeArgs[]): Uint8Array;
 }
 /**
  * 编译 invoke参数列表
@@ -199,8 +202,15 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  */
 declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
+declare var makeRefundTransaction: (transcount: number, netfee: number) => Promise<InvokeOutput>;
+/**
+ *
+ * @param utxo 兑换gas的utxo
+ * @param transcount 兑换的数量
+ */
+declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: Neo.Fixed8, netfee: number) => Promise<Uint8Array>;
 declare const sendTransaction: (tran: Transaction) => Promise<InvokeOutput>;
-declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
+declare var contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 interface NotifyMessage {
     header?: {
         title: string;

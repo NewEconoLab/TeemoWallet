@@ -29,7 +29,7 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
 
     public componentDidMount() {
         if(!common.network)
-            common.network="testnet"
+            common.network="TestNet"
         // Example of how to send a message to eventPage.ts.
         if(chrome.tabs)
         {

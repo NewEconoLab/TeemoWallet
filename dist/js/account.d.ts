@@ -10,7 +10,7 @@ declare var AccountManager: {
     getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
     setAccount: (account: AccountInfo) => void;
     logout: () => void;
-    netWorkChange: (network: "testnet" | "mainnet") => void;
+    netWorkChange: (network: "TestNet" | "MainNet") => void;
 };
 /**
  * 事件出发返回方法

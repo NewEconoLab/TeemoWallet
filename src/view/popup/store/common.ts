@@ -11,7 +11,7 @@ class Common
     }   
     private tabname:string;
 
-    private _network:string;
+    private _network:"TestNet"|"MainNet";
 
     // 账户信息
     private _account:AccountInfo;
@@ -19,13 +19,13 @@ class Common
     private _accountList:NepAccount[];
     
     
-    public set network(v : "testnet"|"mainnet") {
+    public set network(v : "TestNet"|"MainNet") {
         bg.AccountManager.netWorkChange(v);
         this._network = v;
     }    
     
-    public get network() : "testnet"|"mainnet" {
-        return this._network = Storage_internal.get<"testnet"|"mainnet">("network");
+    public get network() : "TestNet"|"MainNet" {
+        return this._network = Storage_internal.get<"TestNet"|"MainNet">("network");
     }
     
 

@@ -12,6 +12,7 @@ import { observer } from 'mobx-react';
 import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import hashConfig from "../../../config/hash.config";
+import { BalanceRequest, GetBalanceArgs, BalanceResults } from '../../../../lib/background';
 
 @observer
 export default class Assets extends React.Component<any, {}> 

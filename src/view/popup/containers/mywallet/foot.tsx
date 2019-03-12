@@ -11,7 +11,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 	}
 	
 	public onSelect=(option:IOption)=>{
-		let network = option.id as "testnet"|"mainnet";
+		let network = option.id as "TestNet"|"MainNet";
 		common.network=network
 	}
 

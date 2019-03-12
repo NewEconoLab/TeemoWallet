@@ -169,9 +169,9 @@ var AccountManager={
         EventsOnChange(WalletEvents.DISCONNECTED);
     },
 
-    netWorkChange:(network:"testnet"|"mainnet")=>{
+    netWorkChange:(network:"TestNet"|"MainNet")=>{
         storage.network=network;
-        EventsOnChange(WalletEvents.NETWORK_CHANGED,{networks:["testnet","mainnet"],defaultNetwork:network});
+        EventsOnChange(WalletEvents.NETWORK_CHANGED,{networks:["TestNet","MainNet"],defaultNetwork:network});
     }
 
 }
@@ -188,7 +188,6 @@ const EventsOnChange= (event: WalletEvents, data?: any) => {
             const domain = url?url[0]:tab.url;
             if(storage.domains.indexOf(domain)>=0)
             {
-                console.log("------------发送给 "+domain +"event事件："+event);
                 chrome.tabs.sendMessage(tab.id,{EventName:event,data});
             }
         }

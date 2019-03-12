@@ -310,7 +310,6 @@ namespace Teemmo
 }
 
 const EventChange=()=>{
-    window.postMessage({eventInit:true},"*");
     window.addEventListener("message",e=>
     {
         const response = e.data;            
@@ -343,3 +342,9 @@ if (window.dispatchEvent) {
 }
 
 EventChange();
+
+document.onload=()=>{
+    // chrome.tabs.query({currentWindow:true},tabs=>{
+
+    // })
+}

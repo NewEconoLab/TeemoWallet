@@ -1,4 +1,9 @@
 /// <reference path="./background.d.ts" />
+
+import { NepAccount } from "./background";
+import { LoginInfo } from "../view/notify/utils/neotools";
+import { AccountInfo } from "../common/entity";
+
 declare interface AccountManager{
     createWallet: (key: Uint8Array) => void;
     deciphering: (password: string, nepaccount: NepAccount) => Promise<WalletAccount>;
@@ -9,7 +14,7 @@ declare interface AccountManager{
      * 获得账户私钥等信息从account解密
      */
     getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
-    netWorkChange: (network: "mainnet" | "testnet") => void;
+    netWorkChange: (network: "TestNet"|"MainNet") => void;
     logout: () => void;
     setAccount: (account: AccountInfo) => void;
     getCurrent: () => WalletAccount;

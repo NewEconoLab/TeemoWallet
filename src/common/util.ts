@@ -1,4 +1,5 @@
 import { NepAccount } from "./entity";
+import { AccountInfo } from "../lib/background";
 
 export class Storage_local
 {

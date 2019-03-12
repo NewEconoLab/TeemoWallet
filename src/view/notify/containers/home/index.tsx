@@ -9,9 +9,9 @@ import Footer from '../footer';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
-import { Command,NotifyMessage } from '../../../../common/entity';
+import { Command } from '../../../../common/entity';
 import Login from '../login';
-import Label from '../../../components/Label';
+import { Background } from '../../../../lib/background';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
