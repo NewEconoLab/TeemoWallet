@@ -122,7 +122,7 @@ interface IOpts {
     method: string;
     params: any[];
     isGET?: boolean;
-    baseUrl?: string;
+    baseUrl?: 'common' | 'rpc';
     getAll?: boolean;
 }
 declare const makeRpcUrl: (url: any, method: any, params: any) => string;
@@ -155,6 +155,10 @@ declare var Api: {
      */
     hasTx: (txid: any) => Promise<any>;
     getrawtransaction: (txid: any) => Promise<any>;
+    /**
+     *
+     */
+    getrawtransaction_api: (txid: any) => Promise<any>;
     /**
      * 判断合约调用是否抛出 notify
      * @param txid 交易id

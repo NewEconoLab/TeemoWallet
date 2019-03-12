@@ -442,11 +442,11 @@ var Api = {
         return request(opts);
     },
     getDomainInfo: (domain) => {
-        const opts = {
+        return request({
             method: "getdomaininfo",
-            params: [domain]
-        };
-        return request(opts);
+            params: [domain],
+            baseUrl: 'rpc'
+        });
     },
     /**
      * 判断交易是否入链
@@ -462,10 +462,20 @@ var Api = {
     getrawtransaction: (txid) => {
         const opts = {
             method: "getrawtransaction",
-            params: [txid],
+            params: [txid, 1],
             baseUrl: 'rpc'
         };
         return request(opts);
+    },
+    /**
+     *
+     */
+    getrawtransaction_api: (txid) => {
+        return request({
+            method: "getrawtransaction",
+            params: [txid],
+            baseUrl: 'common'
+        });
     },
     /**
      * 判断合约调用是否抛出 notify
@@ -1373,7 +1383,6 @@ class TransferGroup {
 class TaskManager {
     static start() {
         setInterval(() => {
-            console.log("-----------------进来了");
             Api.getBlockCount()
                 .then(result => {
                 const count = (parseInt(result[0].blockcount) - 1);
@@ -1392,14 +1401,15 @@ class TaskManager {
         this.shed[task.txid] = task;
     }
     static update() {
-        console.log("------------------进入了 TaskManager.update ");
         for (const key in this.shed) {
             const task = this.shed[key];
             if (task.state == TaskState.watting) {
                 if (task.type === ConfirmType.tranfer) {
                     Api.getrawtransaction(task.txid)
                         .then(result => {
-                        if (result) {
+                        console.log('-------------------------------------------------------------------------请注意这里是任务管理器正在处理交易');
+                        console.log(result);
+                        if (result['blockhash']) {
                             console.log(task.txid + "       该交易查询成功");
                             task.state = TaskState.success;
                             console.log("状态变更");

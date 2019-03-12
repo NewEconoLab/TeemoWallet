@@ -440,7 +440,7 @@ interface IOpts {
     method:string, // 接口名
     params: any[], // 参数
     isGET?:boolean, // 是否是get 请求（默认请求是post）
-    baseUrl?:string, // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
+    baseUrl?:'common'|'rpc', // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
     getAll?:boolean, // 是否获取所有返回结果
 }
 
@@ -498,7 +498,7 @@ async function request(opts: IOpts) {
 
 var Api = {
     getInvokeRead:(scriptHash:string)=>{
-        const opts = {
+        const opts:IOpts = {
             method:'invokescript',
             params:[scriptHash],
             baseUrl:'rpc'
@@ -510,7 +510,7 @@ var Api = {
      * 获取nep5的资产（CGAS）
      */
     getnep5balanceofaddress : (address,assetId) => {
-        const opts = {
+        const opts:IOpts = {
             method:'getnep5balanceofaddress',
             params:[
                 assetId,
@@ -524,7 +524,7 @@ var Api = {
      * 获取nep5的资产（CGAS）
      */
     getallnep5assetofaddress :  (address) => {
-        const opts = {
+        const opts:IOpts = {
             method:'getallnep5assetofaddress',
             params:[
                 address,1
@@ -537,7 +537,7 @@ var Api = {
      * 获取nep5的资产（CGAS）
      */
     getUtxoBalance :  (address,assetId) => {
-        const opts = {
+        const opts:IOpts = {
         method:'getnep5balanceofaddress',
         params:[
             assetId,
@@ -559,7 +559,7 @@ var Api = {
         return request(opts);
     },
     sendrawtransaction : (data) => {
-        const opts = {
+        const opts:IOpts = {
         method:'sendrawtransaction',
         params:[data],
         baseUrl:'common'
@@ -567,7 +567,7 @@ var Api = {
         return request(opts);
     },
     getUtxo:(address)=>{
-        const opts={
+        const opts:IOpts={
             method:"getutxo",
             params:[address],
             baseUrl:'common'
@@ -576,11 +576,11 @@ var Api = {
     },
     
     getDomainInfo:(domain)=>{
-        const opts={
+        return request({
             method:"getdomaininfo",
-            params:[domain]
-        }
-        return request(opts);
+            params:[domain],
+            baseUrl:'rpc'
+        });
     },
     
     /**
@@ -596,12 +596,24 @@ var Api = {
     },
 
     getrawtransaction:(txid)=>{
-        const opts={            
+        const opts:IOpts={            
             method:"getrawtransaction",
-            params:[txid],
+            params:[txid,1],
             baseUrl:'rpc'
         }
         return request(opts);
+    },
+    /**
+     * 
+     */
+    getrawtransaction_api:(txid)=>{
+        return request(
+            {
+                method:"getrawtransaction",
+                params:[txid],
+                baseUrl:'common'
+            }
+        )
     },
     
     /**
@@ -629,7 +641,7 @@ var Api = {
     },
     
     getBlockCount:()=>{
-        const opts={
+        const opts:IOpts={
             method:"getblockcount",
             params:[],
             baseUrl:"common"
@@ -638,7 +650,7 @@ var Api = {
     },
     
     getBalance:(addr)=>{
-        const opts={
+        const opts:IOpts={
             method:"getbalance",
             params:[addr],
             baseUrl:"common"
@@ -1658,9 +1670,7 @@ class TaskManager{
 
     public static start()
     {
-        setInterval(()=>{
-            console.log("-----------------进来了");
-            
+        setInterval(()=>{            
             Api.getBlockCount()
             .then(result=>{
                 const count = (parseInt(result[0].blockcount)-1);
@@ -1684,9 +1694,7 @@ class TaskManager{
     }
 
     public static update()
-    {
-        console.log("------------------进入了 TaskManager.update ");
-        
+    {        
         for ( const key in this.shed) 
         {
             const task = this.shed[key];
@@ -1695,7 +1703,11 @@ class TaskManager{
                 if(task.type===ConfirmType.tranfer){
                     Api.getrawtransaction(task.txid)
                     .then(result=>{
-                        if(result)
+                        console.log('-------------------------------------------------------------------------请注意这里是任务管理器正在处理交易');
+                        
+                        console.log(result);
+                        
+                        if(result['blockhash'])
                         {
                             console.log(task.txid+"       该交易查询成功");
                             
