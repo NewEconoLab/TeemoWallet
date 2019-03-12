@@ -147,8 +147,7 @@ var Teemmo;
     Teemmo.NEO = NEO;
 })(Teemmo || (Teemmo = {}));
 const EventChange = () => {
-    const request = { eventname: EventName.CONNECTED };
-    window.postMessage(request, "*");
+    window.postMessage({ eventInit: true }, "*");
     window.addEventListener("message", e => {
         const response = e.data;
         if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据

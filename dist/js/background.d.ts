@@ -4,6 +4,7 @@ interface BackStore {
     height: number;
     account: AccountInfo;
     domain: string[];
+    titles: string[];
 }
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
@@ -197,9 +198,10 @@ declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput
 declare const sendTransaction: (tran: Transaction) => Promise<InvokeOutput>;
 declare const contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 interface NotifyMessage {
-    header: {
+    header?: {
         title: string;
         domain: string;
+        icon?: string;
     };
     account?: {
         address: string;
@@ -248,8 +250,8 @@ declare var send: (title: any, params: SendArgs) => Promise<SendOutput>;
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
+declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
 declare const responseMessage: (request: any) => void;
-declare const selectCall: (request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,
     contract = 1
@@ -462,4 +464,6 @@ declare class ResultItem {
     AsBoolean(): boolean;
     AsInteger(): Neo.BigInteger;
 }
+declare function getBase64Image(img: any): string;
+declare function getBase64ByUrl(url: string): Promise<string>;
 //# sourceMappingURL=background.d.ts.map

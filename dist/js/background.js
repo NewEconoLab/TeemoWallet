@@ -11,7 +11,8 @@ var storage = {
     network: "testnet",
     account: undefined,
     height: 0,
-    domain: []
+    domain: [],
+    titles: []
 };
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
@@ -899,29 +900,19 @@ const getAccount = (title) => {
             header: title,
         };
         console.log("---------进入了 getAccount 方法");
-        chrome.storage.local.get("confirm", res => {
-            if (res["confirm"] === "confirm") {
-                if (storage.account) {
-                    chrome.storage.local.set({ trust: title });
-                    resolve({
-                        address: storage.account.address,
-                        label: storage.account.walletName
-                    });
-                }
-                else {
-                    reject({
-                        type: "AccountError",
-                        description: "Account not logged in"
-                    });
-                }
-            }
-            else if (res["confirm"] === "cancel") {
-                reject({
-                    type: "AccountError",
-                    description: "User cancel Authorization "
-                });
-            }
-        });
+        if (storage.account) {
+            chrome.storage.local.set({ trust: title });
+            resolve({
+                address: storage.account.address,
+                label: storage.account.walletName
+            });
+        }
+        else {
+            reject({
+                type: "AccountError",
+                description: "Account not logged in"
+            });
+        }
     });
 };
 /**
@@ -931,17 +922,10 @@ const getAccount = (title) => {
  */
 const invokeGroup = (title, params) => {
     return new Promise((resolve, reject) => {
-        if (!storage.account) {
-            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
-        }
-        const { address, walletName } = storage.account;
         const data = {
             lable: Command.invokeGroup,
-            header: title,
-            account: { address, walletName },
             data: params
         };
-        console.log(data);
         openNotify(data, () => {
             chrome.storage.local.get("confirm", res => {
                 if (res["confirm"] === "confirm") {
@@ -970,14 +954,8 @@ const invokeGroup = (title, params) => {
  */
 const invoke = (title, params) => {
     return new Promise((resolve, reject) => {
-        if (!storage.account) {
-            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
-        }
-        const { address, walletName } = storage.account;
         const data = {
             lable: Command.invokeGroup,
-            header: title,
-            account: { address, walletName },
             data: params
         };
         openNotify(data, () => {
@@ -1167,14 +1145,9 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
 });
 var send = (title, params) => {
     return new Promise((resolve, reject) => {
-        if (!storage.account) {
-            reject({ type: "ACCOUNT_ERROR", description: "this account is undefind" });
-        }
-        const { address, walletName } = storage.account;
         const data = {
             lable: Command.send,
             header: title,
-            account: { address, walletName },
             data: params
         };
         openNotify(data, () => {
@@ -1246,129 +1219,79 @@ const getProvider = () => {
         resolve(provider);
     });
 };
+const notifyInit = (title, domain, favIconUrl) => {
+    return new Promise((r, j) => {
+        if (storage.domain.indexOf(domain)) {
+            const notifyHeader = {
+                header: { title, domain, icon: favIconUrl },
+                lable: Command.getAccount
+            };
+            getBase64ByUrl(favIconUrl)
+                .then(icon => {
+                notifyHeader.header.icon = icon;
+                openNotify(notifyHeader, () => {
+                    chrome.storage.local.get("confirm", res => {
+                        if (res["confirm"] === "confirm") {
+                            storage.titles.push(title);
+                            storage.domain.push(domain);
+                            r();
+                        }
+                        else if (res["confirm"] === "cancel") {
+                            j({ type: "NOTIFY_ERROR", description: "User cancel Authorization " });
+                        }
+                    });
+                });
+            });
+        }
+        else {
+            r();
+        }
+    });
+};
 const responseMessage = (request) => {
     const { ID, command, message, params } = request;
-    if (!storage.domain.includes(message.domain)) {
-        const notifymsg = {
-            "lable": Command.getAccount,
-            "header": message
-        };
-        openNotify(notifymsg, () => {
-            storage.domain.push(message.domain);
-            selectCall(request);
-        });
-    }
-    else {
-        selectCall(request);
-    }
-    // chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> 
-    // {
-    //     const sendResponse=(result:Promise<any>)=>
-    //     {
-    //         result
-    //         .then(data=>{
-    //             chrome.tabs.sendMessage(tabs[0].id, {
-    //                 return:command,
-    //                 ID,data
-    //             });  
-    //         })
-    //         .catch(error=>{
-    //             chrome.tabs.sendMessage(tabs[0].id, {
-    //                 return:command,
-    //                 ID,error
-    //             });  
-    //         })
-    //     }
-    //     if(!storage.domain.includes(message.domain))
-    //     {
-    //         const notifymsg:NotifyMessage = {
-    //             "lable":Command.getAccount,
-    //             "header":message
-    //         }
-    //         openNotify(notifymsg,()=>{
-    //             storage.domain.push(message.domain)
-    //             switch (request.command) {
-    //                 case Command.getProvider:
-    //                     sendResponse(getProvider());
-    //                     break;        
-    //                 case Command.getNetworks:
-    //                     sendResponse(getNetworks());
-    //                     break;
-    //                 case Command.getAccount:
-    //                     sendResponse(getAccount(message));
-    //                     break;
-    //                 case Command.getBalance:
-    //                     sendResponse(getBalance(params));
-    //                     break;
-    //                 case Command.getStorage:
-    //                     break;
-    //                 case Command.getPublicKey:
-    //                     break;
-    //                 case Command.invoke:
-    //                     sendResponse(invoke(message,params));
-    //                     break;
-    //                 case Command.send:
-    //                     sendResponse(send(message,params))
-    //                     break;
-    //                 case Command.invokeRead:
-    //                     sendResponse(invokeRead(params));
-    //                     break;
-    //                 case Command.invokeGroup:
-    //                     sendResponse(invokeGroup(message,params));
-    //                     break;
-    //                 case Command.invokeReadGroup:
-    //                     sendResponse(invokeReadGroup(params));
-    //                     break;
-    //                 default:
-    //                     sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
-    //                     break;
-    //             }
-    //         })
-    //     }
-    //     else
-    //     {            
-    //         switch (request.command) {
-    //             case Command.getProvider:
-    //                 sendResponse(getProvider());
-    //                 break;        
-    //             case Command.getNetworks:
-    //                 sendResponse(getNetworks());
-    //                 break;
-    //             case Command.getAccount:
-    //                 sendResponse(getAccount(message));
-    //                 break;
-    //             case Command.getBalance:
-    //                 sendResponse(getBalance(params));
-    //                 break;
-    //             case Command.getStorage:
-    //                 break;
-    //             case Command.getPublicKey:
-    //                 break;
-    //             case Command.invoke:
-    //                 sendResponse(invoke(message,params));
-    //                 break;
-    //             case Command.send:
-    //                 sendResponse(send(message,params))
-    //                 break;
-    //             case Command.invokeRead:
-    //                 sendResponse(invokeRead(params));
-    //                 break;
-    //             case Command.invokeGroup:
-    //                 sendResponse(invokeGroup(message,params));
-    //                 break;
-    //             case Command.invokeReadGroup:
-    //                 sendResponse(invokeReadGroup(params));
-    //                 break;
-    //             default:
-    //                 sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
-    //                 break;
-    //         }
-    //     }
-    // })
-};
-const selectCall = (request) => {
-    const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const title = tabs[0].title;
+        const domain = tabs[0].url.match(/http:\/\/([^\/]+)\//i)[1];
+        notifyInit(title, domain, tabs[0].favIconUrl)
+            .then(() => {
+            switch (request.command) {
+                case Command.getProvider:
+                    sendResponse(getProvider());
+                    break;
+                case Command.getNetworks:
+                    sendResponse(getNetworks());
+                    break;
+                case Command.getAccount:
+                    sendResponse(getAccount(message));
+                    break;
+                case Command.getBalance:
+                    sendResponse(getBalance(params));
+                    break;
+                case Command.getStorage:
+                    break;
+                case Command.getPublicKey:
+                    break;
+                case Command.invoke:
+                    sendResponse(invoke(message, params));
+                    break;
+                case Command.send:
+                    sendResponse(send(message, params));
+                    break;
+                case Command.invokeRead:
+                    sendResponse(invokeRead(params));
+                    break;
+                case Command.invokeGroup:
+                    sendResponse(invokeGroup(message, params));
+                    break;
+                case Command.invokeReadGroup:
+                    sendResponse(invokeReadGroup(params));
+                    break;
+                default:
+                    sendResponse(new Promise((r, j) => j({ type: "REQUEST_ERROR", description: "This method is not available" })));
+                    break;
+            }
+        });
         const sendResponse = (result) => {
             result
                 .then(data => {
@@ -1384,42 +1307,6 @@ const selectCall = (request) => {
                 });
             });
         };
-        switch (request.command) {
-            case Command.getProvider:
-                sendResponse(getProvider());
-                break;
-            case Command.getNetworks:
-                sendResponse(getNetworks());
-                break;
-            case Command.getAccount:
-                sendResponse(getAccount(message));
-                break;
-            case Command.getBalance:
-                sendResponse(getBalance(params));
-                break;
-            case Command.getStorage:
-                break;
-            case Command.getPublicKey:
-                break;
-            case Command.invoke:
-                sendResponse(invoke(message, params));
-                break;
-            case Command.send:
-                sendResponse(send(message, params));
-                break;
-            case Command.invokeRead:
-                sendResponse(invokeRead(params));
-                break;
-            case Command.invokeGroup:
-                sendResponse(invokeGroup(message, params));
-                break;
-            case Command.invokeReadGroup:
-                sendResponse(invokeReadGroup(params));
-                break;
-            default:
-                sendResponse(new Promise((r, j) => j({ type: "REQUEST_ERROR", description: "This method is not available" })));
-                break;
-        }
     });
 };
 /**
@@ -1648,214 +1535,24 @@ class ResultItem {
         return new Neo.BigInteger(this.data);
     }
 }
-// namespace Account{
-//     /**
-//      * verifyAddress
-//      * @param addr
-//      */
-//     var verifyAddress=(addr: string): boolean=>
-//     {
-//         var verify = /^[a-zA-Z0-9]{34,34}$/;
-//         var res: boolean = verify.test(addr) ? verifyPublicKey(addr) : verify.test(addr);
-//         return res;
-//     }
-//     /**
-//      * verifyPublicKey 验证地址
-//      * @param publicKey 公钥
-//      */
-//     var verifyPublicKey(publicKey: string)
-//     {
-//         var array: Uint8Array = Neo.Cryptography.Base58.decode(publicKey);
-//         var check = array.subarray(21, 21 + 4); //
-//         var checkdata = array.subarray(0, 21);//
-//         var hashd = Neo.Cryptography.Sha256.computeHash(checkdata);//
-//         hashd = Neo.Cryptography.Sha256.computeHash(hashd);//
-//         var hashd = hashd.slice(0, 4);//    
-//         var checked = new Uint8Array(hashd);//
-//         var error = false;
-//         for (var i = 0; i < 4; i++)
-//         {
-//             if (checked[i] != check[i])
-//             {
-//                 error = true;
-//                 break;
-//             }
-//         }
-//         return !error;
-//     }
-//     /**
-//      * wifDecode wif解码
-//      * @param wif wif私钥
-//      */
-//     var wifDecode = (wif: string)=>
-//     {
-//         let result: Result = new Result();
-//         let login = {} as LoginInfo;
-//         try
-//         {
-//             login.prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
-//         }
-//         catch (e)
-//         {
-//             result.err = true;
-//             result.info = e.message;
-//             return result
-//         }
-//         try
-//         {
-//             login.pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(login.prikey);
-//         }
-//         catch (e)
-//         {
-//             result.err = true;
-//             result.info = e.message;
-//             return result
-//         }
-//         try
-//         {
-//             login.address = ThinNeo.Helper.GetAddressFromPublicKey(login.pubkey);
-//         }
-//         catch (e)
-//         {
-//             result.err = true;
-//             result.info = e.message;
-//             return result
-//         }
-//         result.info = login;
-//         return result;
-//     }
-//     /**
-//      * nep2FromWif
-//      */
-//     var nep2FromWif = (wif: string, password: string): Result=>
-//     {
-//         var prikey: Uint8Array;
-//         var pubkey: Uint8Array;
-//         var address: string;
-//         let res: Result = new Result();
-//         try
-//         {
-//             prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(wif);
-//             var n = 16384;
-//             var r = 8;
-//             var p = 8
-//             ThinNeo.Helper.GetNep2FromPrivateKey(prikey, password, n, r, p, (info, result) =>
-//             {
-//                 res.err = false;
-//                 res.info.nep2 = result;
-//                 pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-//                 var hexstr = pubkey.toHexString();
-//                 address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-//                 res.info.address = address
-//                 return res;
-//             });
-//         }
-//         catch (e)
-//         {
-//             res.err = true;
-//             res.info = e.message;
-//             return res;
-//         }
-//     }
-//     /**
-//      * nep2TOWif
-//      */
-//     var nep2Load = (nep2: string, password: string): Promise<AccountInfo>=>
-//     {
-//         let promise: Promise<AccountInfo> = new Promise((resolve, reject) =>
-//         {
-//             const scrypt={N:16384,r:8,p:8};
-//             ThinNeo.Helper.GetPrivateKeyFromNep2(nep2, password, scrypt.N, scrypt.r, scrypt.p, (info, result) =>
-//             {
-//                 if ("nep2 hash not match." == result)
-//                     reject(result);
-//                 const prikey = result as Uint8Array;
-//                 if (prikey != null)
-//                 {
-//                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-//                     const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-//                     resolve(new AccountInfo(
-//                         new NepAccount("",address,nep2,scrypt),
-//                         prikey,
-//                         pubkey
-//                     ));
-//                 }
-//                 else
-//                 {
-//                     reject("");
-//                 }
-//             });
-//         });
-//         return promise;
-//     }
-//     /**
-//      * nep6Load
-//      */
-//     var nep6Load=async(wallet: ThinNeo.nep6wallet, password: string): Promise< Array< AccountInfo > >=>
-//     {
-//         try
-//         {
-//             //getPrivateKey 是异步方法，且同时只能执行一个
-//             let arr:AccountInfo[]=[]
-//             if (wallet.accounts)
-//             {
-//                 for (let keyindex = 0; keyindex < wallet.accounts.length; keyindex++)
-//                 {
-//                     let account = wallet.accounts[keyindex];
-//                     if (account.nep2key == null)
-//                     {
-//                         continue;
-//                     }
-//                     try
-//                     {
-//                         const info = await getPriKeyfromAccount(wallet.scrypt, password, account);                        
-//                         arr.push(new AccountInfo(
-//                             new NepAccount("",account.address,account.nep2key,wallet.scrypt),
-//                             info.prikey,
-//                             info.pubkey
-//                         ));
-//                         return arr;
-//                     } catch (error)
-//                     {
-//                         throw error;
-//                     }
-//                 }
-//             } else
-//             {
-//                 throw console.error("The account cannot be empty");
-//             }
-//         }
-//         catch (e)
-//         {
-//             throw e.result;
-//         }
-//     }
-//     /**
-//      * getPriKeyform
-//      */
-//     var getPriKeyfromAccount = async(
-//         scrypt: ThinNeo.nep6ScryptParameters, 
-//         password: string, 
-//         account: ThinNeo.nep6account): Promise<LoginInfo>=>
-//     {
-//         let promise: Promise<LoginInfo> =
-//             new Promise((resolve, reject) =>
-//             {
-//                 account.getPrivateKey(scrypt, password, (info, result) =>
-//                 {
-//                     if (info == "finish")
-//                     {
-//                         var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(result as Uint8Array);
-//                         var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-//                         resolve({ pubkey, address: address, prikey: result as Uint8Array });
-//                     }
-//                     else
-//                     {
-//                         reject(result);
-//                     }
-//                 });
-//             })
-//         return promise;
-//     }
-// }
+function getBase64Image(img) {
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    var ext = img.src.substring(img.src.lastIndexOf(".") + 1).toLowerCase();
+    var dataURL = canvas.toDataURL("image/" + ext);
+    return dataURL;
+}
+function getBase64ByUrl(url) {
+    return new Promise((r, j) => {
+        var image = new Image();
+        image.src = url;
+        image.onload = () => {
+            let base64 = getBase64Image(image);
+            r(base64);
+        };
+    });
+}
 //# sourceMappingURL=background.js.map

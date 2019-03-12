@@ -18,7 +18,6 @@ declare var AccountManager: {
  * @param data 传递参数
  */
 declare const EventsOnChange: (event: WalletEvents, data?: any) => void;
-declare const EventInit: () => void;
 declare enum WalletEvents {
     READY = "Teemmo.NEO.READY",
     CONNECTED = "Teemmo.NEO.CONNECTED",

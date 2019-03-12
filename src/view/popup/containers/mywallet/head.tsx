@@ -65,15 +65,15 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     public goOut=()=>{
         if(this.props.lableChange){
             bg.AccountManager.logout();
-            console.log("---------------这边退出了");
+            // console.log("---------------这边退出了");
             
-            chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
-                chrome.tabs.sendMessage(tabs[0].id,{
-                    EventName:"Teemmo.NEO.DISCONNECTED",
-                },()=>{
+            // chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
+            //     chrome.tabs.sendMessage(tabs[0].id,{
+            //         EventName:"Teemmo.NEO.DISCONNECTED",
+            //     },()=>{
 
-                })
-            })
+            //     })
+            // })
             this.props.lableChange('out');
         }
     }

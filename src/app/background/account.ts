@@ -186,52 +186,20 @@ var AccountManager={
  * @param data 传递参数
  */
 const EventsOnChange= (event: WalletEvents, data?: any) => {
-    window.dispatchEvent(
-        new CustomEvent(event,{
-            detail:data,
-        })
-    );
+    chrome.tabs.query({},tabs=>{
+        for (const tab of tabs) {
+            for (const title of storage.titles) {
+                if(tab.url.includes(title))
+                {
+                    console.log("------------发送给 "+title +"event事件："+event);
+                    
+                    chrome.tabs.sendMessage(tab.id,{EventName:event,data});
+                }
+            }
+        }
+    })
 };
 
-/**
- * 监听
- */
-chrome.runtime.onMessage.addListener(
-    (request, sender, sendResponse) => {
-        if(request.eventInit)
-            EventInit()
-    }
-);
-const EventInit=()=>{    
-    chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
-        const tabId= tabs[0].id;
-        window.addEventListener(WalletEvents.ACCOUNT_CHANGED,(event:CustomEvent)=>{
-            chrome.extension.sendRequest({
-                EventName:WalletEvents.ACCOUNT_CHANGED,
-                data:event.detail
-            });
-        })
-        window.addEventListener(WalletEvents.CONNECTED,(event:CustomEvent)=>{
-            chrome.extension.sendRequest({
-                EventName:WalletEvents.CONNECTED,
-                data:event.detail
-            });   
-        })
-        window.addEventListener(WalletEvents.DISCONNECTED,(event:CustomEvent)=>{
-            chrome.runtime.sendMessage({
-                EventName:WalletEvents.DISCONNECTED,
-                data:event.detail
-            });    
-            
-        })
-        window.addEventListener(WalletEvents.NETWORK_CHANGED,(event:CustomEvent)=>{
-            chrome.runtime.sendMessage({
-                EventName:WalletEvents.NETWORK_CHANGED,
-                data:event.detail
-            });     
-        })
-    })
-}
 enum WalletEvents {
     READY = "Teemmo.NEO.READY",
     CONNECTED = "Teemmo.NEO.CONNECTED",

@@ -29,36 +29,28 @@ export default class Home extends React.Component<any, any> {
       if(chrome.tabs)
       {
         const bg = chrome.extension.getBackgroundPage() as Background;
-        const account = {address:bg.storage.account.address,label:bg.storage.account.walletName}
-        chrome.storage.local.get(['notifyData'],(result)=>{
-          const label = result.notifyData.lable;
-          const header = result.notifyData.header;
-          const data = result.notifyData.data;
-          console.log({label});
-          console.log(header);
-          
-          this.setState(
-            {
-              account,
-              label,
-              data,
-              header
-            })  
-        })
         if(bg.storage.account)
         {
-          this.setState({
-            login:true
-          })
-        }
-        else
+          const account = {address:bg.storage.account.address,label:bg.storage.account.walletName}
+          this.setState({account,login:true});
+        }else
         {
-          console.log("------进入了 else "+ bg.storage.account);
-          
           this.setState({
             login:false
           })
-        }    
+        }
+        chrome.storage.local.get(['notifyData'],(result)=>{
+          const label = result.notifyData.lable;
+          const header = result.notifyData.header;
+          const data = result.notifyData.data;          
+          this.setState(
+            {
+              label,
+              data
+            })
+          if(header)
+            this.setState({header});
+        })   
       }
   }
 
