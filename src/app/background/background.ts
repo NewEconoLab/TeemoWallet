@@ -6,7 +6,7 @@ interface BackStore
     network:"testnet"|"mainnet",
     height:number,
     account:AccountInfo,
-    domain:string[],
+    domains:string[],
     titles:string[],
 }
 
@@ -16,7 +16,7 @@ var storage:BackStore=
     network:"testnet",
     account:undefined,
     height:0,
-    domain:[],
+    domains:[],
     titles:[]
 }
 
@@ -1461,7 +1461,7 @@ const getProvider=()=>
 
 const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
     return new Promise((r,j)=>{        
-        if(storage.domain.indexOf(domain))
+        if(storage.domains.indexOf(domain))
         {
             const notifyHeader:NotifyMessage = {
                 header:{title,domain,icon:favIconUrl},
@@ -1476,7 +1476,7 @@ const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
                         if(res["confirm"]==="confirm")
                         {
                             storage.titles.push(title);
-                            storage.domain.push(domain);
+                            storage.domains.push(domain);
                             r()
                         }else if(res["confirm"]==="cancel"){
                             j({type:"NOTIFY_ERROR",description:"User cancel Authorization "});

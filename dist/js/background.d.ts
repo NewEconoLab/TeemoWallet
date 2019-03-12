@@ -3,7 +3,7 @@ interface BackStore {
     network: "testnet" | "mainnet";
     height: number;
     account: AccountInfo;
-    domain: string[];
+    domains: string[];
     titles: string[];
 }
 declare var storage: BackStore;

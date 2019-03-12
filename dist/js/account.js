@@ -143,9 +143,9 @@ var AccountManager = {
 const EventsOnChange = (event, data) => {
     chrome.tabs.query({}, tabs => {
         for (const tab of tabs) {
-            for (const title of storage.titles) {
-                if (tab.url.includes(title)) {
-                    console.log("------------发送给 " + title + "event事件：" + event);
+            for (const domain of storage.domains) {
+                if (tab.url.includes(domain)) {
+                    console.log("------------发送给 " + domain + "event事件：" + event);
                     chrome.tabs.sendMessage(tab.id, { EventName: event, data });
                 }
             }

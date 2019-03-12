@@ -11,7 +11,7 @@ var storage = {
     network: "testnet",
     account: undefined,
     height: 0,
-    domain: [],
+    domains: [],
     titles: []
 };
 const HASH_CONFIG = {
@@ -1221,7 +1221,7 @@ const getProvider = () => {
 };
 const notifyInit = (title, domain, favIconUrl) => {
     return new Promise((r, j) => {
-        if (storage.domain.indexOf(domain)) {
+        if (storage.domains.indexOf(domain)) {
             const notifyHeader = {
                 header: { title, domain, icon: favIconUrl },
                 lable: Command.getAccount
@@ -1233,7 +1233,7 @@ const notifyInit = (title, domain, favIconUrl) => {
                     chrome.storage.local.get("confirm", res => {
                         if (res["confirm"] === "confirm") {
                             storage.titles.push(title);
-                            storage.domain.push(domain);
+                            storage.domains.push(domain);
                             r();
                         }
                         else if (res["confirm"] === "cancel") {
