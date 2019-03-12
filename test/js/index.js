@@ -7,13 +7,46 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-window.addEventListener('Teemmo.NEO.READY', () => {
-    console.log("inject ready ");
+/**
+ * 定义事件接收与响应代码
+ */
+window.addEventListener('Teemmo.NEO.READY', (data) => {
+    console.log("inject READY ");
+    //console.log(JSON.stringify(data.detail))
     var myDate = new Date();
     var eventPool = document.getElementById("event");
-    eventPool.value = myDate.toLocaleTimeString() + "  ready" + "\n" + eventPool.value;
+    eventPool.value = myDate.toLocaleTimeString() + "  READY" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
     const main = new Main();
-    main.start();
+    main.start(); //监听到这个事件后，才能开始插件的相关方法调用
+});
+window.addEventListener('Teemmo.NEO.ACCOUNT_CHANGED', (data) => {
+    console.log("inject ACCOUNT_CHANGED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event");
+    eventPool.value = myDate.toLocaleTimeString() + "  ACCOUNT_CHANGED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
+});
+window.addEventListener('Teemmo.NEO.CONNECTED', (data) => {
+    console.log("inject CONNECTED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event");
+    eventPool.value = myDate.toLocaleTimeString() + "  CONNECTED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
+});
+window.addEventListener('Teemmo.NEO.DISCONNECTED', (data) => {
+    console.log("inject DISCONNECTED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event");
+    eventPool.value = myDate.toLocaleTimeString() + "  DISCONNECTED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
+});
+window.addEventListener('Teemmo.NEO.NETWORK_CHANGED', (data) => {
+    console.log("inject NETWORK_CHANGED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event");
+    eventPool.value = myDate.toLocaleTimeString() + "  NETWORK_CHANGED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
 class Main {
     constructor() {
