@@ -143,11 +143,12 @@ var AccountManager = {
 const EventsOnChange = (event, data) => {
     chrome.tabs.query({}, tabs => {
         for (const tab of tabs) {
-            for (const domain of storage.domains) {
-                if (tab.url.includes(domain)) {
-                    console.log("------------发送给 " + domain + "event事件：" + event);
-                    chrome.tabs.sendMessage(tab.id, { EventName: event, data });
-                }
+            const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;
+            const url = urlReg.exec(tab.url);
+            const domain = url ? url[0] : tab.url;
+            if (storage.domains.indexOf(domain) >= 0) {
+                console.log("------------发送给 " + domain + "event事件：" + event);
+                chrome.tabs.sendMessage(tab.id, { EventName: event, data });
             }
         }
     });

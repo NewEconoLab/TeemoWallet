@@ -1262,7 +1262,9 @@ const responseMessage = (request) => {
     const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const title = tabs[0].title;
-        const domain = tabs[0].url.match(/http:\/\/([^\/]+)\//i)[1];
+        const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;
+        const url = urlReg.exec(tabs[0].url);
+        const domain = url ? url[0] : tabs[0].url;
         notifyInit(title, domain, tabs[0].favIconUrl)
             .then(() => {
             switch (request.command) {
