@@ -39,17 +39,17 @@ export default class Select extends React.Component<IProps, IState> {
 			this.setState({
 				options:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
 			}, () => {
-				if(this.props.onCallback) {
-					this.props.onCallback(this.state.options);
-				}
+				// if(this.props.onCallback) {
+				// 	this.props.onCallback(this.state.options);
+				// }
 			});
 		} else if(!this.props.placeholder) {
 			this.setState({
 				options:this.props.options[0]
 			});
-			if(this.props.onCallback) {
-				this.props.onCallback(this.props.options[0]);
-			}
+			// if(this.props.onCallback) {
+			// 	this.props.onCallback(this.props.options[0]);
+			// }
 		}
 
 		// 注册全局点击事件，以便点击其他区域时，隐藏展开的内容

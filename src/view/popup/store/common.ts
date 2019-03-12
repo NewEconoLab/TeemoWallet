@@ -20,6 +20,7 @@ class Common
     
     
     public set network(v : "testnet"|"mainnet") {
+        bg.AccountManager.netWorkChange(v);
         this._network = v;
     }    
     

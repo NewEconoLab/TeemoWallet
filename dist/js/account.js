@@ -19,7 +19,7 @@ var AccountManager = {
                 const prikey = result;
                 if (prikey != null) {
                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-                    storage.account = new AccountInfo(nepaccount, prikey, pubkey);
+                    AccountManager.setAccount(new AccountInfo(nepaccount, prikey, pubkey));
                     resolve(nepaccount);
                 }
                 else {
