@@ -108,6 +108,8 @@ class Main {
                             {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
                             {type:"Integer",value:"100000"}
                         ],
+                        "description":"NNC转账",
+                        "fee":"0",
                         network:"TestNet",
                         // assets: 暂时用不到
                     },
@@ -123,6 +125,8 @@ class Main {
                             {type:"Hook_Txid",value:0}, // 
                             {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
                         ],
+                        "description":"充值确认",
+                        "fee":"0.001",
                         network:"TestNet"
                     }
                 ]
@@ -141,6 +145,8 @@ class Main {
                             {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
                             {type:"Integer",value:"1000"}
                         ],
+                        "description":"NNC转账",
+                        "fee":"0.001",
                         network:"TestNet",
                         // assets: 暂时用不到
                     },
@@ -156,6 +162,8 @@ class Main {
                             {type:"Hook_Txid",value:0}, // 
                             {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
                         ],
+                        "description":"充值确认",
+                        "fee":"0.001",
                         network:"TestNet"
                     }
                 ]
