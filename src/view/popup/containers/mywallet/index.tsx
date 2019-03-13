@@ -10,6 +10,7 @@ import common from '../../store/common';
 import ManageAsset from '../manage';
 import Setting from '../setting';
 import classnames = require('classnames');
+import EditWallet from '../editwallet';
 
 interface AppProps extends RouteComponentProps
 {
@@ -30,7 +31,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
 
     public state = {
         value: "",
-        label: "setting" // history,assets,manage,setting,wallet
+        label: "wallet" // history,assets,manage,setting,wallet
     }
 
     public componentDidMount()
@@ -108,10 +109,13 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                     )
                 }
                 {
-                    this.state.label === 'manage' && <ManageAsset />
+                    this.state.label === 'manage' && <ManageAsset  lableChange={this.labelChange} />
                 }
                 {
-                    this.state.label === 'setting' && <Setting />
+                    this.state.label === 'wallet' && <EditWallet  lableChange={this.labelChange} />
+                }
+                {
+                    this.state.label === 'setting' && <Setting  lableChange={this.labelChange} />
                 }
             </div>
         )

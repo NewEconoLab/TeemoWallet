@@ -7,16 +7,16 @@ import './index.less';
 import Modal from '../../../components/Modal';
 import common from '../../store/common';
 import QrMakeCode from '../../utils/qrcode';
-import Toast from '../../../components/Toast'
+import Toast from '../../../components/Toast';
 
 interface IProps
 {
 	show: boolean,
-	onHide?:()=>void
+	onHide?: () => void
 }
 interface IState
 {
-	codeLink:string
+	codeLink: string
 }
 
 @observer
@@ -25,19 +25,22 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 	constructor(props: IProps)
 	{
 		super(props);
-	}	
+	}
 	public state = {
 		codeLink: common.account.address,
-	  }
-	public componentDidMount(){
-		const div = document.getElementById('qrcode')
-		QrMakeCode(div,common.account.address);
 	}
-	public onHide=()=>{
-		this.props.onHide?this.props.onHide():null;
+	public componentDidMount()
+	{
+		const div = document.getElementById('qrcode')
+		QrMakeCode(div, common.account.address);
+	}
+	public onHide = () =>
+	{
+		this.props.onHide ? this.props.onHide() : null;
 	}
 	// 复制地址
-	public onCopyAddress = () => {		
+	public onCopyAddress = () =>
+	{
 		const oInput = document.createElement('input');
 		oInput.value = this.state.codeLink;
 		document.body.appendChild(oInput);
@@ -45,10 +48,8 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 		document.execCommand("Copy"); // 执行浏览器复制命令
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
-		// alert(2)
 		Toast("复制成功");
-		
-	  }
+	}
 	public render()
 	{
 		return (
