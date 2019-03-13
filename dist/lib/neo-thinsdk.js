@@ -5060,7 +5060,7 @@ var ThinNeo;
             this.AddWitnessScript(vscript, iscript);
         };
         Transaction.prototype.AddWitnessScript = function (vscript, iscript) {
-            var scripthash = ThinNeo.Helper.GetScriptHashFromScript(vscript);
+            // var scripthash = ThinNeo.Helper.GetScriptHashFromScript(vscript);
             if (this.witnesses == null)
                 this.witnesses = [];
             var newwit = new Witness();

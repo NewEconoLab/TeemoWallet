@@ -30,7 +30,8 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
     public componentDidMount() {
         if(!common.network)
             common.network="TestNet"
-        // Example of how to send a message to eventPage.ts.
+        // Example of how to send a message to eventPage.ts.        
+        common.initBalance();
         if(chrome.tabs)
         {
             chrome.runtime.sendMessage({ popupMounted: true });

@@ -1,5 +1,7 @@
 import { AccountInfo, NepAccount } from "../../../common/entity";
 import { Storage_internal, Storage_local, bg } from "../utils/storagetools";
+import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
+import { HASH_CONFIG } from "../../config";
 
 /**
  * 我的账户管理
@@ -10,6 +12,54 @@ class Common
         this.tabname="account"
     }   
     private tabname:string;
+
+    public _balance:{NEO:number,GAS:number,CGAS:number,NNC:number}={NEO:0,GAS:0,CGAS:0,NNC:0};
+
+    
+    public set balance(v : {NEO:number,GAS:number,CGAS:number,NNC:number}) {
+        this._balance = bg.storage['balance'] = v;
+    }    
+    
+    public get balance() : {NEO:number,GAS:number,CGAS:number,NNC:number} {
+        return bg.storage['balance']?bg.storage['balance']:{NEO:0,GAS:0,CGAS:0,NNC:0};
+    }
+    
+
+    public initBalance=()=>{
+        const params: BalanceRequest = {
+            address: this.account.address,   // 你要查询的地址
+            assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_CGAS.toString(),HASH_CONFIG.ID_NNC.toString()],
+          }
+        const data:GetBalanceArgs=
+        {
+            "network":"testnet",
+            "params":params
+        }
+        let assets = {NEO:0,GAS:0,CGAS:0,NNC:0};
+        bg.getBalance(data)
+        .then((result:BalanceResults)=>{
+            result[this.account.address].forEach((value,index)=>{
+                console.log(value);
+                
+                switch(value.symbol){
+                    case 'NEO':
+                        assets.NEO = parseFloat(value.amount);
+                        break;
+                    case 'GAS':
+                        assets.GAS = parseFloat(value.amount);
+                        break;
+                    case 'CGAS':
+                        assets.CGAS = parseFloat(value.amount);
+                        break;
+                    case 'NNC':
+                        assets.NNC = parseFloat(value.amount);
+                        break;                    
+                }
+                this.balance=assets;
+                
+            })
+        })
+    }
 
     private _network:"TestNet"|"MainNet";
 

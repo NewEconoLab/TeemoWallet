@@ -27,19 +27,15 @@ export default class Checkbox extends React.Component<IProps, {}>
 	// 监控输入内容
 	public onClick = () =>
 	{
-        if(this.state.value){
-            this.setState({
-                value:false
-            })
-        }else{            
-            this.setState({
-                value:true
-            })
-        }
-		if (this.props.onClick)
-		{
-			this.props.onClick(this.state.value);
-		}
+        this.setState({
+            value:!this.state.value
+        },
+        ()=>{       
+            if (this.props.onClick)
+            {
+                this.props.onClick(this.state.value);
+            }
+        })
 	}
 	public render()
 	{

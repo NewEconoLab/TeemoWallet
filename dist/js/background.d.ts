@@ -99,8 +99,9 @@ declare class Transaction extends ThinNeo.Transaction {
      * @param utxos 资产的utxo
      * @param sendcount 输出总数
      * @param target 对方地址
+     * @param netfee 有手续费的时候使用，并且使用的utxos是gas的时候
      */
-    creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string): void;
+    creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string, netfee?: Neo.Fixed8): void;
     getTxid(): string;
 }
 /**
@@ -180,7 +181,6 @@ declare var Api: {
      */
     getnep5asset: (asset: any) => Promise<any>;
 };
-declare function invokeScriptBuild(data: InvokeArgs): Uint8Array;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     constructor();
@@ -202,14 +202,24 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  */
 declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
+/**
+ *
+ * @param transcount 转换金额
+ * @param netfee 交易费用
+ */
+declare var exchangeCgas: (transcount: number, netfee: number) => Promise<InvokeOutput[]>;
 declare var makeRefundTransaction: (transcount: number, netfee: number) => Promise<InvokeOutput>;
 /**
  *
  * @param utxo 兑换gas的utxo
  * @param transcount 兑换的数量
  */
-declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: Neo.Fixed8, netfee: number) => Promise<Uint8Array>;
+declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: number, netfee: number) => Promise<TransferGroup>;
 declare const sendTransaction: (tran: Transaction) => Promise<InvokeOutput>;
+/**
+ * 构造合约调用交易
+ * @param invoke invoke调用参数
+ */
 declare var contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 interface NotifyMessage {
     header?: {

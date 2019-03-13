@@ -37,7 +37,8 @@ declare interface Background extends Window{
     mytest:(data:Uint8Array)=>void;
     contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
     storage: BackStore;
-    AccountManager: AccountManager
+    AccountManager: AccountManager;
+    exchangeCgas: (transcount: number, netfee: number) => Promise<void>;
 }
 
 interface BalanceRequest {

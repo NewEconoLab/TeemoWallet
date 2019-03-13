@@ -13,6 +13,7 @@ import { InvokeArgs } from '../../../../common/entity';
 import common from '../../store/common';
 import { HASH_CONFIG } from '../../../config';
 import { bg } from '../../utils/storagetools';
+import { asNumber } from '../../utils/numberTool';
 
 interface IProps
 {
@@ -24,6 +25,9 @@ interface IState
 {
 	show:boolean,
 	amount:string,
+	netfee:boolean,
+	inputError:boolean,
+	errorMessage:string,
 	currentOption:IOption
 }
 
@@ -37,6 +41,9 @@ export default class Exchange extends React.Component<IProps, IState>
 	public state = {
 		show:false,
 		amount:'',
+		netfee:false,
+		inputError:false,
+		errorMessage:'',
 		currentOption:{id:'cgasexchange',name:'GAS换CGAS'}
 	}
 	public options:IOption[]=[
@@ -46,14 +53,17 @@ export default class Exchange extends React.Component<IProps, IState>
 	// 监控输入内容
 	public onChange = (event) =>
 	{
-		this.setState({
-			amount:event
-		})
+		const amount = asNumber(event,8);
+		this.setState({amount});
 	}
 
 	public onSelect=(event:IOption)=>
 	{
 		this.setState({currentOption:event})
+	}
+
+	public onCheck=(netfee:boolean)=>{		
+		this.setState({netfee})
 	}
 
 	public onHide=()=>{
@@ -64,26 +74,26 @@ export default class Exchange extends React.Component<IProps, IState>
 		if(this.state.currentOption.id=="cgasexchange")
 		{
 			const invoke:InvokeArgs={
-				"scriptHash":HASH_CONFIG.ID_CGAS.toString(),
-				"operation":"mintTokens",
-				"arguments":[],
-				"attachedAssets":{[HASH_CONFIG.ID_GAS]:this.state.amount},
-				"network":common.network,
-				// "assetIntentOverrides":{
-				// 	"inputs":[],
-				// 	"outputs":[]
-				// }
+				scriptHash:HASH_CONFIG.ID_CGAS.toString(),
+				operation:"mintTokens",
+				arguments:[],
+				attachedAssets:{[HASH_CONFIG.ID_GAS]:this.state.amount},
+				network:common.network,
+				fee:this.state.netfee?"0.001":"0"
 			}
 			bg.contractBuilder(invoke)
 			.then(result=>{
-				result.txid;
+				alert(result.txid);
 			})
 			.catch(error=>{
-
+				console.log(error);
+				
 			})
 		}
 		else
-		{}
+		{
+			bg.exchangeCgas(parseFloat(this.state.amount),0.01)
+		}
 	}
 
 	public render()
@@ -94,10 +104,10 @@ export default class Exchange extends React.Component<IProps, IState>
 					<Select onCallback={this.onSelect} options={this.options} text="操作类型" size="big" />
 				</div>
 				<div className="line">
-					<Input placeholder="兑换数量" value={this.state.amount+""} onChange={this.onChange} type="text" />		
+					<Input placeholder="兑换数量" value={this.state.amount+""} onChange={this.onChange} type="text" error={this.state.inputError} message={this.state.errorMessage} />		
 				</div>		
 				<div className="line-checkbox">
-					<Checkbox text="优先确认交易（支付 0.001 GAS）" />
+					<Checkbox text="优先确认交易（支付 0.001 GAS）" onClick={this.onCheck} />
 				</div>
 				<div className="btn-list">
 					<div className="cancel">
