@@ -459,7 +459,7 @@ return urlout;
  * @param opts 请求参数
  */
 async function request(opts: IOpts) {
-    let network = common.network=="TestNet"?"testnet":"mainnet"
+    let network = storage.network=="TestNet"?"testnet":"mainnet"
     let url = [baseUrl,network].join('/');
     if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network].join('/');
@@ -861,7 +861,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             }
         }
         try {
-            let result = await sendTransaction(tran);
+            let result = await transactionSignAndSend(tran);
             TaskManager.addTask(
                 new Task(
                 ConfirmType.tranfer,
@@ -1025,7 +1025,7 @@ var makeRefundTransaction = async (transcount:number,netfee:number)=>
     // var sgasScript = r[0]['script'].hexToBytes();
     // tran.AddWitnessScript(sgasScript, sb.ToArray());
     tran.AddWitnessScript(new Uint8Array(0), sb.ToArray());
-    let result = sendTransaction(tran);
+    let result = transactionSignAndSend(tran);
     return result;
 }
 /**
@@ -1073,7 +1073,7 @@ var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:number,netfee:n
 
 }
 
-const sendTransaction = async (tran:Transaction)=>
+const transactionSignAndSend = async (tran:Transaction)=>
 {
     try {
         const message  = tran.GetMessage().clone();
@@ -1085,6 +1085,7 @@ const sendTransaction = async (tran:Transaction)=>
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result[0].txid)
         {
+            MarkUtxo.setMark(tran.marks);
             const txid:string = (result[0].txid as string).replace('0x','');
             const nodeUrl:string="https://api.nel.group/api";
             let ouput:InvokeOutput ={txid,nodeUrl}
@@ -1127,28 +1128,7 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
                     tran.creatInuptAndOutup(utxo,amount,toaddr)
             }
         }
-
-        const message  = tran.GetMessage().clone();
-        const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
-        tran.AddWitness(signdata,common.account.pubkey,common.account.address);
-        const data:Uint8Array = tran.GetRawData();
-        const result =await Api.sendrawtransaction(data.toHexString());
-        if(result[0].txid)
-        {
-            console.log(data.toHexString());
-            
-            let ouput:InvokeOutput =
-            {
-                txid:result[0].txid,
-                nodeUrl:"https://api.nel.group/api"
-            }
-            return ouput;            
-        }
-        else
-        {
-            throw {type:"TransactionError",description:result[0].errorMessage,data:data.toHexString()};            
-        }
-        
+        return transactionSignAndSend(tran);        
     } 
     catch (error) 
     {
@@ -1470,12 +1450,12 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                     tran.creatInuptAndOutup(asset,Neo.Fixed8.parse(data.amount),data.toAddress);
                     tran.creatInuptAndOutup(gass,fee);
                 }
-                return sendTransaction(tran);
+                return transactionSignAndSend(tran);
             }else{                
                 const asset = utxos[data.asset];
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset,amount);
-                return sendTransaction(tran);
+                return transactionSignAndSend(tran);
             }
         } 
         catch (error) 

@@ -39,6 +39,24 @@ declare interface Background extends Window{
     storage: BackStore;
     AccountManager: AccountManager;
     exchangeCgas: (transcount: number, netfee: number) => Promise<void>;
+    transfer: (data: SendArgs) => Promise<SendOutput>;
+    invokeRead: (data: InvokeReadInput) => Promise<{}>;
+    invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
+}
+
+interface SendArgs {
+    fromAddress: string;
+    toAddress: string;
+    asset: string;
+    amount: string;
+    remark?: string;
+    fee?: string;
+    network: "TestNet"|"MainNet";
+}
+  
+interface SendOutput {
+    txid: string;
+    nodeUrl: string;
 }
 
 interface BalanceRequest {
@@ -127,7 +145,7 @@ declare interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     arguments?: Argument[];
-    network: string;
+    network: "TestNet"|"MainNet";
 }
 declare interface InvokeReadGroup{
     group:InvokeReadInput[];

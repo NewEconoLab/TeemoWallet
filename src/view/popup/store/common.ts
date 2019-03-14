@@ -32,7 +32,7 @@ class Common
           }
         const data:GetBalanceArgs=
         {
-            "network":"testnet",
+            "network":"TestNet",
             "params":params
         }
         let assets = {NEO:0,GAS:0,CGAS:0,NNC:0};

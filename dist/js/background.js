@@ -333,7 +333,7 @@ const makeRpcUrl = (url, method, params) => {
  */
 function request(opts) {
     return __awaiter(this, void 0, void 0, function* () {
-        let network = common.network == "TestNet" ? "testnet" : "mainnet";
+        let network = storage.network == "TestNet" ? "testnet" : "mainnet";
         let url = [baseUrl, network].join('/');
         if (opts.baseUrl === 'common') {
             url = [baseCommonUrl, network].join('/');
@@ -703,7 +703,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
             }
         }
         try {
-            let result = yield sendTransaction(tran);
+            let result = yield transactionSignAndSend(tran);
             TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', '')));
             return [result];
         }
@@ -846,7 +846,7 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
     // var sgasScript = r[0]['script'].hexToBytes();
     // tran.AddWitnessScript(sgasScript, sb.ToArray());
     tran.AddWitnessScript(new Uint8Array(0), sb.ToArray());
-    let result = sendTransaction(tran);
+    let result = transactionSignAndSend(tran);
     return result;
 });
 /**
@@ -885,7 +885,7 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
     trandata.txid = tran.getTxid();
     return trandata;
 });
-const sendTransaction = (tran) => __awaiter(this, void 0, void 0, function* () {
+const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, function* () {
     try {
         const message = tran.GetMessage().clone();
         const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
@@ -894,6 +894,7 @@ const sendTransaction = (tran) => __awaiter(this, void 0, void 0, function* () {
         console.log(data.toHexString());
         const result = yield Api.sendrawtransaction(data.toHexString());
         if (result[0].txid) {
+            MarkUtxo.setMark(tran.marks);
             const txid = result[0].txid.replace('0x', '');
             const nodeUrl = "https://api.nel.group/api";
             let ouput = { txid, nodeUrl };
@@ -933,22 +934,7 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
                     tran.creatInuptAndOutup(utxo, amount, toaddr);
             }
         }
-        const message = tran.GetMessage().clone();
-        const signdata = ThinNeo.Helper.Sign(message, common.account.prikey);
-        tran.AddWitness(signdata, common.account.pubkey, common.account.address);
-        const data = tran.GetRawData();
-        const result = yield Api.sendrawtransaction(data.toHexString());
-        if (result[0].txid) {
-            console.log(data.toHexString());
-            let ouput = {
-                txid: result[0].txid,
-                nodeUrl: "https://api.nel.group/api"
-            };
-            return ouput;
-        }
-        else {
-            throw { type: "TransactionError", description: result[0].errorMessage, data: data.toHexString() };
-        }
+        return transactionSignAndSend(tran);
     }
     catch (error) {
         throw error;
@@ -1223,13 +1209,13 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
                     tran.creatInuptAndOutup(asset, Neo.Fixed8.parse(data.amount), data.toAddress);
                     tran.creatInuptAndOutup(gass, fee);
                 }
-                return sendTransaction(tran);
+                return transactionSignAndSend(tran);
             }
             else {
                 const asset = utxos[data.asset];
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset, amount);
-                return sendTransaction(tran);
+                return transactionSignAndSend(tran);
             }
         }
         catch (error) {

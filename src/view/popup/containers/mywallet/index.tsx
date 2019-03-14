@@ -51,7 +51,8 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
             <div className="mywallet">
                 <WalletHeader lableChange={this.labelChange}/>
                 <div className="body">         
-                {this.state.label=="history"?       
+                {
+                    this.state.label=="history"?       
                     <History/>:
                     <Assets />
                 }

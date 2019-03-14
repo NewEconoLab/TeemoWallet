@@ -215,7 +215,7 @@ declare var makeRefundTransaction: (transcount: number, netfee: number) => Promi
  * @param transcount 兑换的数量
  */
 declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: number, netfee: number) => Promise<TransferGroup>;
-declare const sendTransaction: (tran: Transaction) => Promise<InvokeOutput>;
+declare const transactionSignAndSend: (tran: Transaction) => Promise<InvokeOutput>;
 /**
  * 构造合约调用交易
  * @param invoke invoke调用参数
