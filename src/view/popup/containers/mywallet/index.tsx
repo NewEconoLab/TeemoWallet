@@ -31,7 +31,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
 
     public state = {
         value: "",
-        label: "wallet" // history,assets,manage,setting,wallet
+        label: "history" // history,assets,manage,setting,wallet
     }
 
     public componentDidMount()

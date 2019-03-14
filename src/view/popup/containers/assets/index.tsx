@@ -13,6 +13,7 @@ import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import hashConfig from "../../../config/hash.config";
 import ClaimGAS from './claimgas';
+import classnames from 'classnames';
 interface IProps
 {
   lableChange: (table: string) => void
@@ -26,6 +27,7 @@ export default class Assets extends React.Component<IProps, {}>
   }
   public state = {
     showNumber: 0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
+    assetData:null,
     balance: {
       neo: "加载中...",
       gas: "加载中...",
@@ -51,7 +53,10 @@ export default class Assets extends React.Component<IProps, {}>
     let result = await bg.getBalance(data);
     if (result)
     {
-      this.initBalance(result)
+      this.initBalance(result);
+      this.setState({
+        assetData:result
+      })
     }
   }
   // 初始化资产
@@ -117,6 +122,9 @@ export default class Assets extends React.Component<IProps, {}>
 
   public render()
   {
+    const loadClassName = classnames('asset-amount',{
+      'loading-amount':!this.state.assetData?true:false
+    });
     return (
       <div className="assets">
         <ClaimGAS />
@@ -132,19 +140,19 @@ export default class Assets extends React.Component<IProps, {}>
           <div className="title">资产列表</div>
           <div className="asset-panel">
             <div className="asset-name">NEO</div>
-            <div className="asset-amount">{this.state.balance.neo}</div>
+            <div className={loadClassName}>{this.state.balance.neo}</div>
           </div>
           <div className="asset-panel">
             <div className="asset-name">GAS</div>
-            <div className="asset-amount">{this.state.balance.gas}</div>
+            <div className={loadClassName}>{this.state.balance.gas}</div>
           </div>
           <div className="asset-panel">
             <div className="asset-name">CGAS</div>
-            <div className="asset-amount">{this.state.balance.cgas}</div>
+            <div className={loadClassName}>{this.state.balance.cgas}</div>
           </div>
           <div className="asset-panel">
             <div className="asset-name">NNC</div>
-            <div className="asset-amount">{this.state.balance.nnc}</div>
+            <div className={loadClassName}>{this.state.balance.nnc}</div>
           </div>
         </div>
         <p className="asset-p">没有你的代币？试试 <span className="asset-a" onClick={this.showManage}>管理代币</span></p>

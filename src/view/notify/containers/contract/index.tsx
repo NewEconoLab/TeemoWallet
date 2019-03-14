@@ -48,9 +48,6 @@ export default class ContractRequest extends React.Component<IProps, IState>
   // 更新数据
   public getRenderState = () =>
   {
-    console.log("渲染hash");
-    console.log(this.props.data);
-    console.log(JSON.stringify(this.state.data))
     let invoke: InvokeArgs[] = [];
     if (this.state.data && this.state.data.group)
     {
