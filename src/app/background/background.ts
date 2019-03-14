@@ -8,6 +8,7 @@ interface BackStore
     account:AccountInfo,
     domains:string[],
     titles:string[],
+    oldUtxo:{[txid:string]:any}
 }
 
 
@@ -17,7 +18,8 @@ var storage:BackStore=
     account:undefined,
     height:0,
     domains:[],
-    titles:[]
+    titles:[],
+    oldUtxo:{}
 }
 
 const HASH_CONFIG = {
@@ -118,22 +120,19 @@ class MarkUtxo
      */
     public static setMark(utxos:MarkUtxo[])
     {
-        const session = Storage_internal.get<{[txid:string]:number[]}>("utxo_manager");
         for (let index = 0; index < utxos.length; index++) 
         {
             const utxo = utxos[index];
-            if(session[utxo.txid])
+            if(storage.oldUtxo[utxo.txid])
             {
-                session[utxo.txid].push(utxo.n);
+                storage.oldUtxo[utxo.txid].push(utxo.n);
             }
             else
             {
-                session[utxo.txid] = new Array<number>();
-                session[utxo.txid].push(utxo.n);
+                storage.oldUtxo[utxo.txid] = new Array<number>();
+                storage.oldUtxo[utxo.txid].push(utxo.n);
             }
         }
-        Storage_internal.set("utxo_manager",session);
-
     }
 
     public static async getAllUtxo():Promise<{ [id: string]: Utxo[] }>
@@ -207,9 +206,9 @@ class Utxo{
     public count: Neo.Fixed8;
 }
 
-const Storage_local = 
+class Storage_local
 {
-    setAccount:(account:AccountInfo)=>{
+    public static setAccount(account:AccountInfo){
         let arr = Storage_local.getAccount();
         
         let index: number= 0;
@@ -238,8 +237,8 @@ const Storage_local =
         
         localStorage.setItem("TEEMMOWALLET_ACCOUNT",JSON.stringify(arr));
         return index;
-    },
-    getAccount:()=>{
+    }
+    public static getAccount(){
         const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
         let accounts = [] as NepAccount[];
         if(str) 
@@ -253,13 +252,24 @@ const Storage_local =
         }
         return accounts;
     }
+    public static set(key:string,value:any,call?){
+        chrome.storage.local.set({[key]:value},()=>{if(call)call()})
+    };
+    public static get<T>(key:string,):Promise<T>
+    {
+        return new Promise<T>((r,j)=>{
+            chrome.storage.local.get(key,item=>{
+                r(item?item[key]:undefined);
+            })
+        })
+    }
 }
 /**
  * 主要用于background的内存数据的存储和读取
  */
 class Storage_internal
 {
-    public static set=(key:string,value:any)=>{
+    public static set(key:string,value:any){
         storage[key]=value;
     };
     public static get<T>(key:string,):T
@@ -826,13 +836,13 @@ function groupScriptBuild(group:InvokeArgs[])
  */
 const invokeGroupBuild = async(data:InvokeGroup)=>
 {
+    let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
     // 判断merge的值
     if (data.merge) 
     {
         let tran = new Transaction();
         let script = groupScriptBuild(data.group);
         tran.setScript(script);
-        let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
         let transfer:{[toaddr:string]:AttachedAssets}={} // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = await MarkUtxo.getAllUtxo();
         let assets:{[asset:string]:string};
@@ -865,7 +875,9 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             TaskManager.addTask(
                 new Task(
                 ConfirmType.tranfer,
-                result.txid.replace('0x',''))
+                result.txid.replace('0x',''),
+                netfee.toString(),
+                )
             )
             return [result];
         } catch (error) {
@@ -879,7 +891,6 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
         for (let index = 0; index < data.group.length; index++)
         {
             const invoke = data.group[index];
-            console.log(invoke);
             
             if(index==0)
             {
@@ -919,17 +930,17 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
+        const task = new Task(ConfirmType.tranfer,txids[0].txid.replace('0x',''),data.group[0].fee,{},trans[0],TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if(index<(trans.length-1)){
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,trans[index+1],TaskState.watForLast
+                    ConfirmType.tranfer,tran.txid,data.group[index].fee,{},trans[index+1],TaskState.watForLast
                 ))
             }else{
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,undefined,TaskState.watForLast
+                    ConfirmType.tranfer,tran.txid,data.group[index].fee,undefined,undefined,TaskState.watForLast
                 ))
             }
         }
@@ -968,8 +979,8 @@ var exchangeCgas=async(transcount:number,netfee:number)=>{
     utxo.count = Neo.Fixed8.fromNumber(transcount);
     utxo.n = 0;
     const data = await makeRefundTransaction_tranGas(utxo,transcount,netfee);
-    TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,data));
-    TaskManager.addTask(new Task(ConfirmType.tranfer,data.txid,undefined,TaskState.watForLast));
+    TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,netfee.toString(),{},data));
+    TaskManager.addTask(new Task(ConfirmType.tranfer,data.txid,netfee.toString(),{},undefined,TaskState.watForLast));
     let txids:InvokeOutput[] = [result,{"txid":data.txid,"nodeUrl":"https://api.nel.group/api"}];
     return txids;
 }
@@ -1036,7 +1047,6 @@ var makeRefundTransaction = async (transcount:number,netfee:number)=>
 var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:number,netfee:number)=>
 {
     var tran: Transaction = new Transaction();
-
     try
     {
         let sendcount = Neo.Fixed8.fromNumber(transcount);
@@ -1298,91 +1308,92 @@ const getNetworks=():Promise<GetNetworksOutput>=>{
  * @param data 请求的参数
  */
 var getBalance = async (data:GetBalanceArgs)=>{
-    if (!Array.isArray(data.params)) {
-      data.params = [data.params];
-    }
-    data.params.forEach(({address, assets, fetchUTXO}, index) => {
-      if (assets && !Array.isArray(assets)) {
-        data.params[index] = {
-          address,
-          assets: [assets],
-          fetchUTXO,
-        };
-      }
-    });
-    let balances:BalanceResults = {};
-    
-    if (!Array.isArray(data.params)) {
-        data.params = [data.params];
-    }
-    for (const arg of data.params) {
-        
-        var asset = arg.assets?arg.assets:[HASH_CONFIG.ID_GAS,HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_NNC.toString(),HASH_CONFIG.ID_NNK.toString()];
-        var nep5asset:string[] = [];
-        var utxoasset:string[] = [];
-        const assetArray:Balance[]=[];
-        for (const id of asset) {
-            if(id.length==40){
-                nep5asset.push(id);
-            }else{
-                utxoasset.push(id);
+    return new Promise(async(r,j)=>{
+        try {
+            if (!Array.isArray(data.params)) {
+            data.params = [data.params];
             }
-        }
-        if(nep5asset.length){
-            try {
-                let res = await Api.getallnep5assetofaddress(arg.address);
-                let assets={};
-                for (const iterator of res) 
-                {
-                    const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
-                    const assetID=assetid.replace("0x","")
-                    assets[assetID]={assetID,symbol,amount:balance}
-                }
-                for (const id of nep5asset) {
-                    if(assets[id]){
-                        assetArray.push(assets[id]);
-                    }
-                }
-            } catch (error) {
-                throw {type:"NETWORK_ERROR",description:"余额查询失败",data:error};                
+            data.params.forEach(({address, assets, fetchUTXO}, index) => {
+            if (assets && !Array.isArray(assets)) {
+                data.params[index] = {
+                address,
+                assets: [assets],
+                fetchUTXO,
+                };
             }
-        }
-        if(utxoasset.length){
-            let res = await Api.getBalance(arg.address);
-            let assets = {};
-            for (const iterator of res) {
-                const {asset,balance,name} = iterator as {asset:string,balance:number,name:{lang:string,name:string}[]};
+            });
+            let balances:BalanceResults = {};
+            if (!Array.isArray(data.params)) {
+                data.params = [data.params];
+            }
+            for (const arg of data.params) {
                 
-                let symbol: string = "";
-                const assetID = asset.replace('0x','');
-                if (assetID == HASH_CONFIG.ID_GAS)
-                {
-                    symbol = "GAS";
-                }
-                else if (assetID == HASH_CONFIG.ID_NEO)
-                {
-                    symbol = "NEO";
-                }
-                else
-                {
-                    for (var i in name)
-                    {
-                        symbol = name[i].name;
-                        if (name[i].lang == "en")
-                            break;
+                var asset = arg.assets?arg.assets:[HASH_CONFIG.ID_GAS,HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_NNC.toString(),HASH_CONFIG.ID_NNK.toString()];
+                var nep5asset:string[] = [];
+                var utxoasset:string[] = [];
+                const assetArray:Balance[]=[];
+                for (const id of asset) {
+                    if(id.length==40){
+                        nep5asset.push(id);
+                    }else{
+                        utxoasset.push(id);
                     }
                 }
-                assets[assetID]={assetID,symbol,amount:balance};
-            }
-            for (const id of utxoasset) {
-                if(assets[id]){
-                    assetArray.push(assets[id]);
+                if(nep5asset.length){
+                        let res = await Api.getallnep5assetofaddress(arg.address);
+                        let assets={};
+                        for (const iterator of res) 
+                        {
+                            const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
+                            const assetID=assetid.replace("0x","")
+                            assets[assetID]={assetID,symbol,amount:balance}
+                        }
+                        for (const id of nep5asset) {
+                            if(assets[id]){
+                                assetArray.push(assets[id]);
+                            }
+                        }
                 }
+                if(utxoasset.length){
+                    let res = await Api.getBalance(arg.address);
+                    let assets = {};
+                    for (const iterator of res) {
+                        const {asset,balance,name} = iterator as {asset:string,balance:number,name:{lang:string,name:string}[]};
+                        
+                        let symbol: string = "";
+                        const assetID = asset.replace('0x','');
+                        if (assetID == HASH_CONFIG.ID_GAS)
+                        {
+                            symbol = "GAS";
+                        }
+                        else if (assetID == HASH_CONFIG.ID_NEO)
+                        {
+                            symbol = "NEO";
+                        }
+                        else
+                        {
+                            for (var i in name)
+                            {
+                                symbol = name[i].name;
+                                if (name[i].lang == "en")
+                                    break;
+                            }
+                        }
+                        assets[assetID]={assetID,symbol,amount:balance};
+                    }
+                    for (const id of utxoasset) {
+                        if(assets[id]){
+                            assetArray.push(assets[id]);
+                        }
+                    }
+                }
+                balances[arg.address]=assetArray;
             }
+            r(balances)
+        } catch (error) {
+            j ({type:"NETWORK_ERROR",description:"余额查询失败",data:error});                
         }
-        balances[arg.address]=assetArray;
-    }
-    return balances;
+    })
 }
 
 var transfer= async(data:SendArgs):Promise<SendOutput>=>{
@@ -1427,6 +1438,7 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                 "network":data.network
             }
         )
+        TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid,data.fee))
         return outupt;
     }
     else if(data.asset.hexToBytes().length==32)
@@ -1688,10 +1700,14 @@ class Task
     message: any;
     state: TaskState;
     startTime: number;
+    netfee:string;
+    expenses:{[asset:string]:string};
     next?:TransferGroup;
     constructor(
         type: ConfirmType,
         txid: string,
+        netfee:string,
+        expenses?:{[asset:string]:string},
         next?:TransferGroup,
         state?:TaskState,
         messgae?
@@ -1702,6 +1718,8 @@ class Task
         this.confirm = 0;
         this.txid = txid;
         this.next = next;
+        this.netfee = netfee;
+        this.expenses = expenses?expenses:{};
         this.state = state?state:TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();

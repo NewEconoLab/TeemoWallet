@@ -76,10 +76,12 @@ declare class Utxo {
     asset: string;
     count: Neo.Fixed8;
 }
-declare const Storage_local: {
-    setAccount: (account: AccountInfo) => number;
-    getAccount: () => NepAccount[];
-};
+declare class Storage_local {
+    static setAccount(account: AccountInfo): number;
+    static getAccount(): NepAccount[];
+    static set(key: string, value: any, call?: any): void;
+    static get<T>(key: string): Promise<T>;
+}
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -264,7 +266,7 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * 余额获取
  * @param data 请求的参数
  */
-declare var getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
+declare var getBalance: (data: GetBalanceArgs) => Promise<{}>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
 declare var send: (title: any, params: SendArgs) => Promise<SendOutput>;
 /**

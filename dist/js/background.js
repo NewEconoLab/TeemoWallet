@@ -79,18 +79,22 @@ class MarkUtxo {
      * @param utxos 标记
      */
     static setMark(utxos) {
-        const session = Storage_internal.get("utxo_manager");
-        for (let index = 0; index < utxos.length; index++) {
-            const utxo = utxos[index];
-            if (session[utxo.txid]) {
-                session[utxo.txid].push(utxo.n);
+        Storage_local.get("utxo_manager")
+            .then(session => {
+            session = session ? session : {};
+            console.log("------------this session");
+            for (let index = 0; index < utxos.length; index++) {
+                const utxo = utxos[index];
+                if (session[utxo.txid]) {
+                    session[utxo.txid].push(utxo.n);
+                }
+                else {
+                    session[utxo.txid] = new Array();
+                    session[utxo.txid].push(utxo.n);
+                }
             }
-            else {
-                session[utxo.txid] = new Array();
-                session[utxo.txid].push(utxo.n);
-            }
-        }
-        Storage_internal.set("utxo_manager", session);
+            Storage_local.set("utxo_manager", session);
+        });
     }
     static getAllUtxo() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -147,8 +151,8 @@ class MarkUtxo {
 }
 class Utxo {
 }
-const Storage_local = {
-    setAccount: (account) => {
+class Storage_local {
+    static setAccount(account) {
         let arr = Storage_local.getAccount();
         let index = 0;
         let newacc = new NepAccount(account.walletName, account.address, account.nep2key, account.scrypt);
@@ -170,8 +174,8 @@ const Storage_local = {
         }
         localStorage.setItem("TEEMMOWALLET_ACCOUNT", JSON.stringify(arr));
         return index;
-    },
-    getAccount: () => {
+    }
+    static getAccount() {
         const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
         let accounts = [];
         if (str) {
@@ -184,7 +188,19 @@ const Storage_local = {
         }
         return accounts;
     }
-};
+    static set(key, value, call) {
+        chrome.storage.local.set({ [key]: value }, () => { if (call)
+            call(); });
+    }
+    ;
+    static get(key) {
+        return new Promise((r, j) => {
+            chrome.storage.local.get(key, item => {
+                r(item ? item[key] : undefined);
+            });
+        });
+    }
+}
 /**
  * 主要用于background的内存数据的存储和读取
  */
@@ -1076,85 +1092,87 @@ const getNetworks = () => {
  * @param data 请求的参数
  */
 var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
-    if (!Array.isArray(data.params)) {
-        data.params = [data.params];
-    }
-    data.params.forEach(({ address, assets, fetchUTXO }, index) => {
-        if (assets && !Array.isArray(assets)) {
-            data.params[index] = {
-                address,
-                assets: [assets],
-                fetchUTXO,
-            };
-        }
-    });
-    let balances = {};
-    if (!Array.isArray(data.params)) {
-        data.params = [data.params];
-    }
-    for (const arg of data.params) {
-        var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO, HASH_CONFIG.ID_NNC.toString(), HASH_CONFIG.ID_NNK.toString()];
-        var nep5asset = [];
-        var utxoasset = [];
-        const assetArray = [];
-        for (const id of asset) {
-            if (id.length == 40) {
-                nep5asset.push(id);
+    return new Promise((r, j) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!Array.isArray(data.params)) {
+                data.params = [data.params];
             }
-            else {
-                utxoasset.push(id);
-            }
-        }
-        if (nep5asset.length) {
-            try {
-                let res = yield Api.getallnep5assetofaddress(arg.address);
-                let assets = {};
-                for (const iterator of res) {
-                    const { assetid, symbol, balance } = iterator;
-                    const assetID = assetid.replace("0x", "");
-                    assets[assetID] = { assetID, symbol, amount: balance };
+            data.params.forEach(({ address, assets, fetchUTXO }, index) => {
+                if (assets && !Array.isArray(assets)) {
+                    data.params[index] = {
+                        address,
+                        assets: [assets],
+                        fetchUTXO,
+                    };
                 }
-                for (const id of nep5asset) {
-                    if (assets[id]) {
-                        assetArray.push(assets[id]);
+            });
+            let balances = {};
+            if (!Array.isArray(data.params)) {
+                data.params = [data.params];
+            }
+            for (const arg of data.params) {
+                var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO, HASH_CONFIG.ID_NNC.toString(), HASH_CONFIG.ID_NNK.toString()];
+                var nep5asset = [];
+                var utxoasset = [];
+                const assetArray = [];
+                for (const id of asset) {
+                    if (id.length == 40) {
+                        nep5asset.push(id);
+                    }
+                    else {
+                        utxoasset.push(id);
                     }
                 }
-            }
-            catch (error) {
-                throw { type: "NETWORK_ERROR", description: "余额查询失败", data: error };
-            }
-        }
-        if (utxoasset.length) {
-            let res = yield Api.getBalance(arg.address);
-            let assets = {};
-            for (const iterator of res) {
-                const { asset, balance, name } = iterator;
-                let symbol = "";
-                const assetID = asset.replace('0x', '');
-                if (assetID == HASH_CONFIG.ID_GAS) {
-                    symbol = "GAS";
-                }
-                else if (assetID == HASH_CONFIG.ID_NEO) {
-                    symbol = "NEO";
-                }
-                else {
-                    for (var i in name) {
-                        symbol = name[i].name;
-                        if (name[i].lang == "en")
-                            break;
+                if (nep5asset.length) {
+                    let res = yield Api.getallnep5assetofaddress(arg.address);
+                    let assets = {};
+                    for (const iterator of res) {
+                        const { assetid, symbol, balance } = iterator;
+                        const assetID = assetid.replace("0x", "");
+                        assets[assetID] = { assetID, symbol, amount: balance };
+                    }
+                    for (const id of nep5asset) {
+                        if (assets[id]) {
+                            assetArray.push(assets[id]);
+                        }
                     }
                 }
-                assets[assetID] = { assetID, symbol, amount: balance };
-            }
-            for (const id of utxoasset) {
-                if (assets[id]) {
-                    assetArray.push(assets[id]);
+                if (utxoasset.length) {
+                    let res = yield Api.getBalance(arg.address);
+                    let assets = {};
+                    for (const iterator of res) {
+                        const { asset, balance, name } = iterator;
+                        let symbol = "";
+                        const assetID = asset.replace('0x', '');
+                        if (assetID == HASH_CONFIG.ID_GAS) {
+                            symbol = "GAS";
+                        }
+                        else if (assetID == HASH_CONFIG.ID_NEO) {
+                            symbol = "NEO";
+                        }
+                        else {
+                            for (var i in name) {
+                                symbol = name[i].name;
+                                if (name[i].lang == "en")
+                                    break;
+                            }
+                        }
+                        assets[assetID] = { assetID, symbol, amount: balance };
+                    }
+                    for (const id of utxoasset) {
+                        if (assets[id]) {
+                            assetArray.push(assets[id]);
+                        }
+                    }
                 }
+                balances[arg.address] = assetArray;
             }
+            r(balances);
         }
-        balances[arg.address] = assetArray;
-    }
-    return balances;
+        catch (error) {
+            j({ type: "NETWORK_ERROR", description: "余额查询失败", data: error });
+        }
+    }));
 });
 var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
     if (data.asset.hexToBytes().length == 20) {

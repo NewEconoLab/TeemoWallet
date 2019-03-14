@@ -87,7 +87,7 @@ export default class Home extends React.Component<any, any> {
           {
             this.state.label==Command.getAccount?
             <Dice title={this.state.header.title} domain={this.state.header.domain} icon={this.state.header.icon} />:
-            <ContractRequest title={this.state.header.title} domain={this.state.header.domain} data={this.state.data} {...this.props} />
+            <ContractRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>

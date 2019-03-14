@@ -10,7 +10,7 @@ export class NNSTool
 
     static async resolveData(domain: string)
     {
-        return new Promise((r,j)=>{
+        return new Promise<string>((r,j)=>{
             var scriptaddress = this.baseContract;
             let arr = domain.split(".");
             let nnshash = NNSTool.nameHashArray(arr);

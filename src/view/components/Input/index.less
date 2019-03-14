@@ -35,6 +35,9 @@
         &.error{
             color: #F25151 ;
             border-bottom: 1px solid #F25151;
+            &:focus{
+                border-bottom: 1px solid #F25151;
+            }
         }
         &.file{
             color: #B2B2B2;
@@ -47,6 +50,9 @@
         }
         &.active{
             border-bottom: 1px solid #5F8DFB;
+            &.error{
+                border-bottom: 1px solid #F25151;
+            }
         }
         &::-webkit-input-placeholder{
             color: #B2B2B2;

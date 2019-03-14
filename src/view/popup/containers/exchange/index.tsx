@@ -14,6 +14,7 @@ import common from '../../store/common';
 import { HASH_CONFIG } from '../../../config';
 import { bg } from '../../utils/storagetools';
 import { asNumber } from '../../utils/numberTool';
+import Toast from '../../../components/Toast';
 
 interface IProps
 {
@@ -62,6 +63,8 @@ export default class Exchange extends React.Component<IProps, IState>
 					inputError:true,
 					errorMessage:'Gas余额不足'
 				})
+			}else{
+				this.setState({inputError:false,errorMessage:""});
 			}
 		}
 		else
@@ -72,6 +75,10 @@ export default class Exchange extends React.Component<IProps, IState>
 					inputError:true,
 					errorMessage:'CGas余额不足'
 				})
+			}
+			else
+			{
+				this.setState({inputError:false,errorMessage:""});
 			}
 		}
 		this.setState({amount});
@@ -103,16 +110,25 @@ export default class Exchange extends React.Component<IProps, IState>
 			}
 			bg.contractBuilder(invoke)
 			.then(result=>{
-				alert(result.txid);
+				Toast("兑换交易已发送！")
+				console.log(result);				
 			})
 			.catch(error=>{
 				console.log(error);
-				
+				Toast("兑换失败！","error")
 			})
 		}
 		else
 		{
 			bg.exchangeCgas(parseFloat(this.state.amount),0.01)
+			.then(result=>{
+				Toast("兑换交易已发送！");
+				console.log(result);				
+			})
+			.catch(error=>{
+				console.log(error);
+				Toast("兑换失败！","error");
+			})
 		}
 	}
 

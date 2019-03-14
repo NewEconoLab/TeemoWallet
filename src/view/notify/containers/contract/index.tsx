@@ -12,7 +12,8 @@ interface IProps
 {
   title: string,
   domain: string,
-  data: any
+  data: any,
+  address:string,
 }
 interface IState
 {
@@ -23,6 +24,7 @@ interface IState
   fee: string,
   operation: string[],
   arguments: Array<Argument>
+  expenses:{[asset:string]:string}
 }
 // @observer
 export default class ContractRequest extends React.Component<IProps, IState>
@@ -34,7 +36,8 @@ export default class ContractRequest extends React.Component<IProps, IState>
     scriptHash: [],
     fee: '0',
     operation: [],
-    arguments: []
+    arguments: [],
+    expenses:{},
   }
   public componentWillReceiveProps(nextProps)
   {
@@ -73,6 +76,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
     let fee = 0;
     let operation = [];
     let argument = [];
+    let expenses = {}
     invoke.map((key, value) =>
     {
       console.log(key);
@@ -82,6 +86,26 @@ export default class ContractRequest extends React.Component<IProps, IState>
       fee = key.fee ? parseFloat(key.fee) : 0 + fee;
       operation[value] = key.operation;
       argument[value] = key.arguments;
+      // 判断 nep5的转账花费
+      // if(key.operation=="transfer")
+      // {
+      //   if(key.arguments[0].value==this.props.address)
+      //   {
+      //     expenses[key.scriptHash]=key.arguments[2];
+      //   }
+      // }
+      if(key.attachedAssets)
+      {
+        for (const asset in key.attachedAssets) {
+          if (key.attachedAssets.hasOwnProperty(asset)) {
+            const amount = parseFloat(key.attachedAssets[asset]);
+            expenses[asset]=expenses[asset]?expenses[asset]+amount:amount;
+          }
+        }
+        Object.keys(key.attachedAssets).map(value=>{
+          expenses[value]=key.attachedAssets[value];
+        })
+      }
     })
     this.setState({
       description: description,

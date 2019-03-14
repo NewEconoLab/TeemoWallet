@@ -11,9 +11,7 @@ export class neotools
      */
     public static verifyAddress(addr: string): boolean
     {
-        var verify = /^[a-zA-Z0-9]{34,34}$/;
-        var res: boolean = verify.test(addr) ? neotools.verifyPublicKey(addr) : verify.test(addr);
-        return res;
+        return /^[a-zA-Z0-9]{34,34}$/.test(addr) ? neotools.verifyPublicKey(addr) : false;
     }
 
     /**
