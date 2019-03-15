@@ -1,9 +1,10 @@
 import { NepAccount } from "./entity";
 import { AccountInfo } from "../lib/background";
 
-export class Storage_local
+export 
+class Storage_local
 {
-    static setAccount(account:AccountInfo){
+    public static setAccount(account:AccountInfo){
         let arr = Storage_local.getAccount();
         
         let index: number= 0;
@@ -33,7 +34,7 @@ export class Storage_local
         localStorage.setItem("TEEMMOWALLET_ACCOUNT",JSON.stringify(arr));
         return index;
     }
-    static getAccount(){
+    public static getAccount(){
         const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
         let accounts = [] as NepAccount[];
         if(str) 
@@ -46,5 +47,16 @@ export class Storage_local
             }
         }
         return accounts;
+    }
+    public static set(key:string,value:any,call?){
+        chrome.storage.local.set({[key]:value},()=>{if(call)call()})
+    };
+    public static get<T>(key:string,):Promise<T>
+    {
+        return new Promise<T>((r,j)=>{
+            chrome.storage.local.get(key,item=>{
+                r(item?item[key]:undefined);
+            })
+        })
     }
 }

@@ -4,17 +4,14 @@
 import * as React from 'react';
 // import { observer } from 'mobx-react';
 import './index.less';
+import { Task, TaskState, ConfirmType } from '../../popup/containers/history';
 
 interface IProps
 {
 	onClick?: () => void;
     active?:boolean;
 	disabled?: boolean; // 按钮是否禁止点击
-	type: 'contract'|'transfer';
-	time:number;
-	title:string;
-	wait:boolean;
-	message:string;
+	task:Task;
 }
 
 // @observer
@@ -47,13 +44,17 @@ export default class Panel extends React.Component<IProps, {}>
 					<div className="transfer-type">
 						<div className="icon">{this.props.children}</div>
 						<div className="message">
-							<div className="type">{this.props.type==="contract"?"合约交互":"个人转账"}</div>
-							<div className="time">1-1 10:09</div>
+							<div className="type">{this.props.task.type===ConfirmType.contract?"合约交互":"个人转账"}</div>
+							<div className="time">{this.props.task.startTime}</div>
 						</div>
 					</div>
 					<div className="asset">
-						<div className="output">-5 GAS</div>
-						<div className="wait">等待确认</div>
+						<div className="output">- {this.props.task.expenses}</div>
+						{
+							((this.props.task.state===TaskState.watting)||(this.props.task.state===TaskState.watForLast))?
+							<div className="wait">等待确认</div>
+							:<></>
+						}
 					</div>
 				</div>
 				{
@@ -61,10 +62,10 @@ export default class Panel extends React.Component<IProps, {}>
 					<div className="panel-body" >
 						<div className="group txid">
 							<div className="title">TXID</div>
-							<div className="value">5380...2927</div>
+							<div className="value">{this.props.task.txid}</div>
 						</div>
 						<div className="transaction-info">
-							<div className="transaction-title">转账</div>
+							<div className="transaction-title">{this.props.task.confirm==ConfirmType.tranfer?'转账':'合约'}</div>
 							<div className="group send">
 								<div className="title">发往</div>
 								<div className="value">AeMy...oWu3</div>

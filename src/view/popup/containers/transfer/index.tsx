@@ -198,11 +198,12 @@ export default class Transfer extends React.Component<IProps, IState>
 		.then(result=>{
 			Toast("交易已发送！");
 			console.log(result);
-			
+			this.onHide();
 		})
 		.catch(error=>{
 			Toast("交易失败！","error");
 			console.log(error);
+			this.onHide();
 		})
 	}
 

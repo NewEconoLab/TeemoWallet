@@ -12,7 +12,8 @@ var storage = {
     account: undefined,
     height: 0,
     domains: [],
-    titles: []
+    titles: [],
+    oldUtxo: {}
 };
 const HASH_CONFIG = {
     accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
@@ -79,22 +80,16 @@ class MarkUtxo {
      * @param utxos 标记
      */
     static setMark(utxos) {
-        Storage_local.get("utxo_manager")
-            .then(session => {
-            session = session ? session : {};
-            console.log("------------this session");
-            for (let index = 0; index < utxos.length; index++) {
-                const utxo = utxos[index];
-                if (session[utxo.txid]) {
-                    session[utxo.txid].push(utxo.n);
-                }
-                else {
-                    session[utxo.txid] = new Array();
-                    session[utxo.txid].push(utxo.n);
-                }
+        for (let index = 0; index < utxos.length; index++) {
+            const utxo = utxos[index];
+            if (storage.oldUtxo[utxo.txid]) {
+                storage.oldUtxo[utxo.txid].push(utxo.n);
             }
-            Storage_local.set("utxo_manager", session);
-        });
+            else {
+                storage.oldUtxo[utxo.txid] = new Array();
+                storage.oldUtxo[utxo.txid].push(utxo.n);
+            }
+        }
     }
     static getAllUtxo() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -205,13 +200,14 @@ class Storage_local {
  * 主要用于background的内存数据的存储和读取
  */
 class Storage_internal {
+    static set(key, value) {
+        storage[key] = value;
+    }
+    ;
     static get(key) {
         return storage[key];
     }
 }
-Storage_internal.set = (key, value) => {
-    storage[key] = value;
-};
 class Transaction extends ThinNeo.Transaction {
     constructor(type) {
         super();
@@ -569,6 +565,20 @@ var Api = {
         return request(opts);
     }
 };
+const setContractMessage = (txid, domain, data) => {
+    Storage_local.get("invoke-message")
+        .then(result => {
+        if (result) {
+            result[txid] = { domain, data };
+            Storage_local.set("invoke-message", { result });
+        }
+        else {
+            let message = {};
+            message[txid] = { domain, data };
+            Storage_local.set("invoke-message", { message });
+        }
+    });
+};
 const getWeakRandomValues = (array) => {
     let buffer = typeof array === "number" ? new Uint8Array(array) : array;
     for (let i = 0; i < buffer.length; i++)
@@ -689,12 +699,12 @@ function groupScriptBuild(group) {
  * @param data 合并合约调用参数
  */
 const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () {
+    let netfee = Neo.Fixed8.Zero;
     // 判断merge的值
     if (data.merge) {
         let tran = new Transaction();
         let script = groupScriptBuild(data.group);
         tran.setScript(script);
-        let netfee = Neo.Fixed8.Zero;
         let transfer = {}; // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = yield MarkUtxo.getAllUtxo();
         let assets;
@@ -720,7 +730,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         try {
             let result = yield transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', '')));
+            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', ''), netfee.toString()));
             return [result];
         }
         catch (error) {
@@ -732,7 +742,6 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         let trans = [];
         for (let index = 0; index < data.group.length; index++) {
             const invoke = data.group[index];
-            console.log(invoke);
             if (index == 0) {
                 try {
                     let result = yield contractBuilder(invoke);
@@ -768,15 +777,15 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer, txids[0].txid.replace('0x', ''), trans[0], TaskState.watting);
+        const task = new Task(ConfirmType.tranfer, txids[0].txid.replace('0x', ''), data.group[0].fee, {}, trans[0], TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if (index < (trans.length - 1)) {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, trans[index + 1], TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, data.group[index].fee, {}, trans[index + 1], TaskState.watForLast));
             }
             else {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, undefined, TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, data.group[index].fee, undefined, undefined, TaskState.watForLast));
             }
         }
         return txids;
@@ -812,8 +821,8 @@ var exchangeCgas = (transcount, netfee) => __awaiter(this, void 0, void 0, funct
     utxo.count = Neo.Fixed8.fromNumber(transcount);
     utxo.n = 0;
     const data = yield makeRefundTransaction_tranGas(utxo, transcount, netfee);
-    TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, data));
-    TaskManager.addTask(new Task(ConfirmType.tranfer, data.txid, undefined, TaskState.watForLast));
+    TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, netfee.toString(), {}, data));
+    TaskManager.addTask(new Task(ConfirmType.tranfer, data.txid, netfee.toString(), {}, undefined, TaskState.watForLast));
     let txids = [result, { "txid": data.txid, "nodeUrl": "https://api.nel.group/api" }];
     return txids;
 });
@@ -907,7 +916,6 @@ const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, functio
         const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
         tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
         const data = tran.GetRawData();
-        console.log(data.toHexString());
         const result = yield Api.sendrawtransaction(data.toHexString());
         if (result[0].txid) {
             MarkUtxo.setMark(tran.marks);
@@ -950,7 +958,9 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
                     tran.creatInuptAndOutup(utxo, amount, toaddr);
             }
         }
-        return transactionSignAndSend(tran);
+        let result = yield transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, invoke.fee));
+        return result;
     }
     catch (error) {
         throw error;
@@ -1208,6 +1218,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             "fee": data.fee,
             "network": data.network
         });
+        TaskManager.addTask(new Task(ConfirmType.tranfer, outupt.txid, data.fee));
         return outupt;
     }
     else if (data.asset.hexToBytes().length == 32) {
@@ -1227,14 +1238,15 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
                     tran.creatInuptAndOutup(asset, Neo.Fixed8.parse(data.amount), data.toAddress);
                     tran.creatInuptAndOutup(gass, fee);
                 }
-                return transactionSignAndSend(tran);
             }
             else {
                 const asset = utxos[data.asset];
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset, amount);
-                return transactionSignAndSend(tran);
             }
+            const result = yield transactionSignAndSend(tran);
+            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, data.fee));
+            return result;
         }
         catch (error) {
             throw error;
@@ -1431,12 +1443,14 @@ var TaskState;
     TaskState[TaskState["failForLast"] = 4] = "failForLast";
 })(TaskState || (TaskState = {}));
 class Task {
-    constructor(type, txid, next, state, messgae) {
+    constructor(type, txid, netfee, expenses, next, state, messgae) {
         this.height = storage.height;
         this.type = type;
         this.confirm = 0;
         this.txid = txid;
         this.next = next;
+        this.netfee = netfee;
+        this.expenses = expenses ? expenses : {};
         this.state = state ? state : TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();
@@ -1478,8 +1492,10 @@ class TaskManager {
                 const count = (parseInt(result[0].blockcount) - 1);
                 if (count - storage.height > 0) {
                     storage.height = count;
-                    console.log(storage.height);
-                    this.update();
+                    this.initShed()
+                        .then(shed => {
+                        this.update();
+                    });
                 }
             })
                 .catch(error => {
@@ -1488,7 +1504,33 @@ class TaskManager {
         }, 15000);
     }
     static addTask(task) {
-        this.shed[task.txid] = task;
+        Storage_local.get("Task-Manager-shed")
+            .then(shed => {
+            if (shed) {
+                shed[task.txid] = task;
+                this.shed = shed;
+                Storage_local.set("Task-Manager-shed", shed);
+            }
+            else {
+                shed = {};
+                this.shed[task.txid] = shed[task.txid] = task;
+                Storage_local.set("Task-Manager-shed", shed);
+            }
+        });
+    }
+    static initShed() {
+        return new Promise((r, j) => {
+            Storage_local.get("Task-Manager-shed")
+                .then(shed => {
+                if (shed) {
+                    this.shed = shed;
+                }
+                else {
+                    this.shed = {};
+                }
+                r(shed);
+            });
+        });
     }
     static update() {
         for (const key in this.shed) {

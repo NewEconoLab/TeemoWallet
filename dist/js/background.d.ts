@@ -5,6 +5,9 @@ interface BackStore {
     account: AccountInfo;
     domains: string[];
     titles: string[];
+    oldUtxo: {
+        [txid: string]: any;
+    };
 }
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
@@ -86,7 +89,7 @@ declare class Storage_local {
  * 主要用于background的内存数据的存储和读取
  */
 declare class Storage_internal {
-    static set: (key: string, value: any) => void;
+    static set(key: string, value: any): void;
     static get<T>(key: string): T;
 }
 declare class Transaction extends ThinNeo.Transaction {
@@ -183,6 +186,7 @@ declare var Api: {
      */
     getnep5asset: (asset: any) => Promise<any>;
 };
+declare const setContractMessage: (txid: string, domain: string, data: any) => void;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     constructor();
@@ -297,8 +301,14 @@ declare class Task {
     message: any;
     state: TaskState;
     startTime: number;
+    netfee: string;
+    expenses: {
+        [asset: string]: string;
+    };
     next?: TransferGroup;
-    constructor(type: ConfirmType, txid: string, next?: TransferGroup, state?: TaskState, messgae?: any);
+    constructor(type: ConfirmType, txid: string, netfee: string, expenses?: {
+        [asset: string]: string;
+    }, next?: TransferGroup, state?: TaskState, messgae?: any);
 }
 declare class TransferGroup {
     txid: string;
@@ -316,6 +326,7 @@ declare class TaskManager {
     };
     static start(): void;
     static addTask(task: Task): void;
+    static initShed(): Promise<{}>;
     static update(): void;
 }
 declare const BLOCKCHAIN = "NEO";

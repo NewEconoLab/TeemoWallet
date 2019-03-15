@@ -709,6 +709,23 @@ var Api = {
     }
 }
 
+const setContractMessage=(txid:string,domain:string,data)=>{
+    Storage_local.get("invoke-message")
+    .then(result=>{
+        if(result)
+        {
+            result[txid] = {domain,data}
+            Storage_local.set("invoke-message",{result})
+        }
+        else
+        {
+            let message = {};
+            message[txid] = {domain,data}
+            Storage_local.set("invoke-message",{message})
+        }
+    })
+}
+
 const getWeakRandomValues=(array: number | Uint8Array)=>{    
     let buffer = typeof array === "number" ? new Uint8Array(array) : array;
     for (let i = 0; i < buffer.length; i++)
@@ -1090,8 +1107,6 @@ const transactionSignAndSend = async (tran:Transaction)=>
         const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
         tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
         const data:Uint8Array = tran.GetRawData();
-        console.log(data.toHexString());
-        
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result[0].txid)
         {
@@ -1138,7 +1153,9 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
                     tran.creatInuptAndOutup(utxo,amount,toaddr)
             }
         }
-        return transactionSignAndSend(tran);        
+        let result = await transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,invoke.fee));
+        return result;
     } 
     catch (error) 
     {
@@ -1462,13 +1479,14 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                     tran.creatInuptAndOutup(asset,Neo.Fixed8.parse(data.amount),data.toAddress);
                     tran.creatInuptAndOutup(gass,fee);
                 }
-                return transactionSignAndSend(tran);
             }else{                
                 const asset = utxos[data.asset];
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset,amount);
-                return transactionSignAndSend(tran);
             }
+            const result = await transactionSignAndSend(tran);
+            TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,data.fee))
+            return result
         } 
         catch (error) 
         {
@@ -1776,24 +1794,56 @@ class TaskManager{
                 if(count - storage.height>0)
                 {
                     storage.height=count;
-                    console.log(storage.height);
-                    
-                    this.update()
+                    this.initShed()
+                    .then(shed=>{                    
+                        this.update()
+                    })
                 }
             }) 
             .catch(error=>{
-                console.log(error);        
+                console.log(error);
             })
         },15000)        
     }
 
     public static addTask(task:Task)
     {
-        this.shed[task.txid] = task;
+        Storage_local.get<{[txid:string]:Task}>("Task-Manager-shed")
+        .then(shed=>{
+            if(shed)
+            {
+                shed[task.txid]=task;
+                this.shed = shed;
+                Storage_local.set("Task-Manager-shed",shed)
+            }else
+            {
+                shed={};
+                this.shed[task.txid] = shed[task.txid]=task;
+                Storage_local.set("Task-Manager-shed",shed)
+            }
+        })
+    }
+
+    public static initShed()
+    {
+        return new Promise((r,j)=>{
+            Storage_local.get<{[txid:string]:Task}>("Task-Manager-shed")
+            .then(shed=>{
+                if(shed)
+                {
+                    this.shed = shed;
+                }
+                else
+                {
+                    this.shed={}
+                }
+                r(shed)
+            })
+        })
     }
 
     public static update()
-    {        
+    {
         for ( const key in this.shed) 
         {
             const task = this.shed[key];
