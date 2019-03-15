@@ -324,6 +324,7 @@ declare class TaskManager {
     static shed: {
         [txid: string]: Task;
     };
+    static table: string;
     static start(): void;
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;

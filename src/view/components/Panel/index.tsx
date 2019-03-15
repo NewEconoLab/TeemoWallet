@@ -1,5 +1,5 @@
 /**
- * 按钮组件
+ * 动态面板
  */
 import * as React from 'react';
 // import { observer } from 'mobx-react';
@@ -36,6 +36,13 @@ export default class Panel extends React.Component<IProps, {}>
 		}
 	}
 
+	componentDidMount()
+	{
+		console.log("=================================这里是Panel");
+		
+		console.log(this.props.task);		
+	}
+
 	public render()
 	{
 		return (
@@ -49,11 +56,10 @@ export default class Panel extends React.Component<IProps, {}>
 						</div>
 					</div>
 					<div className="asset">
-						<div className="output">- {this.props.task.expenses}</div>
+						{/* <div className="output">- {this.props.task.expenses}</div> */}
 						{
-							((this.props.task.state===TaskState.watting)||(this.props.task.state===TaskState.watForLast))?
+							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
 							<div className="wait">等待确认</div>
-							:<></>
 						}
 					</div>
 				</div>

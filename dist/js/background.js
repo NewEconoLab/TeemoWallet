@@ -230,7 +230,7 @@ class Transaction extends ThinNeo.Transaction {
         this.attributes = new Array(1);
         this.attributes[0] = new ThinNeo.Attribute();
         this.attributes[0].usage = ThinNeo.TransactionAttributeUsage.Script;
-        this.attributes[0].data = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(common.account.address);
+        this.attributes[0].data = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
     }
     /**
      * 创建一个交易中的输入和输出 将使用过的utxo 放入 marks
@@ -443,15 +443,13 @@ var Api = {
         return request(opts);
     },
     getregisteraddressbalance: (address, register) => {
-        // alert(DomainSelling.RootNeo.register.toString())
-        const opts = {
+        return request({
             method: 'getregisteraddressbalance',
             params: [
                 address,
                 register
             ]
-        };
-        return request(opts);
+        });
     },
     sendrawtransaction: (data) => {
         const opts = {
@@ -848,31 +846,59 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
     tran.creatInuptAndOutup(cgass, Neo.Fixed8.fromNumber(transcount), nepAddress);
     if (netfee > 0) // 判断是否有手续费
      { // 创建当前交易的手续费
+        console.log('当前CGAS兑换添加手续费 ' + netfee + " GAS");
         tran.creatInuptAndOutup(gass, Neo.Fixed8.fromNumber(netfee));
     }
-    for (const i in tran.inputs) // hash反序
-     {
-        tran.inputs[i].hash = tran.inputs[i].hash.reverse();
-    }
+    // for (const i in tran.inputs)    // hash反序
+    // {
+    //     tran.inputs[i].hash = tran.inputs[i].hash.reverse();
+    // }
     var scriptHash = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
-    var script = new ScriptBuild();
-    const refund = {
-        scriptHash: HASH_CONFIG.ID_CGAS.toString(),
-        operation: 'refund',
-        arguments: [{ type: "ByteArray", value: scriptHash.toHexString() }],
-        network: storage.network
-    };
-    script.EmitInvokeArgs(refund);
+    // var script = new ScriptBuild();
+    // const refund:InvokeArgs = {
+    //     scriptHash:HASH_CONFIG.ID_CGAS.toString(),
+    //     operation:'refund',
+    //     arguments:[{type:"ByteArray",value:scriptHash.toHexString()}],
+    //     network:storage.network
+    // }
+    // script.EmitInvokeArgs(refund);
+    var script = new ThinNeo.ScriptBuilder();
+    script.EmitParamJson(["(bytes)" + scriptHash.toHexString()]); //第二个参数是个数组
+    script.EmitPushString("refund");
+    script.EmitAppCall(HASH_CONFIG.ID_CGAS);
     tran.setScript(script.ToArray());
     //构建一个script
-    let sb = new ScriptBuild();
-    sb.EmitArguments([{ type: "String", value: "whatever" }, { type: 'Integer', value: 250 }]);
+    // let sb = new ScriptBuild();
+    // sb.EmitArguments([{type:"String",value:"whatever"},{type:'Integer',value:250}])
     // var r = await Api.getcontractstate(HASH_CONFIG.ID_CGAS.toString())
     // var sgasScript = r[0]['script'].hexToBytes();
     // tran.AddWitnessScript(sgasScript, sb.ToArray());
+    // tran.AddWitnessScript(new Uint8Array(0), sb.ToArray());
+    let sb = new ThinNeo.ScriptBuilder();
+    sb.EmitPushString("whatever");
+    sb.EmitPushNumber(new Neo.BigInteger(250));
     tran.AddWitnessScript(new Uint8Array(0), sb.ToArray());
-    let result = transactionSignAndSend(tran);
-    return result;
+    // let result = transactionSignAndSend(tran);
+    const message = tran.GetMessage().clone();
+    const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
+    tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
+    let index0 = tran.witnesses[0];
+    let index1 = tran.witnesses[1];
+    tran.witnesses[0] = index1;
+    tran.witnesses[1] = index0;
+    const data = tran.GetRawData();
+    const result = yield Api.sendrawtransaction(data.toHexString());
+    if (result[0].txid) {
+        MarkUtxo.setMark(tran.marks);
+        const txid = result[0].txid.replace('0x', '');
+        const nodeUrl = "https://api.nel.group/api";
+        let ouput = { txid, nodeUrl };
+        return ouput;
+    }
+    else {
+        throw { type: "TransactionError", description: result[0].errorMessage, data: "" };
+    }
+    // return result;
 });
 /**
  *
@@ -905,6 +931,10 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
     // var sgasScript = r[0]['script'].hexToBytes();
     // tran.AddWitnessScript(sgasScript, sb.ToArray());
     tran.AddWitnessScript(new Uint8Array(0), sb.ToArray());
+    let index0 = tran.witnesses[0];
+    let index1 = tran.witnesses[1];
+    tran.witnesses[0] = index1;
+    tran.witnesses[1] = index0;
     var trandata = new TransferGroup();
     trandata.txhex = tran.GetRawData().toHexString();
     trandata.txid = tran.getTxid();
@@ -1458,7 +1488,6 @@ class Task {
 }
 class TransferGroup {
     static update(tran) {
-        console.log("-------------------------------------TransferGroup-update");
         Api.sendrawtransaction(tran.txhex)
             .then(result => {
             if (result) {
@@ -1472,6 +1501,7 @@ class TransferGroup {
                     data: tran.txhex
                 };
             }
+            Storage_local.set(TaskManager.table, TaskManager.shed);
         })
             .catch(error => {
             if (error) {
@@ -1504,23 +1534,23 @@ class TaskManager {
         }, 15000);
     }
     static addTask(task) {
-        Storage_local.get("Task-Manager-shed")
+        Storage_local.get(this.table)
             .then(shed => {
             if (shed) {
                 shed[task.txid] = task;
                 this.shed = shed;
-                Storage_local.set("Task-Manager-shed", shed);
+                Storage_local.set(this.table, shed);
             }
             else {
                 shed = {};
                 this.shed[task.txid] = shed[task.txid] = task;
-                Storage_local.set("Task-Manager-shed", shed);
+                Storage_local.set(this.table, shed);
             }
         });
     }
     static initShed() {
         return new Promise((r, j) => {
-            Storage_local.get("Task-Manager-shed")
+            Storage_local.get(this.table)
                 .then(shed => {
                 if (shed) {
                     this.shed = shed;
@@ -1539,14 +1569,10 @@ class TaskManager {
                 if (task.type === ConfirmType.tranfer) {
                     Api.getrawtransaction(task.txid)
                         .then(result => {
-                        console.log('----------------------------------------请注意这里是任务管理器正在处理交易---------------------------------');
-                        console.log(result);
                         if (result['blockhash']) {
-                            console.log(task.txid + "       该交易查询成功");
                             task.state = TaskState.success;
-                            console.log("状态变更");
-                            console.log(task);
                             this.shed[key] = task;
+                            Storage_local.set(this.table, this.shed);
                             if (task.next) {
                                 TransferGroup.update(task.next);
                             }
@@ -1570,6 +1596,7 @@ class TaskManager {
     }
 }
 TaskManager.shed = {};
+TaskManager.table = "Task-Manager-shed";
 TaskManager.start();
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';

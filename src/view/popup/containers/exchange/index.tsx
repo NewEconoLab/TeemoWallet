@@ -120,14 +120,14 @@ export default class Exchange extends React.Component<IProps, IState>
 		}
 		else
 		{
-			bg.exchangeCgas(parseFloat(this.state.amount),0.01)
+			bg.exchangeCgas(parseFloat(this.state.amount),this.state.netfee?0.01:0)
 			.then(result=>{
-				Toast("兑换交易已发送！");
+				Toast("兑换交易已发送！")
 				console.log(result);				
 			})
 			.catch(error=>{
 				console.log(error);
-				Toast("兑换失败！","error");
+				Toast("兑换失败！","error")
 			})
 		}
 	}
