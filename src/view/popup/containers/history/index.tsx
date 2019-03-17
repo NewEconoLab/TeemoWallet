@@ -29,10 +29,6 @@ export interface Task {
     message: any;
     state: TaskState;
     startTime: number;
-    netfee: string;
-    expenses: {
-        [asset: string]: string;
-    };
     next?: TransferGroup;
 }
 export interface TransferGroup {
@@ -60,8 +56,6 @@ export default class History extends React.Component<any, {}>
     {
         Storage_local.get<{[txid:string]:Task}>("Task-Manager-shed")
         .then(shed=>{
-            console.log(shed);
-            
             if(shed)
             {
                 const list = [];
@@ -74,8 +68,7 @@ export default class History extends React.Component<any, {}>
                 this.setState({
                     tasklist:list
                 },()=>{
-                    console.log(this.state.tasklist);
-                    
+                    console.log(this.state.tasklist);                    
                 })
             }
         })

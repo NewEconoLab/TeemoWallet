@@ -371,6 +371,7 @@ function request(opts) {
                 return null;
             }
             else {
+                console.log(json.error);
                 throw new Error(json.error);
             }
         }
@@ -728,7 +729,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         try {
             let result = yield transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', ''), netfee.toString()));
+            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', '')));
             return [result];
         }
         catch (error) {
@@ -775,15 +776,15 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer, txids[0].txid.replace('0x', ''), data.group[0].fee, {}, trans[0], TaskState.watting);
+        const task = new Task(ConfirmType.tranfer, txids[0].txid.replace('0x', ''), trans[0], TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if (index < (trans.length - 1)) {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, data.group[index].fee, {}, trans[index + 1], TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, trans[index + 1], TaskState.watForLast));
             }
             else {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, data.group[index].fee, undefined, undefined, TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, undefined, TaskState.watForLast));
             }
         }
         return txids;
@@ -819,8 +820,8 @@ var exchangeCgas = (transcount, netfee) => __awaiter(this, void 0, void 0, funct
     utxo.count = Neo.Fixed8.fromNumber(transcount);
     utxo.n = 0;
     const data = yield makeRefundTransaction_tranGas(utxo, transcount, netfee);
-    TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, netfee.toString(), {}, data));
-    TaskManager.addTask(new Task(ConfirmType.tranfer, data.txid, netfee.toString(), {}, undefined, TaskState.watForLast));
+    TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, data));
+    TaskManager.addTask(new Task(ConfirmType.tranfer, data.txid, undefined, TaskState.watForLast));
     let txids = [result, { "txid": data.txid, "nodeUrl": "https://api.nel.group/api" }];
     return txids;
 });
@@ -989,7 +990,7 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
             }
         }
         let result = yield transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, invoke.fee));
+        TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid));
         return result;
     }
     catch (error) {
@@ -1030,11 +1031,6 @@ const openNotify = (notifyData, call) => {
  */
 const getAccount = (title) => {
     return new Promise((resolve, reject) => {
-        // const {address,walletName} = storage.account;
-        const data = {
-            lable: Command.getAccount,
-            header: title,
-        };
         console.log("---------进入了 getAccount 方法");
         if (storage.account) {
             chrome.storage.local.set({ trust: title });
@@ -1056,7 +1052,7 @@ const getAccount = (title) => {
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-const invokeGroup = (title, params) => {
+const invokeGroup = (domain, params) => {
     return new Promise((resolve, reject) => {
         const data = {
             lable: Command.invokeGroup,
@@ -1067,6 +1063,14 @@ const invokeGroup = (title, params) => {
                 if (res["confirm"] === "confirm") {
                     invokeGroupBuild(params)
                         .then(result => {
+                        if (params.merge) {
+                            TaskManager.addInvokeData(result[0].txid, domain, params.group);
+                        }
+                        else {
+                            result.forEach((output, index) => {
+                                TaskManager.addInvokeData(output.txid, domain, params.group[index]);
+                            });
+                        }
                         resolve(result);
                     })
                         .catch(error => {
@@ -1088,7 +1092,7 @@ const invokeGroup = (title, params) => {
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-const invoke = (title, params) => {
+const invoke = (domain, params) => {
     return new Promise((resolve, reject) => {
         const data = {
             lable: Command.invokeGroup,
@@ -1100,6 +1104,7 @@ const invoke = (title, params) => {
                     contractBuilder(params)
                         .then(result => {
                         resolve(result);
+                        TaskManager.addInvokeData(result.txid, domain, params);
                     })
                         .catch(error => {
                         reject(error);
@@ -1248,7 +1253,8 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             "fee": data.fee,
             "network": data.network
         });
-        TaskManager.addTask(new Task(ConfirmType.tranfer, outupt.txid, data.fee));
+        TaskManager.addTask(new Task(ConfirmType.tranfer, outupt.txid));
+        TaskManager.addSendData(outupt.txid, data);
         return outupt;
     }
     else if (data.asset.hexToBytes().length == 32) {
@@ -1274,9 +1280,10 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset, amount);
             }
-            const result = yield transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, data.fee));
-            return result;
+            const outupt = yield transactionSignAndSend(tran);
+            TaskManager.addTask(new Task(ConfirmType.tranfer, outupt.txid));
+            TaskManager.addSendData(outupt.txid, data);
+            return outupt;
         }
         catch (error) {
             throw error;
@@ -1391,6 +1398,7 @@ const notifyInit = (title, domain, favIconUrl) => {
 const responseMessage = (request) => {
     const { ID, command, message, params } = request;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        console.log(message);
         const title = tabs[0].title;
         const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;
         const url = urlReg.exec(tabs[0].url);
@@ -1415,16 +1423,16 @@ const responseMessage = (request) => {
                 case Command.getPublicKey:
                     break;
                 case Command.invoke:
-                    sendResponse(invoke(message, params));
+                    sendResponse(invoke(domain, params));
+                    break;
+                case Command.invokeGroup:
+                    sendResponse(invokeGroup(domain, params));
                     break;
                 case Command.send:
                     sendResponse(send(message, params));
                     break;
                 case Command.invokeRead:
                     sendResponse(invokeRead(params));
-                    break;
-                case Command.invokeGroup:
-                    sendResponse(invokeGroup(message, params));
                     break;
                 case Command.invokeReadGroup:
                     sendResponse(invokeReadGroup(params));
@@ -1473,14 +1481,12 @@ var TaskState;
     TaskState[TaskState["failForLast"] = 4] = "failForLast";
 })(TaskState || (TaskState = {}));
 class Task {
-    constructor(type, txid, netfee, expenses, next, state, messgae) {
+    constructor(type, txid, next, state, messgae) {
         this.height = storage.height;
         this.type = type;
         this.confirm = 0;
         this.txid = txid;
         this.next = next;
-        this.netfee = netfee;
-        this.expenses = expenses ? expenses : {};
         this.state = state ? state : TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();
@@ -1532,6 +1538,46 @@ class TaskManager {
                 console.log(error);
             });
         }, 15000);
+    }
+    static addSendData(txid, data) {
+        Storage_local.get('send-data')
+            .then(senddata => {
+            let setdata = senddata ? senddata : {};
+            setdata[txid] = data;
+            Storage_local.set('send-data', setdata);
+        });
+    }
+    static addInvokeData(txid, domain, data) {
+        const hashs = [];
+        const descripts = [];
+        let fee = Neo.Fixed8.Zero;
+        let spend = {};
+        if (Array.isArray(data)) {
+            for (const invoke of data) {
+                hashs.push(invoke.scriptHash);
+                if (invoke.description) {
+                    descripts.push(invoke.description);
+                }
+                if (invoke.fee) {
+                    fee.add(Neo.Fixed8.parse(invoke.fee));
+                }
+                if (invoke.attachedAssets) {
+                    spend = invoke.attachedAssets;
+                }
+                if (invoke.operation == 'transfer') {
+                    // assets[invoke.scriptHash] = invoke.operation[0]
+                }
+            }
+        }
+        const message = { domain, hashs, descripts, spend, netfee: fee.toString() };
+        Storage_local.get('invoke-data')
+            .then(invokes => {
+            let setdata = invokes ? invokes : {};
+            setdata[txid] = message;
+            Storage_local.set('invoke-data', message);
+        })
+            .catch(error => {
+        });
     }
     static addTask(task) {
         Storage_local.get(this.table)

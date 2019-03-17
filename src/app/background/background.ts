@@ -500,6 +500,8 @@ async function request(opts: IOpts) {
         }
         else
         {
+            console.log(json.error);
+            
             throw new Error(json.error);    
         }
     } 
@@ -891,7 +893,6 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 new Task(
                 ConfirmType.tranfer,
                 result.txid.replace('0x',''),
-                netfee.toString(),
                 )
             )
             return [result];
@@ -945,17 +946,17 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer,txids[0].txid.replace('0x',''),data.group[0].fee,{},trans[0],TaskState.watting);
+        const task = new Task(ConfirmType.tranfer,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if(index<(trans.length-1)){
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,data.group[index].fee,{},trans[index+1],TaskState.watForLast
+                    ConfirmType.tranfer,tran.txid,trans[index+1],TaskState.watForLast
                 ))
             }else{
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,data.group[index].fee,undefined,undefined,TaskState.watForLast
+                    ConfirmType.tranfer,tran.txid,undefined,TaskState.watForLast
                 ))
             }
         }
@@ -994,8 +995,8 @@ var exchangeCgas=async(transcount:number,netfee:number)=>{
     utxo.count = Neo.Fixed8.fromNumber(transcount);
     utxo.n = 0;
     const data = await makeRefundTransaction_tranGas(utxo,transcount,netfee);
-    TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,netfee.toString(),{},data));
-    TaskManager.addTask(new Task(ConfirmType.tranfer,data.txid,netfee.toString(),{},undefined,TaskState.watForLast));
+    TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,data));
+    TaskManager.addTask(new Task(ConfirmType.tranfer,data.txid,undefined,TaskState.watForLast));
     let txids:InvokeOutput[] = [result,{"txid":data.txid,"nodeUrl":"https://api.nel.group/api"}];
     return txids;
 }
@@ -1191,7 +1192,7 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
             }
         }
         let result = await transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,invoke.fee));
+        TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid));
         return result;
     } 
     catch (error) 
@@ -1254,12 +1255,6 @@ const openNotify=(notifyData:NotifyMessage,call)=> {
  */
 const getAccount=(title)=>{    
     return new Promise((resolve,reject)=>{
-        // const {address,walletName} = storage.account;
-        const data:NotifyMessage = {
-            lable:Command.getAccount,
-            header:title,
-            // account:{address,walletName}
-        }
         console.log("---------进入了 getAccount 方法");
         
         if(storage.account){
@@ -1282,7 +1277,7 @@ const getAccount=(title)=>{
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-const invokeGroup=(title,params)=>{
+const invokeGroup=(domain,params:InvokeGroup)=>{
     return new Promise((resolve,reject)=>{
         const data:NotifyMessage = {
             lable:Command.invokeGroup,
@@ -1295,6 +1290,14 @@ const invokeGroup=(title,params)=>{
                 {
                     invokeGroupBuild(params)
                     .then(result=>{
+                        if(params.merge)
+                        {                            
+                            TaskManager.addInvokeData(result[0].txid,domain,params.group);
+                        }else{
+                            result.forEach((output,index,)=>{
+                                TaskManager.addInvokeData(output.txid,domain,params.group[index]);
+                            });
+                        }
                         resolve(result);
                     })
                     .catch(error=>{        
@@ -1316,7 +1319,7 @@ const invokeGroup=(title,params)=>{
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-const invoke=(title,params)=>{
+const invoke=(domain,params:InvokeArgs)=>{
     return new Promise((resolve,reject)=>{
         const data:NotifyMessage = {
             lable:Command.invokeGroup,
@@ -1329,11 +1332,12 @@ const invoke=(title,params)=>{
                     contractBuilder(params)
                     .then(result=>{
                         resolve(result);
+                        TaskManager.addInvokeData(result.txid,domain,params);
                     })
                     .catch(error=>{
                         reject(error);
                     })
-                }else if(res["confirm"]==="cancel"){       
+                }else if(res["confirm"]==="cancel"){
                     reject({
                         type : "TransactionError",
                         description : "User cancel Authorization "
@@ -1492,7 +1496,8 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                 "network":data.network
             }
         )
-        TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid,data.fee))
+        TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid))
+        TaskManager.addSendData(outupt.txid,data);
         return outupt;
     }
     else if(data.asset.hexToBytes().length==32)
@@ -1521,9 +1526,10 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset,amount);
             }
-            const result = await transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer,result.txid,data.fee))
-            return result
+            const outupt = await transactionSignAndSend(tran);
+            TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid));            
+            TaskManager.addSendData(outupt.txid,data);
+            return outupt
         } 
         catch (error) 
         {
@@ -1655,6 +1661,8 @@ const responseMessage =(request)=>
     const {ID,command,message,params}=request;
     chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=>
     {
+        console.log(message);
+        
         const title = tabs[0].title;
         const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
         const url=urlReg.exec(tabs[0].url);
@@ -1681,16 +1689,16 @@ const responseMessage =(request)=>
                     
                     break;
                 case Command.invoke:
-                    sendResponse(invoke(message,params));
+                    sendResponse(invoke(domain,params));
+                    break;
+                case Command.invokeGroup:
+                    sendResponse(invokeGroup(domain,params));
                     break;
                 case Command.send:
                     sendResponse(send(message,params))
                     break;
                 case Command.invokeRead:
                     sendResponse(invokeRead(params));
-                    break;
-                case Command.invokeGroup:
-                    sendResponse(invokeGroup(message,params));
                     break;
                 case Command.invokeReadGroup:
                     sendResponse(invokeReadGroup(params));
@@ -1755,14 +1763,10 @@ class Task
     message: any;
     state: TaskState;
     startTime: number;
-    netfee:string;
-    expenses:{[asset:string]:string};
     next?:TransferGroup;
     constructor(
         type: ConfirmType,
         txid: string,
-        netfee:string,
-        expenses?:{[asset:string]:string},
         next?:TransferGroup,
         state?:TaskState,
         messgae?
@@ -1773,8 +1777,6 @@ class Task
         this.confirm = 0;
         this.txid = txid;
         this.next = next;
-        this.netfee = netfee;
-        this.expenses = expenses?expenses:{};
         this.state = state?state:TaskState.watting;
         this.message = messgae;
         this.startTime = new Date().getTime();
@@ -1842,6 +1844,57 @@ class TaskManager{
                 console.log(error);
             })
         },15000)        
+    }
+
+    public static addSendData(txid:string,data:SendArgs)
+    {
+        Storage_local.get('send-data')
+        .then(senddata =>{
+            let setdata = senddata?senddata:{};
+            setdata[txid]=data;
+            Storage_local.set('send-data',setdata);
+        })
+    }
+
+    public static addInvokeData(txid:string,domain:string,data:InvokeArgs|InvokeArgs[])
+    {
+        const hashs = [];
+        const descripts = []
+        let fee = Neo.Fixed8.Zero;
+        let spend:{[asset:string]:string} = {}
+        if(Array.isArray(data))
+        {
+            for (const invoke of data) {
+                hashs.push(invoke.scriptHash);
+                if(invoke.description)
+                {
+                    descripts.push(invoke.description);
+                }
+                if(invoke.fee)
+                {
+                    fee.add(Neo.Fixed8.parse(invoke.fee));
+                }
+                if(invoke.attachedAssets)
+                {
+                    spend = invoke.attachedAssets
+                }
+                if(invoke.operation == 'transfer')
+                {
+                    // assets[invoke.scriptHash] = invoke.operation[0]
+                }
+            }
+        }
+        const message={domain,hashs,descripts,spend,netfee:fee.toString()}
+        Storage_local.get('invoke-data')
+        .then(invokes=>{
+            let setdata = invokes?invokes:{}
+            setdata[txid]=message
+            Storage_local.set('invoke-data',message);
+        })
+        .catch(error=>{
+
+        })
+
     }
 
     public static addTask(task:Task)

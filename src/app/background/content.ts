@@ -15,10 +15,6 @@ function injectCustomJs(jsPath?)
     document.head.appendChild(temp);
 }
 
-function sendMsgTest() {
-    window.postMessage({"test": '这里是contentScript.js'}, '*');
-}
-
 // 接收向页面注入的JS
 window.addEventListener("message", function(e)
 {
@@ -56,7 +52,6 @@ chrome.runtime.onMessage.addListener(
 
 window.onload=()=>{
     injectCustomJs()
-    sendMsgTest()
 }
 
 

@@ -255,13 +255,13 @@ declare const getAccount: (title: any) => Promise<{}>;
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-declare const invokeGroup: (title: any, params: any) => Promise<{}>;
+declare const invokeGroup: (domain: any, params: InvokeGroup) => Promise<{}>;
 /**
  * invoke 合约调用
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-declare const invoke: (title: any, params: any) => Promise<{}>;
+declare const invoke: (domain: any, params: InvokeArgs) => Promise<{}>;
 /**
  * 获得网络状态信息
  */
@@ -301,14 +301,8 @@ declare class Task {
     message: any;
     state: TaskState;
     startTime: number;
-    netfee: string;
-    expenses: {
-        [asset: string]: string;
-    };
     next?: TransferGroup;
-    constructor(type: ConfirmType, txid: string, netfee: string, expenses?: {
-        [asset: string]: string;
-    }, next?: TransferGroup, state?: TaskState, messgae?: any);
+    constructor(type: ConfirmType, txid: string, next?: TransferGroup, state?: TaskState, messgae?: any);
 }
 declare class TransferGroup {
     txid: string;
@@ -326,6 +320,8 @@ declare class TaskManager {
     };
     static table: string;
     static start(): void;
+    static addSendData(txid: string, data: SendArgs): void;
+    static addInvokeData(txid: string, domain: string, data: InvokeArgs | InvokeArgs[]): void;
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;
     static update(): void;

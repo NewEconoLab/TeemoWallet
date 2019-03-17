@@ -11,9 +11,6 @@ function injectCustomJs(jsPath) {
     };
     document.head.appendChild(temp);
 }
-function sendMsgTest() {
-    window.postMessage({ "test": '这里是contentScript.js' }, '*');
-}
 // 接收向页面注入的JS
 window.addEventListener("message", function (e) {
     var request = e.data;
@@ -38,7 +35,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 window.onload = () => {
     injectCustomJs();
-    sendMsgTest();
 };
 // function getBase64Image(img) {  
 //     var canvas = document.createElement("canvas");  

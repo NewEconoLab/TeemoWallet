@@ -40,6 +40,7 @@ interface IState
 	currentOption:IOption,
 	toAddress:string,
 	domain:string,
+	confirmDisable:boolean,
 }
 
 // @observer
@@ -60,6 +61,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		errorAmount:false,
 		verifyPass:false,
 		checkDisable:false,
+		confirmDisable:false,
 		addrMessage:'',
 		amountMessage:'',
 		currentOption:{id:HASH_CONFIG.ID_GAS,name:'GAS'},
@@ -73,6 +75,8 @@ export default class Transfer extends React.Component<IProps, IState>
 		{id:HASH_CONFIG.ID_NNC.toString(),name:'NNC'}
 	]
 	public onSelect = (currentOption:IOption)=>{
+		console.log(currentOption);
+		
 		this.setState({
 			currentOption
 		},()=>{
@@ -174,9 +178,10 @@ export default class Transfer extends React.Component<IProps, IState>
 			checkDisable:false,
 			addrMessage:'',
 			amountMessage:'',
-			currentOption:{id:'GAS',name:'GAS'},
+			currentOption:{id:HASH_CONFIG.ID_GAS,name:'GAS'},
 			toAddress:'',
 			domain:'',
+			confirmDisable:false
 		})
 		this.props.onHide?this.props.onHide():null;
 	}
@@ -187,6 +192,10 @@ export default class Transfer extends React.Component<IProps, IState>
 	}
 	public send=()=>
 	{
+		console.log(this.state.currentOption.id);
+		this.setState({
+			confirmDisable:true
+		})
 		bg.transfer({
 			"amount":this.state.amount,
 			"asset":this.state.currentOption.id,
@@ -223,7 +232,7 @@ export default class Transfer extends React.Component<IProps, IState>
 					</div>
 					<div className="info-line">
 						<div className="title">发送</div>
-						<div className="content">{this.state.amount}</div>
+						<div className="content">{this.state.amount+" "+this.state.currentOption.name}</div>
 					</div>
 					<div className="info-line">
 						<div className="title">至</div>
@@ -239,14 +248,14 @@ export default class Transfer extends React.Component<IProps, IState>
 					</div>
 					<div className="info-line">
 						<div className="title">手续费</div>
-						<div className="content">{(this.state.netfee?'0.001':'0')+" "+this.state.currentOption.name}</div>
+						<div className="content">{this.state.netfee?'0.001 GAS':'0 GAS'}</div>
 					</div>
 					<div className="btn-list">
 						<div className="cancel">
 							<Button type="warn" text="取消" onClick={this.onHide} />
 						</div>
 						<div className="confrim">
-							<Button type="primary" text="确定" onClick={this.send}/>
+							<Button type="primary" text="确定" onClick={this.send} disabled={this.state.confirmDisable}/>
 						</div>
 					</div>
 				</div>
