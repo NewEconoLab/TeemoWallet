@@ -516,6 +516,14 @@ async function request(opts: IOpts) {
 }
 
 var Api = {
+    getStorage:(scriptHash:string,key:string)=>{
+        return request({
+            method:"getstorage",
+            params:[scriptHash,key],
+            baseUrl:"rpc"
+        })
+    },
+
     getcontractstate:(scriptaddr: string)=>{
         return request({
             method:"getcontractstate",
@@ -1640,6 +1648,26 @@ const getProvider=()=>
     })
 }
 
+const getStorage=(data:GetStorageArgs)=>
+{
+    return new Promise<GetStorageOutput>((resolve,reject)=>
+    {
+        Api.getStorage(data.scriptHash,data.key)
+        .then(result=>{
+            console.log("返回getStorage");
+            console.log(result);
+            if(result)
+                resolve(result);
+            else
+                reject({type:'GETSTORAGE_ERROR',description:"接口返回异常"})
+        })
+        .catch(error=>{
+            
+            reject({type:'GETSTORAGE_ERROR',description:"接口返回异常",data:error})
+        })
+    })
+}
+
 const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
     return new Promise((r,j)=>{        
         if(storage.domains.indexOf(domain))
@@ -1705,7 +1733,7 @@ const responseMessage =(request)=>
                     sendResponse(getBalance(params));
                     break;
                 case Command.getStorage:
-                    
+                    sendResponse(getStorage(params));
                     break;
                 case Command.getPublicKey:
                     

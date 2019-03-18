@@ -138,6 +138,7 @@ declare const makeRpcUrl: (url: any, method: any, params: any) => string;
  */
 declare function request(opts: IOpts): Promise<any>;
 declare var Api: {
+    getStorage: (scriptHash: string, key: string) => Promise<any>;
     getcontractstate: (scriptaddr: string) => Promise<any>;
     getavailableutxos: (address: string, count: number) => Promise<any>;
     getInvokeRead: (scriptHash: string) => Promise<any>;
@@ -280,6 +281,7 @@ declare var send: (params: SendArgs) => Promise<SendOutput>;
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
+declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
 declare const responseMessage: (request: any) => void;
 declare enum ConfirmType {

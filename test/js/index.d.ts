@@ -37,5 +37,6 @@ declare class Main {
      * invoke 发送合约调用交易（多操作）
      */
     invokeGroup(params: string): Promise<{}>;
+    getStorage(params: string): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map

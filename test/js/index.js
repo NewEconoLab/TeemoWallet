@@ -84,6 +84,10 @@ class Main {
                 var invokeGroup_input = document.getElementById("invokeGroup_input");
                 yield this.invokeGroup(invokeGroup_input.value);
             });
+            document.getElementById("getStorage_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getStorage_input = document.getElementById("getStorage_input");
+                yield this.getStorage(getStorage_input.value);
+            });
             document.getElementById("merge").onclick = () => {
                 var invokeGroup_input = document.getElementById("invokeGroup_input");
                 invokeGroup_input.value = JSON.stringify({
@@ -361,6 +365,35 @@ class Main {
                 console.log("==============进入了异常流程");
                 console.log(error);
                 document.getElementById("invokeGroup_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            });
+        });
+    }
+    getStorage(params) {
+        // const params:InvokeArgs = {
+        //     scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+        //     operation:"transfer",
+        //     arguments:[
+        //         {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        //         {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        //         {type:"Integer",value:"100000"}
+        //     ],
+        //     fee:'0.001',
+        //     network:"TestNet",
+        //     // assets: 暂时用不到
+        // }
+        return new Promise((resolve, reject) => {
+            Teemmo.NEO.getStorage(JSON.parse(params))
+                .then(result => {
+                console.log(result);
+                console.log("这是交易id" + result);
+                document.getElementById("getStorage_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+                .catch(error => {
+                console.log("==============进入了异常流程");
+                console.log(error);
+                document.getElementById("getStorage_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             });
         });

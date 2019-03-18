@@ -95,6 +95,11 @@ class Main {
             await this.invokeGroup(invokeGroup_input.value)
         }
 
+        document.getElementById("getStorage_do").onclick = async()=>{
+            var getStorage_input = document.getElementById("getStorage_input") as HTMLTextAreaElement;
+            await this.getStorage(getStorage_input.value);
+        }
+
         document.getElementById("merge").onclick = () =>{ 
             var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
             invokeGroup_input.value = JSON.stringify({
@@ -403,6 +408,37 @@ class Main {
     }
 
 
+    public getStorage(params:string)
+    {
+        // const params:InvokeArgs = {
+        //     scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",  // 合约地址
+        //     operation:"transfer",
+        //     arguments:[
+        //         {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        //         {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        //         {type:"Integer",value:"100000"}
+        //     ],
+        //     fee:'0.001',
+        //     network:"TestNet",
+        //     // assets: 暂时用不到
+        // }
+        return new Promise((resolve,reject)=>{            
+            Teemmo.NEO.getStorage(JSON.parse(params) as GetStorageArgs)
+            .then(result=>{
+                console.log(result);
+                console.log("这是交易id"+ result);
+                document.getElementById("getStorage_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getStorage_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
     
     // public invokeGroup2()
     // {
