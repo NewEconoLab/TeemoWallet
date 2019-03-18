@@ -14,6 +14,7 @@ import common from '../../store/common';
 import { HASH_CONFIG } from '../../../config';
 import { bg } from '../../utils/storagetools';
 import { asNumber } from '../../utils/numberTool';
+import { observer } from 'mobx-react';
 import Toast from '../../../components/Toast';
 
 interface IProps
@@ -32,7 +33,7 @@ interface IState
 	currentOption:IOption
 }
 
-// @observer
+@observer
 export default class Exchange extends React.Component<IProps, IState> 
 {
 	constructor(props: IProps)
@@ -57,7 +58,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		const amount = asNumber(event,8);
 		if(this.state.currentOption.id=='cgasexchange')
 		{
-			if(Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.fromNumber(common.balance.GAS))>0)
+			if(Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.fromNumber(common.balances.GAS))>0)
 			{
 				this.setState({
 					inputError:true,
@@ -69,7 +70,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		}
 		else
 		{
-			if(Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.fromNumber(common.balance.CGAS))>0)
+			if(Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.fromNumber(common.balances.CGAS))>0)
 			{
 				this.setState({
 					inputError:true,

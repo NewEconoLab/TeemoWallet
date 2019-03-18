@@ -16,6 +16,7 @@ import { neotools } from '../../../notify/utils/neotools';
 import { asNumber } from '../../utils/numberTool';
 import { HASH_CONFIG } from '../../../config';
 import Toast from '../../../components/Toast';
+import { observer } from 'mobx-react';
 
 interface IProps
 {
@@ -43,7 +44,7 @@ interface IState
 	confirmDisable:boolean,
 }
 
-// @observer
+@observer
 export default class Transfer extends React.Component<IProps, IState> 
 {
 	constructor(props: IProps)
@@ -133,7 +134,7 @@ export default class Transfer extends React.Component<IProps, IState>
 	public onAmountChange = (event) =>
 	{
 		const amount = asNumber(event,8);
-		const balance = Neo.Fixed8.fromNumber(common.balance[this.state.currentOption.name])
+		const balance = Neo.Fixed8.fromNumber(common.balances[this.state.currentOption.name])
 		let checkDisable=false;
 		let errorAmount = false;
 		let amountMessage="";
@@ -226,7 +227,7 @@ export default class Transfer extends React.Component<IProps, IState>
 					<div className="info-line first">
 						<div className="title">从</div>
 						<div className="content">
-							<div className="double">{common.account.walletName}</div>
+							<div className="double">{common.account.lable}</div>
 							<div className="double address">{common.account.address}</div>
 						</div>
 					</div>

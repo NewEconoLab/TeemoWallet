@@ -43,6 +43,7 @@ var AccountManager = {
             scrypt.p = 8;
             ThinNeo.Helper.GetNep2FromPrivateKey(key, password, scrypt.N, scrypt.r, scrypt.p, (info, result) => {
                 if (info == "finish") {
+                    AccountManager.setAccount(new AccountInfo(new NepAccount("", address, result, scrypt), prikey, pubkey));
                     resolve(new AccountInfo(new NepAccount("", address, result, scrypt), prikey, pubkey));
                 }
                 else {
@@ -129,8 +130,12 @@ var AccountManager = {
         EventsOnChange(WalletEvents.DISCONNECTED);
     },
     netWorkChange: (network) => {
-        storage.network = network;
-        EventsOnChange(WalletEvents.NETWORK_CHANGED, { networks: ["TestNet", "MainNet"], defaultNetwork: network });
+        return new Promise((r, j) => {
+            storage.network = network;
+            const message = { networks: ["TestNet", "MainNet"], defaultNetwork: network };
+            EventsOnChange(WalletEvents.NETWORK_CHANGED, message);
+            r(message);
+        });
     }
 };
 /**

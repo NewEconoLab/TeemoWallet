@@ -3,6 +3,7 @@ import * as React from 'react';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
 import { RouteComponentProps } from 'react-router';
+import { observer } from 'mobx-react';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { Storage_local } from '../../utils/storagetools';
 import common from '../../store/common';
@@ -26,7 +27,7 @@ interface IPorps{
     goMyWallet:()=>void;
 }
 
-// @observer
+@observer
 export default class WalletCreate extends React.Component<IPorps, IState> {
 	constructor(props: any) {
 		super(props);
@@ -83,7 +84,7 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
 
     goMyWallet =()=> {
         Storage_local.setAccount(this.state.account);
-        common.account=this.state.account;
+        common.initAccountInfo();
         if(this.props.goMyWallet)
             this.props.goMyWallet();
     }

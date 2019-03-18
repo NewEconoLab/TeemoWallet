@@ -7,6 +7,7 @@ import History from '../history';
 import Assets from '../assets';
 import { neotools } from '../../utils/neotools';
 import common from '../../store/common';
+import { observer } from 'mobx-react';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -17,6 +18,8 @@ interface AppState {
     label:string;
 }
 
+
+@observer
 export default class MyWallet extends React.Component<AppProps,AppState> {
     constructor(props: AppProps, state: AppState) {
         super(props, state);
@@ -28,10 +31,8 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
     }
 
     public componentDidMount() {
-        if(!common.network)
-            common.network="TestNet"
         // Example of how to send a message to eventPage.ts.        
-        common.initBalance();
+        common.initAccountBalance();
         if(chrome.tabs)
         {
             chrome.runtime.sendMessage({ popupMounted: true });

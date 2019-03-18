@@ -3,22 +3,24 @@ import * as React from 'react';
 import Select, { IOption } from '../../../components/Select';
 import common from '../../store/common';
 import { bg } from '../../utils/storagetools';
+import { NetWork } from '../../store/interface/common.interface';
+import { observer } from 'mobx-react';
 
-// @observer
+@observer
 export default class WalletFoot extends React.Component<any, {}> {
 	constructor(props: any) {
 		super(props);
 	}
 	
 	public onSelect=(option:IOption)=>{
-		let network = option.id as "TestNet"|"MainNet";
-		common.network=network
+		let network = option.id as NetWork;
+		common.changeNetWork(network);
 	}
 
     public options:IOption[]=
     [
-        {id:"mainnet",name:"主网"},
-        {id:"testnet",name:"测试网"},
+        {id:NetWork.MainNet,name:"主网"},
+        {id:NetWork.TestNet,name:"测试网"},
     ]
 
 	public render() {

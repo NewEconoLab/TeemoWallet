@@ -139,7 +139,7 @@ class MarkUtxo
     {
         try 
         {
-            const utxos:any[] = await Api.getUtxo(common.account.address);   // 获得为使用的utxo
+            const utxos:any[] = await Api.getUtxo(storage.account.address);   // 获得为使用的utxo
             if(!utxos)
             {
                 return undefined;
@@ -377,71 +377,6 @@ class Transaction extends ThinNeo.Transaction
 
     
 }
-
-/**
- * 我的账户管理
- */
-class Common
-{
-    constructor(){
-        this.tabname="account"
-    }   
-    private tabname:string;
-
-    private _network:string;
-
-    // 账户信息
-    private _account:AccountInfo;
-    
-    private _accountList:NepAccount[];
-    
-    
-    public set network(v : string) {
-        Storage_internal.set("network",v);
-        this._network = v;
-    }    
-    
-    public get network() : string {
-        return this._network = Storage_internal.get("network");
-    }
-    
-
-    public set accountList(v : NepAccount[]) {
-        this.accountList = v;
-    }
-    
-    public get accountList(){
-        if(this._accountList && this._accountList.length)
-        {
-            return this._accountList;
-        }
-        else
-        {
-            return Storage_local.getAccount();
-        }
-    }
-    
-    // set 方法往background的storage变量赋值
-    public set account(v : AccountInfo) {
-        this._account = v;
-        Storage_internal.set(this.tabname,v);
-    }
-    
-    // 从background storage 变量中取值
-    public get account() : AccountInfo {
-        const acc =Storage_internal.get<AccountInfo>(this.tabname);
-
-        const newacc = new AccountInfo(
-            new NepAccount(acc.walletName,acc.address,acc.nep2key,acc.scrypt,acc.index),
-            acc.prikey,acc.pubkey
-        );
-        
-        return newacc;
-    }
-
-}
-const common = new Common();
-
 
 const makeRpcPostBody = (method, params) => {
     const body = {};
@@ -948,8 +883,8 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
                 tran.setScript(script.ToArray());
                 const message  = tran.GetMessage().clone();
-                const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
-                tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+                const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);
+                tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
                 const data:Uint8Array = tran.GetRawData();
                 const nextTran = new TransferGroup()
                 nextTran.txhex=data.toHexString();
@@ -982,8 +917,8 @@ const sendGroupTranstion=(trans:Transaction[])=>{
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];            
             const message  = tran.GetMessage().clone();
-            const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
-            tran.AddWitness(signdata,common.account.pubkey,common.account.address);
+            const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);
+            tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
             // const data:Uint8Array = tran.GetRawData();
             console.log(tran.getTxid());
             outputs.push({"txid": tran.getTxid(),nodeUrl:"https://api.nel.group/api"});

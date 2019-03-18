@@ -1,80 +1,71 @@
+import { observable, action } from 'mobx';
 import { AccountInfo, NepAccount } from "../../../common/entity";
 import { Storage_internal, Storage_local, bg } from "../utils/storagetools";
 import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
 import { HASH_CONFIG } from "../../config";
+import { IAccountBalanceStore, NetWork, IAccountMessage } from './interface/common.interface';
 
 /**
  * 我的账户管理
  */
 class Common
 {
+    @observable public account:IAccountMessage={address:'',lable:''};
+    @observable public network:NetWork=NetWork.TestNet;
+    @observable public balances:IAccountBalanceStore={NEO:0,GAS:0,CGAS:0,NNC:0,CNEO:0};
     constructor(){
         this.tabname="account"
-    }   
-    private tabname:string;
-
-    public _balance:{NEO:number,GAS:number,CGAS:number,NNC:number}={NEO:0,GAS:0,CGAS:0,NNC:0};
-
-    
-    public set balance(v : {NEO:number,GAS:number,CGAS:number,NNC:number}) {
-        this._balance = bg.storage['balance'] = v;
-    }    
-    
-    public get balance() : {NEO:number,GAS:number,CGAS:number,NNC:number} {
-        return bg.storage['balance']?bg.storage['balance']:{NEO:0,GAS:0,CGAS:0,NNC:0};
     }
+    private tabname:string;
     
+    @action public changeNetWork=(network:NetWork)=>{
+        return new Promise((r,j)=>{ 
+            bg.AccountManager.netWorkChange(network)
+            .then(result=>{
+                this.network = result.defaultNetwork;
+                this.initAccountBalance();
+            })
+        })
+    }
 
-    public initBalance=()=>{
+    @action public initAccountBalance=()=>{
         const params: BalanceRequest = {
             address: this.account.address,   // 你要查询的地址
             assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_CGAS.toString(),HASH_CONFIG.ID_NNC.toString()],
-          }
+        }
         const data:GetBalanceArgs=
         {
-            "network":"TestNet",
+            "network":this.network,
             "params":params
         }
-        let assets = {NEO:0,GAS:0,CGAS:0,NNC:0};
         bg.getBalance(data)
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{
                 switch(value.symbol){
                     case 'NEO':
-                        assets.NEO = parseFloat(value.amount);
+                        this.balances.NEO = parseFloat(value.amount);
                         break;
                     case 'GAS':
-                        assets.GAS = parseFloat(value.amount);
+                        this.balances.GAS = parseFloat(value.amount);
                         break;
                     case 'CGAS':
-                        assets.CGAS = parseFloat(value.amount);
+                        this.balances.CGAS = parseFloat(value.amount);
                         break;
                     case 'NNC':
-                        assets.NNC = parseFloat(value.amount);
+                        this.balances.NNC = parseFloat(value.amount);
                         break;                    
                 }
-                this.balance=assets;
-                
             })
         })
     }
 
-    private _network:"TestNet"|"MainNet";
-
-    // 账户信息
-    private _account:AccountInfo;
+    @action public initAccountInfo=()=>{
+        const acc =Storage_internal.get<AccountInfo>(this.tabname);
+        this.account.address=acc.address;
+        this.account.lable=acc.walletName;
+    }
     
     private _accountList:NepAccount[];
-    
-    
-    public set network(v : "TestNet"|"MainNet") {
-        bg.AccountManager.netWorkChange(v);
-        this._network = v;
-    }    
-    
-    public get network() : "TestNet"|"MainNet" {
-        return this._network = Storage_internal.get<"TestNet"|"MainNet">("network");
-    }
     
 
     public set accountList(v : NepAccount[]) {
@@ -91,24 +82,6 @@ class Common
         {
             return Storage_local.getAccount();
         }
-    }
-    
-    // set 方法往background的storage变量赋值
-    public set account(v : AccountInfo) {
-        this._account = v;
-        Storage_internal.set(this.tabname,v);
-    }
-    
-    // 从background storage 变量中取值
-    public get account() : AccountInfo {
-        const acc =Storage_internal.get<AccountInfo>(this.tabname);
-
-        const newacc = new AccountInfo(
-            new NepAccount(acc.walletName,acc.address,acc.nep2key,acc.scrypt,acc.index),
-            acc.prikey,acc.pubkey
-        );
-        
-        return newacc;
     }
 
 }

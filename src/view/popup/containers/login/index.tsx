@@ -10,6 +10,7 @@ import Chooser from '../../../components/Chooser';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { neotools } from '../../utils/neotools';
 import AddrList from './addrlist';
+import { observer } from 'mobx-react';
 import common from '../../store/common';
 
 interface AppProps extends RouteComponentProps {
@@ -25,6 +26,7 @@ interface AppState {
     currentAccount:NepAccount,
 }
 
+@observer
 export default class Login extends React.Component<AppProps,AppState> {
     constructor(props: AppProps, state: AppState) {
         super(props, state);

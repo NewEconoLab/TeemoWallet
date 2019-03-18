@@ -7,6 +7,7 @@ import Panel from '../../../components/Panel';
 import Select, { IOption } from '../../../components/Select';
 import Checkbox from '../../../components/Checkbox';
 import { Storage_local } from '../../../../common/util';
+import { observer } from 'mobx-react';
 interface IState{
     tasklist:Task[];
 }
@@ -40,7 +41,7 @@ export interface TransferGroup {
         description: string;
     };
 }
-// @observer
+@observer
 export default class History extends React.Component<any, {}> 
 {
 	constructor(props: any)

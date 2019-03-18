@@ -84,6 +84,7 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
     {
         bg.AccountManager.nep6Load(this.state.walletString,this.state.password)
         .then(account =>{
+            common.initAccountInfo();
             this.goMyWallet();
         })
         .catch(error =>{

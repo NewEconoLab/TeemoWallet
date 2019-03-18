@@ -4,6 +4,7 @@ import { RouteComponentProps } from 'react-router';
 import Input from '../../../../components/Input';
 import { NepAccount } from '../../../../../common/entity';
 import { Storage_local } from '../../../utils/storagetools';
+import { observer } from 'mobx-react';
 import common from '../../../store/common';
 
 interface IState{
@@ -19,7 +20,7 @@ interface IPorps{
     goMyWallet:()=>void;
 }
 
-// @observer
+@observer
 export default class WifImport extends React.Component<IPorps, IState> {
 	constructor(props: any) {
 		super(props);
@@ -71,8 +72,7 @@ export default class WifImport extends React.Component<IPorps, IState> {
             let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
             NepAccount.encryption(this.state.password,prikey)
             .then(account=>{
-                common.account = account;
-                Storage_local.setAccount(account);
+                common.initAccountInfo();
                 this.goMyWallet();                
             })
             .catch(error=>{

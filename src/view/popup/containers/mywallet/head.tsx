@@ -8,11 +8,13 @@ import classnames = require('classnames');
 import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import HeadImg from '../../utils/headimg';
+import { observer } from 'mobx-react';
 
 interface IProps{
     lableChange:(table:string)=>void
 }
 
+@observer
 export default class WalletHeader extends React.Component<IProps, {}> {
 	constructor(props: any) {
 		super(props);
@@ -30,6 +32,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
         {id:'dice',name:'DICE',icon:ICON.nns}
     ]
     public componentDidMount(){
+        common.initAccountInfo();
         const div = document.getElementById('headimg')
 		HeadImg(div,common.account.address);
     }
@@ -90,7 +93,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     <div className="list">
                         <div className="walletCode">
                             <div className="headimg-wrapp" id="headimg" />
-                            <span>{common.account.walletName?common.account.walletName: "我的钱包 "+(common.account.index+1)}</span>
+                            <span>{common.account.lable}</span>
                         </div>
                         <div className="function">
                             <Chooser options={this.options} onCallback={this.cutFunction} >

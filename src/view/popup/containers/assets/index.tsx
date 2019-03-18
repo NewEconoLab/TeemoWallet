@@ -22,6 +22,7 @@ export default class Assets extends React.Component<any, {}>
         showNumber:0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
     }
     componentDidMount(){
+        common.initAccountBalance();
     }
 
     public onShowQrcode = () =>
@@ -53,19 +54,19 @@ export default class Assets extends React.Component<any, {}>
                     <div className="title">资产列表</div>
                     <div className="asset-panel">
                         <div className="asset-name">NEO</div>
-                        <div className="asset-amount">{common.balance['NEO']}</div>
+                        <div className="asset-amount">{common.balances.NEO}</div>
                     </div>
                     <div className="asset-panel">
                         <div className="asset-name">GAS</div>
-                        <div className="asset-amount">{common.balance['GAS']}</div>
+                        <div className="asset-amount">{common.balances.GAS}</div>
                     </div>
                     <div className="asset-panel">
                         <div className="asset-name">CGAS</div>
-                        <div className="asset-amount">{common.balance['CGAS']}</div>
+                        <div className="asset-amount">{common.balances.CGAS}</div>
                     </div>
                     <div className="asset-panel">
                         <div className="asset-name">NNC</div>
-                        <div className="asset-amount">{common.balance['NNC']}</div>
+                        <div className="asset-amount">{common.balances.NNC}</div>
                     </div>
                 </div>
                 <QrCodeBox show={this.state.showNumber === 1} onHide={this.onCloseModel} />

@@ -3,6 +3,7 @@
 import { NepAccount } from "./background";
 import { LoginInfo } from "../view/notify/utils/neotools";
 import { AccountInfo } from "../common/entity";
+import { NetWork } from "../view/popup/store/interface/common.interface";
 
 declare interface AccountManager{
     createWallet: (key: Uint8Array) => void;
@@ -13,11 +14,16 @@ declare interface AccountManager{
     /**
      * 获得账户私钥等信息从account解密
      */
-    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
-    netWorkChange: (network: "TestNet"|"MainNet") => void;
+    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;    
+    netWorkChange: (network: "TestNet" | "MainNet") => Promise<GetNetworksOutput>;
     logout: () => void;
     setAccount: (account: AccountInfo) => void;
     getCurrent: () => WalletAccount;
+}
+
+interface GetNetworksOutput {
+    networks: string[];
+    defaultNetwork: NetWork;
 }
 /**
  * 事件出发返回方法

@@ -1,7 +1,4 @@
 import { LoginInfo, Result, AccountInfo, Invoke, MarkUtxo, NepAccount } from "../../../common/entity";
-import { Transaction } from "./transaction";
-import { HASH_CONFIG } from "../../config";
-import common from "../store/common";
 
 export class neotools
 {
@@ -259,61 +256,4 @@ export class neotools
         sb.EmitAppCall(Neo.Uint160.parse(data.scriptHash));
         return sb.ToArray();
     }
-
-    public static async contractBuilder(invoke:Invoke):Promise<Uint8Array>{
-        let tran = new Transaction();
-        
-        try {
-            const script=this.invokeScriptBuild(invoke);
-            tran.setScript(script);
-        } catch (error) {
-            console.log(error);            
-        }
-        if(!!invoke.fee && invoke.fee!=='' && invoke.fee!='0'){
-            
-            try {
-                const utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
-                if(utxos)
-                    tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
-            } catch (error) {
-                console.log(error);
-            }
-        }
-        try {
-            const message  = tran.GetMessage().clone();
-            const signdata = ThinNeo.Helper.Sign(message,common.account.prikey);
-            tran.AddWitness(signdata,common.account.pubkey,common.account.address);
-            const data:Uint8Array = tran.GetRawData();
-            return data;
-            
-        } catch (error) {
-            console.log(error);            
-        }
-    }
-
-    public static invokeTest(){
-        var script:Invoke = {
-            scriptHash:"74f2dc36a68fdc4682034178eb2220729231db76",
-            operation:"transfer",
-            arguments:[
-                {type:"Address",value:"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-                {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-                {type:"Integer",value:"100000"}
-            ],
-            fee:'0.001',
-            network:'TestNet',
-            assets:{}
-        }
-        console.log(common.account.prikey.toHexString());
-        neotools.contractBuilder(script)
-        .then(result=>{
-            console.log(result);
-            console.log(result.toHexString());
-            
-        })
-        .catch(reason=>{
-            console.log(reason);            
-        })
-    }
-
 }

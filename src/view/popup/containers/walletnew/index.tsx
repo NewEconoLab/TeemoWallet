@@ -7,6 +7,8 @@ import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
 import WalletCreate from './create';
 import WalletImport from './load';
+import common from '../../store/common';
+import { observer } from 'mobx-react';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -16,6 +18,7 @@ interface AppState {
     develop:boolean;
 }
 
+@observer
 export default class Login extends React.Component<AppProps> {
     constructor(props: AppProps, state: AppState) {
         super(props, state);
@@ -57,6 +60,7 @@ export default class Login extends React.Component<AppProps> {
     }
 
     goMyWallet=()=>{
+        common.initAccountInfo();
         this.props.history.push("mywallet")
     }
 

@@ -109,20 +109,6 @@ declare class Transaction extends ThinNeo.Transaction {
     creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string, netfee?: Neo.Fixed8): void;
     getTxid(): string;
 }
-/**
- * 我的账户管理
- */
-declare class Common {
-    constructor();
-    private tabname;
-    private _network;
-    private _account;
-    private _accountList;
-    network: string;
-    accountList: NepAccount[];
-    account: AccountInfo;
-}
-declare const common: Common;
 declare const makeRpcPostBody: (method: any, params: any) => string;
 interface IOpts {
     method: string;
