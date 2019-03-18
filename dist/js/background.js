@@ -1147,8 +1147,8 @@ const invoke = (domain, params) => {
 const getNetworks = () => {
     return new Promise((resolve, reject) => {
         const network = {
-            networks: ["mainnet", "testnet"],
-            defaultNetwork: storage.network ? storage.network : "testnet"
+            networks: ["MainNet", "TesTnet"],
+            defaultNetwork: storage.network ? storage.network : "TestNet"
         };
         resolve(network);
     });
