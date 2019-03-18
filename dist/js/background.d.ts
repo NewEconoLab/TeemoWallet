@@ -256,13 +256,13 @@ declare const getAccount: () => Promise<{}>;
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-declare const invokeGroup: (domain: any, params: InvokeGroup) => Promise<{}>;
+declare const invokeGroup: (header: any, params: InvokeGroup) => Promise<{}>;
 /**
  * invoke 合约调用
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-declare const invoke: (domain: any, params: InvokeArgs) => Promise<{}>;
+declare const invoke: (header: any, params: InvokeArgs) => Promise<{}>;
 /**
  * 获得网络状态信息
  */
@@ -273,7 +273,7 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<{}>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
-declare var send: (params: SendArgs) => Promise<SendOutput>;
+declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
@@ -282,8 +282,9 @@ declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare const getProvider: () => Promise<{}>;
 declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
+declare const getPublicKey: () => Promise<GetPublickeyOutput>;
 declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
-declare const responseMessage: (request: any) => void;
+declare const responseMessage: (sender: any, request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,
     contract = 1
@@ -480,6 +481,10 @@ interface Provider {
         theme: string;
         currency: string;
     };
+}
+interface GetPublickeyOutput {
+    address: string;
+    publickey: string;
 }
 declare enum DataType {
     Array = "Array",

@@ -19,7 +19,6 @@ function injectCustomJs(jsPath?)
 window.addEventListener("message", function(e)
 {
     var request = e.data;
-    request['url']=document.URL;
     if(request.command)
     {
         chrome.runtime.sendMessage(request);

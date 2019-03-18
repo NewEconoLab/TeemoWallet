@@ -1205,9 +1205,7 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
                     tran.creatInuptAndOutup(utxo,amount,toaddr)
             }
         }
-        let result = await transactionSignAndSend(tran);
-        console.log("===============这里是invoke调用");
-        
+        let result = await transactionSignAndSend(tran);        
         TaskManager.addTask(new Task(ConfirmType.contract,result.txid));
         return result;
     } 
@@ -1240,7 +1238,7 @@ const openNotify=(notifyData:NotifyMessage,call)=> {
     {
         chrome.storage.local.set({notifyData},()=>
         {
-            var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+            var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
             
             //获得关闭事件
             var loop = setInterval(() => {
@@ -1254,7 +1252,7 @@ const openNotify=(notifyData:NotifyMessage,call)=> {
     }
     else
     {        
-        var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=0, left=0, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+        var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
         //获得关闭事件
         var loop = setInterval(() => {
                if(notify.closed) {
@@ -1290,11 +1288,12 @@ const getAccount=()=>{
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-const invokeGroup=(domain,params:InvokeGroup)=>{
+const invokeGroup=(header,params:InvokeGroup)=>{
     return new Promise((resolve,reject)=>{
         const data:NotifyMessage = {
             lable:Command.invokeGroup,
-            data:params
+            data:params,
+            header
         }
         
         openNotify(data,()=>{              
@@ -1316,10 +1315,10 @@ const invokeGroup=(domain,params:InvokeGroup)=>{
                     .then(result=>{
                         if(params.merge)
                         {                            
-                            TaskManager.addInvokeData(result[0].txid,domain,params.group);
+                            TaskManager.addInvokeData(result[0].txid,header.domain,params.group);
                         }else{
                             result.forEach((output,index,)=>{
-                                TaskManager.addInvokeData(output.txid,domain,params.group[index]);
+                                TaskManager.addInvokeData(output.txid,header.domain,params.group[index]);
                             });
                         }
                         resolve(result);
@@ -1343,11 +1342,12 @@ const invokeGroup=(domain,params:InvokeGroup)=>{
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-const invoke=(domain,params:InvokeArgs)=>{
+const invoke=(header,params:InvokeArgs)=>{
     return new Promise((resolve,reject)=>{
         const data:NotifyMessage = {
             lable:Command.invokeGroup,
-            data:params
+            data:params,
+            header
         }
         openNotify(data,()=>{
             chrome.storage.local.get(["confirm","checkNetFee"],res=>{
@@ -1358,7 +1358,7 @@ const invoke=(domain,params:InvokeArgs)=>{
                     contractBuilder(params)
                     .then(result=>{
                         resolve(result);
-                        TaskManager.addInvokeData(result.txid,domain,params);
+                        TaskManager.addInvokeData(result.txid,header.domain,params);
                     })
                     .catch(error=>{
                         reject(error);
@@ -1564,13 +1564,14 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
     }
 }
 
-var send = (params:SendArgs) =>
+var send = (header,params:SendArgs) =>
 {
     return new Promise<SendOutput>((resolve,reject)=>
     {
         const data:NotifyMessage = {
             lable:Command.send,
-            data:params
+            data:params,
+            header
         }
         openNotify(data,()=>
         {
@@ -1668,6 +1669,15 @@ const getStorage=(data:GetStorageArgs)=>
     })
 }
 
+const getPublicKey=()=>{
+    return new Promise<GetPublickeyOutput>((resolve,reject)=>
+    {
+        let provider:GetPublickeyOutput=
+        {address:storage.account.address,publickey:storage.account.pubkey.toHexString()}
+        resolve(provider);
+    })
+}
+
 const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
     return new Promise((r,j)=>{        
         if(storage.domains.indexOf(domain))
@@ -1708,73 +1718,72 @@ const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
     })
 }
 
-const responseMessage =(request)=>
+const responseMessage =(sender,request)=>
 {
-    const {ID,command,url,params}=request;
-    chrome.tabs.query({ url },  (tabs)=>
-    {        
-        const title = tabs[0].title;
-        const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
-        const url=urlReg.exec(tabs[0].url);
-        const domain = url?url[0]:tabs[0].url;
-        notifyInit(title,domain,tabs[0].favIconUrl)
-        .then(()=>{
-            switch (request.command) {
-                case Command.getProvider:
-                    sendResponse(getProvider());
-                    break;        
-                case Command.getNetworks:
-                    sendResponse(getNetworks());
-                    break;
-                case Command.getAccount:
-                    sendResponse(getAccount());
-                    break;
-                case Command.getBalance:
-                    sendResponse(getBalance(params));
-                    break;
-                case Command.getStorage:
-                    sendResponse(getStorage(params));
-                    break;
-                case Command.getPublicKey:
-                    
-                    break;
-                case Command.invoke:
-                    sendResponse(invoke(domain,params));
-                    break;
-                case Command.invokeGroup:
-                    sendResponse(invokeGroup(domain,params));
-                    break;
-                case Command.send:
-                    sendResponse(send(params))
-                    break;
-                case Command.invokeRead:
-                    sendResponse(invokeRead(params));
-                    break;
-                case Command.invokeReadGroup:
-                    sendResponse(invokeReadGroup(params));
-                    break;
-                default:
-                    sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
-                    break;
-            }
-        })
-        const sendResponse=(result:Promise<any>)=>
-        {
-            result
-            .then(data=>{
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    return:command,
-                    ID,data
-                });  
-            })
-            .catch(error=>{
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    return:command,
-                    ID,error
-                });  
-            })
+    const {ID,command,params}=request;
+    const tab = sender.tab;
+    const title = sender.tab.title;
+    const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
+    const url=urlReg.exec(tab.url);
+    const domain = url?url[0]:tab.url;
+    const header={title,domain,icon:tab.favIconUrl};
+    notifyInit(title,domain,tab.favIconUrl)
+    .then(()=>{
+        switch (command) {
+            case Command.getAccount:
+                sendResponse(getAccount());
+                break;
+            case Command.getProvider:
+                sendResponse(getProvider());
+                break;        
+            case Command.getNetworks:
+                sendResponse(getNetworks());
+                break;
+            case Command.getPublicKey:
+                sendResponse(getPublicKey());
+                break;
+            case Command.send:
+                sendResponse(send(header,params))
+                break;
+            case Command.getBalance:
+                sendResponse(getBalance(params));
+                break;
+            case Command.getStorage:
+                sendResponse(getStorage(params));
+                break;
+            case Command.invokeRead:
+                sendResponse(invokeRead(params));
+                break;
+            case Command.invoke:
+                sendResponse(invoke(header,params));
+                break;
+            case Command.invokeReadGroup:
+                sendResponse(invokeReadGroup(params));
+                break;
+            case Command.invokeGroup:
+                sendResponse(invokeGroup(header,params));
+                break;
+            default:
+                sendResponse(new Promise((r,j)=>j({type:"REQUEST_ERROR",description:"This method is not available"})))
+                break;
         }
     })
+    const sendResponse=(result:Promise<any>)=>
+    {
+        result
+        .then(data=>{
+            chrome.tabs.sendMessage(tab.id, {
+                return:command,
+                ID,data
+            });  
+        })
+        .catch(error=>{
+            chrome.tabs.sendMessage(tab.id, {
+                return:command,
+                ID,error
+            });  
+        })
+    }
 }
 
 
@@ -1782,10 +1791,10 @@ const responseMessage =(request)=>
  * 监听
  */
 chrome.runtime.onMessage.addListener(
-    (request, sender, sendResponse) => {
+    (request, sender, sendResponse) => {        
         //初始化鼠标随机方法
         if(request.command)
-            responseMessage(request);
+            responseMessage(sender,request);
     }
 );
 
@@ -2241,6 +2250,11 @@ interface Provider {
         theme: string,
         currency: string,
     };
+}
+
+interface GetPublickeyOutput{
+    address:string,
+    publickey:string
 }
 
 enum DataType

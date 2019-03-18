@@ -152,6 +152,10 @@ interface GetNetworksOutput {
     defaultNetwork: string;
 }
 
+interface GetPublickeyOutput{
+    address:string,
+    publickey:string
+}
 
 interface AccountOutput {
     address: string;
@@ -276,6 +280,10 @@ namespace Teemmo
          */
         static getStorage(params:GetStorageArgs):Promise<GetStorageOutput>{
             return sendMessage<GetStorageOutput>(Command.getStorage,params);
+        }
+
+        static getPublicKey():Promise<GetPublickeyOutput>{
+            return sendMessage<GetPublickeyOutput>(Command.getPublicKey);
         }
         
         /**
