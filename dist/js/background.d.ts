@@ -80,9 +80,9 @@ declare class Utxo {
     count: Neo.Fixed8;
 }
 declare class Storage_local {
-    static setAccount(account: AccountInfo): number;
+    static setAccount(account: NepAccount): NepAccount;
     static getAccount(): NepAccount[];
-    static set(key: string, value: any, call?: any): void;
+    static set(key: string, value: any): Promise<{}>;
     static get<T>(key: string): Promise<T>;
 }
 /**
@@ -249,7 +249,7 @@ declare const openNotify: (notifyData: NotifyMessage, call: any) => void;
 /**
  * 请求账户信息
  */
-declare const getAccount: (title: any) => Promise<{}>;
+declare const getAccount: () => Promise<{}>;
 /**
  * invokeGroup 合约调用
  * @param title 请求的网页信息
@@ -272,7 +272,7 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  */
 declare var getBalance: (data: GetBalanceArgs) => Promise<{}>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
-declare var send: (title: any, params: SendArgs) => Promise<SendOutput>;
+declare var send: (params: SendArgs) => Promise<SendOutput>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数

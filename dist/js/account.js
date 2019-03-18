@@ -61,7 +61,8 @@ var AccountManager = {
                 if (prikey != null) {
                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
                     const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-                    AccountManager.setAccount(new AccountInfo(new NepAccount("", address, nep2, scrypt), prikey, pubkey));
+                    const nepacc = Storage_local.setAccount(new NepAccount("", address, nep2, scrypt));
+                    AccountManager.setAccount(new AccountInfo(nepacc, prikey, pubkey));
                     resolve(true);
                 }
                 else {
@@ -85,18 +86,15 @@ var AccountManager = {
                     }
                     try {
                         const info = yield AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);
-                        arr.push(new AccountInfo(new NepAccount("", account.address, account.nep2key, wallet.scrypt), info.prikey, info.pubkey));
-                        for (let i = 0; i < arr.length; i++) {
-                            const account = arr[i];
-                            Storage_local.setAccount(account);
-                        }
+                        const nepacc = Storage_local.setAccount(new NepAccount("", account.address, account.nep2key, wallet.scrypt));
+                        arr.push(new AccountInfo(nepacc, info.prikey, info.pubkey));
                         AccountManager.setAccount(arr[0]);
-                        return { address: arr[0].address, lable: arr[0].walletName };
                     }
                     catch (error) {
                         throw error;
                     }
                 }
+                return { address: arr[0].address, lable: arr[0].walletName };
             }
             else {
                 throw console.error("The account cannot be empty");

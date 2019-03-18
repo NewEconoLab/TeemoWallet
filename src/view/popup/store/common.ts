@@ -39,8 +39,6 @@ class Common
         bg.getBalance(data)
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{
-                console.log(value);
-                
                 switch(value.symbol){
                     case 'NEO':
                         assets.NEO = parseFloat(value.amount);

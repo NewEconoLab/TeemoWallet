@@ -14,6 +14,7 @@ function injectCustomJs(jsPath) {
 // 接收向页面注入的JS
 window.addEventListener("message", function (e) {
     var request = e.data;
+    request['url'] = document.URL;
     if (request.command) {
         chrome.runtime.sendMessage(request);
     }
@@ -36,24 +37,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 window.onload = () => {
     injectCustomJs();
 };
-// function getBase64Image(img) {  
-//     var canvas = document.createElement("canvas");  
-//     canvas.width = img.width;  
-//     canvas.height = img.height;  
-//     var ctx = canvas.getContext("2d");  
-//     ctx.drawImage(img, 0, 0, img.width, img.height);  
-//     var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();  
-//     var dataURL = canvas.toDataURL("image/"+ext);  
-//     return dataURL;  
-// }
-// function getBase64ByUrl(url:string) {
-//     return new Promise<string>((r,j)=>{
-//         var image = new Image();
-//         image.src = url;
-//         image.onload = ()=>{  
-//         let base64 = getBase64Image(image);  
-//         r(base64);
-//         }
-//     })
-// }
 //# sourceMappingURL=content.js.map

@@ -30,7 +30,8 @@ interface IState
 			[asset: string]: string;
 		};
 		netfee: string;
-	}
+	},
+	dappMessage:{title:string,icon:string}
 }
 
 // @observer
@@ -43,7 +44,8 @@ export default class Panel extends React.Component<IProps, IState>
 	public state:IState = {
 		open:false,
 		tranMessage:null,
-		invokeMessage:null
+		invokeMessage:null,
+		dappMessage:{title:'',icon:''}
 	}
 	// 监控输入内容
 	public onClick = () =>
@@ -59,10 +61,7 @@ export default class Panel extends React.Component<IProps, IState>
 
 	componentDidMount()
 	{
-		console.log("=================================这里是Panel");
-		
-		console.log(this.props.task);
-		if(this.props.task.confirm == ConfirmType.tranfer)
+		if(this.props.task.type == ConfirmType.tranfer)
 		{
 			Storage_local.get('send-data')
 			.then(data =>{
@@ -76,14 +75,26 @@ export default class Panel extends React.Component<IProps, IState>
 			});
 		}
 		else
-		{			
+		{
 			Storage_local.get('invoke-data')
 			.then(invokes=>{
 				if(invokes)
 				{
+					console.log(invokes);
+					
 					this.setState({
 						invokeMessage:invokes[this.props.task.txid]
+					},()=>{
+						Storage_local.get('white_list')
+						.then(result=>{
+							this.setState({ dappMessage:result[this.state.invokeMessage.domain]},()=>{
+								console.log("invoke 数据初始化完成");
+								
+								console.log(this.state.dappMessage);
+							})
+						})
 					})
+
 				}
 			})
 		}
@@ -106,16 +117,28 @@ export default class Panel extends React.Component<IProps, IState>
 		}
 	}
 
+	public getIconForDomain()
+	{
+
+	}
+
 	public render()
 	{
 		return (
 			<div className="panel">
 				<div className="panel-heading" onClick={this.onClick}>
-				{this.props.task.confirm == ConfirmType.tranfer &&
+				{this.props.task.type == ConfirmType.tranfer?
 					<div className="transfer-type">
 						<div className="icon"><img src={ICON.output}/></div>
 						<div className="message">
 							<div className="type">个人转账</div>
+							<div className="time">{format("MM-dd hh:mm:ss",this.props.task.startTime.toString(),'cn')}</div>
+						</div>
+					</div>:
+					<div className="transfer-type">
+						<div className="icon"><img src={this.state.dappMessage.icon}/></div>
+						<div className="message">
+							<div className="type">合约交互</div>
 							<div className="time">{format("MM-dd hh:mm:ss",this.props.task.startTime.toString(),'cn')}</div>
 						</div>
 					</div>
@@ -130,6 +153,16 @@ export default class Panel extends React.Component<IProps, IState>
 						}
 					</div>
 				}
+				{
+					this.state.invokeMessage!=null&&					
+					<div className="asset">
+						{/* <div className="output">- {this.state.invokeMessage.spend} {this.getAssetSymbol(this.state.tranMessage.asset)}</div> */}
+						{
+							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
+							<div className="wait">等待确认</div>
+						}
+					</div>
+				}
 				</div>
 				{
 					this.state.open && 
@@ -138,7 +171,7 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="title">TXID</div>
 							<div className="value">{this.props.task.txid.substr(0,4)+'...'+this.props.task.txid.substr(this.props.task.txid.length-3,4)}</div>
 						</div>
-					{this.props.task.confirm==ConfirmType.tranfer?
+					{this.props.task.type==ConfirmType.tranfer?
 					<>
 						<div className="transaction-info">
 							<div className="transaction-title">转账</div>
@@ -158,7 +191,7 @@ export default class Panel extends React.Component<IProps, IState>
 					</>:
 					<>
 						<div className="transaction-info">
-							<div className="transaction-title">合约</div>
+							<div className="transaction-title">{this.state.dappMessage.title}</div>
 							<div className="send">
 								<div className="group">
 									<div className="title">合约hash</div>

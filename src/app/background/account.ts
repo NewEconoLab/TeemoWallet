@@ -71,8 +71,10 @@ var AccountManager={
                 {
                     const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
                     const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+                    
+                    const nepacc = Storage_local.setAccount(new NepAccount("",address,nep2,scrypt));
                     AccountManager.setAccount(new AccountInfo(
-                        new NepAccount("",address,nep2,scrypt),
+                        nepacc,
                         prikey,
                         pubkey
                     ));
@@ -105,23 +107,20 @@ var AccountManager={
                     }
                     try
                     {
-                        const info = await AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);                        
+                        const info = await AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);      
+                        const nepacc = Storage_local.setAccount(new NepAccount("",account.address,account.nep2key,wallet.scrypt));
                         arr.push(new AccountInfo(
-                            new NepAccount("",account.address,account.nep2key,wallet.scrypt),
+                            nepacc,
                             info.prikey,
                             info.pubkey
                         ));
-                        for (let i = 0; i < arr.length; i++) {
-                            const account = arr[i];  
-                            Storage_local.setAccount(account);
-                        }
                         AccountManager.setAccount(arr[0]);
-                        return {address:arr[0].address,lable:arr[0].walletName};
                     } catch (error)
                     {
                         throw error;
                     }
                 }
+                return {address:arr[0].address,lable:arr[0].walletName};
             } else
             {
                 throw console.error("The account cannot be empty");

@@ -161,14 +161,16 @@ class Storage_local {
                 return acc;
             });
             if (index < 0) {
+                newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包' + arr.length + 1;
                 arr.push(newacc);
             }
         }
         else {
+            newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包1';
             arr.push(newacc);
         }
         localStorage.setItem("TEEMMOWALLET_ACCOUNT", JSON.stringify(arr));
-        return index;
+        return newacc;
     }
     static getAccount() {
         const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
@@ -183,9 +185,10 @@ class Storage_local {
         }
         return accounts;
     }
-    static set(key, value, call) {
-        chrome.storage.local.set({ [key]: value }, () => { if (call)
-            call(); });
+    static set(key, value) {
+        return new Promise((r, j) => {
+            chrome.storage.local.set({ [key]: value }, () => { r(); });
+        });
     }
     ;
     static get(key) {
@@ -729,7 +732,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         try {
             let result = yield transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid.replace('0x', '')));
+            TaskManager.addTask(new Task(ConfirmType.contract, result.txid.replace('0x', '')));
             return [result];
         }
         catch (error) {
@@ -776,12 +779,12 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 trans.push(nextTran);
             }
         }
-        const task = new Task(ConfirmType.tranfer, txids[0].txid.replace('0x', ''), trans[0], TaskState.watting);
+        const task = new Task(ConfirmType.contract, txids[0].txid.replace('0x', ''), trans[0], TaskState.watting);
         TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if (index < (trans.length - 1)) {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, trans[index + 1], TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.contract, tran.txid, trans[index + 1], TaskState.watForLast));
             }
             else {
                 TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, undefined, TaskState.watForLast));
@@ -820,8 +823,8 @@ var exchangeCgas = (transcount, netfee) => __awaiter(this, void 0, void 0, funct
     utxo.count = Neo.Fixed8.fromNumber(transcount);
     utxo.n = 0;
     const data = yield makeRefundTransaction_tranGas(utxo, transcount, netfee);
-    TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid, data));
-    TaskManager.addTask(new Task(ConfirmType.tranfer, data.txid, undefined, TaskState.watForLast));
+    TaskManager.addTask(new Task(ConfirmType.contract, result.txid, data));
+    TaskManager.addTask(new Task(ConfirmType.contract, data.txid, undefined, TaskState.watForLast));
     let txids = [result, { "txid": data.txid, "nodeUrl": "https://api.nel.group/api" }];
     return txids;
 });
@@ -855,18 +858,18 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
     //     tran.inputs[i].hash = tran.inputs[i].hash.reverse();
     // }
     var scriptHash = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
-    // var script = new ScriptBuild();
-    // const refund:InvokeArgs = {
-    //     scriptHash:HASH_CONFIG.ID_CGAS.toString(),
-    //     operation:'refund',
-    //     arguments:[{type:"ByteArray",value:scriptHash.toHexString()}],
-    //     network:storage.network
-    // }
-    // script.EmitInvokeArgs(refund);
-    var script = new ThinNeo.ScriptBuilder();
-    script.EmitParamJson(["(bytes)" + scriptHash.toHexString()]); //第二个参数是个数组
-    script.EmitPushString("refund");
-    script.EmitAppCall(HASH_CONFIG.ID_CGAS);
+    var script = new ScriptBuild();
+    const refund = {
+        scriptHash: HASH_CONFIG.ID_CGAS.toString(),
+        operation: 'refund',
+        arguments: [{ type: "ByteArray", value: scriptHash.toHexString() }],
+        network: storage.network
+    };
+    script.EmitInvokeArgs(refund); // 这里的方法有推随机数进去不知道具体是否有影响
+    // var script = new ThinNeo.ScriptBuilder();
+    // script.EmitParamJson(["(bytes)" + scriptHash.toHexString()]);//第二个参数是个数组
+    // script.EmitPushString("refund");
+    // script.EmitAppCall(HASH_CONFIG.ID_CGAS);
     tran.setScript(script.ToArray());
     //构建一个script
     // let sb = new ScriptBuild();
@@ -894,6 +897,7 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
         const txid = result[0].txid.replace('0x', '');
         const nodeUrl = "https://api.nel.group/api";
         let ouput = { txid, nodeUrl };
+        TaskManager.addInvokeData(txid, "TeemmoWallet.exchangeCgas", refund);
         return ouput;
     }
     else {
@@ -990,7 +994,8 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
             }
         }
         let result = yield transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.tranfer, result.txid));
+        console.log("===============这里是invoke调用");
+        TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
         return result;
     }
     catch (error) {
@@ -1029,11 +1034,9 @@ const openNotify = (notifyData, call) => {
 /**
  * 请求账户信息
  */
-const getAccount = (title) => {
+const getAccount = () => {
     return new Promise((resolve, reject) => {
-        console.log("---------进入了 getAccount 方法");
         if (storage.account) {
-            chrome.storage.local.set({ trust: title });
             resolve({
                 address: storage.account.address,
                 label: storage.account.walletName
@@ -1290,11 +1293,10 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         }
     }
 });
-var send = (title, params) => {
+var send = (params) => {
     return new Promise((resolve, reject) => {
         const data = {
             lable: Command.send,
-            header: title,
             data: params
         };
         openNotify(data, () => {
@@ -1379,8 +1381,13 @@ const notifyInit = (title, domain, favIconUrl) => {
                 openNotify(notifyHeader, () => {
                     chrome.storage.local.get("confirm", res => {
                         if (res["confirm"] === "confirm") {
-                            storage.titles.push(title);
                             storage.domains.push(domain);
+                            Storage_local.get('white_list')
+                                .then(result => {
+                                let setData = result ? result : {};
+                                setData[domain] = { title, icon };
+                                Storage_local.set('white_list', setData);
+                            });
                             r();
                         }
                         else if (res["confirm"] === "cancel") {
@@ -1396,9 +1403,8 @@ const notifyInit = (title, domain, favIconUrl) => {
     });
 };
 const responseMessage = (request) => {
-    const { ID, command, message, params } = request;
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        console.log(message);
+    const { ID, command, url, params } = request;
+    chrome.tabs.query({ url }, (tabs) => {
         const title = tabs[0].title;
         const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;
         const url = urlReg.exec(tabs[0].url);
@@ -1413,7 +1419,7 @@ const responseMessage = (request) => {
                     sendResponse(getNetworks());
                     break;
                 case Command.getAccount:
-                    sendResponse(getAccount(message));
+                    sendResponse(getAccount());
                     break;
                 case Command.getBalance:
                     sendResponse(getBalance(params));
@@ -1429,7 +1435,7 @@ const responseMessage = (request) => {
                     sendResponse(invokeGroup(domain, params));
                     break;
                 case Command.send:
-                    sendResponse(send(message, params));
+                    sendResponse(send(params));
                     break;
                 case Command.invokeRead:
                     sendResponse(invokeRead(params));
@@ -1569,17 +1575,33 @@ class TaskManager {
                 }
             }
         }
+        else {
+            hashs.push(data.scriptHash);
+            if (data.description) {
+                descripts.push(data.description);
+            }
+            if (data.fee) {
+                fee.add(Neo.Fixed8.parse(data.fee));
+            }
+            if (data.attachedAssets) {
+                spend = data.attachedAssets;
+            }
+            if (data.operation == 'transfer') {
+                // assets[invoke.scriptHash] = invoke.operation[0]
+            }
+        }
         const message = { domain, hashs, descripts, spend, netfee: fee.toString() };
         Storage_local.get('invoke-data')
             .then(invokes => {
             let setdata = invokes ? invokes : {};
             setdata[txid] = message;
-            Storage_local.set('invoke-data', message);
+            Storage_local.set('invoke-data', setdata);
         })
             .catch(error => {
         });
     }
     static addTask(task) {
+        console.log(task);
         Storage_local.get(this.table)
             .then(shed => {
             if (shed) {
@@ -1629,9 +1651,23 @@ class TaskManager {
                     });
                 }
                 else {
-                    Api.hasContract(task.txid)
+                    // Api.hasContract(task.txid)
+                    // .then(result=>{
+                    //     console.log(result);                        
+                    // })
+                    // .catch(error=>{
+                    //     console.log(error);                        
+                    // })
+                    Api.getrawtransaction(task.txid)
                         .then(result => {
-                        console.log(result);
+                        if (result['blockhash']) {
+                            task.state = TaskState.success;
+                            this.shed[key] = task;
+                            Storage_local.set(this.table, this.shed);
+                            if (task.next) {
+                                TransferGroup.update(task.next);
+                            }
+                        }
                     })
                         .catch(error => {
                         console.log(error);

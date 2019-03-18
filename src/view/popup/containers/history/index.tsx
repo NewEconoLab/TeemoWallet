@@ -104,10 +104,10 @@ export default class History extends React.Component<any, {}>
             <div className="transactionlist">
                 <div className="waitlist">
                     <div className="title">排队中</div>
-                    {/* {this.state.tasklist.length>0 && this.state.tasklist.map((task,key)=>{
+                    {this.state.tasklist.length>0 && this.state.tasklist.map((task,key)=>{
                         if(task.state == TaskState.watting || task.state==TaskState.watForLast)
                             return (<Panel task={task} ></Panel>)
-                    })} */}
+                    })}
                 </div>
                 <div className="history">
                     <div className="title">交易历史</div>
@@ -119,10 +119,9 @@ export default class History extends React.Component<any, {}>
                             <Checkbox text="隐藏0GAS"></Checkbox>
                         </div>
                     </div>
-                    {this.state.tasklist.length!==0 && (this.state.tasklist.map((value,key)=>{
-                        console.log(value);
-                        
-                        return <Panel task={value}></Panel>;
+                    {this.state.tasklist.length!==0 && (this.state.tasklist.map((task,key)=>{
+                        if(task.state !=TaskState.watting && task.state!=TaskState.watForLast)
+                            return (<Panel task={task} ></Panel>)
                     }))}
                 </div>
             </div>
