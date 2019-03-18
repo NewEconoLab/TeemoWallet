@@ -1102,8 +1102,10 @@ const invoke = (domain, params) => {
             data: params
         };
         openNotify(data, () => {
-            chrome.storage.local.get("confirm", res => {
+            chrome.storage.local.get(["confirm", "checkNetFee"], res => {
                 if (res["confirm"] === "confirm") {
+                    const checkNetFee = res['checkNetFee'];
+                    params.fee = (params.fee && params.fee != '0') ? params.fee : (checkNetFee ? '0.001' : '0');
                     contractBuilder(params)
                         .then(result => {
                         resolve(result);

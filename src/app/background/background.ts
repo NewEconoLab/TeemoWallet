@@ -1290,9 +1290,20 @@ const invokeGroup=(domain,params:InvokeGroup)=>{
         }
         
         openNotify(data,()=>{              
-            chrome.storage.local.get("confirm",res=>{
+            chrome.storage.local.get(["confirm","checkNetFee"],res=>{
                 if(res["confirm"]==="confirm")
                 {
+                    if(params.merge)
+                    {
+                        const fee = Neo.Fixed8.Zero;
+                        params.group.map((invoke,index)=>{
+                            fee.add(Neo.Fixed8.parse(invoke.fee?invoke.fee:'0'));
+                        })
+                        if(fee.compareTo(Neo.Fixed8.Zero)<0)
+                        {
+                            params.group[0].fee=res['checkNetFee']?'0.001':'0';
+                        }
+                    }
                     invokeGroupBuild(params)
                     .then(result=>{
                         if(params.merge)
@@ -1331,9 +1342,11 @@ const invoke=(domain,params:InvokeArgs)=>{
             data:params
         }
         openNotify(data,()=>{
-            chrome.storage.local.get("confirm",res=>{
+            chrome.storage.local.get(["confirm","checkNetFee"],res=>{
                 if(res["confirm"]==="confirm")
                 {
+                    const checkNetFee =res['checkNetFee'];
+                    params.fee=(params.fee && params.fee!='0')?params.fee:(checkNetFee?'0.001':'0');
                     contractBuilder(params)
                     .then(result=>{
                         resolve(result);

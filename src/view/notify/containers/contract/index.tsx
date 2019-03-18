@@ -6,6 +6,7 @@ import * as React from 'react';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
+import { Storage_local } from '../../../../common/util';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -120,6 +121,11 @@ export default class ContractRequest extends React.Component<IProps, IState>
       });
   }
 
+  public netfeeChange=(check:boolean)=>
+  {
+    Storage_local.set('checkNetFee',check);
+  }
+
   public nextPage = () =>
   {
     this.setState({
@@ -181,7 +187,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
               {
                 parseFloat(this.state.fee) === 0 && (
                   <div className="check-fee">
-                    <Checkbox text="优先确认交易（支付0.001 GAS）"></Checkbox>
+                    <Checkbox text="优先确认交易（支付0.001 GAS）" onClick={this.netfeeChange}></Checkbox>
                   </div>
                 )
               }
