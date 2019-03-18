@@ -787,7 +787,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 TaskManager.addTask(new Task(ConfirmType.contract, tran.txid, trans[index + 1], TaskState.watForLast));
             }
             else {
-                TaskManager.addTask(new Task(ConfirmType.tranfer, tran.txid, undefined, TaskState.watForLast));
+                TaskManager.addTask(new Task(ConfirmType.contract, tran.txid, undefined, TaskState.watForLast));
             }
         }
         return txids;
@@ -1062,8 +1062,17 @@ const invokeGroup = (domain, params) => {
             data: params
         };
         openNotify(data, () => {
-            chrome.storage.local.get("confirm", res => {
+            chrome.storage.local.get(["confirm", "checkNetFee"], res => {
                 if (res["confirm"] === "confirm") {
+                    if (params.merge) {
+                        const fee = Neo.Fixed8.Zero;
+                        params.group.map((invoke, index) => {
+                            fee.add(Neo.Fixed8.parse(invoke.fee ? invoke.fee : '0'));
+                        });
+                        if (fee.compareTo(Neo.Fixed8.Zero) < 0) {
+                            params.group[0].fee = res['checkNetFee'] ? '0.001' : '0';
+                        }
+                    }
                     invokeGroupBuild(params)
                         .then(result => {
                         if (params.merge) {
@@ -1389,6 +1398,7 @@ const notifyInit = (title, domain, favIconUrl) => {
                                 let setData = result ? result : {};
                                 setData[domain] = { title, icon };
                                 Storage_local.set('white_list', setData);
+                                EventsOnChange(WalletEvents.CONNECTED, { address: storage.account.address, label: storage.account.walletName });
                             });
                             r();
                         }

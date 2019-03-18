@@ -960,7 +960,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 ))
             }else{
                 TaskManager.addTask(new Task(
-                    ConfirmType.tranfer,tran.txid,undefined,TaskState.watForLast
+                    ConfirmType.contract,tran.txid,undefined,TaskState.watForLast
                 ))
             }
         }
@@ -1662,6 +1662,8 @@ const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
                                 let setData = result?result:{};
                                 setData[domain]={title,icon};
                                 Storage_local.set('white_list',setData);
+                                
+                                EventsOnChange(WalletEvents.CONNECTED,{address:storage.account.address,label:storage.account.walletName});
                             })
                             r()
                         }else if(res["confirm"]==="cancel"){
