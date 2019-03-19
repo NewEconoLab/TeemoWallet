@@ -33,6 +33,19 @@
     <pre id="getBalance_R">getBalance rerurn</pre>
 
     <hr />
+    <p>getStorage</p>
+    <textarea id="getStorage_input" rows="10" cols="120" placeholder="getStorage_input">
+    {
+        "scriptHash":"03febccf81ac85e3d795bc5cbd4e84e907812aa3",
+        "key":"5065746572",
+        "network":"TestNet"
+    }
+    </textarea>
+    <br />
+    <button id="getStorage_do">getStorage</button>
+    <pre id="getStorage_R">getStorage rerurn</pre>
+
+    <hr />
     <p>input  invokeRead params</p>
     <textarea id="invokeRead_input" rows="6" cols="120" placeholder="invokeRead_input">
     {
@@ -122,6 +135,7 @@
     <hr name="invokeGroup" id="invokeGroup" />
     <p>input  invokeGroup params</p>
     <a id="merge" href="#invokeGroup">merge</a>  <a id="unmerge" href="#invokeGroup">unmerge</a>
+    <br />
     <textarea id="invokeGroup_input" rows="20" cols="120" placeholder="invokeGroup_input">
     {
         "merge": true,
@@ -170,17 +184,5 @@
     <br />
     <button id="invokeGroup_do">invokeGroup</button>
     <pre id="invokeGroup_R">invokeGroup rerurn</pre>
-    <hr />
-    <p>getStorage</p>
-    <textarea id="getStorage_input" rows="10" cols="120" placeholder="getStorage_input">
-    {
-        "scriptHash":"03febccf81ac85e3d795bc5cbd4e84e907812aa3",
-        "key":"5065746572",
-        "network":"TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getStorage_do">getStorage</button>
-    <pre id="getStorage_R">getStorage rerurn</pre>
 </body>
 </html>
