@@ -22,16 +22,17 @@ interface IState
 {
 	open:boolean,
 	tranMessage:SendArgs,
-	invokeMessage:{
-		domain: string;
-		hashs: string[];
-		descripts: string[];
-		spend: {
-			[asset: string]: string;
-		};
-		netfee: string;
-	},
+	invokeMessage:InvokeHistory,
 	dappMessage:{title:string,icon:string}
+}
+
+interface InvokeHistory
+{
+    domain: string;
+    scriptHashs: string[];
+    descripts: string[];
+    expenses: {assetid:string,symbol:string,amount:string}[];
+    netfee: string;
 }
 
 // @observer
@@ -156,7 +157,14 @@ export default class Panel extends React.Component<IProps, IState>
 				{
 					this.state.invokeMessage!=null&&					
 					<div className="asset">
-						{/* <div className="output">- {this.state.invokeMessage.spend} {this.getAssetSymbol(this.state.tranMessage.asset)}</div> */}
+						<div className="output">
+						{
+							this.state.invokeMessage.expenses?
+							(this.state.invokeMessage.expenses.length==1?this.state.invokeMessage.expenses[0].amount+' '+this.state.invokeMessage.expenses[0].symbol:
+							'-'+this.state.invokeMessage.expenses[0].amount+' '+this.state.invokeMessage.expenses[0].symbol+'，...'):
+							<></>
+						}
+						</div>
 						{
 							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
 							<div className="wait">等待确认</div>
@@ -195,7 +203,7 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="send">
 								<div className="group">
 									<div className="title">合约hash</div>
-									<div className="value">{this.state.invokeMessage.hashs.map(hash=>(hash.substr(0,4)+"..."+hash.substr(hash.length-3,4))).join(',')}</div>
+									<div className="value">{this.state.invokeMessage.scriptHashs.map(hash=>(hash.substr(0,4)+"..."+hash.substr(hash.length-3,4))).join(',')}</div>
 								</div>
 								<div className="group">
 									<div className="title">备注</div>
@@ -204,7 +212,11 @@ export default class Panel extends React.Component<IProps, IState>
 							</div>
 							<div className="group expense">
 								<div className="title">花费</div>
-								<div className="value"></div>
+								<div className="value">
+								{this.state.invokeMessage.expenses.map((val,key)=>{
+									return val.amount+' '+val.symbol;
+								}).join(',')}
+								</div>
 							</div>
 							<div className="group netfee">
 								<div className="title">手续费</div>

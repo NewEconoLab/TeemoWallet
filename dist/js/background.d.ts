@@ -272,13 +272,14 @@ declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
-    scriptHashs: any[];
-    descriptions: any[];
-    operations: any[];
+    scriptHashs: string[];
+    descriptions: string[];
+    operations: string[];
     arguments: any[];
     expenses: {
         symbol: string;
         amount: string;
+        assetid: string;
     }[];
     fee: string;
 }>;
@@ -323,9 +324,23 @@ declare class TransferGroup {
     };
     static update(tran: TransferGroup): void;
 }
+interface InvokeHistory {
+    domain: string;
+    scriptHashs: string[];
+    descripts: string[];
+    expenses: {
+        assetid: string;
+        symbol: string;
+        amount: string;
+    }[];
+    netfee: string;
+}
 declare class TaskManager {
     static shed: {
         [txid: string]: Task;
+    };
+    static invokeHistory: {
+        [txid: string]: InvokeHistory;
     };
     static table: string;
     static start(): void;

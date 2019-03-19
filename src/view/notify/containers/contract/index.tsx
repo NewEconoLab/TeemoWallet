@@ -193,9 +193,9 @@ export default class ContractRequest extends React.Component<IProps, IState>
                 <div className="line-wrap">
                   <div className="line-left">花费</div>
                   <div className="line-right">
-                    {this.state.expenses.map((val,key)=>{
-                      return(<span>{parseFloat(val.amount)+" "+val.symbol}</span>)
-                    })}
+                    <span>
+                    {this.state.expenses.map(val=> parseFloat(val.amount)+" "+val.symbol).join(',')}
+                    </span>
                   </div>
                 </div>
                 {
