@@ -59,13 +59,14 @@ export default class History extends React.Component<any, {}>
         .then(shed=>{
             if(shed)
             {
-                const list = [];
+                const list:Task[] = [];
                 for (const txid in shed) {
                     if (shed.hasOwnProperty(txid)) {
                         const task = shed[txid];
                         list.push(task);
                     }
                 }
+                list.sort((a,b)=>b.startTime-a.startTime)
                 this.setState({
                     tasklist:list
                 },()=>{
@@ -98,8 +99,6 @@ export default class History extends React.Component<any, {}>
 	public render()
 	{
         console.log("--------------------任务列表数量是");
-        
-        console.log(this.state.tasklist.length);
         
 		return (
             <div className="transactionlist">
