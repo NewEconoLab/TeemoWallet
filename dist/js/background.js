@@ -345,7 +345,14 @@ function request(opts) {
         }
     });
 }
-var Api = {
+const Api = {
+    getAssetState: (assetID) => {
+        return request({
+            method: "getassetstate",
+            params: [assetID],
+            baseUrl: 'rpc'
+        });
+    },
     getStorage: (scriptHash, key) => {
         return request({
             method: "getstorage",
@@ -762,6 +769,10 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         return txids;
     }
 });
+/**
+ * 发送
+ * @param trans
+ */
 const sendGroupTranstion = (trans) => {
     return new Promise((resolve, reject) => {
         let outputs = [];
@@ -1338,6 +1349,92 @@ var invokeReadGroup = (data) => {
         }
     });
 };
+var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function* () {
+    let descriptions = [];
+    let scriptHashs = [];
+    let fee = Neo.Fixed8.Zero;
+    let operations = [];
+    let argument = [];
+    let expenses = [];
+    let assets = {};
+    for (let index = 0; index < invokes.length; index++) {
+        const invoke = invokes[index];
+        descriptions.push(invoke.description);
+        scriptHashs.push(invoke.scriptHash);
+        fee = invoke.fee ? fee.add(Neo.Fixed8.parse(invoke.fee)) : fee;
+        operations.push(invoke.operation);
+        argument.push(invoke.arguments);
+        // 判断 nep5的转账花费
+        if (invoke.operation == "transfer") {
+            if (invoke.arguments[0].value == storage.account.address) {
+                const amount = Neo.Fixed8.parse(invoke.arguments[2].value);
+                if (!assets[invoke.scriptHash])
+                    assets[invoke.scriptHash] = Neo.Fixed8.Zero;
+                assets[invoke.scriptHash] = assets[invoke.scriptHash].add(amount);
+            }
+        }
+        if (invoke.attachedAssets) {
+            for (const asset in invoke.attachedAssets) {
+                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
+                if (!assets[asset])
+                    assets[asset] = Neo.Fixed8.Zero;
+                assets[asset] = amount.add(assets[asset]);
+            }
+        }
+    }
+    for (const key in assets) {
+        const amount = assets[key];
+        const assetstate = yield queryAssetSymbol(key, invokes[0].network);
+        expenses.push({
+            symbol: assetstate.symbol,
+            amount: parseFloat(amount.toString()).toFixed(assetstate.decimals)
+        });
+    }
+    return { scriptHashs, descriptions, operations, arguments: argument, expenses, fee: fee.toString() };
+});
+const queryAssetSymbol = (assetID, network) => __awaiter(this, void 0, void 0, function* () {
+    assetID = assetID.replace('0x', '');
+    if (assetID.hexToBytes().length == 20) {
+        const group = {
+            "group": [
+                {
+                    "scriptHash": assetID,
+                    "operation": "symbol",
+                    "arguments": [],
+                    "network": network
+                },
+                {
+                    "scriptHash": assetID,
+                    "operation": "decimals",
+                    "arguments": [],
+                    "network": network
+                }
+            ]
+        };
+        const result = yield invokeReadGroup(group);
+        const stack = result['stack'];
+        if (stack) {
+            const symbol = ThinNeo.Helper.Bytes2String(stack[0]['value'].hexToBytes());
+            const decimals = parseInt(stack[1]['value']);
+            return { symbol, decimals };
+        }
+    }
+    if (assetID.hexToBytes().length == 32) {
+        let asset = { symbol: '', decimals: 0 };
+        if (assetID === HASH_CONFIG.ID_NEO)
+            asset.symbol = 'NEO';
+        else if (assetID === HASH_CONFIG.ID_GAS)
+            asset.symbol = 'GAS';
+        else {
+            const result = yield Api.getAssetState(assetID);
+            const names = result[name];
+            for (var i in names) {
+                asset.symbol = names[i].name;
+            }
+        }
+        return asset;
+    }
+});
 const getProvider = () => {
     return new Promise((resolve, reject) => {
         let provider = {

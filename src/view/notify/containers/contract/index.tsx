@@ -7,6 +7,7 @@ import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 import { Storage_local } from '../../../../common/util';
+import { InvokeGroup,Background, InvokeReadGroup } from '../../../../lib/background';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -25,12 +26,13 @@ interface IState
   fee: string,
   operation: string[],
   arguments: Array<Argument>
-  expenses:{[asset:string]:string}
+  expenses:{symbol:string,amount:string}[];
 }
 // @observer
 export default class ContractRequest extends React.Component<IProps, IState>
 {
-  public state = {
+  public bg:Background = chrome.extension.getBackgroundPage()as Background;
+  public state:IState = {
     pageNumber: 0, // 0为上一页，1为下一页
     data: null,
     description: [],
@@ -38,7 +40,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
     fee: '0',
     operation: [],
     arguments: [],
-    expenses:{},
+    expenses:[],
   }
   public componentWillReceiveProps(nextProps)
   {
@@ -69,56 +71,77 @@ export default class ContractRequest extends React.Component<IProps, IState>
       this.initData(invoke);
     }
   }
+
   // 初始化state
   public initData = (invoke: InvokeArgs[]) =>
   {
-    let description = [];
-    let scriptHash = [];
-    let fee = 0;
-    let operation = [];
-    let argument = [];
-    let expenses = {}
-    invoke.map((key, value) =>
-    {
-      console.log(key);
-      console.log(value);
-      description[value] = key.description;
-      scriptHash[value] = key.scriptHash;
-      fee = key.fee ? parseFloat(key.fee) : 0 + fee;
-      operation[value] = key.operation;
-      argument[value] = key.arguments;
-      // 判断 nep5的转账花费
-      // if(key.operation=="transfer")
-      // {
-      //   if(key.arguments[0].value==this.props.address)
-      //   {
-      //     expenses[key.scriptHash]=key.arguments[2];
-      //   }
-      // }
-      if(key.attachedAssets)
-      {
-        for (const asset in key.attachedAssets) {
-          if (key.attachedAssets.hasOwnProperty(asset)) {
-            const amount = parseFloat(key.attachedAssets[asset]);
-            expenses[asset]=expenses[asset]?expenses[asset]+amount:amount;
-          }
+    console.log("----------------初始化数据");
+    
+    this.bg.invokeArgsAnalyse(...invoke)
+    .then(result=>{
+      console.log("-------------得到了返回结果");
+      
+      console.log(result);
+      
+      this.setState({
+        description: result.descriptions,
+        scriptHash: result.scriptHashs,
+        fee: result.fee,
+        operation: result.operations,
+        arguments: result.arguments,
+        expenses: result.expenses
+      }, () =>
+        {
+          console.log("打印state");
+          console.log(this.state);
         }
-        Object.keys(key.attachedAssets).map(value=>{
-          expenses[value]=key.attachedAssets[value];
-        })
-      }
+      );
     })
-    this.setState({
-      description: description,
-      scriptHash: scriptHash,
-      fee: fee.toString(),
-      operation: operation,
-      arguments: argument
-    }, () =>
-      {
-        console.log("打印state");
-        console.log(this.state);
-      });
+    // let description = [];
+    // let scriptHash = [];
+    // let fee = 0;
+    // let operation = [];
+    // let argument = [];
+    // let expenses = [];
+    // invoke.map((key, value) =>
+    // {
+    //   description[value] = key.description;
+    //   scriptHash[value] = key.scriptHash;
+    //   fee = key.fee ? parseFloat(key.fee) : 0 + fee;
+    //   operation[value] = key.operation;
+    //   argument[value] = key.arguments;
+    //   // 判断 nep5的转账花费
+    //   if(key.operation=="transfer")
+    //   {
+    //     if(key.arguments[0].value==this.props.address)
+    //     {
+    //       expenses.push()
+    //     }
+    //   }
+    //   if(key.attachedAssets)
+    //   {
+    //     for (const asset in key.attachedAssets) {
+    //       if (key.attachedAssets.hasOwnProperty(asset)) {
+    //         const amount = parseFloat(key.attachedAssets[asset]);
+    //         expenses[asset]=expenses[asset]?expenses[asset]+amount:amount;
+    //       }
+    //     }
+    //     Object.keys(key.attachedAssets).map(value=>{
+    //       expenses[value]=key.attachedAssets[value];
+    //     })
+    //   }
+    // })
+    // this.setState({
+    //   description: description,
+    //   scriptHash: scriptHash,
+    //   fee: fee.toString(),
+    //   operation: operation,
+    //   arguments: argument
+    // }, () =>
+    //   {
+    //     console.log("打印state");
+    //     console.log(this.state);
+    //   });
   }
 
   public netfeeChange=(check:boolean)=>
@@ -170,7 +193,9 @@ export default class ContractRequest extends React.Component<IProps, IState>
                 <div className="line-wrap">
                   <div className="line-left">花费</div>
                   <div className="line-right">
-                    <span>0 GAS</span>
+                    {this.state.expenses.map((val,key)=>{
+                      return(<span>{parseFloat(val.amount)+" "+val.symbol}</span>)
+                    })}
                   </div>
                 </div>
                 {

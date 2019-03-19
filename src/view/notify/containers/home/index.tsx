@@ -33,7 +33,8 @@ export default class Home extends React.Component<any, any> {
         {
           const account = {address:bg.storage.account.address,label:bg.storage.account.walletName}
           this.setState({account,login:true});
-        }else
+        }
+        else
         {
           this.setState({
             login:false

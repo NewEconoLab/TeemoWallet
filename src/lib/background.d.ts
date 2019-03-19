@@ -42,6 +42,17 @@ declare interface Background extends Window{
     transfer: (data: SendArgs) => Promise<SendOutput>;
     invokeRead: (data: InvokeReadInput) => Promise<{}>;
     invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
+    invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
+        scriptHashs: any[];
+        descriptions: any[];
+        operations: any[];
+        arguments: any[];
+        expenses: {
+            symbol: string;
+            amount: string;
+        }[];
+        fee: string;
+    }>;
 }
 
 interface SendArgs {
@@ -79,8 +90,6 @@ interface Balance {
     symbol: string;
     amount: string;
 }
-
-
   
 /**
  * invoke 请求参数

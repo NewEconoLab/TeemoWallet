@@ -450,7 +450,15 @@ async function request(opts: IOpts) {
     }
 }
 
-var Api = {
+const Api = {
+    getAssetState:(assetID:string)=>{
+        return request({
+            method:"getassetstate",
+            params:[assetID],
+            baseUrl:'rpc'
+        })
+    },
+
     getStorage:(scriptHash:string,key:string)=>{
         return request({
             method:"getstorage",
@@ -911,6 +919,11 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
     }
 }
 
+
+/**
+ * 发送
+ * @param trans 
+ */
 const sendGroupTranstion=(trans:Transaction[])=>{
     return new Promise<InvokeOutput[]>((resolve,reject)=>{
         let outputs:InvokeOutput[]=[];
@@ -1566,6 +1579,103 @@ var invokeReadGroup=(data:InvokeReadGroup)=>{
             j(error);
         }
     })
+}
+
+var invokeArgsAnalyse=async(...invokes:InvokeArgs[])=>{
+    let descriptions = [];
+    let scriptHashs = [];
+    let fee = Neo.Fixed8.Zero;
+    let operations = [];
+    let argument = [];
+    let expenses:{symbol:string,amount:string}[] = [];
+    let assets:{[asset:string]:Neo.Fixed8}= {};
+    for (let index = 0; index < invokes.length; index++) {
+        const invoke = invokes[index];        
+        descriptions.push(invoke.description);
+        scriptHashs.push(invoke.scriptHash);
+        fee = invoke.fee ? fee.add(Neo.Fixed8.parse(invoke.fee)) :fee;
+        operations.push(invoke.operation);
+        argument.push(invoke.arguments);
+        // 判断 nep5的转账花费
+        if(invoke.operation=="transfer")
+        {
+            if(invoke.arguments[0].value==storage.account.address)
+            {
+                const amount = Neo.Fixed8.parse(invoke.arguments[2].value as string)
+                if(!assets[invoke.scriptHash])
+                    assets[invoke.scriptHash]=Neo.Fixed8.Zero;
+                assets[invoke.scriptHash]=assets[invoke.scriptHash].add(amount);
+            }
+        }
+        if(invoke.attachedAssets)
+        {
+            for (const asset in invoke.attachedAssets) {
+                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
+                if(!assets[asset])
+                    assets[asset]=Neo.Fixed8.Zero;
+                assets[asset]=amount.add(assets[asset]);
+            }
+        }
+    }
+    for (const key in assets) {
+        const amount = assets[key]
+        const assetstate = await queryAssetSymbol(key,invokes[0].network);
+        expenses.push({
+            symbol:assetstate.symbol,
+            amount:parseFloat(amount.toString()).toFixed(assetstate.decimals)
+        })
+    }
+    return {scriptHashs,descriptions,operations,arguments:argument,expenses,fee:fee.toString()}
+}
+
+const queryAssetSymbol=async(assetID:string,network:'TestNet'|'MainNet')=>
+{
+    assetID = assetID.replace('0x','');
+    if(assetID.hexToBytes().length==20)
+    {
+        const group:InvokeReadGroup = {
+          "group":[
+                {
+                    "scriptHash": assetID,
+                    "operation": "symbol",
+                    "arguments":[],
+                    "network": network
+                },
+                {
+                    "scriptHash": assetID,
+                    "operation": "decimals",
+                    "arguments": [],
+                    "network": network
+                }
+            ]
+        }
+        const result = await invokeReadGroup(group);
+        const stack:string = result['stack'];
+        if(stack)
+        {
+            const symbol:string = ThinNeo.Helper.Bytes2String((stack[0]['value'] as string).hexToBytes());
+            const decimals:number = parseInt(stack[1]['value']);
+            return {symbol,decimals}; 
+        }
+    }
+    if(assetID.hexToBytes().length==32)
+    {
+        let asset = {symbol:'',decimals:0};
+        if(assetID===HASH_CONFIG.ID_NEO)
+            asset.symbol='NEO'
+        else if(assetID===HASH_CONFIG.ID_GAS)
+            asset.symbol='GAS'
+        else
+        {
+            const result = await Api.getAssetState(assetID);
+            const names = result[name];
+            for (var i in names)
+            {
+                asset.symbol = names[i].name;
+            }
+        }
+        return asset;
+    }
 }
 
 const getProvider=()=>

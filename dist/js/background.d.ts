@@ -123,7 +123,8 @@ declare const makeRpcUrl: (url: any, method: any, params: any) => string;
  * @param opts 请求参数
  */
 declare function request(opts: IOpts): Promise<any>;
-declare var Api: {
+declare const Api: {
+    getAssetState: (assetID: string) => Promise<any>;
     getStorage: (scriptHash: string, key: string) => Promise<any>;
     getcontractstate: (scriptaddr: string) => Promise<any>;
     getavailableutxos: (address: string, count: number) => Promise<any>;
@@ -194,6 +195,10 @@ declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
  * @param data 合并合约调用参数
  */
 declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
+/**
+ * 发送
+ * @param trans
+ */
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
 /**
  *
@@ -266,6 +271,21 @@ declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
  */
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
+declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
+    scriptHashs: any[];
+    descriptions: any[];
+    operations: any[];
+    arguments: any[];
+    expenses: {
+        symbol: string;
+        amount: string;
+    }[];
+    fee: string;
+}>;
+declare const queryAssetSymbol: (assetID: string, network: "TestNet" | "MainNet") => Promise<{
+    symbol: string;
+    decimals: number;
+}>;
 declare const getProvider: () => Promise<{}>;
 declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const getPublicKey: () => Promise<GetPublickeyOutput>;
