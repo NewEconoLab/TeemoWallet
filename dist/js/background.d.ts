@@ -342,6 +342,9 @@ declare class TaskManager {
     static invokeHistory: {
         [txid: string]: InvokeHistory;
     };
+    static sendHistory: {
+        [txid: string]: SendArgs;
+    };
     static table: string;
     static start(): void;
     static addSendData(txid: string, data: SendArgs): void;

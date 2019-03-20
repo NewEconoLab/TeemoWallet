@@ -1368,7 +1368,7 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
         // 判断 nep5的转账花费
         if (invoke.operation == "transfer") {
             if (invoke.arguments[0].value == storage.account.address) {
-                const amount = Neo.BigInteger.fromString(invoke.arguments[2].value);
+                const amount = Neo.BigInteger.fromString(invoke.arguments[2].value.toString());
                 if (!nep5assets[invoke.scriptHash])
                     nep5assets[invoke.scriptHash] = Neo.BigInteger.Zero;
                 nep5assets[invoke.scriptHash] = nep5assets[invoke.scriptHash].add(amount);
@@ -1376,7 +1376,7 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
         }
         if (invoke.attachedAssets) {
             for (const asset in invoke.attachedAssets) {
-                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
+                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset].toString());
                 if (!utxoassets[asset])
                     utxoassets[asset] = Neo.Fixed8.Zero;
                 utxoassets[asset] = utxoassets[asset].add(amount);
@@ -1656,7 +1656,7 @@ class TaskManager {
                 if (count - storage.height > 0) {
                     storage.height = count;
                     this.initShed()
-                        .then(shed => {
+                        .then(result => {
                         this.update();
                     });
                 }
@@ -1667,18 +1667,10 @@ class TaskManager {
         }, 15000);
     }
     static addSendData(txid, data) {
-        Storage_local.get('send-data')
-            .then(senddata => {
-            let setdata = senddata ? senddata : {};
-            setdata[txid] = data;
-            Storage_local.set('send-data', setdata);
-        });
+        this.sendHistory[txid] = data;
+        Storage_local.set('send-data', this.sendHistory);
     }
     static addInvokeData(txid, domain, data) {
-        const hashs = [];
-        const descripts = [];
-        let fee = Neo.Fixed8.Zero;
-        let expenses = [];
         if (Array.isArray(data)) {
             invokeArgsAnalyse(...data)
                 .then(result => {
@@ -1714,21 +1706,11 @@ class TaskManager {
     }
     static initShed() {
         return new Promise((r, j) => {
-            Storage_local.get(this.table)
-                .then(shed => {
-                if (shed) {
-                    this.shed = shed;
-                }
-                else {
-                    this.shed = {};
-                }
-            });
-            Storage_local.get('invoke-data')
-                .then(data => {
-                if (data)
-                    this.invokeHistory = data;
-                else
-                    this.invokeHistory = {};
+            chrome.storage.local.get([this.table, 'invoke-data', 'send-data'], item => {
+                this.shed = item[this.table] ? item[this.table] : {};
+                this.invokeHistory = item['invoke-data'] ? item['invoke-data'] : {};
+                this.sendHistory = item['send-data'] ? item['send-data'] : {};
+                r(true);
             });
         });
     }
@@ -1774,6 +1756,7 @@ class TaskManager {
 }
 TaskManager.shed = {};
 TaskManager.invokeHistory = {};
+TaskManager.sendHistory = {};
 TaskManager.table = "Task-Manager-shed";
 TaskManager.start();
 const BLOCKCHAIN = 'NEO';

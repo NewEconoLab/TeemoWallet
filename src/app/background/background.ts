@@ -1602,7 +1602,7 @@ var invokeArgsAnalyse=async(...invokes:InvokeArgs[])=>{
         {
             if(invoke.arguments[0].value==storage.account.address)
             {
-                const amount = Neo.BigInteger.fromString(invoke.arguments[2].value as string);
+                const amount = Neo.BigInteger.fromString(invoke.arguments[2].value.toString());
                 if(!nep5assets[invoke.scriptHash])
                     nep5assets[invoke.scriptHash]=Neo.BigInteger.Zero;
                 nep5assets[invoke.scriptHash]=nep5assets[invoke.scriptHash].add(amount);
@@ -1611,7 +1611,7 @@ var invokeArgsAnalyse=async(...invokes:InvokeArgs[])=>{
         if(invoke.attachedAssets)
         {
             for (const asset in invoke.attachedAssets) {                
-                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset] as string);
+                const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset].toString());
                 if(!utxoassets[asset])
                     utxoassets[asset]=Neo.Fixed8.Zero;
                 utxoassets[asset]=utxoassets[asset].add(amount);
@@ -1957,6 +1957,8 @@ class TaskManager{
 
     public static invokeHistory: {[txid:string]:InvokeHistory} = {};
 
+    public static sendHistory:{[txid:string]:SendArgs}={}
+
     public static table:string = "Task-Manager-shed"
 
     public static start()
@@ -1969,7 +1971,7 @@ class TaskManager{
                 {
                     storage.height=count;
                     this.initShed()
-                    .then(shed=>{
+                    .then(result=>{
                         this.update()
                     })
                 }
@@ -1982,24 +1984,12 @@ class TaskManager{
 
     public static addSendData(txid:string,data:SendArgs)
     {
-        Storage_local.get('send-data')
-        .then(senddata =>{
-            let setdata = senddata?senddata:{};
-            setdata[txid]=data;
-            Storage_local.set('send-data',setdata);
-        })
+        this.sendHistory[txid]=data;
+        Storage_local.set('send-data',this.sendHistory);
     }
 
     public static addInvokeData(txid:string,domain:string,data:InvokeArgs|InvokeArgs[])
     {
-        const hashs = [];
-        const descripts = []
-        let fee = Neo.Fixed8.Zero;
-        let expenses: {
-            symbol: string;
-            amount: string;
-            assetid: string;
-        }[] = []
         if(Array.isArray(data))
         {
             invokeArgsAnalyse(...data)
@@ -2042,23 +2032,11 @@ class TaskManager{
     public static initShed()
     {
         return new Promise((r,j)=>{
-            Storage_local.get<{[txid:string]:Task}>(this.table)
-            .then(shed=>{
-                if(shed)
-                {
-                    this.shed = shed;
-                }
-                else
-                {
-                    this.shed={}
-                }
-            })
-            Storage_local.get<{[txid:string]:InvokeHistory}>('invoke-data')
-            .then(data=>{
-                if(data)
-                    this.invokeHistory=data;
-                else
-                    this.invokeHistory={}
+            chrome.storage.local.get([this.table,'invoke-data','send-data'],item=>{
+                this.shed=item[this.table]?item[this.table]:{};
+                this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
+                this.sendHistory=item['send-data']?item['send-data']:{};
+                r(true);
             })
         })
     }
