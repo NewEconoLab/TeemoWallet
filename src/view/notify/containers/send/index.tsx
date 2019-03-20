@@ -109,7 +109,7 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
   public render()
   {
-    const assetHref = `https://scan.nel.group/${this.state.network}/asset/`;
+    const assetHref = `https://scan.nel.group/${this.state.network=='TestNet'?'test':'main'}/asset/`;
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
@@ -128,7 +128,7 @@ export default class SendRequest extends React.Component<IProps, IState>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">目标地址</div>
-                  <div className="line-right">
+                  <div className="line-right address">
                     {
                       this.state.toAddress
                     }
@@ -181,7 +181,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                 <div className="line-wrap">
                   <div className="line-left">资产ID</div>
                   <div className="line-right">
-                  <a href={assetHref+this.state.assetID}>
+                  <a href={assetHref+this.state.assetID} target="_blank">
                     { this.state.assetID.substr(0,4)+"..."+this.state.assetID.substr(this.state.assetID.length-4,4) }
                   </a>
                   </div>
