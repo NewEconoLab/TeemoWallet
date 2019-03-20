@@ -283,7 +283,7 @@ declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
     }[];
     fee: string;
 }>;
-declare const queryAssetSymbol: (assetID: string, network: "TestNet" | "MainNet") => Promise<{
+declare var queryAssetSymbol: (assetID: string, network: "TestNet" | "MainNet") => Promise<{
     symbol: string;
     decimals: number;
 }>;

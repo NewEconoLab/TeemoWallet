@@ -1409,7 +1409,7 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
     }
     return { scriptHashs, descriptions, operations, arguments: argument, expenses, fee: fee.toString() };
 });
-const queryAssetSymbol = (assetID, network) => __awaiter(this, void 0, void 0, function* () {
+var queryAssetSymbol = (assetID, network) => __awaiter(this, void 0, void 0, function* () {
     assetID = assetID.replace('0x', '');
     if (assetID.hexToBytes().length == 20) {
         const group = {

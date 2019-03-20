@@ -5,9 +5,9 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
-import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 import { Storage_local } from '../../../../common/util';
 import { Background, SendArgs } from '../../../../lib/background';
+import { bg } from '../../../popup/utils/storagetools';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -21,12 +21,13 @@ interface IState
 {
   pageNumber: number,
   data: any,
-  description: string[],
-  scriptHash: string[],
+  toAddress:string,
+  amount:string,
   fee: string,
-  operation: string[],
-  arguments: Array<Argument>
-  expenses:{symbol:string,amount:string}[];
+  assetSymbol:string,
+  assetID:string,
+  remark:string,
+  network:'TestNet'|'MainNet';
 }
 // @observer
 export default class SendRequest extends React.Component<IProps, IState>
@@ -35,12 +36,13 @@ export default class SendRequest extends React.Component<IProps, IState>
   public state:IState = {
     pageNumber: 0, // 0为上一页，1为下一页
     data: null,
-    description: [],
-    scriptHash: [],
+    toAddress:"",
+    amount:"0",
     fee: '0',
-    operation: [],
-    arguments: [],
-    expenses:[],
+    assetID:"",
+    assetSymbol:"",
+    remark:"",
+    network:'TestNet'
   }
   public componentWillReceiveProps(nextProps)
   {
@@ -57,7 +59,7 @@ export default class SendRequest extends React.Component<IProps, IState>
     console.log("渲染hash");
     console.log(this.props.data);
     console.log(JSON.stringify(this.state.data))
-    let sendData: SendArgs[] = [];
+    let sendData: SendArgs;
     if (this.state.data)
     {
       sendData = this.props.data;
@@ -66,10 +68,26 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
 
   // 初始化state
-  public initData = (sendData: SendArgs[]) =>
+  public initData = (sendData: SendArgs) =>
   {
-    console.log("----------------初始化数据");
 
+    if(sendData.asset)
+    {
+      this.setState({
+        assetID:sendData.asset,
+        toAddress:sendData.toAddress,
+        fee:sendData.fee?sendData.fee:'0',
+        amount:sendData.amount,
+        remark:sendData.remark?sendData.remark:'',
+        network:sendData.network?sendData.network:'TestNet'
+      })
+      bg.queryAssetSymbol(sendData.asset,sendData.network)
+      .then(result=>{
+        this.setState({
+          assetSymbol:result.symbol
+        })
+      })
+    }
   }
 
   public netfeeChange=(check:boolean)=>
@@ -91,6 +109,7 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
   public render()
   {
+    const assetHref = `https://scan.nel.group/${this.state.network}/asset/`;
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
@@ -111,10 +130,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                   <div className="line-left">目标地址</div>
                   <div className="line-right">
                     {
-                      this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
-                      {
-                        return <a href="#">{k.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}{(this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "," : ""}</a>
-                      })
+                      this.state.toAddress
                     }
                   </div>
                 </div>
@@ -122,7 +138,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                   <div className="line-left">花费</div>
                   <div className="line-right">
                     <span>
-                    {this.state.expenses.map(val=> parseFloat(val.amount)+" "+val.symbol).join(',')}
+                    {this.state.amount+" "+this.state.assetSymbol}
                     </span>
                   </div>
                 </div>
@@ -147,10 +163,7 @@ export default class SendRequest extends React.Component<IProps, IState>
               <div className="contract-title">来自应用的备注</div>
               <div className="remark-content white-wrap">
                 {
-                  this.state.description.length !== 0 && this.state.description.map((k, v) =>
-                  {
-                    return (k?k:'') + ((this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length&&k) ? "/" : "")
-                  })
+                  this.state.remark
                 }
               </div>
               <div className="previous-img" onClick={this.nextPage}>
@@ -162,54 +175,17 @@ export default class SendRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 1 && (
             <>
-              {/* <div className="contract-title">交易数据</div> */}
-              <div className="contract-title">签名消息</div>
+              <div className="contract-title">交易数据</div>
 
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">合约hash</div>
+                  <div className="line-left">资产ID</div>
                   <div className="line-right">
-                  {
-                      this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
-                      {
-                        return <a href="#">{k.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}{(this.state.scriptHash.length > 1 && (v + 1) !== this.state.scriptHash.length) ? "," : ""}</a>
-                      })
-                    }
+                  <a href={assetHref+this.state.assetID}>
+                    { this.state.assetID.substr(0,4)+"..."+this.state.assetID.substr(this.state.assetID.length-4,4) }
+                  </a>
                   </div>
                 </div>
-                {
-                  this.state.operation.length !== 0 && this.state.operation.map((okey, oindex) =>
-                  {
-                    console.log("ok:" + okey)
-                    return (
-                      <div className="line-wrap line-method">
-                        <div className="one-line">
-                          <div className="line-left">
-                            <p className="first-p">方法</p>
-                          </div>
-                          <div className="line-right">
-                            <p className="first-p">{okey}</p>
-                          </div>
-                        </div>
-                        {
-                          this.state.arguments.length !== 0 && Object.keys(this.state.arguments[oindex]).map((akey, aindex) =>
-                          {
-                            return (
-                              <div className="one-line">
-                                <div className="line-left">
-                                  <p className="first-p">{this.state.arguments[oindex][akey].type}</p>
-                                </div>
-                                <div className="line-right">
-                                  <p className="second-p">{this.state.arguments[oindex][akey].value}</p>
-                                </div>
-                              </div>
-                            )
-                          })
-                        }
-                      </div>
-                    )
-                  })
-                }
               </div>
               {/* <div className="transaction-content">
                 <span>内容</span>
