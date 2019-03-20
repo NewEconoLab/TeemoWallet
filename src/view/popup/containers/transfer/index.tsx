@@ -21,7 +21,8 @@ import { observer } from 'mobx-react';
 interface IProps
 {
 	show:boolean,
-	onHide?:()=>void
+	onHide?:()=>void,
+	asset:string,
 }
 
 interface IState
@@ -69,6 +70,19 @@ export default class Transfer extends React.Component<IProps, IState>
 		toAddress:'',
 		domain:'',
 	}
+
+	componentDidMount()
+	{
+		if(this.props.asset!='')
+		{
+			console.log(this.props.asset);
+			
+			this.setState({
+				currentOption:this.options.find(option=>option.id==this.props.asset)
+			})
+		}
+	}
+
 	public options:IOption[]=[
 		{id:HASH_CONFIG.ID_GAS,name:'GAS'},
 		{id:HASH_CONFIG.ID_CGAS.toString(),name:'CGAS'},
@@ -263,7 +277,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				:
 				<>
 					<div className="line">
-						<Select options={this.options} onCallback={this.onSelect} text="资产" />
+						<Select currentOption={this.state.currentOption} options={this.options} onCallback={this.onSelect} text="资产" />
 					</div>
 					<div className="line">
 						<Input placeholder="发送至" value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />		

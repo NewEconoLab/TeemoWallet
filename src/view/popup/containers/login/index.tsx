@@ -154,7 +154,7 @@ export default class Login extends React.Component<AppProps,AppState> {
                             </div>
                         </div>
                     </div>
-                    <div className="href" onClick={this.toCreateWallet}>忘记密码，请重新导入钱包。</div>
+                    <div className="href" onClick={this.toCreateWallet}>请导入钱包或创建钱包。</div>
                 </div>
             </div>
         )

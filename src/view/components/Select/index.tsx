@@ -18,8 +18,9 @@ interface IProps
 	style?: object,
 	size?:"big"
 	placeholder?:string,
-	defaultValue?:string | number,
-	up?:boolean
+	defaultValue?:string,
+	up?:boolean,
+	currentOption?:IOption;
 }
 
 interface IState{
@@ -36,12 +37,11 @@ export default class Select extends React.Component<IProps, IState> {
 	}
 	public componentDidMount() {
 		if(this.props.defaultValue) {
+			console.log(this.props.defaultValue);
+			
 			this.setState({
 				options:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
 			}, () => {
-				// if(this.props.onCallback) {
-				// 	this.props.onCallback(this.state.options);
-				// }
 			});
 		} else if(!this.props.placeholder) {
 			this.setState({
@@ -92,6 +92,10 @@ export default class Select extends React.Component<IProps, IState> {
 		let showName:string = this.props.placeholder || options[0][name];
 		if(this.state.options && this.state.options.name) {
 			showName =   this.state.options.name
+		}
+		if(this.props.currentOption)
+		{
+			showName=this.props.currentOption.name;
 		}
 		return (
 			<div className="select-wrapper">

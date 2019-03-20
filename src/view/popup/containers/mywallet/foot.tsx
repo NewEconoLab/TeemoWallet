@@ -11,10 +11,27 @@ export default class WalletFoot extends React.Component<any, {}> {
 	constructor(props: any) {
 		super(props);
 	}
+
+	public state={currentNetWork:undefined}
+
+	componentDidMount(){
+		console.log(common.network);
+		common.initNetWork();
+		if(common.network==NetWork.TestNet)
+			this.setState({currentNetWork:{id:NetWork.TestNet,name:"测试网"}})
+		else
+			this.setState({currentNetWork:{id:NetWork.MainNet,name:"主网"}})
+	}
 	
 	public onSelect=(option:IOption)=>{
 		let network = option.id as NetWork;
+		console.log(option);
+		
 		common.changeNetWork(network);
+		if(network==NetWork.TestNet)
+			this.setState({currentNetWork:{id:NetWork.TestNet,name:"测试网"}})
+		else
+			this.setState({currentNetWork:{id:NetWork.MainNet,name:"主网"}})
 	}
 
     public options:IOption[]=
@@ -27,7 +44,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 		return (
 			<div className="foot">
 				<div className="content">
-					<Select defaultValue={common.network} options={this.options} onCallback={this.onSelect} text='当前网络' up={true} />
+					<Select currentOption={this.state.currentNetWork} options={this.options} onCallback={this.onSelect} text='当前网络' up={true} />
 				</div>
 			</div>
 		);

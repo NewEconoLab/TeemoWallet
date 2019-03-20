@@ -206,6 +206,7 @@ declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput
  * @param netfee 交易费用
  */
 declare var exchangeCgas: (transcount: number, netfee: number) => Promise<InvokeOutput[]>;
+declare var exchangeGas: (transcount: number, netfee: number) => Promise<InvokeOutput>;
 declare var makeRefundTransaction: (transcount: number, netfee: number) => Promise<InvokeOutput>;
 /**
  *
@@ -237,7 +238,7 @@ interface NotifyMessage {
  * @param call 回调方法
  * @param data 通知信息
  */
-declare const openNotify: (notifyData: NotifyMessage, call: any) => void;
+declare const openNotify: (notifyData: NotifyMessage) => Promise<boolean>;
 /**
  * 请求账户信息
  */
@@ -291,6 +292,8 @@ declare const getProvider: () => Promise<{}>;
 declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const getPublicKey: () => Promise<GetPublickeyOutput>;
 declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
+declare const showNotify: (title: any, msg: any) => void;
+declare const getURLDomain: (Url: string) => string;
 declare const responseMessage: (sender: any, request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,

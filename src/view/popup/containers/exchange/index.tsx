@@ -16,6 +16,7 @@ import { bg } from '../../utils/storagetools';
 import { asNumber } from '../../utils/numberTool';
 import { observer } from 'mobx-react';
 import Toast from '../../../components/Toast';
+import historyStore from '../history/store/history.store';
 
 interface IProps
 {
@@ -95,24 +96,26 @@ export default class Exchange extends React.Component<IProps, IState>
 	}
 
 	public onHide=()=>{
+		this.setState({
+			show:false,
+			amount:'',
+			netfee:false,
+			inputError:false,
+			errorMessage:'',
+			currentOption:{id:'cgasexchange',name:'GAS换CGAS'}
+		})
 		this.props.onHide?this.props.onHide():null;
 	}
 
 	public send=()=>{
 		if(this.state.currentOption.id=="cgasexchange")
 		{
-			const invoke:InvokeArgs={
-				scriptHash:HASH_CONFIG.ID_CGAS.toString(),
-				operation:"mintTokens",
-				arguments:[],
-				attachedAssets:{[HASH_CONFIG.ID_GAS]:this.state.amount},
-				network:common.network,
-				fee:this.state.netfee?"0.001":"0"
-			}
-			bg.contractBuilder(invoke)
+			bg.exchangeGas(parseFloat(this.state.amount),this.state.netfee?0.01:0)
 			.then(result=>{
 				Toast("兑换交易已发送！")
-				console.log(result);				
+				console.log(result);
+				historyStore.initHistoryList()
+				this.props.onHide();			
 			})
 			.catch(error=>{
 				console.log(error);
@@ -124,7 +127,9 @@ export default class Exchange extends React.Component<IProps, IState>
 			bg.exchangeCgas(parseFloat(this.state.amount),this.state.netfee?0.01:0)
 			.then(result=>{
 				Toast("兑换交易已发送！")
-				console.log(result);				
+				historyStore.initHistoryList()
+				console.log(result);			
+				this.props.onHide();	
 			})
 			.catch(error=>{
 				console.log(error);

@@ -8,6 +8,7 @@ import Assets from '../assets';
 import { neotools } from '../../utils/neotools';
 import common from '../../store/common';
 import { observer } from 'mobx-react';
+import historyStore from '../history/store/history.store';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -31,8 +32,10 @@ export default class MyWallet extends React.Component<AppProps,AppState> {
     }
 
     public componentDidMount() {
-        // Example of how to send a message to eventPage.ts.        
+        // Example of how to send a message to eventPage.ts.      
+        common.initNetWork();  
         common.initAccountBalance();
+        historyStore.initHistoryList();
         if(chrome.tabs)
         {
             chrome.runtime.sendMessage({ popupMounted: true });

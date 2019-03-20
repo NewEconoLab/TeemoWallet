@@ -17,12 +17,18 @@ class Common
         this.tabname="account"
     }
     private tabname:string;
+
+    @action public initNetWork=()=>{
+        this.network = NetWork[bg.storage.network]
+        console.log(this.network);
+        
+    }
     
     @action public changeNetWork=(network:NetWork)=>{
         return new Promise((r,j)=>{ 
             bg.AccountManager.netWorkChange(network)
             .then(result=>{
-                this.network = result.defaultNetwork;
+                this.network = network;
                 this.initAccountBalance();
             })
         })

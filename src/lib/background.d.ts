@@ -28,7 +28,7 @@ interface LoginInfo {
     address: string;
 }
 interface BackStore {
-    network: "testnet" | "mainnet";
+    network: "TestNet" | "MainNet";
     height: number;
     account: AccountInfo;
 }
@@ -39,6 +39,7 @@ declare interface Background extends Window{
     storage: BackStore;
     AccountManager: AccountManager;
     exchangeCgas: (transcount: number, netfee: number) => Promise<void>;
+    exchangeGas: (transcount: number, netfee: number) => Promise<InvokeOutput>;
     transfer: (data: SendArgs) => Promise<SendOutput>;
     invokeRead: (data: InvokeReadInput) => Promise<{}>;
     invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;

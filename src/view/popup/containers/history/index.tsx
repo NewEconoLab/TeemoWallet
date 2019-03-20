@@ -6,46 +6,15 @@ import './index.less';
 import Panel from '../../../components/Panel';
 import Select, { IOption } from '../../../components/Select';
 import Checkbox from '../../../components/Checkbox';
-import { Storage_local } from '../../../../common/util';
 import { observer } from 'mobx-react';
+import { TaskState, IHistory, ConfirmType } from './store/interface/history.interface';
+import historyStore from './store/history.store';
 interface IState
 {
-    tasklist: Task[];
+    hasFee:boolean;
+    currentOption:IOption;
 }
-export enum TaskState
-{
-    watting = 0,
-    success = 1,
-    fail = 2,
-    watForLast = 3,
-    failForLast = 4
-}
-export enum ConfirmType
-{
-    tranfer = 0,
-    contract = 1
-}
-export interface Task
-{
-    height: number;
-    confirm: number;
-    type: ConfirmType;
-    txid: string;
-    message: any;
-    state: TaskState;
-    startTime: number;
-    next?: TransferGroup;
-}
-export interface TransferGroup
-{
-    txid: string;
-    txhex: string;
-    executeError?: {
-        type: string;
-        data: string;
-        description: string;
-    };
-}
+
 @observer
 export default class History extends React.Component<any, {}>
 {
@@ -55,34 +24,15 @@ export default class History extends React.Component<any, {}>
     }
 
     state: IState = {
-        tasklist: []
+        currentOption:{ id: "all", name: "全部" },
+        hasFee:false
     }
 
     componentDidMount()
     {
-        Storage_local.get<{ [txid: string]: Task }>("Task-Manager-shed")
-            .then(shed =>
-            {
-                if (shed)
-                {
-                    const list: Task[] = [];
-                    for (const txid in shed)
-                    {
-                        if (shed.hasOwnProperty(txid))
-                        {
-                            const task = shed[txid];
-                            list.push(task);
-                        }
-                    }
-                    list.sort((a, b) => b.startTime - a.startTime)
-                    this.setState({
-                        tasklist: list
-                    }, () =>
-                    {
-                        console.log(this.state.tasklist);
-                    })
-                }
-            })
+        setInterval(()=>{
+            historyStore.initHistoryList();
+        },15000)        
     }
 
     // 监控输入内容
@@ -94,32 +44,83 @@ export default class History extends React.Component<any, {}>
         }
     }
     public options: IOption[] =
-        [
-            { id: "all", name: "全部" },
-            { id: "gas", name: "GAS" },
-            { id: "cgas", name: "CGAS" },
-            { id: "neo", name: "NEO" },
-        ];
+    [
+        { id: "all", name: "全部" },
+        { id: "GAS", name: "GAS" },
+        { id: "CGAS", name: "CGAS" },
+        { id: "NEO", name: "NEO" },
+    ];
     onSelectModule = (call: IOption) =>
     {
         this.setState({ currentOption: call })
     }
 
+    onCheck=(hasFee:boolean)=>{
+        this.setState({hasFee})
+    }
+
+    groupBy=(historylist:IHistory[])=>{
+        const list:IHistory[] = [];
+        for (const history of historylist) {
+            if(this.state.hasFee)
+            {
+                if(history.type==ConfirmType.contract)
+                {
+                    if(history.invokeHistory.netfee&&history.invokeHistory.netfee!='0')
+                        list.push(history)
+                }
+                else
+                {
+                    if(history.sendHistory.fee&&history.sendHistory.fee!='0')
+                        list.push(history)
+                }
+            }
+            else
+            {
+                list.push(history)
+            }
+        }
+        const panellist = list.map(task=>{
+            if(this.state.currentOption.id=='all')
+                return (<Panel task={task} ></Panel>)
+            else
+            {
+                if(task.type==ConfirmType.contract){                    
+                    const res =task.invokeHistory.expenses.findIndex(task=>task.symbol==this.state.currentOption.name);
+                    if(res>-1)
+                    {                        
+                        return (<Panel task={task} ></Panel>)
+                    }
+                }
+                else
+                {
+                    if(task.sendHistory.symbol==this.state.currentOption.id)
+                        return (<Panel task={task} ></Panel>)
+                }
+            }
+
+        })
+        return panellist;
+    }
+
     public render()
     {
-        console.log("--------------------任务列表数量是");
-
+        const waitlist=[];
+        const historylist:IHistory[] = [];
+        historyStore.taskList.forEach((task) =>
+        {
+            if (task.state == TaskState.watting || task.state == TaskState.watForLast)
+                waitlist.push(<Panel task={task} ></Panel>);
+            else
+                historylist.push(task);
+        })
         return (
             <div className="transactionlist">
-                <div className={this.state.tasklist.length > 0?'waitlist mbottom':'waitlist'}>
+                <div className={historyStore.taskList.length > 0?'waitlist mbottom':'waitlist'}>
                     {
-                        this.state.tasklist.length > 0 && <div className="title">排队中</div>
+                        waitlist.length > 0 && <div className="title">排队中</div>
                     }
-                    {this.state.tasklist.length > 0 && this.state.tasklist.map((task, key) =>
-                    {
-                        if (task.state == TaskState.watting || task.state == TaskState.watForLast)
-                            return (<Panel task={task} ></Panel>)
-                    })}
+                    {waitlist}
                 </div>
                 <div className="history">
                     <div className="title">交易历史</div>
@@ -128,14 +129,10 @@ export default class History extends React.Component<any, {}>
                             <Select text="" options={this.options} onCallback={this.onSelectModule} />
                         </div>
                         <div className="filter-checkbox">
-                            <Checkbox text="隐藏0GAS"></Checkbox>
+                            <Checkbox text="隐藏0GAS" onClick={this.onCheck}></Checkbox>
                         </div>
                     </div>
-                    {this.state.tasklist.length !== 0 && (this.state.tasklist.map((task, key) =>
-                    {
-                        if (task.state != TaskState.watting && task.state != TaskState.watForLast)
-                            return (<Panel task={task} ></Panel>)
-                    }))}
+                    { historylist.length !== 0 && this.groupBy(historylist) }
                 </div>
             </div>
         );
