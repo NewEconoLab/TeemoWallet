@@ -42,6 +42,10 @@ declare interface Background extends Window{
     transfer: (data: SendArgs) => Promise<SendOutput>;
     invokeRead: (data: InvokeReadInput) => Promise<{}>;
     invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
+    queryAssetSymbol: (assetID: string, network: "TestNet" | "MainNet") => Promise<{
+        symbol: string;
+        decimals: number;
+    }>
     invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
         scriptHashs: any[];
         descriptions: any[];

@@ -1647,7 +1647,7 @@ var invokeArgsAnalyse=async(...invokes:InvokeArgs[])=>{
     return {scriptHashs,descriptions,operations,arguments:argument,expenses,fee:fee.toString()}
 }
 
-const queryAssetSymbol=async(assetID:string,network:'TestNet'|'MainNet')=>
+var queryAssetSymbol=async(assetID:string,network:'TestNet'|'MainNet')=>
 {
     assetID = assetID.replace('0x','');
     if(assetID.hexToBytes().length==20)
