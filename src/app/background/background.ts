@@ -1328,7 +1328,7 @@ const invoke=(header,params:InvokeArgs)=>{
 const getNetworks=():Promise<GetNetworksOutput>=>{
     return new Promise((resolve,reject)=>{
         const network:GetNetworksOutput={
-            networks : ["MainNet","TestNet"],
+            networks : [storage.network?storage.network:"TestNet"],
             defaultNetwork : storage.network?storage.network:"TestNet"
         }
         resolve(network);

@@ -7,7 +7,7 @@ import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 import { Storage_local } from '../../../../common/util';
-import { Background } from '../../../../lib/background';
+import { Background, SendArgs } from '../../../../lib/background';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -29,7 +29,7 @@ interface IState
   expenses:{symbol:string,amount:string}[];
 }
 // @observer
-export default class ContractRequest extends React.Component<IProps, IState>
+export default class SendRequest extends React.Component<IProps, IState>
 {
   public bg:Background = chrome.extension.getBackgroundPage()as Background;
   public state:IState = {
@@ -57,91 +57,19 @@ export default class ContractRequest extends React.Component<IProps, IState>
     console.log("渲染hash");
     console.log(this.props.data);
     console.log(JSON.stringify(this.state.data))
-    let invoke: InvokeArgs[] = [];
-    if (this.state.data && this.state.data.group)
+    let sendData: SendArgs[] = [];
+    if (this.state.data)
     {
-      console.log("发送的是多条的交易");
-      invoke = this.props.data.group;
-      this.initData(invoke);
-    }
-    else if (this.state.data)
-    {
-      console.log("发送的是单条的交易");
-      invoke[0] = this.props.data;
-      this.initData(invoke);
+      sendData = this.props.data;
+      this.initData(sendData);
     }
   }
 
   // 初始化state
-  public initData = (invoke: InvokeArgs[]) =>
+  public initData = (sendData: SendArgs[]) =>
   {
     console.log("----------------初始化数据");
-    
-    this.bg.invokeArgsAnalyse(...invoke)
-    .then(result=>{
-      console.log("-------------得到了返回结果");
-      
-      console.log(result);
-      
-      this.setState({
-        description: result.descriptions,
-        scriptHash: result.scriptHashs,
-        fee: result.fee,
-        operation: result.operations,
-        arguments: result.arguments,
-        expenses: result.expenses
-      }, () =>
-        {
-          console.log("打印state");
-          console.log(this.state);
-        }
-      );
-    })
-    // let description = [];
-    // let scriptHash = [];
-    // let fee = 0;
-    // let operation = [];
-    // let argument = [];
-    // let expenses = [];
-    // invoke.map((key, value) =>
-    // {
-    //   description[value] = key.description;
-    //   scriptHash[value] = key.scriptHash;
-    //   fee = key.fee ? parseFloat(key.fee) : 0 + fee;
-    //   operation[value] = key.operation;
-    //   argument[value] = key.arguments;
-    //   // 判断 nep5的转账花费
-    //   if(key.operation=="transfer")
-    //   {
-    //     if(key.arguments[0].value==this.props.address)
-    //     {
-    //       expenses.push()
-    //     }
-    //   }
-    //   if(key.attachedAssets)
-    //   {
-    //     for (const asset in key.attachedAssets) {
-    //       if (key.attachedAssets.hasOwnProperty(asset)) {
-    //         const amount = parseFloat(key.attachedAssets[asset]);
-    //         expenses[asset]=expenses[asset]?expenses[asset]+amount:amount;
-    //       }
-    //     }
-    //     Object.keys(key.attachedAssets).map(value=>{
-    //       expenses[value]=key.attachedAssets[value];
-    //     })
-    //   }
-    // })
-    // this.setState({
-    //   description: description,
-    //   scriptHash: scriptHash,
-    //   fee: fee.toString(),
-    //   operation: operation,
-    //   arguments: argument
-    // }, () =>
-    //   {
-    //     console.log("打印state");
-    //     console.log(this.state);
-    //   });
+
   }
 
   public netfeeChange=(check:boolean)=>
@@ -180,7 +108,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
               <div className="contract-title">交易详情</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">合约hash</div>
+                  <div className="line-left">目标地址</div>
                   <div className="line-right">
                     {
                       this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>

@@ -132,7 +132,7 @@ var AccountManager = {
     netWorkChange: (network) => {
         return new Promise((r, j) => {
             storage.network = network;
-            const message = { networks: ["TestNet", "MainNet"], defaultNetwork: network };
+            const message = { networks: [network], defaultNetwork: network };
             EventsOnChange(WalletEvents.NETWORK_CHANGED, message);
             r(message);
         });

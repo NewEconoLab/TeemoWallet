@@ -12,6 +12,7 @@ import Dice from '../dice';
 import { Command } from '../../../../common/entity';
 import Login from '../login';
 import { Background } from '../../../../lib/background';
+import SendRequest from '../send';
 // import { injectIntl } from 'react-intl';
 // import Toast from '@/components/Toast';
 
@@ -86,9 +87,16 @@ export default class Home extends React.Component<any, any> {
         <Header address={this.state.account.address} {...this.props} />
         <div className="notify-content">
           {
-            this.state.label==Command.getAccount?
-            <Dice title={this.state.header.title} domain={this.state.header.domain} icon={this.state.header.icon} />:
+            this.state.label==Command.getAccount&&
+            <Dice title={this.state.header.title} domain={this.state.header.domain} icon={this.state.header.icon} />
+          }
+          {
+            (this.state.label==Command.invoke||this.state.label==Command.invokeGroup)&&
             <ContractRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
+          }
+          {
+            this.state.label==Command.send &&             
+            <SendRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
           }
           {/* <Dice {...this.props} /> */}
         </div>
