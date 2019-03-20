@@ -69,6 +69,7 @@ export default class Login extends React.Component<AppProps> {
             <div className="loginContainer">
                 <div className="titleBackground">
                     <div className="title">新钱包</div>
+                    <img className="teemo-bg" src={require("../../../image/owl.png")} alt=""/>
                 </div>
                 <div className="content">
                     <div className="form-label">
