@@ -5,7 +5,6 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
-import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 import { Storage_local } from '../../../../common/util';
 import { Background, SendArgs } from '../../../../lib/background';
 import { bg } from '../../../popup/utils/storagetools';
@@ -28,6 +27,7 @@ interface IState
   assetSymbol:string,
   assetID:string,
   remark:string,
+  network:'TestNet'|'MainNet';
 }
 // @observer
 export default class SendRequest extends React.Component<IProps, IState>
@@ -41,7 +41,8 @@ export default class SendRequest extends React.Component<IProps, IState>
     fee: '0',
     assetID:"",
     assetSymbol:"",
-    remark:""
+    remark:"",
+    network:'TestNet'
   }
   public componentWillReceiveProps(nextProps)
   {
@@ -77,7 +78,8 @@ export default class SendRequest extends React.Component<IProps, IState>
         toAddress:sendData.toAddress,
         fee:sendData.fee?sendData.fee:'0',
         amount:sendData.amount,
-        remark:sendData.remark?sendData.remark:''
+        remark:sendData.remark?sendData.remark:'',
+        network:sendData.network?sendData.network:'TestNet'
       })
       bg.queryAssetSymbol(sendData.asset,sendData.network)
       .then(result=>{
@@ -107,6 +109,7 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
   public render()
   {
+    const assetHref = `https://scan.nel.group/${this.state.network}/asset/`;
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
@@ -178,7 +181,9 @@ export default class SendRequest extends React.Component<IProps, IState>
                 <div className="line-wrap">
                   <div className="line-left">资产ID</div>
                   <div className="line-right">
-                  { this.state.assetID.substr(0,4)+"..."+this.state.assetID.substr(this.state.assetID.length-4,4) }
+                  <a href={assetHref+this.state.assetID}>
+                    { this.state.assetID.substr(0,4)+"..."+this.state.assetID.substr(this.state.assetID.length-4,4) }
+                  </a>
                   </div>
                 </div>
               </div>
