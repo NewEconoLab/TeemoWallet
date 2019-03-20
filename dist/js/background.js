@@ -16,7 +16,6 @@ var storage = {
     oldUtxo: {}
 };
 const HASH_CONFIG = {
-    accountCGAS: Neo.Uint160.parse('4c7cca112a8c5666bce5da373010fc0920d0e0d2'),
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
     DAPP_NNC: Neo.Uint160.parse("fc732edee1efdf968c23c20a9628eaa5a6ccb934"),
     baseContract: Neo.Uint160.parse("348387116c4a75e420663277d9c02049907128c7"),
@@ -961,7 +960,7 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
         if (invoke.attachedAssets) {
             for (const asset in invoke.attachedAssets) {
                 if (invoke.attachedAssets.hasOwnProperty(asset)) {
-                    const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(asset));
+                    const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));
                     const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
                     const utxo = utxos[asset];
                     if (asset.includes(HASH_CONFIG.ID_GAS))

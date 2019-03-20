@@ -7,7 +7,7 @@
 
     "browser_action": {
         "default_title": "NELPluginWallet",
-        "default_icon": "icon16.png",
+        "default_icon": "owl.png",
         "default_popup": "index.html"
     },
     "web_accessible_resources": [

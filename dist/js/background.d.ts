@@ -11,7 +11,6 @@ interface BackStore {
 }
 declare var storage: BackStore;
 declare const HASH_CONFIG: {
-    accountCGAS: Neo.Uint160;
     ID_CGAS: Neo.Uint160;
     DAPP_NNC: Neo.Uint160;
     baseContract: Neo.Uint160;
