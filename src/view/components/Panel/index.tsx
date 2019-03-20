@@ -159,10 +159,8 @@ export default class Panel extends React.Component<IProps, IState>
 					<div className="asset">
 						<div className="output">
 						{
-							this.state.invokeMessage.expenses?
-							(this.state.invokeMessage.expenses.length==1?this.state.invokeMessage.expenses[0].amount+' '+this.state.invokeMessage.expenses[0].symbol:
-							'-'+this.state.invokeMessage.expenses[0].amount+' '+this.state.invokeMessage.expenses[0].symbol+'，...'):
-							<></>
+							this.state.invokeMessage.expenses&&this.state.invokeMessage.expenses.length>0&&
+							`-${this.state.invokeMessage.expenses[0].amount} ${this.state.invokeMessage.expenses[0].symbol}${this.state.invokeMessage.expenses.length>1?',...':''}`
 						}
 						</div>
 						{
