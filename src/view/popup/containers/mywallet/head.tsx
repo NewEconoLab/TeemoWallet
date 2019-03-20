@@ -29,7 +29,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
         {id:'exchange',name:'CGAS兑换',icon:ICON.exchange},
         {id:'browser',name:'区块链浏览器',icon:ICON.bc},
         {id:'nns',name:'NNS',icon:ICON.nns},
-        {id:'dice',name:'DICE',icon:ICON.nns}
+        // {id:'dice',name:'DICE',icon:ICON.nns}
     ]
     public componentDidMount(){
         common.initAccountInfo();
