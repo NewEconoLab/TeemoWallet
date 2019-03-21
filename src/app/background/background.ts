@@ -414,7 +414,6 @@ async function request(opts: IOpts) {
     }else if(opts.baseUrl==='rpc'){
         url = testRpcUrl;
     }
-    console.log(url);
   
     const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url;
     const init:RequestInit = opts.isGET ?{ method:'GET'}:{method: 'POST',body:makeRpcPostBody(opts.method,opts.params)};
@@ -866,12 +865,8 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             {
                 try {
                     let result = await contractBuilder(invoke);
-                    console.log(result);
-                    
                     txids.push(result);
                 } catch (error) {
-                    console.log(error);
-                    
                     throw error;
                 }
             }
@@ -932,7 +927,6 @@ const sendGroupTranstion=(trans:Transaction[])=>{
             const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);
             tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
             // const data:Uint8Array = tran.GetRawData();
-            console.log(tran.getTxid());
             outputs.push({"txid": tran.getTxid(),nodeUrl:"https://api.nel.group/api"});
         }
     })
@@ -1005,7 +999,6 @@ var makeRefundTransaction = async (transcount:number,netfee:number)=>
     tran.creatInuptAndOutup(cgass, Neo.Fixed8.fromNumber(transcount), nepAddress);
     if (netfee>0) // 判断是否有手续费
     {   // 创建当前交易的手续费
-        console.log('当前CGAS兑换添加手续费 '+netfee+" GAS");
         
         tran.creatInuptAndOutup(gass, Neo.Fixed8.fromNumber(netfee));
     }

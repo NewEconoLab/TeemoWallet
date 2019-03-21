@@ -12,10 +12,6 @@ interface IOpts {
   const baseCommonUrl: string = "https://api.nel.group/api";
   const baseUrl: string = "https://apiwallet.nel.group/api";
 
-  console.log(baseCommonUrl);
-  console.log(baseUrl);
-
-
 const makeRpcPostBody = (method: string, params: any[]):string => {
   const body = {};
   body["jsonrpc"] = "2.0";
@@ -38,8 +34,6 @@ export default async function request(opts: IOpts): Promise<any> {
   if (opts.baseUrl === 'common') {
     url = [baseCommonUrl,common.network].join('/')
   }
-  console.log(url);
-  
   const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url;
   const init:RequestInit = opts.isGET ?{ method:'GET'}:{method: 'POST',body:makeRpcPostBody(opts.method,opts.params)};
   try {    

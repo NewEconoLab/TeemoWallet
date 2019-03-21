@@ -37,13 +37,10 @@ window.addEventListener("message", function(e)
 chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => 
     {
-        console.log(request);
         if(request.return)
             window.postMessage(request,'*');
         if(request.EventName)
         {
-            console.log("收到了Event名称："+request.EventName);
-            
             window.postMessage(request,'*');
         }
     }

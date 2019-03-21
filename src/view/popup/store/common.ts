@@ -19,9 +19,7 @@ class Common
     private tabname:string;
 
     @action public initNetWork=()=>{
-        this.network = NetWork[bg.storage.network]
-        console.log(this.network);
-        
+        this.network = NetWork[bg.storage.network]        
     }
     
     @action public changeNetWork=(network:NetWork)=>{

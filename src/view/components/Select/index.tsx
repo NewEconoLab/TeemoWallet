@@ -37,8 +37,6 @@ export default class Select extends React.Component<IProps, IState> {
 	}
 	public componentDidMount() {
 		if(this.props.defaultValue) {
-			console.log(this.props.defaultValue);
-			
 			this.setState({
 				options:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
 			}, () => {

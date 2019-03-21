@@ -10,7 +10,6 @@ class HistoryList implements IHistoryList
     @observable public taskList: IHistory[]=[];    
 
     @action public initHistoryList=async()=>{
-        console.log("-------------------------initHistoryList");
         
         const shed = await Storage_local.get<{ [txid: string]: Task }>("Task-Manager-shed");
         if (shed)
@@ -46,11 +45,7 @@ class HistoryList implements IHistoryList
                 }
                 else
                 {
-                    console.log("----------------------------麻烦了打印一下");
-                    
-                    const invokeHistory= invokeData[task.txid];
-                    console.log(invokeHistory);
-                    
+                    const invokeHistory= invokeData[task.txid];                    
                     if(invokeHistory)
                     {
                         let dappMessage: {
@@ -69,7 +64,6 @@ class HistoryList implements IHistoryList
                         }
                         history['invokeHistory']=invokeHistory;
                         history['dappMessage']=dappMessage;
-                        console.log(history);
                         
                         tasklist.push(history);
                     }

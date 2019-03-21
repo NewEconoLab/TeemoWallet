@@ -21,7 +21,7 @@ export default class Assets extends React.Component<any, {}>
     } 
     public state={
         showNumber:0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
-        tranAsset:'',
+        tranAsset:HASH_CONFIG.ID_GAS,
     }
     componentDidMount(){
         common.initAccountBalance();
@@ -43,8 +43,10 @@ export default class Assets extends React.Component<any, {}>
     
     public transferNEO=()=>{
         this.setState({
-            showNumber:2,
             tranAsset:HASH_CONFIG.ID_NEO
+        },()=>{
+            this.setState({
+                showNumber:2})
         })
     }
 
@@ -101,7 +103,7 @@ export default class Assets extends React.Component<any, {}>
                     </div>
                 </div>
                 <QrCodeBox show={this.state.showNumber === 1} onHide={this.onCloseModel} />
-                <Transfer show={this.state.showNumber === 2} onHide={this.onCloseModel} asset={this.state.tranAsset} />                
+                {this.state.showNumber==2&&<Transfer show={this.state.showNumber === 2} onHide={this.onCloseModel} asset={this.state.tranAsset} />                }
             </div>
 		);
 	}

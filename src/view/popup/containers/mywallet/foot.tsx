@@ -15,7 +15,6 @@ export default class WalletFoot extends React.Component<any, {}> {
 	public state={currentNetWork:undefined}
 
 	componentDidMount(){
-		console.log(common.network);
 		common.initNetWork();
 		if(common.network==NetWork.TestNet)
 			this.setState({currentNetWork:{id:NetWork.TestNet,name:"测试网"}})
@@ -24,9 +23,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 	}
 	
 	public onSelect=(option:IOption)=>{
-		let network = option.id as NetWork;
-		console.log(option);
-		
+		let network = option.id as NetWork;		
 		common.changeNetWork(network);
 		if(network==NetWork.TestNet)
 			this.setState({currentNetWork:{id:NetWork.TestNet,name:"测试网"}})

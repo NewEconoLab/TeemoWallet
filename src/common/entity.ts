@@ -123,15 +123,12 @@ export class AccountInfo extends NepAccount{
         this.prikeyHex = v.toHexString();
     }
 
-    public get pubkey(): Uint8Array{
-        console.log("调用了我 我是pubkey get");
-        
+    public get pubkey(): Uint8Array{        
         this._pubkey=this.pubkeyHex.hexToBytes();
         return this._pubkey;
     }
 
     public get prikey(): Uint8Array{        
-        console.log("调用了我 我是prikey get");
         this._prikey=this.prikeyHex.hexToBytes();
         return this._prikey
     }    

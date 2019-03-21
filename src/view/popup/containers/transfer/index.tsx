@@ -73,9 +73,13 @@ export default class Transfer extends React.Component<IProps, IState>
 
 	componentDidMount()
 	{
+		console.log(this.props.asset);
+		
 		if(this.props.asset!='')
 		{
 			console.log(this.props.asset);
+			const current =this.options.find(option=>option.id==this.props.asset);
+			console.log(current);
 			
 			this.setState({
 				currentOption:this.options.find(option=>option.id==this.props.asset)
@@ -233,6 +237,8 @@ export default class Transfer extends React.Component<IProps, IState>
 
 	public render()
 	{
+		console.log(this.props.asset);
+		
 		return (
 			<Modal title={this.state.infoShow?"转账详情":"转账"} show={this.props.show}>
 			{				
@@ -277,7 +283,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				:
 				<>
 					<div className="line">
-						<Select currentOption={this.state.currentOption} options={this.options} onCallback={this.onSelect} text="资产" />
+						<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text="资产" />
 					</div>
 					<div className="line">
 						<Input placeholder="发送至" value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />		
