@@ -1783,13 +1783,13 @@ const getURLDomain=(Url:string)=>
     var durl3=/[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;
     
     var arr = Url.match(durl);
-    if(arr.length>1)
+    if(arr && arr.length>1)
         return arr[1].toString();
     arr = Url.match(durl2);
-    if(arr.length>1)
+    if(arr && arr.length>1)
         return arr[1].toString();
     arr = durl3.exec(Url);
-    if(arr.length>0)
+    if(arr && arr.length>0)
         return arr[0].toString();
     else
         return Url;
