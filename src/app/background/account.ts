@@ -191,9 +191,7 @@ var AccountManager={
 const EventsOnChange= (event: WalletEvents, data?: any) => {
     chrome.tabs.query({},tabs=>{
         for (const tab of tabs) {
-            const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
-            const url=urlReg.exec(tab.url);
-            const domain = url?url[0]:tab.url;
+            const domain = getURLDomain(tab.url);
             if(storage.domains.indexOf(domain)>=0)
             {
                 chrome.tabs.sendMessage(tab.id,{EventName:event,data});

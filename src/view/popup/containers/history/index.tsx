@@ -80,25 +80,28 @@ export default class History extends React.Component<any, {}>
                 list.push(history)
             }
         }
-        const panellist = list.map(task=>{
+        const tasklist:IHistory[] = [];
+        for (const task of list) {
             if(this.state.currentOption.id=='all')
-                return (<Panel task={task} ></Panel>)
+                tasklist.push(task);
             else
             {
                 if(task.type==ConfirmType.contract){                    
                     const res =task.invokeHistory.expenses.findIndex(task=>task.symbol==this.state.currentOption.name);
                     if(res>-1)
                     {                        
-                        return (<Panel task={task} ></Panel>)
+                        tasklist.push(task);
                     }
                 }
                 else
                 {
                     if(task.sendHistory.symbol==this.state.currentOption.id)
-                        return (<Panel task={task} ></Panel>)
+                    tasklist.push(task);
                 }
             }
-
+        }
+        const panellist = tasklist.sort((a,b)=>{
+            return a.startTime-b.startTime
         })
         return panellist;
     }
@@ -132,7 +135,7 @@ export default class History extends React.Component<any, {}>
                             <Checkbox text="隐藏0GAS" onClick={this.onCheck}></Checkbox>
                         </div>
                     </div>
-                    { historylist.length !== 0 && this.groupBy(historylist) }
+                    { historylist.length !== 0 && this.groupBy(historylist).map(task=><Panel task={task} ></Panel>) }
                 </div>
             </div>
         );

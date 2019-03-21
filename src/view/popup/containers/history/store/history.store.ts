@@ -2,7 +2,6 @@ import { IHistoryList, IHistory, Task, ConfirmType, InvokeHistory, ISendHistory 
 import { Storage_local } from "../../../../../common/util";
 import { action, observable } from "mobx";
 import { SendArgs } from "../../../../../lib/background";
-import { bg } from "../../../utils/storagetools";
 import { ICON } from "../../../../image";
 
 class HistoryList implements IHistoryList

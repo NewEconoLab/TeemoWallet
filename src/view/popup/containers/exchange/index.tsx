@@ -110,7 +110,7 @@ export default class Exchange extends React.Component<IProps, IState>
 	public send=()=>{
 		if(this.state.currentOption.id=="cgasexchange")
 		{
-			bg.exchangeGas(parseFloat(this.state.amount),this.state.netfee?0.01:0)
+			bg.exchangeGas(parseFloat(this.state.amount),this.state.netfee?0.001:0)
 			.then(result=>{
 				Toast("兑换交易已发送！")
 				console.log(result);
@@ -124,7 +124,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		}
 		else
 		{
-			bg.exchangeCgas(parseFloat(this.state.amount),this.state.netfee?0.01:0)
+			bg.exchangeCgas(parseFloat(this.state.amount),this.state.netfee?0.001:0)
 			.then(result=>{
 				Toast("兑换交易已发送！")
 				historyStore.initHistoryList()
