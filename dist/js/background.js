@@ -1704,8 +1704,12 @@ class TaskManager {
         }, 15000);
     }
     static addSendData(txid, data) {
-        this.sendHistory[txid] = data;
-        Storage_local.set('send-data', this.sendHistory);
+        queryAssetSymbol(data.asset, data.network)
+            .then(assetState => {
+            this.sendHistory[txid] = data;
+            this.sendHistory[txid]['symbol'] = assetState.symbol;
+            Storage_local.set('send-data', this.sendHistory);
+        });
     }
     static addInvokeData(txid, domain, data) {
         if (Array.isArray(data)) {

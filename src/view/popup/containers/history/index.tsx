@@ -32,7 +32,7 @@ export default class History extends React.Component<any, {}>
     {
         setInterval(()=>{
             historyStore.initHistoryList();
-        },15000)        
+        },2000)        
     }
 
     // 监控输入内容

@@ -39,8 +39,8 @@ class HistoryList implements IHistoryList
                 if(task.type == ConfirmType.tranfer)
                 {
                     const sendHistory:ISendHistory=sendData[task.txid];                    
-                    const assetState = await bg.queryAssetSymbol(sendHistory.asset,sendHistory.network)
-                    sendHistory.symbol=assetState.symbol;
+                    // const assetState = await bg.queryAssetSymbol(sendHistory.asset,sendHistory.network)
+                    // sendHistory.symbol=assetState.symbol;
                     history['sendHistory']=sendHistory;
                     tasklist.push(history)
                 }

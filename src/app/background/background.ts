@@ -2022,8 +2022,12 @@ class TaskManager{
 
     public static addSendData(txid:string,data:SendArgs)
     {
-        this.sendHistory[txid]=data;
-        Storage_local.set('send-data',this.sendHistory);
+        queryAssetSymbol(data.asset,data.network)
+        .then(assetState=>{
+            this.sendHistory[txid]=data;
+            this.sendHistory[txid]['symbol']=assetState.symbol;
+            Storage_local.set('send-data',this.sendHistory);
+        })
     }
 
     public static addInvokeData(txid:string,domain:string,data:InvokeArgs|InvokeArgs[])
