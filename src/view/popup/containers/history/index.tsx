@@ -101,7 +101,7 @@ export default class History extends React.Component<any, {}>
             }
         }
         const panellist = tasklist.sort((a,b)=>{
-            return a.startTime-b.startTime
+            return b.startTime-a.startTime
         })
         return panellist;
     }
@@ -113,7 +113,7 @@ export default class History extends React.Component<any, {}>
         historyStore.taskList.forEach((task) =>
         {
             if (task.state == TaskState.watting || task.state == TaskState.watForLast)
-                waitlist.push(<Panel task={task} ></Panel>);
+                waitlist.push(task);
             else
                 historylist.push(task);
         })
@@ -123,7 +123,7 @@ export default class History extends React.Component<any, {}>
                     {
                         waitlist.length > 0 && <div className="title">排队中</div>
                     }
-                    {waitlist}
+                    {waitlist.sort((a,b)=>b.startTime-a.startTime).map(task=><Panel task={task} ></Panel>)}
                 </div>
                 <div className="history">
                     <div className="title">交易历史</div>
