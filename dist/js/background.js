@@ -1661,16 +1661,20 @@ class TransferGroup {
 }
 class TaskManager {
     static start() {
+        chrome.storage.local.get([this.table, 'invoke-data', 'send-data'], item => {
+            this.shed = item[this.table] ? item[this.table] : {};
+            this.invokeHistory = item['invoke-data'] ? item['invoke-data'] : {};
+            this.sendHistory = item['send-data'] ? item['send-data'] : {};
+            console.log('数据初始化完成');
+        });
+        // this.initShed()
         setInterval(() => {
             Api.getBlockCount()
                 .then(result => {
                 const count = (parseInt(result[0].blockcount) - 1);
                 if (count - storage.height > 0) {
                     storage.height = count;
-                    this.initShed()
-                        .then(result => {
-                        this.update();
-                    });
+                    this.update();
                 }
             })
                 .catch(error => {
@@ -1721,12 +1725,12 @@ class TaskManager {
         Storage_local.set(this.table, this.shed);
     }
     static initShed() {
-        return new Promise((r, j) => {
+        return new Promise((resolve, reject) => {
             chrome.storage.local.get([this.table, 'invoke-data', 'send-data'], item => {
                 this.shed = item[this.table] ? item[this.table] : {};
                 this.invokeHistory = item['invoke-data'] ? item['invoke-data'] : {};
                 this.sendHistory = item['send-data'] ? item['send-data'] : {};
-                r(true);
+                resolve();
             });
         });
     }

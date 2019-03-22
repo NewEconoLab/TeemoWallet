@@ -71,6 +71,7 @@ interface InvokeArgs{
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
     attachedAssets?:AttachedAssets;
+    description?:string;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }

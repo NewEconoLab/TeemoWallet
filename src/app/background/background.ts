@@ -1974,6 +1974,14 @@ class TaskManager{
 
     public static start()
     {
+        
+        chrome.storage.local.get([this.table,'invoke-data','send-data'],item=>{
+            this.shed=item[this.table]?item[this.table]:{};
+            this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
+            this.sendHistory=item['send-data']?item['send-data']:{};
+            console.log('数据初始化完成');            
+        })
+        // this.initShed()
         setInterval(()=>{
             Api.getBlockCount()
             .then(result=>{
@@ -1981,12 +1989,9 @@ class TaskManager{
                 if(count - storage.height>0)
                 {
                     storage.height=count;
-                    this.initShed()
-                    .then(result=>{
-                        this.update()
-                    })
+                    this.update()
                 }
-            }) 
+            })
             .catch(error=>{
                 console.log(error);
             })
@@ -2046,12 +2051,12 @@ class TaskManager{
 
     public static initShed()
     {
-        return new Promise((r,j)=>{
+        return new Promise((resolve,reject)=>{
             chrome.storage.local.get([this.table,'invoke-data','send-data'],item=>{
                 this.shed=item[this.table]?item[this.table]:{};
                 this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
                 this.sendHistory=item['send-data']?item['send-data']:{};
-                r(true);
+                resolve();
             })
         })
     }
