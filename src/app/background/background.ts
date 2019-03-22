@@ -1932,8 +1932,8 @@ class TransferGroup
             else
             {
                 TaskManager.shed[tran.txid].state = TaskState.fail;
-                tran.executeError={
-                    type:"TransferError",
+                TaskManager.shed[tran.txid].next.executeError={
+                    type:"RPC_ERROR",
                     description:result[0].errorMessage,
                     data:tran.txhex
                 }
@@ -1941,14 +1941,22 @@ class TransferGroup
             Storage_local.set(TaskManager.table,TaskManager.shed);
         })
         .catch(error=>{
-            if(error)
-            {
-                tran.executeError={
-                    type:"TransferError",
-                    description:"",
-                    data:error
-                }
+            
+            TaskManager.shed[tran.txid].state = TaskState.fail;
+            TaskManager.shed[tran.txid].next.executeError={
+                type:"RPC_ERROR",
+                description:error,
+                data:tran.txhex
             }
+            Storage_local.set(TaskManager.table,TaskManager.shed);
+            // if(error)
+            // {
+            //     tran.executeError={
+            //         type:"RPC_ERROR",
+            //         description:"An RPC error occured when submitting the request",
+            //         data:error
+            //     }
+            // }
         })
     }
 }
