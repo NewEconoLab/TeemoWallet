@@ -168,7 +168,7 @@ declare const getMessageID: () => string;
  * @param data
  */
 declare function sendMessage<K>(command: Command, params?: any): Promise<K>;
-declare namespace Teemmo {
+declare namespace Teemo {
     class NEO {
         static getProvider: () => Promise<Provider>;
         /**

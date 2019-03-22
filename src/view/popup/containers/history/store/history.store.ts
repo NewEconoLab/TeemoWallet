@@ -51,7 +51,7 @@ class HistoryList implements IHistoryList
                             icon: string;
                             title: string;
                         }={icon:'',title:''}
-                        if(invokeHistory.domain=="TeemmoWallet.exchangeCgas")
+                        if(invokeHistory.domain=="TeemoWallet.exchangeCgas")
                         {                            
                             dappMessage.icon=ICON.exchange
                             dappMessage.title="CGAS兑换";

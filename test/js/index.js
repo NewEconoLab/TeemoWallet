@@ -1,4 +1,3 @@
-///<reference path="./inject.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -10,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 /**
  * 定义事件接收与响应代码
  */
-window.addEventListener('Teemmo.NEO.READY', (data) => {
+window.addEventListener('Teemo.NEO.READY', (data) => {
     console.log("inject READY ");
     //console.log(JSON.stringify(data.detail))
     var myDate = new Date();
@@ -20,28 +19,28 @@ window.addEventListener('Teemmo.NEO.READY', (data) => {
     const main = new Main();
     main.start(); //监听到这个事件后，才能开始插件的相关方法调用
 });
-window.addEventListener('Teemmo.NEO.ACCOUNT_CHANGED', (data) => {
+window.addEventListener('Teemo.NEO.ACCOUNT_CHANGED', (data) => {
     console.log("inject ACCOUNT_CHANGED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
     eventPool.value = myDate.toLocaleTimeString() + "  ACCOUNT_CHANGED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
-window.addEventListener('Teemmo.NEO.CONNECTED', (data) => {
+window.addEventListener('Teemo.NEO.CONNECTED', (data) => {
     console.log("inject CONNECTED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
     eventPool.value = myDate.toLocaleTimeString() + "  CONNECTED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
-window.addEventListener('Teemmo.NEO.DISCONNECTED', (data) => {
+window.addEventListener('Teemo.NEO.DISCONNECTED', (data) => {
     console.log("inject DISCONNECTED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
     eventPool.value = myDate.toLocaleTimeString() + "  DISCONNECTED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
-window.addEventListener('Teemmo.NEO.NETWORK_CHANGED', (data) => {
+window.addEventListener('Teemo.NEO.NETWORK_CHANGED', (data) => {
     console.log("inject NETWORK_CHANGED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
@@ -171,7 +170,7 @@ class Main {
      */
     getNetworks() {
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.getNetworks()
+            Teemo.NEO.getNetworks()
                 .then(result => {
                 console.log(result);
                 document.getElementById("getNetworks_R").textContent = JSON.stringify(result, null, 2);
@@ -188,7 +187,7 @@ class Main {
      */
     getAccount() {
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.getAccount()
+            Teemo.NEO.getAccount()
                 .then(result => {
                 console.log(result);
                 this.getAccount_R.textContent = JSON.stringify(result, null, 2);
@@ -217,7 +216,7 @@ class Main {
             params: JSON.parse(params)
         };
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.getBalance(data) // 获得余额的方法
+            Teemo.NEO.getBalance(data) // 获得余额的方法
                 .then(result => {
                 console.log(result);
                 document.getElementById("getBalance_R").innerText = JSON.stringify(result, null, 2);
@@ -236,7 +235,7 @@ class Main {
         return new Promise((resolve, reject) => {
             let json = JSON.parse(params);
             console.log(json);
-            Teemmo.NEO.invokeRead(JSON.parse(params))
+            Teemo.NEO.invokeRead(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 document.getElementById("invokeRead_R").innerText = JSON.stringify(result, null, 2);
@@ -255,7 +254,7 @@ class Main {
         return new Promise((resolve, reject) => {
             let json = JSON.parse(params);
             console.log(json);
-            Teemmo.NEO.invokeReadGroup(JSON.parse(params))
+            Teemo.NEO.invokeReadGroup(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 document.getElementById("invokeReadGroup_R").innerText = JSON.stringify(result, null, 2);
@@ -272,7 +271,7 @@ class Main {
      */
     send(params) {
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.send(JSON.parse(params))
+            Teemo.NEO.send(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 document.getElementById("send_R").innerText = JSON.stringify(result, null, 2);
@@ -303,7 +302,7 @@ class Main {
         //     // assets: 暂时用不到
         // }
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.invoke(JSON.parse(params))
+            Teemo.NEO.invoke(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 console.log("这是交易id" + result.txid);
@@ -354,7 +353,7 @@ class Main {
         //     ]
         // }
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.invokeGroup(JSON.parse(params))
+            Teemo.NEO.invokeGroup(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 //console.log("这是交易id"+ result[0].txid);
@@ -383,7 +382,7 @@ class Main {
         //     // assets: 暂时用不到
         // }
         return new Promise((resolve, reject) => {
-            Teemmo.NEO.getStorage(JSON.parse(params))
+            Teemo.NEO.getStorage(JSON.parse(params))
                 .then(result => {
                 console.log(result);
                 console.log("这是交易id" + result);

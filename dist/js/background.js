@@ -168,11 +168,11 @@ class Storage_local {
             newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包1';
             arr.push(newacc);
         }
-        localStorage.setItem("TEEMMOWALLET_ACCOUNT", JSON.stringify(arr));
+        localStorage.setItem("TeemoWALLET_ACCOUNT", JSON.stringify(arr));
         return newacc;
     }
     static getAccount() {
-        const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
+        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
         let accounts = [];
         if (str) {
             let arr = accounts.concat(JSON.parse(str));
@@ -642,30 +642,6 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
     }
 }
 /**
- * 编译 invoke参数列表
- * @param {InvokeArgs[]} group InvokeGroup参数
- */
-function groupScriptBuild(group) {
-    // invoke 组合 调用
-    let sb = new ScriptBuild();
-    // 生成随机数
-    const RANDOM_UINT8 = getWeakRandomValues(32);
-    const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
-    // 塞入随机数
-    sb.EmitPushNumber(RANDOM_INT); // 将随机数推入栈顶
-    sb.Emit(ThinNeo.OpCode.DROP); // 打包
-    /**
-     * 循环塞入script参数
-     */
-    for (let index = 0; index < group.length; index++) {
-        const invoke = group[index];
-        sb.EmitArguments(invoke.arguments); // 调用EmitArguments方法编译并打包参数
-        sb.EmitPushString(invoke.operation); // 塞入方法名
-        sb.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入合约地址
-    }
-    return sb.ToArray();
-}
-/**
  * 打包合并交易
  * @param data 合并合约调用参数
  */
@@ -674,8 +650,10 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
     // 判断merge的值
     if (data.merge) {
         let tran = new Transaction();
-        let script = groupScriptBuild(data.group);
-        tran.setScript(script);
+        // let script = groupScriptBuild(data.group);
+        const script = new ScriptBuild();
+        script.EmitInvokeArgs(data.group);
+        tran.setScript(script.ToArray());
         let transfer = {}; // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = yield MarkUtxo.getAllUtxo();
         let assets;
@@ -726,15 +704,6 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 let tran = new Transaction();
                 let script = new ScriptBuild();
                 script.EmitInvokeArgs(invoke, txids[0].txid);
-                // 生成随机数
-                const RANDOM_UINT8 = getWeakRandomValues(32);
-                const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
-                // 塞入随机数
-                script.EmitPushNumber(RANDOM_INT); // 将随机数推入栈顶
-                script.Emit(ThinNeo.OpCode.DROP); // 打包
-                script.EmitArguments(invoke.arguments, txids[0].txid);
-                script.EmitPushString(invoke.operation);
-                script.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash));
                 tran.setScript(script.ToArray());
                 const message = tran.GetMessage().clone();
                 const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
@@ -812,7 +781,7 @@ var exchangeGas = (transcount, netfee) => __awaiter(this, void 0, void 0, functi
     };
     try {
         const result = yield contractBuilder(invoke);
-        TaskManager.addInvokeData(result.txid, 'TeemmoWallet.exchangeCgas', invoke);
+        TaskManager.addInvokeData(result.txid, 'TeemoWallet.exchangeCgas', invoke);
         return result;
     }
     catch (error) {
@@ -870,7 +839,7 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
         const txid = result[0].txid.replace('0x', '');
         const nodeUrl = "https://api.nel.group/api";
         let ouput = { txid, nodeUrl };
-        TaskManager.addInvokeData(txid, "TeemmoWallet.exchangeCgas", refund);
+        TaskManager.addInvokeData(txid, "TeemoWallet.exchangeCgas", refund);
         return ouput;
     }
     else {
@@ -1464,7 +1433,7 @@ const getProvider = () => {
         let provider = {
             "compatibility": [""],
             "extra": { theme: "", currency: "" },
-            "name": "Teemmo.NEO",
+            "name": "Teemo.NEO",
             "version": VERSION,
             "website": ""
         };

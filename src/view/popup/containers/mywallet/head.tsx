@@ -72,7 +72,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
             
             // chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
             //     chrome.tabs.sendMessage(tabs[0].id,{
-            //         EventName:"Teemmo.NEO.DISCONNECTED",
+            //         EventName:"Teemo.NEO.DISCONNECTED",
             //     },()=>{
 
             //     })

@@ -1,11 +1,11 @@
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
 declare enum WalletEvents {
-    READY = "Teemmo.NEO.READY",
-    CONNECTED = "Teemmo.NEO.CONNECTED",
-    DISCONNECTED = "Teemmo.NEO.DISCONNECTED",
-    NETWORK_CHANGED = "Teemmo.NEO.NETWORK_CHANGED",
-    ACCOUNT_CHANGED = "Teemmo.NEO.ACCOUNT_CHANGED"
+    READY = "Teemo.NEO.READY",
+    CONNECTED = "Teemo.NEO.CONNECTED",
+    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED"
 }
 declare enum ArgumentDataType {
     STRING = "String",
@@ -175,7 +175,7 @@ declare const getMessageID: () => string;
  * @param data
  */
 declare function sendMessage<K>(command: Command, params?: any): Promise<K>;
-declare namespace Teemmo {
+declare namespace Teemo {
     class NEO {
         static getProvider: () => Promise<Provider>;
         /**

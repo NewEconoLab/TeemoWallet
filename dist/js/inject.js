@@ -2,11 +2,11 @@ const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 var WalletEvents;
 (function (WalletEvents) {
-    WalletEvents["READY"] = "Teemmo.NEO.READY";
-    WalletEvents["CONNECTED"] = "Teemmo.NEO.CONNECTED";
-    WalletEvents["DISCONNECTED"] = "Teemmo.NEO.DISCONNECTED";
-    WalletEvents["NETWORK_CHANGED"] = "Teemmo.NEO.NETWORK_CHANGED";
-    WalletEvents["ACCOUNT_CHANGED"] = "Teemmo.NEO.ACCOUNT_CHANGED";
+    WalletEvents["READY"] = "Teemo.NEO.READY";
+    WalletEvents["CONNECTED"] = "Teemo.NEO.CONNECTED";
+    WalletEvents["DISCONNECTED"] = "Teemo.NEO.DISCONNECTED";
+    WalletEvents["NETWORK_CHANGED"] = "Teemo.NEO.NETWORK_CHANGED";
+    WalletEvents["ACCOUNT_CHANGED"] = "Teemo.NEO.ACCOUNT_CHANGED";
 })(WalletEvents || (WalletEvents = {}));
 var ArgumentDataType;
 (function (ArgumentDataType) {
@@ -85,8 +85,8 @@ function sendMessage(command, params) {
         });
     });
 }
-var Teemmo;
-(function (Teemmo) {
+var Teemo;
+(function (Teemo) {
     class NEO {
         /**
          * 获得当前网络信息
@@ -144,8 +144,8 @@ var Teemmo;
     NEO.getProvider = () => {
         return sendMessage(Command.getProvider);
     };
-    Teemmo.NEO = NEO;
-})(Teemmo || (Teemmo = {}));
+    Teemo.NEO = NEO;
+})(Teemo || (Teemo = {}));
 const EventChange = () => {
     window.addEventListener("message", e => {
         const response = e.data;
@@ -156,7 +156,7 @@ const EventChange = () => {
     });
 };
 const provider = {
-    "name": "TeemmoWallet",
+    "name": "TeemoWallet",
     "version": "0.1",
     "website": "nel.group",
     "compatibility": ["typescript", "javascript"],

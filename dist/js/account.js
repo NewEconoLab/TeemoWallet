@@ -155,10 +155,10 @@ const EventsOnChange = (event, data) => {
 };
 var WalletEvents;
 (function (WalletEvents) {
-    WalletEvents["READY"] = "Teemmo.NEO.READY";
-    WalletEvents["CONNECTED"] = "Teemmo.NEO.CONNECTED";
-    WalletEvents["DISCONNECTED"] = "Teemmo.NEO.DISCONNECTED";
-    WalletEvents["NETWORK_CHANGED"] = "Teemmo.NEO.NETWORK_CHANGED";
-    WalletEvents["ACCOUNT_CHANGED"] = "Teemmo.NEO.ACCOUNT_CHANGED";
+    WalletEvents["READY"] = "Teemo.NEO.READY";
+    WalletEvents["CONNECTED"] = "Teemo.NEO.CONNECTED";
+    WalletEvents["DISCONNECTED"] = "Teemo.NEO.DISCONNECTED";
+    WalletEvents["NETWORK_CHANGED"] = "Teemo.NEO.NETWORK_CHANGED";
+    WalletEvents["ACCOUNT_CHANGED"] = "Teemo.NEO.ACCOUNT_CHANGED";
 })(WalletEvents || (WalletEvents = {}));
 //# sourceMappingURL=account.js.map

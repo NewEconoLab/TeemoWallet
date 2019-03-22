@@ -201,11 +201,11 @@ const EventsOnChange= (event: WalletEvents, data?: any) => {
 };
 
 enum WalletEvents {
-    READY = "Teemmo.NEO.READY",
-    CONNECTED = "Teemmo.NEO.CONNECTED",
-    DISCONNECTED = "Teemmo.NEO.DISCONNECTED",
-    NETWORK_CHANGED = "Teemmo.NEO.NETWORK_CHANGED",
-    ACCOUNT_CHANGED = "Teemmo.NEO.ACCOUNT_CHANGED"
+    READY = "Teemo.NEO.READY",
+    CONNECTED = "Teemo.NEO.CONNECTED",
+    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED"
 }
 interface WalletAccount {
     address: string;

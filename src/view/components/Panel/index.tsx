@@ -90,7 +90,7 @@ export default class Panel extends React.Component<IProps, IState>
 						</div>
 					</div>:
 					<div className="transfer-type">
-						<div className="icon"><img src={this.props.task.invokeHistory.domain=="TeemmoWallet.exchange"?ICON.exchange:this.props.task.dappMessage.icon}/></div>
+						<div className="icon"><img src={this.props.task.invokeHistory.domain=="TeemoWallet.exchange"?ICON.exchange:this.props.task.dappMessage.icon}/></div>
 						<div className="message">
 							<div className="type">合约交互</div>
 							<div className="time">{format("MM-dd hh:mm:ss",this.props.task.startTime.toString(),'cn')}</div>

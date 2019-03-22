@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 
 if(chrome.tabs){
     chrome.tabs.query({ active: true, currentWindow: true }, tab => {
-        const name = "Teemmo Notify";
+        const name = "Teemo Notify";
         const app = document.createElement('div');
         document.body.appendChild(app);
         ReactDOM.render

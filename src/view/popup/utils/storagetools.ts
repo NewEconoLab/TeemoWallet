@@ -32,11 +32,11 @@ export const Storage_local =
             arr.push(newacc);
         }
         
-        localStorage.setItem("TEEMMOWALLET_ACCOUNT",JSON.stringify(arr));
+        localStorage.setItem("TeemoWALLET_ACCOUNT",JSON.stringify(arr));
         return index;
     },
     getAccount:()=>{
-        const str = localStorage.getItem("TEEMMOWALLET_ACCOUNT");
+        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
         let accounts = [] as NepAccount[];
         if(str) 
         {

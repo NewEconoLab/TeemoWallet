@@ -185,11 +185,6 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     EmitInvokeArgs(data: InvokeArgs | InvokeArgs[], hookTxid?: string): Uint8Array;
 }
 /**
- * 编译 invoke参数列表
- * @param {InvokeArgs[]} group InvokeGroup参数
- */
-declare function groupScriptBuild(group: InvokeArgs[]): Uint8Array;
-/**
  * 打包合并交易
  * @param data 合并合约调用参数
  */
