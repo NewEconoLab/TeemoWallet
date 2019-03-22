@@ -116,6 +116,9 @@ var Teemo;
         static getStorage(params) {
             return sendMessage(Command.getStorage, params);
         }
+        static getPublicKey() {
+            return sendMessage(Command.getPublicKey);
+        }
         /**
          * 转账方法
          * @param {SendArgs} params 转账参数

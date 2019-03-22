@@ -63,6 +63,7 @@ interface InvokeArgs {
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;
+    description?: string;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -129,6 +130,10 @@ interface Balance {
 interface GetNetworksOutput {
     networks: string[];
     defaultNetwork: string;
+}
+interface GetPublickeyOutput {
+    address: string;
+    publickey: string;
 }
 interface AccountOutput {
     address: string;
@@ -198,6 +203,7 @@ declare namespace Teemo {
          * @param {GetStorageArgs} params 查询存储区参数
          */
         static getStorage(params: GetStorageArgs): Promise<GetStorageOutput>;
+        static getPublicKey(): Promise<GetPublickeyOutput>;
         /**
          * 转账方法
          * @param {SendArgs} params 转账参数
