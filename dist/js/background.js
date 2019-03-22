@@ -1215,7 +1215,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             const utxos = yield MarkUtxo.getAllUtxo();
             if (data.fee && data.fee != '0') {
                 const fee = Neo.Fixed8.parse(data.fee);
-                const gass = utxos[data.asset];
+                const gass = utxos[HASH_CONFIG.ID_GAS];
                 if (data.asset == HASH_CONFIG.ID_GAS) {
                     const sum = fee.add(Neo.Fixed8.parse(data.amount));
                     tran.creatInuptAndOutup(gass, sum, data.toAddress);
