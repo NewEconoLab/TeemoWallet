@@ -1667,7 +1667,6 @@ class TaskManager {
             this.sendHistory = item['send-data'] ? item['send-data'] : {};
             console.log('数据初始化完成');
         });
-        // this.initShed()
         setInterval(() => {
             Api.getBlockCount()
                 .then(result => {
@@ -1691,34 +1690,19 @@ class TaskManager {
         });
     }
     static addInvokeData(txid, domain, data) {
-        if (Array.isArray(data)) {
-            invokeArgsAnalyse(...data)
-                .then(result => {
-                const message = {
-                    domain: domain,
-                    scriptHashs: result.scriptHashs,
-                    descripts: result.descriptions,
-                    expenses: result.expenses,
-                    netfee: result.fee,
-                };
-                this.invokeHistory[txid] = message;
-                Storage_local.set('invoke-data', this.invokeHistory);
-            });
-        }
-        else {
-            invokeArgsAnalyse(data)
-                .then(result => {
-                const message = {
-                    domain: domain,
-                    scriptHashs: result.scriptHashs,
-                    descripts: result.descriptions,
-                    expenses: result.expenses,
-                    netfee: result.fee,
-                };
-                this.invokeHistory[txid] = message;
-                Storage_local.set('invoke-data', this.invokeHistory);
-            });
-        }
+        const invokeArgs = Array.isArray(data) ? data : [data];
+        invokeArgsAnalyse(...invokeArgs)
+            .then(result => {
+            const message = {
+                domain: domain,
+                scriptHashs: result.scriptHashs,
+                descripts: result.descriptions,
+                expenses: result.expenses,
+                netfee: result.fee,
+            };
+            this.invokeHistory[txid] = message;
+            Storage_local.set('invoke-data', this.invokeHistory);
+        });
     }
     static addTask(task) {
         this.shed[task.txid] = task;
