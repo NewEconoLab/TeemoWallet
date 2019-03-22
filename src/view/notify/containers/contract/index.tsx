@@ -54,19 +54,14 @@ export default class ContractRequest extends React.Component<IProps, IState>
   // 更新数据
   public getRenderState = () =>
   {
-    console.log("渲染hash");
-    console.log(this.props.data);
-    console.log(JSON.stringify(this.state.data))
     let invoke: InvokeArgs[] = [];
     if (this.state.data && this.state.data.group)
     {
-      console.log("发送的是多条的交易");
       invoke = this.props.data.group;
       this.initData(invoke);
     }
     else if (this.state.data)
     {
-      console.log("发送的是单条的交易");
       invoke[0] = this.props.data;
       this.initData(invoke);
     }
@@ -74,15 +69,9 @@ export default class ContractRequest extends React.Component<IProps, IState>
 
   // 初始化state
   public initData = (invoke: InvokeArgs[]) =>
-  {
-    console.log("----------------初始化数据");
-    
+  {    
     this.bg.invokeArgsAnalyse(...invoke)
     .then(result=>{
-      console.log("-------------得到了返回结果");
-      
-      console.log(result);
-      
       this.setState({
         description: result.descriptions,
         scriptHash: result.scriptHashs,
@@ -97,51 +86,6 @@ export default class ContractRequest extends React.Component<IProps, IState>
         }
       );
     })
-    // let description = [];
-    // let scriptHash = [];
-    // let fee = 0;
-    // let operation = [];
-    // let argument = [];
-    // let expenses = [];
-    // invoke.map((key, value) =>
-    // {
-    //   description[value] = key.description;
-    //   scriptHash[value] = key.scriptHash;
-    //   fee = key.fee ? parseFloat(key.fee) : 0 + fee;
-    //   operation[value] = key.operation;
-    //   argument[value] = key.arguments;
-    //   // 判断 nep5的转账花费
-    //   if(key.operation=="transfer")
-    //   {
-    //     if(key.arguments[0].value==this.props.address)
-    //     {
-    //       expenses.push()
-    //     }
-    //   }
-    //   if(key.attachedAssets)
-    //   {
-    //     for (const asset in key.attachedAssets) {
-    //       if (key.attachedAssets.hasOwnProperty(asset)) {
-    //         const amount = parseFloat(key.attachedAssets[asset]);
-    //         expenses[asset]=expenses[asset]?expenses[asset]+amount:amount;
-    //       }
-    //     }
-    //     Object.keys(key.attachedAssets).map(value=>{
-    //       expenses[value]=key.attachedAssets[value];
-    //     })
-    //   }
-    // })
-    // this.setState({
-    //   description: description,
-    //   scriptHash: scriptHash,
-    //   fee: fee.toString(),
-    //   operation: operation,
-    //   arguments: argument
-    // }, () =>
-    //   {
-    //     console.log("打印state");
-    //     console.log(this.state);
-    //   });
   }
 
   public netfeeChange=(check:boolean)=>
@@ -272,7 +216,10 @@ export default class ContractRequest extends React.Component<IProps, IState>
                                   <p className="first-p">{this.state.arguments[oindex][akey].type}</p>
                                 </div>
                                 <div className="line-right">
+                                {this.state.arguments[oindex][akey].type=="Array"?
+                                  <p className="second-p">{JSON.stringify(this.state.arguments[oindex][akey].value)}</p>:
                                   <p className="second-p">{this.state.arguments[oindex][akey].value}</p>
+                                }
                                 </div>
                               </div>
                             )
