@@ -182,7 +182,7 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
      * @param argument
      */
     EmitArguments(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
-    EmitInvokeArgs(...invokes: InvokeArgs[]): Uint8Array;
+    EmitInvokeArgs(data: InvokeArgs | InvokeArgs[], hookTxid?: string): Uint8Array;
 }
 /**
  * 编译 invoke参数列表
@@ -270,6 +270,7 @@ declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
  * @param data invokeRead 的参数
  */
 declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
+declare var invokeReadTest: () => void;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
     scriptHashs: string[];

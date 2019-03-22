@@ -572,12 +572,6 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
     EmitArguments(argument, hookTxid) {
         for (let i = argument.length - 1; i >= 0; i--) {
             const param = argument[i];
-            if (param.type === ArgumentDataType.ARRAY) {
-                var list = param.value;
-                for (let i = list.length - 1; i >= 0; i--) {
-                    this.EmitParamJson(list[i]);
-                }
-            }
             switch (param.type) {
                 case ArgumentDataType.STRING:
                     this.EmitPushString(param.value);
@@ -631,7 +625,8 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
         this.Emit(ThinNeo.OpCode.PACK);
         return this;
     }
-    EmitInvokeArgs(...invokes) {
+    EmitInvokeArgs(data, hookTxid) {
+        const invokes = Array.isArray(data) ? data : [data];
         const RANDOM_UINT8 = getWeakRandomValues(32);
         const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
         // 塞入随机数
@@ -639,7 +634,7 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
         this.Emit(ThinNeo.OpCode.DROP); // 打包
         for (let index = 0; index < invokes.length; index++) {
             const invoke = invokes[index];
-            this.EmitArguments(invoke.arguments); // 调用EmitArguments方法编译并打包参数
+            this.EmitArguments(invoke.arguments, hookTxid); // 调用EmitArguments方法编译并打包参数
             this.EmitPushString(invoke.operation); // 塞入方法名
             this.EmitAppCall(Neo.Uint160.parse(invoke.scriptHash)); // 塞入合约地址
         }
@@ -730,6 +725,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
             else {
                 let tran = new Transaction();
                 let script = new ScriptBuild();
+                script.EmitInvokeArgs(invoke, txids[0].txid);
                 // 生成随机数
                 const RANDOM_UINT8 = getWeakRandomValues(32);
                 const RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
@@ -749,6 +745,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 nextTran.txid = tran.getTxid();
                 txids.push({ txid: nextTran.txid, nodeUrl: "https://api.nel.group/api" });
                 trans.push(nextTran);
+                MarkUtxo.setMark(tran.marks);
             }
         }
         const task = new Task(ConfirmType.contract, txids[0].txid.replace('0x', ''), trans[0], TaskState.watting);
@@ -913,6 +910,7 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
     var trandata = new TransferGroup();
     trandata.txhex = tran.GetRawData().toHexString();
     trandata.txid = tran.getTxid();
+    MarkUtxo.setMark(tran.marks);
     return trandata;
 });
 const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, function* () {
@@ -1321,6 +1319,19 @@ var invokeRead = (data) => {
         catch (error) {
             j(error);
         }
+    });
+};
+var invokeReadTest = () => {
+    const script = new ScriptBuild();
+    script.EmitParamJson([['(str)test', '(str)qmz']]);
+    script.EmitPushString('nameHashArray'); // 塞入需要调用的合约方法名
+    script.EmitAppCall(Neo.Uint160.parse('348387116c4a75e420663277d9c02049907128c7')); // 塞入需要调用的合约hex
+    Api.getInvokeRead(script.ToArray().toHexString())
+        .then(result => {
+        console.log(result);
+    })
+        .then(error => {
+        console.log(error);
     });
 };
 var invokeReadGroup = (data) => {
