@@ -6,7 +6,7 @@ interface BackStore {
     domains: string[];
     titles: string[];
     oldUtxo: {
-        [txid: string]: any;
+        [txid: string]: number[];
     };
 }
 declare var storage: BackStore;

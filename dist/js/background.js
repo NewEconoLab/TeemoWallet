@@ -81,12 +81,13 @@ class MarkUtxo {
     static setMark(utxos) {
         for (let index = 0; index < utxos.length; index++) {
             const utxo = utxos[index];
-            if (storage.oldUtxo[utxo.txid]) {
-                storage.oldUtxo[utxo.txid].push(utxo.n);
+            const txid = utxo.txid.replace('0x', '');
+            if (storage.oldUtxo[txid]) {
+                storage.oldUtxo[txid].push(utxo.n);
             }
             else {
-                storage.oldUtxo[utxo.txid] = new Array();
-                storage.oldUtxo[utxo.txid].push(utxo.n);
+                storage.oldUtxo[txid] = new Array();
+                storage.oldUtxo[txid].push(utxo.n);
             }
         }
     }
@@ -97,13 +98,12 @@ class MarkUtxo {
                 if (!utxos) {
                     return undefined;
                 }
-                const marks = Storage_internal.get("utxo_manager"); // 获得被标记的utxo
+                const marks = storage.oldUtxo; // 获得被标记的utxo
                 const assets = {};
                 // 对utxo进行归类，并且将count由string转换成 Neo.Fixed8
-                // tslint:disable-next-line:forin        
                 for (const item of utxos) {
                     const mark = marks ? marks[item["txid"]] : undefined;
-                    if (!mark || !mark.join(",").includes(item.n)) // 排除已经标记的utxo返回给调用放
+                    if (!mark || mark.indexOf(item.n) < 0) // 排除已经标记的utxo返回给调用放
                      {
                         const asset = item.asset.replace('0x', '');
                         if (assets[asset] === undefined || assets[asset] == null) {
