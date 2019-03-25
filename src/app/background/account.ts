@@ -11,12 +11,16 @@ var AccountManager={
             {
                 if ("nep2 hash not match." == result)
                     reject(result);
-                const prikey = result as Uint8Array;
-                if (prikey != null)
+                else if (result != null)
                 {
-                    const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-                    AccountManager.setAccount(new AccountInfo(nepaccount,prikey,pubkey));
-                    resolve(nepaccount)
+                    const prikey = result as Uint8Array;
+                    try {
+                        const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+                        AccountManager.setAccount(new AccountInfo(nepaccount,prikey,pubkey));
+                        resolve(nepaccount)
+                    } catch (error) {
+                        reject("prikey is fail")
+                    }
                 }
                 else
                 {

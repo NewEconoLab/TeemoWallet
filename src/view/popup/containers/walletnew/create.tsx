@@ -51,28 +51,24 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     
     public passwordChange=(event)=>{
         this.setState({
+            password:event,
             password_error:!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(event))
-        })
-        this.setState({
-            password:event
         })
     }
 
     public password2Change=(event)=>{
         this.setState({
-            passwordconfirm:event
-        })
-        this.setState({
+            passwordconfirm:event,
             passwordconfirm_error:this.state.password!=event
         })
     }
 
-    public walletNameChange =(event)=>{
+    public walletNameChange =(event:string)=>{
+        const clength = event.match(/[\u4E00-\u9FA5]/g)?event.match(/[\u4E00-\u9FA5]/g).length:0;
+        const elength = event.match(/[a-zA-Z0-9]/g)?event.match(/[a-zA-Z0-9]/g).length:0;
         this.setState({
-            walletname_error: !(/^[\u4e00-\u9fffa-zA-Z]{1,15}$/.test(event))
-        })
-        this.setState({
-            walletname:event
+            walletname:event,
+            walletname_error: (clength*2+elength)>15
         })
     }
     

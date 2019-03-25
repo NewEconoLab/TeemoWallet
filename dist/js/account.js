@@ -16,11 +16,16 @@ var AccountManager = {
             ThinNeo.Helper.GetPrivateKeyFromNep2(nepaccount.nep2key, password, nepaccount.scrypt.N, nepaccount.scrypt.r, nepaccount.scrypt.p, (info, result) => {
                 if ("nep2 hash not match." == result)
                     reject(result);
-                const prikey = result;
-                if (prikey != null) {
-                    const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
-                    AccountManager.setAccount(new AccountInfo(nepaccount, prikey, pubkey));
-                    resolve(nepaccount);
+                else if (result != null) {
+                    const prikey = result;
+                    try {
+                        const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+                        AccountManager.setAccount(new AccountInfo(nepaccount, prikey, pubkey));
+                        resolve(nepaccount);
+                    }
+                    catch (error) {
+                        reject("prikey is fail");
+                    }
                 }
                 else {
                     reject("prikey is null");

@@ -2,13 +2,10 @@ import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
 import { RouteComponentProps } from 'react-router-dom';
-import Label from '../../../components/Label';
-import Select, { IOption } from '../../../components/Select';
+import { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
 import { bg, Storage_local} from '../../utils/storagetools';
-import Chooser from '../../../components/Chooser';
-import { AccountInfo, NepAccount } from '../../../../common/entity';
-import { neotools } from '../../utils/neotools';
+import { NepAccount } from '../../../../common/entity';
 import AddrList from './addrlist';
 import { observer } from 'mobx-react';
 import common from '../../store/common';
@@ -81,7 +78,11 @@ export default class Login extends React.Component<AppProps,AppState> {
      */
     public passwordChange=(event:string)=>
     {
-        this.setState({password:event})
+        this.setState(
+        {
+            passwordError:false,
+            password:event
+        })
     }
 
     public chooserAddr=(event:IOption)=>
@@ -105,10 +106,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         this.props.history.push('/walletnew')
     }
 
-    public loginWallet=()=>{
-        console.log("--------state-currentAccount");
-        console.log(this.state.currentAccount);
-        
+    public loginWallet=()=>{        
         bg.AccountManager.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
             // bg['storage'].account = account;

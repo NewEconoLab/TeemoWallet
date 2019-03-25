@@ -76,7 +76,10 @@ export default class Panel extends React.Component<IProps, IState>
 	}
 
 	public render()
-	{		
+	{
+		let type=''
+		if(this.props.task.sendHistory)
+		{type=this.props.task.sendHistory.fromAddress!==common.account.address && this.props.task.sendHistory.toAddress==common.account.address?'input':'output'}
 		return (
 			<div className="panel">
 				<div className="panel-heading" onClick={this.onClick}>
@@ -99,7 +102,11 @@ export default class Panel extends React.Component<IProps, IState>
 				{
 					this.props.task.sendHistory!=null&&					
 					<div className="asset">
+						{type=='input'? 
+						<div className="input">+ {this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
+						:
 						<div className="output">- {this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
+						}
 						{
 							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
 							<div className="wait">等待确认</div>
@@ -146,13 +153,23 @@ export default class Panel extends React.Component<IProps, IState>
 					{this.props.task.type==ConfirmType.tranfer?
 					<>
 						<div className="transaction-info">
-							<div className="transaction-title">转账</div>
+							<div className="transaction-title">{type=='input' ?'收款': '转账'}</div>
+							{this.props.task.sendHistory.remark&&
+								<div className="group">
+									<div className="title">备注</div>
+									<div className="value">{this.props.task.sendHistory.remark}</div>
+								</div>
+							}
 							<div className="group send">
-								<div className="title">发往</div>
-								<div className="value">{this.props.task.sendHistory.toAddress.substr(0,4)+"..."+this.props.task.sendHistory.toAddress.substr(31,4)}</div>
+								<div className="title">{type=='input' ?'来自': '发往'}</div>
+								<div className="value">{type=='input'?this.props.task.sendHistory.fromAddress.substr(0,4)+"..."+this.props.task.sendHistory.fromAddress.substr(31,4) :this.props.task.sendHistory.toAddress.substr(0,4)+"..."+this.props.task.sendHistory.toAddress.substr(31,4)}</div>
 							</div>
 							<div className="group expense">
-								<div className="title">花费</div>
+								<div className="title">
+									{this.props.task.sendHistory.fromAddress!==common.account.address && 
+										this.props.task.sendHistory.toAddress==common.account.address && '收款'}
+									{this.props.task.sendHistory.fromAddress==common.account.address && '花费'}
+								</div>
 								<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
 							</div>
 							<div className="group netfee">

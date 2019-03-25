@@ -42,6 +42,7 @@ class Common
             "network":this.network,
             "params":params
         }
+        this.balances={NEO:0,GAS:0,NNC:0,CGAS:0,CNEO:0};
         bg.getBalance(data)
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{

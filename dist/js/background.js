@@ -751,7 +751,8 @@ var exchangeCgas = (transcount, netfee) => __awaiter(this, void 0, void 0, funct
     // 已经确认
     //tx的第一个utxo就是给自己的
     let utxo = new Utxo();
-    utxo.addr = storage.account.address;
+    // utxo.addr = storage.account.address;
+    utxo.addr = ThinNeo.Helper.GetAddressFromScriptHash(HASH_CONFIG.ID_CGAS);
     utxo.txid = result.txid;
     utxo.asset = HASH_CONFIG.ID_GAS;
     utxo.count = Neo.Fixed8.fromNumber(transcount);
@@ -812,6 +813,7 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
         operation: 'refund',
         arguments: [{ type: "ByteArray", value: scriptHash.toHexString() }],
         network: storage.network,
+        fee: netfee.toString(),
         description: 'cgas换cgas'
     };
     script.EmitInvokeArgs(refund); // 这里的方法有推随机数进去不知道具体是否有影响
@@ -832,7 +834,17 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
         const txid = result[0].txid.replace('0x', '');
         const nodeUrl = "https://api.nel.group/api";
         let ouput = { txid, nodeUrl };
-        TaskManager.addInvokeData(txid, "TeemoWallet.exchangeCgas", refund);
+        // 为了popup显示对应的refund的数额
+        // TaskManager.addInvokeData(txid,"TeemoWallet.exchangeCgas",refund);
+        const message = {
+            domain: "TeemoWallet.exchangeCgas",
+            scriptHashs: [refund.scriptHash],
+            descripts: [refund.description],
+            expenses: [{ 'assetid': HASH_CONFIG.ID_CGAS.toString(), 'amount': transcount.toString(), 'symbol': 'CGAS' }],
+            netfee: refund.fee ? refund.fee : '0',
+        };
+        TaskManager.invokeHistory[txid] = message;
+        Storage_local.set('invoke-data', TaskManager.invokeHistory);
         return ouput;
     }
     else {
@@ -870,6 +882,16 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
     trandata.txhex = tran.GetRawData().toHexString();
     trandata.txid = tran.getTxid();
     MarkUtxo.setMark(tran.marks);
+    const senddata = {
+        'fromAddress': utxo.addr,
+        'toAddress': storage.account.address,
+        'asset': HASH_CONFIG.ID_GAS,
+        'amount': transcount.toString(),
+        'fee': netfee.toString(),
+        'remark': 'cgas换gas',
+        network: storage.network
+    };
+    TaskManager.addSendData(trandata.txid, senddata);
     return trandata;
 });
 const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, function* () {
@@ -1348,6 +1370,8 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
                 utxoassets[asset] = utxoassets[asset].add(amount);
             }
         }
+        if (HASH_CONFIG.ID_CGAS.compareTo(Neo.Uint160.parse(invoke.scriptHash)) === 0 && invoke.operation == "refund") {
+        }
     }
     for (const key in utxoassets) {
         const amount = utxoassets[key];
@@ -1670,7 +1694,7 @@ class TaskManager {
             Api.getBlockCount()
                 .then(result => {
                 const count = (parseInt(result[0].blockcount) - 1);
-                if (count - storage.height > 0) {
+                if (count - storage.height != 0) {
                     storage.height = count;
                     this.update();
                 }
@@ -1702,6 +1726,9 @@ class TaskManager {
             this.invokeHistory[txid] = message;
             Storage_local.set('invoke-data', this.invokeHistory);
         });
+    }
+    static InvokeDataUpdate() {
+        Storage_local.set('invoke-data', this.invokeHistory);
     }
     static addTask(task) {
         this.shed[task.txid] = task;

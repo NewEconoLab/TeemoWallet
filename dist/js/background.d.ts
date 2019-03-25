@@ -346,6 +346,7 @@ declare class TaskManager {
     static start(): void;
     static addSendData(txid: string, data: SendArgs): void;
     static addInvokeData(txid: string, domain: string, data: InvokeArgs | InvokeArgs[]): void;
+    static InvokeDataUpdate(): void;
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;
     static update(): void;
