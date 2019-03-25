@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Teemo Wallet",
     "description":
-        "Teemo is an extension for accessing NEO enabled distributed applications, or 'Dapps' in your normal Chrome browser!",
+        "NEO browser extension",
     "version": "1.0.0",
     "browser_action": {
         "default_title": "Teemo Wallet",
