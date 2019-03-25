@@ -10,41 +10,58 @@
         background: #f9f9f9;
         border-bottom: 1px solid #E5E5E5;
         .functionRow {
-            margin: 30px 30px;
+            padding: 20px 15px;
+            height: 33px;
+            background: #5F8DFB;
             .list {
                 display: flex;
                 .walletCode{
+                    flex: 1;
                     line-height: 30px;
                     width: 255px;
                     .headimg-wrapp{
-                        width: 30px;
-                        height: 30px;
+                        width: 33px;
+                        height: 33px;
                         display: inline-block;
                         border-radius: 50%;
                         vertical-align: middle;
+                        img{
+                            width: 33px;
+                            height: 33px;
+                        }
                     }
-                    span{
+                    .account-message{
+                        height: 33px;
+                        line-height: 33px;
+                        display: inline-block;
                         margin-left: 15px;
                         vertical-align: middle;
+                        font-family: NotoSansHans-Medium;
+                        font-size: 16px;
+                        color: #FFFFFF;
+                        div{
+                            height: 16px;
+                            line-height: 16px;
+                        }
+                        .address{
+                            margin-top: 5px;
+                            line-height: 12px;
+                            height: 12px;
+                            font-size: 12px;
+                        }
                     }
                 }
                 .function{
                     margin-right: 20px;
                 }
             }
-            .address {
-                margin-top: 10px;
-                font-family: NotoSansHans-Regular;
-                font-size: 12px;
-                color: #333333;
-            }
         }
-        .lablelist {
-            margin: 0 15px;
+        .labellist {
+            height: 44px;
+            line-height: 42px;
             display: flex;
-            .lable{
+            .header-label{
                 flex: 1;
-                height: 30px;
                 text-align: center;
                 span{
                     font-family: NotoSansHans-Medium;
@@ -58,7 +75,7 @@
                 &.active{
                     span{
                         color: #5F8DFB;
-                        padding-bottom: 7px;
+                        padding-bottom: 10px;
                         border-bottom: 3px solid #5F8DFB;
                     }
                 }

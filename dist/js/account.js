@@ -89,6 +89,7 @@ var AccountManager = {
                         const info = yield AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);
                         const nepacc = Storage_local.setAccount(new NepAccount("", account.address, account.nep2key, wallet.scrypt));
                         arr.push(new AccountInfo(nepacc, info.prikey, info.pubkey));
+                        console.log(arr[0]);
                         AccountManager.setAccount(arr[0]);
                     }
                     catch (error) {

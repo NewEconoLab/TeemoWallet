@@ -33,8 +33,8 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     ]
     public componentDidMount(){
         common.initAccountInfo();
-        const div = document.getElementById('headimg')
-		HeadImg(div,common.account.address);
+        // const div = document.getElementById('headimg')
+		// HeadImg(div,common.account.address);
     }
 
     public cutFunction =(option:IOption)=>
@@ -68,15 +68,6 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     public goOut=()=>{
         if(this.props.lableChange){
             bg.AccountManager.logout();
-            // console.log("---------------这边退出了");
-            
-            // chrome.tabs.query({ active: true, currentWindow: true },  (tabs)=> {
-            //     chrome.tabs.sendMessage(tabs[0].id,{
-            //         EventName:"Teemo.NEO.DISCONNECTED",
-            //     },()=>{
-
-            //     })
-            // })
             this.props.lableChange('out');
         }
     }
@@ -85,15 +76,18 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     }
 
 	public render() {
-        const history = classnames("lable",{"active":this.state.activeLable=="history"});
-        const assets = classnames("lable",{"active":this.state.activeLable=="assets"});
+        const history = classnames("header-label",{"active":this.state.activeLable=="history"});
+        const assets = classnames("header-label",{"active":this.state.activeLable=="assets"});
 		return (
             <div className="head">
                 <div className="functionRow">
                     <div className="list">
                         <div className="walletCode">
-                            <div className="headimg-wrapp" id="headimg" />
-                            <span>{common.account.lable}</span>
+                            <div className="headimg-wrapp" id="headimg" ><img src={ICON.header}/></div>
+                            <div className="account-message">
+                                <div className=''>{common.account.lable}</div>
+                                <div className='address'>{common.account.address.substring(0,4)+'...'+common.account.address.substring(30,34)}</div>
+                            </div>
                         </div>
                         <div className="function">
                             <Chooser options={this.options} onCallback={this.cutFunction} >
@@ -104,9 +98,8 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             <img src={ICON.LOGOUT} height={24}/>
                         </div>
                     </div>
-                    <div className="address">{common.account.address}</div>
                 </div>
-                <div className="lablelist">
+                <div className="labellist">
                     <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
                     <div className={assets} onClick={this.showAssets}><span>资产</span></div>
                 </div>

@@ -119,6 +119,8 @@ var AccountManager={
                             info.prikey,
                             info.pubkey
                         ));
+                        console.log(arr[0]);
+                        
                         AccountManager.setAccount(arr[0]);
                     } catch (error)
                     {

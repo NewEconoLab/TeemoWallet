@@ -522,4 +522,21 @@ declare class ResultItem {
 }
 declare function getBase64Image(img: any): string;
 declare function getBase64ByUrl(url: string): Promise<string>;
+declare var getHistoryList: () => Promise<{
+    taskShed: {
+        [txid: string]: Task;
+    };
+    sendHistory: {
+        [txid: string]: SendArgs;
+    };
+    invokeHistory: {
+        [txid: string]: InvokeHistory;
+    };
+    whiteHistory: {
+        [domain: string]: {
+            title: string;
+            icon: string;
+        };
+    };
+}>;
 //# sourceMappingURL=background.d.ts.map

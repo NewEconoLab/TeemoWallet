@@ -227,7 +227,7 @@ class Storage_local
             arr = arr.map((acc,n)=>{
                 if(acc.address===account.address)
                 {
-                    acc.walletName = newacc.walletName?newacc.walletName:acc.walletName;
+                    acc.walletName = newacc.walletName?newacc.walletName:(acc.walletName?acc.walletName:'我的钱包'+n);
                     newacc.index = index = n;
                     return newacc;
                 }
@@ -2389,5 +2389,45 @@ function getBase64ByUrl(url:string) {
         let base64 = getBase64Image(image);  
         r(base64);
         }
+    })
+}
+
+var getHistoryList=()=>{
+    return new Promise<{
+        taskShed:{[txid: string]: Task},
+        sendHistory:{[txid: string]: SendArgs},
+        invokeHistory:{[txid: string]: InvokeHistory},
+        whiteHistory:{[domain:string]:{title:string,icon:string}}
+    }>((resolve,reject)=>{
+        Storage_local.get<
+        {[domain:string]:{title:string,icon:string}}
+        >('white_list')
+        .then(result=>{
+            const list = [];
+            for (const txid in TaskManager.shed) {
+                if (TaskManager.shed.hasOwnProperty(txid)) {
+                    const task = TaskManager.shed[txid];
+                    const sendHistory = TaskManager.sendHistory[txid];
+                    const invokeHistory = TaskManager.invokeHistory[txid];
+                    const whiteHistory = result
+                }
+            }
+
+
+            resolve({
+                taskShed:TaskManager.shed,
+                sendHistory:TaskManager.sendHistory,
+                invokeHistory:TaskManager.invokeHistory,
+                whiteHistory:result
+            })
+        })
+        .catch(error=>{
+            resolve({
+                taskShed:TaskManager.shed,
+                sendHistory:TaskManager.sendHistory,
+                invokeHistory:TaskManager.invokeHistory,
+                whiteHistory:undefined
+            })
+        })
     })
 }

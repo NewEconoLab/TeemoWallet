@@ -158,7 +158,7 @@ class Storage_local {
         if (arr.length) {
             arr = arr.map((acc, n) => {
                 if (acc.address === account.address) {
-                    acc.walletName = newacc.walletName ? newacc.walletName : acc.walletName;
+                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : '我的钱包' + n);
                     newacc.index = index = n;
                     return newacc;
                 }
@@ -1890,4 +1890,34 @@ function getBase64ByUrl(url) {
         };
     });
 }
+var getHistoryList = () => {
+    return new Promise((resolve, reject) => {
+        Storage_local.get('white_list')
+            .then(result => {
+            const list = [];
+            for (const txid in TaskManager.shed) {
+                if (TaskManager.shed.hasOwnProperty(txid)) {
+                    const task = TaskManager.shed[txid];
+                    const sendHistory = TaskManager.sendHistory[txid];
+                    const invokeHistory = TaskManager.invokeHistory[txid];
+                    const whiteHistory = result;
+                }
+            }
+            resolve({
+                taskShed: TaskManager.shed,
+                sendHistory: TaskManager.sendHistory,
+                invokeHistory: TaskManager.invokeHistory,
+                whiteHistory: result
+            });
+        })
+            .catch(error => {
+            resolve({
+                taskShed: TaskManager.shed,
+                sendHistory: TaskManager.sendHistory,
+                invokeHistory: TaskManager.invokeHistory,
+                whiteHistory: undefined
+            });
+        });
+    });
+};
 //# sourceMappingURL=background.js.map
