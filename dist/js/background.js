@@ -855,9 +855,6 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
         }
         tran.creatInuptAndOutup([utxo], sendcount, storage.account.address); //创建交易
         tran.outputs.length = 1; //去掉找零的部分，只保留一个转账位
-        for (const n in tran.inputs) {
-            tran.inputs[n].hash = tran.inputs[n].hash.reverse();
-        }
     }
     catch (error) {
         console.log(error);
@@ -1097,7 +1094,7 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
                 data.params = [data.params];
             }
             for (const arg of data.params) {
-                var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO, HASH_CONFIG.ID_NNC.toString(), HASH_CONFIG.ID_NNK.toString()];
+                var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO, HASH_CONFIG.ID_NNC.toString(), HASH_CONFIG.ID_CGAS.toString()];
                 var nep5asset = [];
                 var utxoasset = [];
                 const assetArray = [];

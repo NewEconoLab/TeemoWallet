@@ -5,7 +5,6 @@ import WalletFoot from './foot';
 import WalletHeader from './head';
 import History from '../history';
 import Assets from '../assets';
-import { neotools } from '../../utils/neotools';
 import common from '../../store/common';
 import { observer } from 'mobx-react';
 import historyStore from '../history/store/history.store';

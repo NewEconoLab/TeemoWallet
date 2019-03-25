@@ -73,7 +73,6 @@ export default class Panel extends React.Component<IProps, IState>
 
 	public getIconForDomain()
 	{
-
 	}
 
 	public render()
@@ -105,6 +104,10 @@ export default class Panel extends React.Component<IProps, IState>
 							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
 							<div className="wait">等待确认</div>
 						}
+						{
+							this.props.task.state==TaskState.fail&&
+							<div className="fail">失败</div>
+						}
 					</div>
 				}
 				{
@@ -119,6 +122,10 @@ export default class Panel extends React.Component<IProps, IState>
 						{
 							(this.props.task.state==TaskState.watting||this.props.task.state==TaskState.watForLast) &&
 							<div className="wait">等待确认</div>
+						}
+						{
+							this.props.task.state==TaskState.fail&&
+							<div className="fail">失败</div>
 						}
 					</div>
 				}
