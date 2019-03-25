@@ -1965,16 +1965,19 @@ class TaskManager{
 
     public static invokeHistory: {[txid:string]:InvokeHistory} = {};
 
-    public static sendHistory:{[txid:string]:SendArgs}={}
+    public static sendHistory:{[txid:string]:SendArgs}={};
+
+    public static dappsMessage:{[txid:string]:{title:string,icon:string}}={};
 
     public static table:string = "Task-Manager-shed"
 
     public static start()
     {
-        chrome.storage.local.get([this.table,'invoke-data','send-data'],item=>{
+        chrome.storage.local.get([this.table,'invoke-data','send-data','white_list'],item=>{
             this.shed=item[this.table]?item[this.table]:{};
             this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
             this.sendHistory=item['send-data']?item['send-data']:{};
+            this.dappsMessage=item['white_list']?item['white_list']:{};
             console.log('数据初始化完成');
         })
         setInterval(()=>{
@@ -2388,42 +2391,29 @@ function getBase64ByUrl(url:string) {
     })
 }
 
-var getHistoryList=()=>{
-    return new Promise<{
-        taskShed:{[txid: string]: Task},
-        sendHistory:{[txid: string]: SendArgs},
-        invokeHistory:{[txid: string]: InvokeHistory},
-        whiteHistory:{[domain:string]:{title:string,icon:string}}
-    }>((resolve,reject)=>{
-        Storage_local.get<
-        {[domain:string]:{title:string,icon:string}}
-        >('white_list')
-        .then(result=>{
-            const list = [];
-            for (const txid in TaskManager.shed) {
-                if (TaskManager.shed.hasOwnProperty(txid)) {
-                    const task = TaskManager.shed[txid];
-                    const sendHistory = TaskManager.sendHistory[txid];
-                    const invokeHistory = TaskManager.invokeHistory[txid];
-                    const whiteHistory = result
-                }
+var getHistoryList=()=>{    
+    const list:TaskHistory[] = [];
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task:TaskHistory = TaskManager.shed[txid];
+            const sendHistory = TaskManager.sendHistory[txid];
+            const invokeHistory = TaskManager.invokeHistory[txid];
+            let dappMessage=undefined;
+            if(task.type==ConfirmType.contract && task.invokeHistory)
+            {
+                dappMessage = TaskManager.dappsMessage[invokeHistory.domain];                        
             }
+            task['dappMessage']=dappMessage;
+            task['invokeHistory']=invokeHistory;
+            task['sendHistory']=sendHistory;
+            list.push(task);
+        }
+    }
+    return list;
+}
 
-
-            resolve({
-                taskShed:TaskManager.shed,
-                sendHistory:TaskManager.sendHistory,
-                invokeHistory:TaskManager.invokeHistory,
-                whiteHistory:result
-            })
-        })
-        .catch(error=>{
-            resolve({
-                taskShed:TaskManager.shed,
-                sendHistory:TaskManager.sendHistory,
-                invokeHistory:TaskManager.invokeHistory,
-                whiteHistory:undefined
-            })
-        })
-    })
+interface TaskHistory extends Task{
+    dappMessage?:{icon:string,title:string};
+    invokeHistory?:InvokeHistory;
+    sendHistory?:SendArgs;
 }

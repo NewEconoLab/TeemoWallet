@@ -2,6 +2,7 @@
 
 import { InvokeArgs } from "../common/entity";
 import { AccountManager } from "./account";
+import { IHistory } from "../view/popup/containers/history/store/interface/history.interface";
 
 declare class NepAccount {
     index?: number;
@@ -58,6 +59,7 @@ declare interface Background extends Window{
         }[];
         fee: string;
     }>;
+    getHistoryList: () => IHistory[];
 }
 
 interface SendArgs {

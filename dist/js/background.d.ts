@@ -336,6 +336,12 @@ declare class TaskManager {
     static sendHistory: {
         [txid: string]: SendArgs;
     };
+    static dappsMessage: {
+        [txid: string]: {
+            title: string;
+            icon: string;
+        };
+    };
     static table: string;
     static start(): void;
     static addSendData(txid: string, data: SendArgs): void;
@@ -522,21 +528,13 @@ declare class ResultItem {
 }
 declare function getBase64Image(img: any): string;
 declare function getBase64ByUrl(url: string): Promise<string>;
-declare var getHistoryList: () => Promise<{
-    taskShed: {
-        [txid: string]: Task;
+declare var getHistoryList: () => TaskHistory[];
+interface TaskHistory extends Task {
+    dappMessage?: {
+        icon: string;
+        title: string;
     };
-    sendHistory: {
-        [txid: string]: SendArgs;
-    };
-    invokeHistory: {
-        [txid: string]: InvokeHistory;
-    };
-    whiteHistory: {
-        [domain: string]: {
-            title: string;
-            icon: string;
-        };
-    };
-}>;
+    invokeHistory?: InvokeHistory;
+    sendHistory?: SendArgs;
+}
 //# sourceMappingURL=background.d.ts.map

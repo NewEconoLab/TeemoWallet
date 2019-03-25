@@ -106,7 +106,7 @@ export default class Panel extends React.Component<IProps, IState>
 						}
 						{
 							this.props.task.state==TaskState.fail&&
-							<div className="fail">失败</div>
+							<div className="fail">交易失败</div>
 						}
 					</div>
 				}
@@ -125,7 +125,7 @@ export default class Panel extends React.Component<IProps, IState>
 						}
 						{
 							this.props.task.state==TaskState.fail&&
-							<div className="fail">失败</div>
+							<div className="fail">交易失败</div>
 						}
 					</div>
 				}

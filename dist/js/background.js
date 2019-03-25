@@ -1659,10 +1659,11 @@ class TransferGroup {
 }
 class TaskManager {
     static start() {
-        chrome.storage.local.get([this.table, 'invoke-data', 'send-data'], item => {
+        chrome.storage.local.get([this.table, 'invoke-data', 'send-data', 'white_list'], item => {
             this.shed = item[this.table] ? item[this.table] : {};
             this.invokeHistory = item['invoke-data'] ? item['invoke-data'] : {};
             this.sendHistory = item['send-data'] ? item['send-data'] : {};
+            this.dappsMessage = item['white_list'] ? item['white_list'] : {};
             console.log('数据初始化完成');
         });
         setInterval(() => {
@@ -1759,6 +1760,7 @@ class TaskManager {
 TaskManager.shed = {};
 TaskManager.invokeHistory = {};
 TaskManager.sendHistory = {};
+TaskManager.dappsMessage = {};
 TaskManager.table = "Task-Manager-shed";
 TaskManager.start();
 const BLOCKCHAIN = 'NEO';
@@ -1888,33 +1890,22 @@ function getBase64ByUrl(url) {
     });
 }
 var getHistoryList = () => {
-    return new Promise((resolve, reject) => {
-        Storage_local.get('white_list')
-            .then(result => {
-            const list = [];
-            for (const txid in TaskManager.shed) {
-                if (TaskManager.shed.hasOwnProperty(txid)) {
-                    const task = TaskManager.shed[txid];
-                    const sendHistory = TaskManager.sendHistory[txid];
-                    const invokeHistory = TaskManager.invokeHistory[txid];
-                    const whiteHistory = result;
-                }
+    const list = [];
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task = TaskManager.shed[txid];
+            const sendHistory = TaskManager.sendHistory[txid];
+            const invokeHistory = TaskManager.invokeHistory[txid];
+            let dappMessage = undefined;
+            if (task.type == ConfirmType.contract && task.invokeHistory) {
+                dappMessage = TaskManager.dappsMessage[invokeHistory.domain];
             }
-            resolve({
-                taskShed: TaskManager.shed,
-                sendHistory: TaskManager.sendHistory,
-                invokeHistory: TaskManager.invokeHistory,
-                whiteHistory: result
-            });
-        })
-            .catch(error => {
-            resolve({
-                taskShed: TaskManager.shed,
-                sendHistory: TaskManager.sendHistory,
-                invokeHistory: TaskManager.invokeHistory,
-                whiteHistory: undefined
-            });
-        });
-    });
+            task['dappMessage'] = dappMessage;
+            task['invokeHistory'] = invokeHistory;
+            task['sendHistory'] = sendHistory;
+            list.push(task);
+        }
+    }
+    return list;
 };
 //# sourceMappingURL=background.js.map
