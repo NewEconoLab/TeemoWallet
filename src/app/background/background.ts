@@ -147,22 +147,28 @@ class MarkUtxo
             const marks = storage.oldUtxo   // 获得被标记的utxo
             const assets:{ [id: string]: Utxo[] } = {};        
             // 对utxo进行归类，并且将count由string转换成 Neo.Fixed8
-            for (const item of utxos) {           
-                const mark = marks?marks[item["txid"]]:undefined;                
-                if(!mark || mark.indexOf(item.n)<0)   // 排除已经标记的utxo返回给调用放
+            for (const item of utxos) {         
+                const utxo = new Utxo();
+                utxo.addr = item.addr;
+                utxo.asset = item.asset.replace('0x','');
+                utxo.n = item.n;
+                utxo.txid = item.txid.replace('0x','');
+                utxo.count = Neo.Fixed8.parse(item.value);  
+                assets[utxo.asset]=assets[utxo.asset]?assets[utxo.asset]:[];
+                const mark = marks?marks[utxo.txid]:undefined;
+                if(!mark)
                 {
-                    const asset = (item.asset as string).replace('0x','');
-                    if (assets[ asset ] === undefined || assets[ asset ] == null)
-                    {
-                        assets[ asset ] = [];
-                    }
-                    const utxo = new Utxo();
-                    utxo.addr = item.addr;
-                    utxo.asset = asset;
-                    utxo.n = item.n;
-                    utxo.txid = item.txid;
-                    utxo.count = Neo.Fixed8.parse(item.value);
-                    assets[ asset ].push(utxo);
+                    assets[utxo.asset].push(utxo);
+                }
+                else if(mark.indexOf(item.n)<0)   // 排除已经标记的utxo返回给调用放
+                {
+                    assets[utxo.asset].push(utxo);
+                }
+                else    // 对被使用过的utxo进行排除
+                {
+                    console.log("以下是被使用过的utxo被排除使用");
+                    
+                    console.log(item);                    
                 }
             }            
             return assets;
@@ -265,19 +271,6 @@ class Storage_local
                 r(item?item[key]:undefined);
             })
         })
-    }
-}
-/**
- * 主要用于background的内存数据的存储和读取
- */
-class Storage_internal
-{
-    public static set(key:string,value:any){
-        storage[key]=value;
-    };
-    public static get<T>(key:string,):T
-    {
-        return storage[key];
     }
 }
 class Transaction extends ThinNeo.Transaction
@@ -1523,7 +1516,7 @@ var invokeReadTest=()=>{
     script.EmitAppCall(Neo.Uint160.parse('348387116c4a75e420663277d9c02049907128c7'));   // 塞入需要调用的合约hex
     Api.getInvokeRead(script.ToArray().toHexString())
     .then(result=>{
-        console.log(result);        
+        // console.log(result);        
     })
     .then(error=>{
         console.log(error);        
@@ -1986,7 +1979,7 @@ class TaskManager{
             this.shed=item[this.table]?item[this.table]:{};
             this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
             this.sendHistory=item['send-data']?item['send-data']:{};
-            console.log('数据初始化完成');            
+            console.log('数据初始化完成');
         })
         setInterval(()=>{
             Api.getBlockCount()

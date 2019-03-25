@@ -84,13 +84,6 @@ declare class Storage_local {
     static set(key: string, value: any): Promise<{}>;
     static get<T>(key: string): Promise<T>;
 }
-/**
- * 主要用于background的内存数据的存储和读取
- */
-declare class Storage_internal {
-    static set(key: string, value: any): void;
-    static get<T>(key: string): T;
-}
 declare class Transaction extends ThinNeo.Transaction {
     marks: MarkUtxo[];
     constructor(type?: ThinNeo.TransactionType);
