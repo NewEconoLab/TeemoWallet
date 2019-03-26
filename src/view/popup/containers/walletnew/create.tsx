@@ -44,15 +44,15 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
         download_name:"",
         walletname:"",
         password:"",
-        passwordconfirm:"",
+        passwordconfirm:"", 
         wif:"",
         account:null
     }
     
-    public passwordChange=(event)=>{
+    public passwordChange=(event:string)=>{
         this.setState({
             password:event,
-            password_error:!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(event))
+            password_error:(event.length<8)
         })
     }
 
@@ -159,7 +159,7 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                             value={this.state.password} 
                             onChange={this.passwordChange}
                             error={this.state.password_error}
-                            message={this.state.password_error?"请输入不小于8位，且包含大小写的密码":""}
+                            message={this.state.password_error?"请输入不小于8位的密码":""}
                             />
                         </div>
                         <div className="input">
