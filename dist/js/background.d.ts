@@ -24,6 +24,7 @@ declare const HASH_CONFIG: {
 declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
 declare const testRpcUrl = "http://47.99.223.87:20332";
+declare const mainRpcUrl = "http://116.62.132.58:10332/";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -378,7 +379,8 @@ declare enum Command {
     invoke = "invoke",
     invokeGroup = "invokeGroup",
     event = "event",
-    disconnect = "disconnect"
+    disconnect = "disconnect",
+    getAddressFromScriptHash = "getAddressFromScriptHash"
 }
 declare enum EventName {
     READY = "READY",

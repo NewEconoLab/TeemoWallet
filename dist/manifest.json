@@ -6,10 +6,7 @@
     "version": "1.0.0",
     "browser_action": {
         "default_title": "Teemo Wallet",
-        "default_icon": {
-            "19":"icon.png",
-            "38":"icon.png"
-        }, 
+        "default_icon": "icon48.png", 
         "default_popup": "index.html"
     },
     "web_accessible_resources": [
@@ -40,8 +37,8 @@
       }
     ],
     "icons": {
-        "16": "owl.png",
-        "48": "owl.png",
-        "128": "owl.png"
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
     }
 }

@@ -27,13 +27,13 @@ export default class WalletFoot extends React.Component<any, {}> {
 		common.changeNetWork(network);
 		if(network==NetWork.TestNet)
 			this.setState({currentNetWork:{id:NetWork.TestNet,name:"测试网"}})
-		// else
-		// 	this.setState({currentNetWork:{id:NetWork.MainNet,name:"主网"}})
+		else
+			this.setState({currentNetWork:{id:NetWork.MainNet,name:"主网"}})
 	}
 
     public options:IOption[]=
     [
-        // {id:NetWork.MainNet,name:"主网"},
+        {id:NetWork.MainNet,name:"主网"},
         {id:NetWork.TestNet,name:"测试网"},
     ]
 

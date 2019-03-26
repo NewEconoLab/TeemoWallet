@@ -19,6 +19,8 @@ class Common
     private tabname:string;
 
     @action public initNetWork=()=>{
+        console.log(bg.storage.network);
+        
         this.network = NetWork[bg.storage.network]        
     }
     

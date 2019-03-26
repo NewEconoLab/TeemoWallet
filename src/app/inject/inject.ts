@@ -37,6 +37,7 @@ enum Command {
   invokeGroup="invokeGroup",
   event = 'event',
   disconnect = 'disconnect',
+  getAddressFromScriptHash = 'getAddressFromScriptHash',
 }
 
 enum EventName {
@@ -314,6 +315,14 @@ namespace Teemo
 
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>{
             return sendMessage(Command.invokeReadGroup,params);
+        }
+
+        /**
+         * 根据scriptHash获得Address
+         * @param params scriptHash
+         */
+        static getAddressFromScriptHash(params:string): Promise<string>{
+            return sendMessage(Command.getAddressFromScriptHash,params);
         }
     }
 }

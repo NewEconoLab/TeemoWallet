@@ -29,6 +29,7 @@ const HASH_CONFIG = {
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
 const testRpcUrl = "http://47.99.223.87:20332";
+const mainRpcUrl = "http://116.62.132.58:10332/";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -153,19 +154,19 @@ class Utxo {
 class Storage_local {
     static setAccount(account) {
         let arr = Storage_local.getAccount();
-        let index = 0;
+        let index = -1;
         let newacc = new NepAccount(account.walletName, account.address, account.nep2key, account.scrypt);
         if (arr.length) {
             arr = arr.map((acc, n) => {
                 if (acc.address === account.address) {
-                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : '我的钱包' + n);
+                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : '我的钱包' + (n + 1));
                     newacc.index = index = n;
                     return newacc;
                 }
                 return acc;
             });
             if (index < 0) {
-                newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包' + arr.length + 1;
+                newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包' + (arr.length + 1);
                 arr.push(newacc);
             }
         }
@@ -308,7 +309,7 @@ function request(opts) {
             url = [baseCommonUrl, network].join('/');
         }
         else if (opts.baseUrl === 'rpc') {
-            url = testRpcUrl;
+            url = storage.network == "TestNet" ? testRpcUrl : mainRpcUrl;
         }
         const input = opts.isGET ? makeRpcUrl(url, opts.method, opts.params) : url;
         const init = opts.isGET ? { method: 'GET' } : { method: 'POST', body: makeRpcPostBody(opts.method, opts.params) };
@@ -1509,7 +1510,7 @@ const notifyInit = (title, domain, favIconUrl) => {
 const showNotify = (title, msg) => {
     chrome.notifications.create(null, {
         type: 'basic',
-        iconUrl: 'owl.png',
+        iconUrl: 'icon128.png',
         title: title,
         message: msg
     });
@@ -1590,6 +1591,16 @@ const responseMessage = (sender, request) => {
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(header, params));
+                break;
+            case Command.getAddressFromScriptHash:
+                sendResponse(new Promise((r, j) => {
+                    try {
+                        r(ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(params)));
+                    }
+                    catch (error) {
+                        j({ type: "MALFORMED_INPUT", description: 'This scripthash is not correct.' });
+                    }
+                }));
                 break;
             default:
                 sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
@@ -1820,6 +1831,7 @@ var Command;
     Command["invokeGroup"] = "invokeGroup";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
+    Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
