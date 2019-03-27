@@ -4,6 +4,7 @@ import { Storage_internal, Storage_local, bg } from "../utils/storagetools";
 import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
 import { HASH_CONFIG } from "../../config";
 import { IAccountBalanceStore, NetWork, IAccountMessage } from './interface/common.interface';
+import historyStore from '../containers/history/store/history.store';
 
 /**
  * 我的账户管理
@@ -30,6 +31,7 @@ class Common
             .then(result=>{
                 this.network = network;
                 this.initAccountBalance();
+                historyStore.initHistoryList();
             })
         })
     }

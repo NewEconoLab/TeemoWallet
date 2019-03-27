@@ -7,6 +7,7 @@ import { observer } from 'mobx-react';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { Storage_local } from '../../utils/storagetools';
 import common from '../../store/common';
+import intl from '../../store/intl';
 
 interface IState{
     walletname:string,
@@ -147,35 +148,35 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                 <div className="form">                
                     <div className="form-content">                            
                         <div className="first">
-                            <Input type="text" placeholder="为你的钱包命名" 
+                            <Input type="text" placeholder={intl.message.walletnew.create.createName} 
                             value={this.state.walletname} 
                             onChange={this.walletNameChange} 
                             error={this.state.walletname_error} 
-                            message={this.state.walletname_error?"请输入少于16个英文字符的名称":""} 
+                            message={this.state.walletname_error?intl.message.walletnew.create.error1:""} 
                             />
                         </div>
                         <div className="input">
-                            <Input type="password" placeholder="设置密码" 
+                            <Input type="password" placeholder={intl.message.walletnew.create.setPassword} 
                             value={this.state.password} 
                             onChange={this.passwordChange}
                             error={this.state.password_error}
-                            message={this.state.password_error?"请输入不小于8位的密码":""}
+                            message={this.state.password_error?intl.message.walletnew.create.error2:""}
                             />
                         </div>
                         <div className="input">
-                            <Input type="password" placeholder="确认密码" 
+                            <Input type="password" placeholder={intl.message.walletnew.create.confirmPassword} 
                                 value={this.state.passwordconfirm} 
                                 onChange={this.password2Change}
                                 error={this.state.passwordconfirm_error}
-                                message={this.state.passwordconfirm_error?"请输入相同的密码":""}
+                                message={this.state.passwordconfirm_error?intl.message.walletnew.create.error3:""}
                             />
                         </div>
-                        <div className="btn-list">
+                        <div className="create-btn-list">
                             <div className="btn-first">
-                                <Button type='warn' text="取消" onClick={this.goBack}/>
+                                <Button type='warn' text={intl.message.button.cancel} onClick={this.goBack}/>
                             </div>
                             <div>
-                                <Button type='primary' text="确定" onClick={this.createWallet} disabled={disable}/>
+                                <Button type='primary' text={intl.message.button.confirm} onClick={this.createWallet} disabled={disable}/>
                             </div>
                         </div>
                     </div>
@@ -184,16 +185,18 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                 <div className="form">                
                     <div className="form-content">
                         <div className="form-line">
-                            <div className="line-title">钱包创建成功</div>
-                            请将钱包备份后再使用!
+                            <div className="line-title">{intl.message.walletnew.create.successfully}</div>
+                            {intl.message.walletnew.create.goWallet}
                         </div>
                         <div className="form-line">
-                            <div className="line-title">私钥</div>
+                            <div className="line-title">
+                                {intl.message.walletnew.create.prikey}
+                            </div>
                             <div className="prikey">{this.state.wif}</div>
                         </div>
                         <div className="form-line">
                             <a href={this.state.download_href} download={this.state.download_name}>
-                                <Button text="下载备份文件并继续" size="long" onClick={this.goMyWallet}/>
+                                <Button text={intl.message.walletnew.create.download} size="long" onClick={this.goMyWallet}/>
                             </a>
                         </div>
                     </div>

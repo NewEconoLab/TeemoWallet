@@ -9,6 +9,7 @@ import WalletCreate from './create';
 import WalletImport from './load';
 import common from '../../store/common';
 import { observer } from 'mobx-react';
+import intl from '../../store/intl';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -26,9 +27,9 @@ export default class Login extends React.Component<AppProps> {
 
     public options:IOption[]=
     [
-        {id:"nep6",name:"Nep6加密文件"},
-        {id:"nep2",name:"Nep2加密字段"},
-        {id:"wif",name:"WIF私钥字符串"},
+        {id:"nep6",name:intl.message.walletnew.option_nep6},
+        {id:"nep2",name:intl.message.walletnew.option_nep2},
+        {id:"wif",name:intl.message.walletnew.option_wif},
     ]
 
     public state = 
@@ -68,13 +69,13 @@ export default class Login extends React.Component<AppProps> {
         return (
             <div className="loginContainer">
                 <div className="titleBackground">
-                    <div className="title">新钱包</div>
+                    <div className="title">{intl.message.walletnew.newWallet}</div>
                     <img className="teemo-bg" src={require("../../../image/owl.png")} alt=""/>
                 </div>
                 <div className="content">
                     <div className="form-label">
-                        <Label text="创建钱包" active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
-                        <Label text="导入钱包" active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
+                        <Label text={intl.message.walletnew.createWallet} active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
+                        <Label text={intl.message.walletnew.importWallet} active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
                     </div>
                     {this.state.currentLable==="create"?
                     <WalletCreate goBack={this.goBack} goMyWallet={this.goMyWallet} />:

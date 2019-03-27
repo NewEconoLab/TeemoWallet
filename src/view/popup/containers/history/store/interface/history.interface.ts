@@ -34,6 +34,8 @@ export interface Task
     message?: any;
     state: TaskState;
     startTime: number;
+    network:"TestNet" | "MainNet";
+    currentAddr:string;
 }
 
 export enum TaskState

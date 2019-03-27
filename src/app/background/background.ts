@@ -215,8 +215,7 @@ class Utxo{
 class Storage_local
 {
     public static setAccount(account:NepAccount){
-        let arr = Storage_local.getAccount();
-        
+        let arr = Storage_local.getAccount();        
         let index: number= -1;
         let newacc=new NepAccount(
             account.walletName,
@@ -274,6 +273,7 @@ class Storage_local
         })
     }
 }
+
 class Transaction extends ThinNeo.Transaction
 {    
 
@@ -386,6 +386,7 @@ interface IOpts {
     isGET?:boolean, // 是否是get 请求（默认请求是post）
     baseUrl?:'common'|'rpc', // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
     getAll?:boolean, // 是否获取所有返回结果
+    network?:"TestNet" | "MainNet",
 }
 
 const makeRpcUrl=(url, method, params)=>
@@ -401,12 +402,17 @@ const makeRpcUrl=(url, method, params)=>
  * @param opts 请求参数
  */
 async function request(opts: IOpts) {
-    let network = storage.network=="TestNet"?"testnet":"mainnet"
-    let url = [baseUrl,network].join('/');
+    // 判断当前网络
+    let network = opts.network?opts.network:storage.network;
+    let url = '';
+    // 筛选节点
     if (opts.baseUrl === 'common') {
-        url = [baseCommonUrl,network].join('/');
+        url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
-        url = storage.network=="TestNet"?testRpcUrl:mainRpcUrl;
+        url = network=="TestNet"?testRpcUrl:mainRpcUrl;
+    }else
+    {
+        url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }
 
     const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url;
@@ -533,11 +539,12 @@ const Api = {
             ]
         });
     },
-    sendrawtransaction : (data) => {
+    sendrawtransaction : (data,network?:'TestNet'|'MainNet') => {
         const opts:IOpts = {
             method:'sendrawtransaction',
             params:[data],
-            baseUrl:'common'
+            baseUrl:'common',
+            network
         }
         return request(opts);
     },
@@ -570,11 +577,12 @@ const Api = {
         return request(opts);
     },
 
-    getrawtransaction:(txid)=>{
+    getrawtransaction:(txid,network?:'TestNet'|'MainNet')=>{
         const opts:IOpts={            
             method:"getrawtransaction",
             params:[txid,1],
-            baseUrl:'rpc'
+            baseUrl:'rpc',
+            network          
         }
         return request(opts);
     },
@@ -1073,7 +1081,7 @@ const transactionSignAndSend = async (tran:Transaction)=>
             const txid:string = (result[0].txid as string).replace('0x','');
             const nodeUrl:string="https://api.nel.group/api";
             let ouput:InvokeOutput ={txid,nodeUrl}
-            return ouput;            
+            return ouput;
         }
         else
         {
@@ -1918,6 +1926,8 @@ class Task
     message: any;
     state: TaskState;
     startTime: number;
+    network:"TestNet" | "MainNet";
+    currentAddr:string;
     next?:TransferGroup;
     constructor(
         type: ConfirmType,
@@ -1933,6 +1943,8 @@ class Task
         this.txid = txid;
         this.next = next;
         this.state = state?state:TaskState.watting;
+        this.network = storage.network;
+        this.currentAddr = storage.account.address;
         this.message = messgae;
         this.startTime = new Date().getTime();
     }
@@ -1943,8 +1955,8 @@ class TransferGroup
     txid:string;
     txhex:string;
     executeError?:{type:string,data:string,description:string}
-    static update(tran:TransferGroup){        
-        Api.sendrawtransaction(tran.txhex)
+    static update(tran:TransferGroup,network?:'TestNet'|'MainNet'){        
+        Api.sendrawtransaction(tran.txhex,network)
         .then(result=>{
             if(result)
             {
@@ -2010,7 +2022,6 @@ class TaskManager{
             this.invokeHistory=item['invoke-data']?item['invoke-data']:{};
             this.sendHistory=item['send-data']?item['send-data']:{};
             this.dappsMessage=item['white_list']?item['white_list']:{};
-            console.log('数据初始化完成');
         })
         setInterval(()=>{
             Api.getBlockCount()
@@ -2085,7 +2096,7 @@ class TaskManager{
             if(task.state==TaskState.watting)
             {
                 if(task.type===ConfirmType.tranfer){
-                    Api.getrawtransaction(task.txid)
+                    Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{                        
                         if(result['blockhash'])
                         {      
@@ -2094,7 +2105,7 @@ class TaskManager{
                             Storage_local.set(this.table,this.shed);
                             if(task.next)
                             {
-                                TransferGroup.update(task.next);
+                                TransferGroup.update(task.next,task.network);
                             }
                         }
                     })
@@ -2102,16 +2113,16 @@ class TaskManager{
                         console.log(error);
                     })
                 }else{
-                    Api.getrawtransaction(task.txid)
-                    .then(result=>{                        
+                    Api.getrawtransaction(task.txid,task.network)
+                    .then(result=>{
                         if(result['blockhash'])
-                        {      
+                        {
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
                             if(task.next)
                             {
-                                TransferGroup.update(task.next);
+                                TransferGroup.update(task.next,task.network);
                             }
                         }
                     })
@@ -2427,22 +2438,25 @@ function getBase64ByUrl(url:string) {
     })
 }
 
-var getHistoryList=()=>{    
+var getHistoryList=()=>{
     const list:TaskHistory[] = [];
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task:TaskHistory = TaskManager.shed[txid];
-            const sendHistory = TaskManager.sendHistory[txid];
-            const invokeHistory = TaskManager.invokeHistory[txid];
-            let dappMessage=undefined;
-            if(task.type==ConfirmType.contract && task.invokeHistory)
-            {
-                dappMessage = TaskManager.dappsMessage[invokeHistory.domain];                        
+            if(task.network==storage.network && task.currentAddr==storage.account.address)
+            {                
+                const sendHistory = TaskManager.sendHistory[txid];
+                const invokeHistory = TaskManager.invokeHistory[txid];
+                let dappMessage=undefined;
+                if(task.type==ConfirmType.contract && task.invokeHistory)
+                {
+                    dappMessage = TaskManager.dappsMessage[invokeHistory.domain];                        
+                }
+                task['dappMessage']=dappMessage;
+                task['invokeHistory']=invokeHistory;
+                task['sendHistory']=sendHistory;
+                list.push(task);
             }
-            task['dappMessage']=dappMessage;
-            task['invokeHistory']=invokeHistory;
-            task['sendHistory']=sendHistory;
-            list.push(task);
         }
     }
     return list;

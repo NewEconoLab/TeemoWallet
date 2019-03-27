@@ -6,6 +6,7 @@ import { NepAccount } from '../../../../../common/entity';
 import { Storage_local } from '../../../utils/storagetools';
 import { observer } from 'mobx-react';
 import common from '../../../store/common';
+import intl from '../../../store/intl';
 
 interface IState{
     wif:string,
@@ -93,27 +94,27 @@ export default class WifImport extends React.Component<IPorps, IState> {
         return(                
             <div className="form-content">                            
                 <div className="wif">
-                    <Input type="text" placeholder="输入私钥" 
+                    <Input type="text" placeholder={intl.message.walletnew.wif.placeholder1} 
                         value={this.state.wif} 
                         onChange={this.wifChange}
                         error={this.state.wif_error}
-                        message={this.state.wif_error?"WIF错误":""}
+                        message={this.state.wif_error?intl.message.walletnew.wif.error1:""}
                     />
                 </div>
                 <div className="wif">
-                    <Input type="password" placeholder="设置密码" 
+                    <Input type="password" placeholder={intl.message.walletnew.wif.placeholder2} 
                         value={this.state.password} 
                         onChange={this.passwordChange}
                         error={this.state.password_error}
-                        message={this.state.password_error?"请输入不小于8位，且包含大小写的密码":""}
+                        message={this.state.password_error?intl.message.walletnew.wif.error2:""}
                     />
                 </div>
                 <div className="wif">
-                    <Input type="password" placeholder="确认密码" 
+                    <Input type="password" placeholder={intl.message.walletnew.wif.placeholder3} 
                         value={this.state.passwordconfirm} 
                         onChange={this.password2Change}
                         error={this.state.passwordconfirm_error}
-                        message={this.state.passwordconfirm_error?"请输入相同的密码":""}
+                        message={this.state.passwordconfirm_error?intl.message.walletnew.wif.error3:""}
                     />
                 </div>
             </div>

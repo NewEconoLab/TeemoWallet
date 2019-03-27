@@ -5,6 +5,7 @@ import Input from '../../../../components/Input';
 import { neotools } from '../../../utils/neotools';
 import { Storage_local, bg } from '../../../utils/storagetools';
 import common from '../../../store/common';
+import intl from '../../../store/intl';
 
 interface IState{
     file:File,
@@ -98,19 +99,19 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
         return(
             <div className="form-content">                            
                 <div className="input">
-                    <Input type="file" placeholder="选择Nep6文件（.json）" 
+                    <Input type="file" placeholder={intl.message.walletnew.nep6.placeholder1}
                         value={this.state.filename} 
                         onChange={this.fileChange}
                         error={this.state.file_error}
-                        message={this.state.file_error?"文件解析异常，请使用正确的Nep6协议文件":""}
+                        message={this.state.file_error?intl.message.walletnew.nep6.error1:""}
                     />
                 </div>
                 <div className="input">
-                    <Input type="password" placeholder="输入密码" 
+                    <Input type="password" placeholder={intl.message.walletnew.nep6.placeholder2} 
                         value={this.state.password} 
                         onChange={this.passwordChange}
                         error={this.state.password_error}
-                        message={this.state.password_error?"密码错误":""}
+                        message={this.state.password_error?intl.message.walletnew.nep6.error2:""}
                     />
                 </div>
             </div>

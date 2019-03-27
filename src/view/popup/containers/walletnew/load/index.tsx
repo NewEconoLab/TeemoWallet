@@ -7,6 +7,7 @@ import Button from '../../../../components/Button';
 import Nep6Import from './nep6';
 import Nep2Import from './nep2';
 import WifImport from './wif';
+import intl from '../../../store/intl';
 
 interface IState{
     currentLable:string,
@@ -30,9 +31,9 @@ export default class WalletImport extends React.Component<IProps, IState> {
     
     public options:IOption[]=
     [
-        {id:"nep6",name:"Nep6加密文件"},
-        {id:"nep2",name:"Nep2加密字段"},
-        {id:"wif",name:"WIF私钥字符串"},
+        {id:"nep6",name:intl.message.walletnew.option_nep6},
+        {id:"nep2",name:intl.message.walletnew.option_nep2},
+        {id:"wif",name:intl.message.walletnew.option_wif},
     ]
 
     public state:IState = 
@@ -88,7 +89,7 @@ export default class WalletImport extends React.Component<IProps, IState> {
         return(            
             <div className="form">
                 <div className="form-title">
-                    <Select text="导入类型" options={this.options} onCallback={this.onSelectModule}/>
+                    <Select text={intl.message.walletnew.importFrom} options={this.options} onCallback={this.onSelectModule}/>
                 </div>
                 {
                     // 该方法为了渲染form表单对应不同栏目的内容
@@ -100,10 +101,10 @@ export default class WalletImport extends React.Component<IProps, IState> {
                 }                        
                 <div className="form-btn-list">
                     <div className="btn-first">
-                        <Button type='warn' text="取消" onClick={this.goBack}/>
+                        <Button type='warn' text={intl.message.button.cancel} onClick={this.goBack}/>
                     </div>
                     <div>
-                        <Button type='primary' text="确定" onClick={this.loadWallet}/>
+                        <Button type='primary' text={intl.message.button.confirm} onClick={this.loadWallet}/>
                     </div>
                 </div>
             </div>

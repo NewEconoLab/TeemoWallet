@@ -109,6 +109,7 @@ interface IOpts {
     isGET?: boolean;
     baseUrl?: 'common' | 'rpc';
     getAll?: boolean;
+    network?: "TestNet" | "MainNet";
 }
 declare const makeRpcUrl: (url: any, method: any, params: any) => string;
 /**
@@ -135,7 +136,7 @@ declare const Api: {
      */
     getUtxoBalance: (address: any, assetId: any) => Promise<any>;
     getregisteraddressbalance: (address: any, register: any) => Promise<any>;
-    sendrawtransaction: (data: any) => Promise<any>;
+    sendrawtransaction: (data: any, network?: "TestNet" | "MainNet") => Promise<any>;
     getUtxo: (address: any) => Promise<any>;
     getDomainInfo: (domain: any) => Promise<any>;
     /**
@@ -143,7 +144,7 @@ declare const Api: {
      * @param txid 交易id
      */
     hasTx: (txid: any) => Promise<any>;
-    getrawtransaction: (txid: any) => Promise<any>;
+    getrawtransaction: (txid: any, network?: "TestNet" | "MainNet") => Promise<any>;
     /**
      *
      */
@@ -303,6 +304,8 @@ declare class Task {
     message: any;
     state: TaskState;
     startTime: number;
+    network: "TestNet" | "MainNet";
+    currentAddr: string;
     next?: TransferGroup;
     constructor(type: ConfirmType, txid: string, next?: TransferGroup, state?: TaskState, messgae?: any);
 }
@@ -314,7 +317,7 @@ declare class TransferGroup {
         data: string;
         description: string;
     };
-    static update(tran: TransferGroup): void;
+    static update(tran: TransferGroup, network?: 'TestNet' | 'MainNet'): void;
 }
 interface InvokeHistory {
     domain: string;
