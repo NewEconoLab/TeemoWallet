@@ -32,7 +32,8 @@ declare enum Command {
     invoke = "invoke",
     invokeGroup = "invokeGroup",
     event = "event",
-    disconnect = "disconnect"
+    disconnect = "disconnect",
+    getAddressFromScriptHash = "getAddressFromScriptHash"
 }
 declare enum EventName {
     READY = "READY",
@@ -218,6 +219,11 @@ declare namespace Teemo {
         static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
         static invokeRead(params: InvokeReadInput): Promise<any>;
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
+        /**
+         * 根据scriptHash获得Address
+         * @param params scriptHash
+         */
+        static getAddressFromScriptHash(params: string): Promise<string>;
     }
 }
 declare const EventChange: () => void;

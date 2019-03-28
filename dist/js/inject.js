@@ -36,6 +36,7 @@ var Command;
     Command["invokeGroup"] = "invokeGroup";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
+    Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
@@ -142,6 +143,13 @@ var Teemo;
         }
         static invokeReadGroup(params) {
             return sendMessage(Command.invokeReadGroup, params);
+        }
+        /**
+         * 根据scriptHash获得Address
+         * @param params scriptHash
+         */
+        static getAddressFromScriptHash(params) {
+            return sendMessage(Command.getAddressFromScriptHash, params);
         }
     }
     NEO.getProvider = () => {

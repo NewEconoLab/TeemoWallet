@@ -1,3 +1,4 @@
+///<reference path="./inject.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -86,6 +87,10 @@ class Main {
             document.getElementById("getStorage_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
                 var getStorage_input = document.getElementById("getStorage_input");
                 yield this.getStorage(getStorage_input.value);
+            });
+            document.getElementById("getAddressFromScriptHash_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getAddressFromScriptHash_input = document.getElementById("getAddressFromScriptHash_input");
+                yield this.getAddressFromScriptHash(getAddressFromScriptHash_input.value.replace(/(^\s*)|(\s*$)/g, ""));
             });
             document.getElementById("merge").onclick = () => {
                 var invokeGroup_input = document.getElementById("invokeGroup_input");
@@ -364,6 +369,26 @@ class Main {
                 console.log("==============进入了异常流程");
                 console.log(error);
                 document.getElementById("invokeGroup_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            });
+        });
+    }
+    /**
+     * getAddressFromScriptHash
+     */
+    getAddressFromScriptHash(params) {
+        return new Promise((resolve, reject) => {
+            Teemo.NEO.getAddressFromScriptHash(params)
+                .then(result => {
+                console.log(result);
+                console.log("得到的地址" + result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+                .catch(error => {
+                console.log("==============进入了异常流程");
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             });
         });

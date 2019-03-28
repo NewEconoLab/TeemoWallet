@@ -1,5 +1,12 @@
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
+declare enum WalletEvents {
+    READY = "Teemo.NEO.READY",
+    CONNECTED = "Teemo.NEO.CONNECTED",
+    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED"
+}
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -25,7 +32,8 @@ declare enum Command {
     invoke = "invoke",
     invokeGroup = "invokeGroup",
     event = "event",
-    disconnect = "disconnect"
+    disconnect = "disconnect",
+    getAddressFromScriptHash = "getAddressFromScriptHash"
 }
 declare enum EventName {
     READY = "READY",
@@ -56,6 +64,7 @@ interface InvokeArgs {
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;
+    description?: string;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
@@ -123,6 +132,10 @@ interface GetNetworksOutput {
     networks: string[];
     defaultNetwork: string;
 }
+interface GetPublickeyOutput {
+    address: string;
+    publickey: string;
+}
 interface AccountOutput {
     address: string;
     label: string;
@@ -145,7 +158,7 @@ interface Provider {
     version: string;
     compatibility: string[];
     website: string;
-    extra: {
+    extra?: {
         theme: string;
         currency: string;
     };
@@ -191,6 +204,7 @@ declare namespace Teemo {
          * @param {GetStorageArgs} params 查询存储区参数
          */
         static getStorage(params: GetStorageArgs): Promise<GetStorageOutput>;
+        static getPublicKey(): Promise<GetPublickeyOutput>;
         /**
          * 转账方法
          * @param {SendArgs} params 转账参数
@@ -205,9 +219,13 @@ declare namespace Teemo {
         static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
         static invokeRead(params: InvokeReadInput): Promise<any>;
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
+        /**
+         * 根据scriptHash获得Address
+         * @param params scriptHash
+         */
+        static getAddressFromScriptHash(params: string): Promise<string>;
     }
 }
-declare var readyEvent: CustomEvent<{
-    title: string;
-}>;
+declare const EventChange: () => void;
+declare const provider: Provider;
 //# sourceMappingURL=inject.d.ts.map

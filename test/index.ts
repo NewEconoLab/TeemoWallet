@@ -100,6 +100,11 @@ class Main {
             await this.getStorage(getStorage_input.value);
         }
 
+        document.getElementById("getAddressFromScriptHash_do").onclick=async()=>{
+            var getAddressFromScriptHash_input = document.getElementById("getAddressFromScriptHash_input") as HTMLTextAreaElement;
+            await this.getAddressFromScriptHash(getAddressFromScriptHash_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
         document.getElementById("merge").onclick = () =>{ 
             var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
             invokeGroup_input.value = JSON.stringify({
@@ -407,6 +412,27 @@ class Main {
         })
     }
 
+    /**
+     * getAddressFromScriptHash
+     */
+    public getAddressFromScriptHash(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getAddressFromScriptHash(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
 
     public getStorage(params:string)
     {
