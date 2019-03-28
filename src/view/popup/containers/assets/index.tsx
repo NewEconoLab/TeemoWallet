@@ -11,6 +11,7 @@ import QrCodeBox from '../qrcode';
 import { observer } from 'mobx-react';
 import common from '../../store/common';
 import { HASH_CONFIG } from '../../../config';
+import intl from '../../store/intl';
 
 @observer
 export default class Assets extends React.Component<any, {}> 
@@ -77,14 +78,14 @@ export default class Assets extends React.Component<any, {}>
             <div className="assets">
                 <div className="btn-list">
                     <div className="address">
-                        <Button text="收款" size="adaptation" onClick={this.onShowQrcode} />
+                        <Button text={intl.message.assets.receiving} size="adaptation" onClick={this.onShowQrcode} />
                     </div>
                     <div className="transfer">
-                        <Button text="转账" size="adaptation" onClick={this.onShowTransfer} />
+                        <Button text={intl.message.assets.transfer} size="adaptation" onClick={this.onShowTransfer} />
                     </div>
                 </div>
                 <div className="asset-list">
-                    <div className="title">资产列表</div>
+                    <div className="title">{intl.message.assets.assetlist}</div>
                     <div className="asset-panel" onClick={this.transferNEO}>
                         <div className="asset-name">NEO</div>
                         <div className="asset-amount">{common.balances.NEO}</div>

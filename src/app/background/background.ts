@@ -1778,6 +1778,10 @@ const showNotify = (title,msg) =>{
     });
 }
 
+/**
+ * 通过正则获得url中的域名
+ * @param Url url链接
+ */
 const getURLDomain=(Url:string)=>
 {
     var durl=/http:\/\/([^\/]+)\//i;
@@ -1796,14 +1800,17 @@ const getURLDomain=(Url:string)=>
     else
         return Url;
 }
-const responseMessage =(sender,request)=>
+
+/**
+ * 处理请求并返回
+ * @param sender An object containing information about the script context that sent a message or request.
+ * @param request 请求数据
+ */
+const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
 {
     const {ID,command,params}=request;
     const tab = sender.tab;
     const title = sender.tab.title;
-    // const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
-    // const url=urlReg.exec(tab.url);
-    // const domain = url?url[0]:tab.url;
     const domain = getURLDomain(tab.url)
     const header={title,domain,icon:tab.favIconUrl};
     if(Storage_local.getAccount().length<1)
@@ -2440,6 +2447,9 @@ function getBase64ByUrl(url:string) {
 
 var getHistoryList=()=>{
     const list:TaskHistory[] = [];
+    if(storage.account){
+        return list;
+    }
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task:TaskHistory = TaskManager.shed[txid];

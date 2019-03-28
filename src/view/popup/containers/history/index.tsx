@@ -9,6 +9,7 @@ import Checkbox from '../../../components/Checkbox';
 import { observer } from 'mobx-react';
 import { TaskState, IHistory, ConfirmType } from './store/interface/history.interface';
 import historyStore from './store/history.store';
+import intl from '../../store/intl';
 interface IState
 {
     hasFee:boolean;
@@ -24,7 +25,7 @@ export default class History extends React.Component<any, {}>
     }
 
     state: IState = {
-        currentOption:{ id: "all", name: "全部" },
+        currentOption:{ id: "all", name: intl.message.history.all },
         hasFee:false
     }
 
@@ -45,7 +46,7 @@ export default class History extends React.Component<any, {}>
     }
     public options: IOption[] =
     [
-        { id: "all", name: "全部" },
+        { id: "all", name: intl.message.history.all },
         { id: "GAS", name: "GAS" },
         { id: "CGAS", name: "CGAS" },
         { id: "NEO", name: "NEO" },
@@ -121,18 +122,18 @@ export default class History extends React.Component<any, {}>
             <div className="transactionlist">
                 <div className={historyStore.taskList.length > 0?'waitlist mbottom':'waitlist'}>
                     {
-                        waitlist.length > 0 && <div className="title">排队中</div>
+                        waitlist.length > 0 && <div className="title">{intl.message.history.wait}</div>
                     }
                     {waitlist.sort((a,b)=>b.startTime-a.startTime).map(task=><Panel task={task} ></Panel>)}
                 </div>
                 <div className="history">
-                    <div className="title">交易历史</div>
+                    <div className="title">{intl.message.history.tranHistory}</div>
                     <div className="filter">
                         <div className="filter-select">
                             <Select text="" options={this.options} onCallback={this.onSelectModule} />
                         </div>
                         <div className="filter-checkbox">
-                            <Checkbox text="隐藏0GAS" onClick={this.onCheck}></Checkbox>
+                            <Checkbox text={intl.message.history.hide} onClick={this.onCheck}></Checkbox>
                         </div>
                     </div>
                     { historylist.length !== 0 && this.groupBy(historylist).map(task=><Panel task={task} ></Panel>) }

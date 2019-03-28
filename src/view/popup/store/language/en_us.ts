@@ -3,6 +3,11 @@ export default {
     confirm:"Confirm",
     cancel:"Cancel"
   },
+  toast:{
+    successfully:"Operation successful, please be patient and wait for it to be confirmed in the block .",
+    failed:"Operation failed, please try again later.",
+    copySuccess:"Copied successfully！"
+  },
   welcome:{
     start:'Start',
     welcomeToUse:'WELCOME TO USE',
@@ -11,7 +16,7 @@ export default {
   walletnew:{
     option_wif:"Private key",
     option_nep2:"Nep2",
-    option_nep6:"Nep6加密文件",
+    option_nep6:"Nep6 encrypted file",
     newWallet:"New wallet",
     createWallet:"Creat wallet",
     importWallet:"Import wallet",
@@ -45,14 +50,68 @@ export default {
     nep6:{
       placeholder1:"Select NEP6 file（.json）",
       placeholder2:"Enter password",
-      error1:"文件解析异常，请使用正确的Nep6协议文件",
+      error1:"File parsing failed, please use the correct Nep6 protocol file",
       error2:"Wrong password",
     },
   },
-  mywallet:{},
-  login:{},
-  asset:{},
-  exchange:{},
-  assets:{},
-  history:{},
+  login:{
+    welcome:"Welcome back",
+    goCreate:"Click here to create or import a new wallet",
+    placeholder1:"Enter password",
+    button:"Log in",
+    error:"Wrong password"
+  },
+  mywallet:{
+    records:"Transaction records",
+    assets:"Assets",
+    mainnet:"MainNet",
+    testnet:"TestNet",
+    currentnet:"Network",
+    cgasExchange:"CGAS conversion",
+    explorer:"Blockchain explorer",
+    
+  },
+  history:{
+    wait:"Waiting in line",
+    tranHistory:"Transaction history",
+    contract:"Contract interaction",
+    waitConfirm:"Waiting for confirmation",
+    failed:"Transaction failed",
+    hide:"Hide no-cost transactions",
+    scriptHash:"Contract hash",
+    note:"Note",
+    amount:"Amount",
+    fee:"Fee",
+    presonalTransfer:"Personal transfer",    
+    all:"All",
+    from:"From",
+    to:"To"
+  },
+  exchange:{
+    gasToCgas:"Convert GAS to CGAS",
+    cgasToGas:"Convert CGAS to GAS",
+    operationType:"Operation types",
+    amount:"Amount",
+    payfee:"Priority transaction( pay 0.002GAS)",
+    noBalance:"Insufficient balance",
+  },
+  transfer:{
+    sendTo:"Sent to",
+    amount:"Amount",
+    payfee:"Priority transaction( pay 0.001GAS)",
+    next:"Next",
+    title:"Transaction details",
+    title1:"From",
+    title2:"Amount",
+    title3:"To",
+    title4:"Fee",
+    error1:"The domain is not in use",
+    error2:"Please enter the correct address"
+  },
+  assets:{
+    receiving:"Receiving",
+    transfer:"Transfer",
+    assetlist:"Asset list",
+    copy:"Click address to copy it directly",
+  },
 }

@@ -1,4 +1,5 @@
 /// <reference path="../../src/lib/neo-thinsdk.d.ts" />
+/// <reference types="chrome" />
 interface BackStore {
     network: "TestNet" | "MainNet";
     height: number;
@@ -283,8 +284,17 @@ declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const getPublicKey: () => Promise<GetPublickeyOutput>;
 declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
 declare const showNotify: (title: any, msg: any) => void;
+/**
+ * 通过正则获得url中的域名
+ * @param Url url链接
+ */
 declare const getURLDomain: (Url: string) => string;
-declare const responseMessage: (sender: any, request: any) => void;
+/**
+ * 处理请求并返回
+ * @param sender An object containing information about the script context that sent a message or request.
+ * @param request 请求数据
+ */
+declare const responseMessage: (sender: chrome.runtime.MessageSender, request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,
     contract = 1

@@ -1522,6 +1522,10 @@ const showNotify = (title, msg) => {
         message: msg
     });
 };
+/**
+ * 通过正则获得url中的域名
+ * @param Url url链接
+ */
 const getURLDomain = (Url) => {
     var durl = /http:\/\/([^\/]+)\//i;
     var durl2 = /https:\/\/([^\/]+)\//i;
@@ -1538,13 +1542,15 @@ const getURLDomain = (Url) => {
     else
         return Url;
 };
+/**
+ * 处理请求并返回
+ * @param sender An object containing information about the script context that sent a message or request.
+ * @param request 请求数据
+ */
 const responseMessage = (sender, request) => {
     const { ID, command, params } = request;
     const tab = sender.tab;
     const title = sender.tab.title;
-    // const urlReg = /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/;  
-    // const url=urlReg.exec(tab.url);
-    // const domain = url?url[0]:tab.url;
     const domain = getURLDomain(tab.url);
     const header = { title, domain, icon: tab.favIconUrl };
     if (Storage_local.getAccount().length < 1) {
@@ -1938,6 +1944,9 @@ function getBase64ByUrl(url) {
 }
 var getHistoryList = () => {
     const list = [];
+    if (storage.account) {
+        return list;
+    }
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task = TaskManager.shed[txid];

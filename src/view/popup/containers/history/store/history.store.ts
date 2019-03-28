@@ -2,6 +2,7 @@ import { IHistoryList, IHistory, Task, ConfirmType } from "./interface/history.i
 import { action, observable } from "mobx";
 import { ICON } from "../../../../image";
 import { bg } from "../../../utils/storagetools";
+import intl from "../../../store/intl";
 
 class HistoryList implements IHistoryList
 {
@@ -14,7 +15,7 @@ class HistoryList implements IHistoryList
             if(task.type==ConfirmType.contract && task.invokeHistory)
             {
                 if(task.invokeHistory.domain=="TeemoWallet.exchangeCgas"){
-                    task.dappMessage={title:"CGAS兑换",icon:ICON.exchange};
+                    task.dappMessage={title:intl.message.mywallet.cgasExchange,icon:ICON.exchange};
                 }
                 tasklist.push(task);
             }

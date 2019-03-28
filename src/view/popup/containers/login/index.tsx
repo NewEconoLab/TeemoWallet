@@ -9,6 +9,7 @@ import { NepAccount } from '../../../../common/entity';
 import AddrList from './addrlist';
 import { observer } from 'mobx-react';
 import common from '../../store/common';
+import intl from '../../store/intl';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -126,7 +127,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         return (
             <div className="loginContainer">
                 <div className="titleBackground">
-                    <div className="title">欢迎回来</div>
+                    <div className="title">{intl.message.login.welcome}</div>
                 </div>
                 <div className="content">
                     <div className="box">
@@ -140,19 +141,19 @@ export default class Login extends React.Component<AppProps,AppState> {
                                 />
                             </div>
                             <div className="login-password">
-                                <Input type='password' placeholder='输入密码' 
+                                <Input type='password' placeholder={intl.message.login.placeholder1} 
                                     value={this.state.password} 
                                     onChange={this.passwordChange}
                                     error={this.state.passwordError}
-                                    message={this.state.passwordError?"密码错误，请重试":""}
+                                    message={this.state.passwordError&&intl.message.login.error}
                                 />
                             </div>
                             <div className="login-button">
-                                <Button type='primary' size='long' text="登陆" onClick={this.loginWallet} />
+                                <Button type='primary' size='long' text={intl.message.login.button} onClick={this.loginWallet} />
                             </div>
                         </div>
                     </div>
-                    <div className="href" onClick={this.toCreateWallet}>请导入钱包或创建钱包。</div>
+                    <div className="href" onClick={this.toCreateWallet}>{intl.message.login.goCreate}</div>
                 </div>
             </div>
         )

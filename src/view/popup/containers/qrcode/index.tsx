@@ -8,6 +8,7 @@ import Modal from '../../../components/Modal';
 import common from '../../store/common';
 import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'
+import intl from '../../store/intl';
 
 interface IProps
 {
@@ -46,17 +47,17 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
 		// alert(2)
-		Toast("复制成功");
+		Toast(intl.message.toast.copySuccess);
 		
 	  }
 	public render()
 	{
 		return (
-			<Modal title="收款" show={this.props.show}>
+			<Modal title={intl.message.assets.receiving} show={this.props.show}>
 				<div className="qrcode-wrapper">
 					<div className="qrcode-code" id="qrcode" />
 					<div className="qrcode-addr" onClick={this.onCopyAddress}>{common.account.address}</div>
-					<p className="qrcode-copy">（点击地址直接复制）</p>
+					<p className="qrcode-copy">（{intl.message.assets.copy}）</p>
 				</div>
 				<div className="qrcode-close" onClick={this.onHide}>
 					<img src={require("../../../image/close.png")} alt="" />

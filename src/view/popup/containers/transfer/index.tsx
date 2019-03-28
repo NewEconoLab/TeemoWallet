@@ -17,6 +17,7 @@ import { asNumber } from '../../utils/numberTool';
 import { HASH_CONFIG } from '../../../config';
 import Toast from '../../../components/Toast';
 import { observer } from 'mobx-react';
+import intl from '../../store/intl';
 
 interface IProps
 {
@@ -116,7 +117,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				if(!addr)
 				{
 					errorAddr=true;
-					addrMessage='该域名无映射地址'
+					addrMessage=intl.message.transfer.error2
 				}else{
 					errorAddr=false;
 					addrMessage=toAddress=addr;
@@ -124,7 +125,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				}
 			} catch (error) {
 				errorAddr=true;
-				addrMessage='该域名无映射地址'
+				addrMessage=intl.message.transfer.error2
 			}
 		}
 		else if(neotools.verifyAddress(event))
@@ -135,7 +136,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		else
 		{
 			errorAddr=true;
-			addrMessage='请输入正确格式的域名或地址'
+			addrMessage=intl.message.transfer.error1
 		}
 		this.setState({errorAddr,addrMessage,domain,toAddress},()=>{
 			this.onVerify();
@@ -160,7 +161,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		if(compare>0)
 		{
 			errorAmount=true;
-			amountMessage="您的余额不足 "+this.state.currentOption.name+' '+balance.toString();
+			amountMessage=intl.message.exchange.noBalance+" "+this.state.currentOption.name+' '+balance.toString();
 		}
 		else if(compare==0)
 		{
@@ -224,39 +225,37 @@ export default class Transfer extends React.Component<IProps, IState>
 			"network":"TestNet"
 		})
 		.then(result=>{
-			Toast("交易已发送！");
+			Toast(intl.message.toast.successfully);
 			console.log(result);
 			this.onHide();
 		})
 		.catch(error=>{
-			Toast("交易失败！","error");
+			Toast(intl.message.toast.failed,"error");
 			console.log(error);
 			this.onHide();
 		})
 	}
 
 	public render()
-	{
-		console.log(this.props.asset);
-		
+	{		
 		return (
-			<Modal title={this.state.infoShow?"转账详情":"转账"} show={this.props.show}>
+			<Modal title={this.state.infoShow?intl.message.transfer.title:intl.message.assets.transfer} show={this.props.show}>
 			{				
 				this.state.infoShow?
 				<div className="transfer-info">
 					<div className="info-line first">
-						<div className="title">从</div>
+						<div className="title">{intl.message.transfer.title1}</div>
 						<div className="content">
 							<div className="double">{common.account.lable}</div>
 							<div className="double address">{common.account.address}</div>
 						</div>
 					</div>
 					<div className="info-line">
-						<div className="title">发送</div>
+						<div className="title">{intl.message.transfer.title2}</div>
 						<div className="content">{this.state.amount+" "+this.state.currentOption.name}</div>
 					</div>
 					<div className="info-line">
-						<div className="title">至</div>
+						<div className="title">{intl.message.transfer.title3}</div>
 						<div className="content">
 						{this.state.domain?
 						<>
@@ -268,38 +267,38 @@ export default class Transfer extends React.Component<IProps, IState>
 						</div>
 					</div>
 					<div className="info-line">
-						<div className="title">手续费</div>
+						<div className="title">{intl.message.transfer.title4}</div>
 						<div className="content">{this.state.netfee?'0.001 GAS':'0 GAS'}</div>
 					</div>
 					<div className="btn-list">
 						<div className="cancel">
-							<Button type="warn" text="取消" onClick={this.onHide} />
+							<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
 						</div>
 						<div className="confrim">
-							<Button type="primary" text="确定" onClick={this.send} disabled={this.state.confirmDisable}/>
+							<Button type="primary" text={intl.message.button.confirm} onClick={this.send} disabled={this.state.confirmDisable}/>
 						</div>
 					</div>
 				</div>
 				:
 				<>
 					<div className="line">
-						<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text="资产" />
+						<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text={intl.message.mywallet.assets} />
 					</div>
 					<div className="line">
-						<Input placeholder="发送至" value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />		
+						<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />		
 					</div>
 					<div className="line">
-						<Input placeholder="发送数量" value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />		
+						<Input placeholder={intl.message.transfer.amount} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />		
 					</div>
 					<div className="line">
-						<Checkbox text="优先确认交易（支付 0.001 GAS）" onClick={this.onCheck} disabled={this.state.checkDisable} />
+						<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
 					</div>
 					<div className="btn-list">
 						<div className="cancel">
-							<Button type="warn" text="取消" onClick={this.onHide} />
+							<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
 						</div>
 						<div className="confrim">
-							<Button type="primary" disabled={!this.state.verifyPass} text="下一步" onClick={this.showInfo}/>
+							<Button type="primary" disabled={!this.state.verifyPass} text={intl.message.transfer.next} onClick={this.showInfo}/>
 						</div>
 					</div>
 				</>

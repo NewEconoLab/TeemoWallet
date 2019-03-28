@@ -9,6 +9,7 @@ import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import HeadImg from '../../utils/headimg';
 import { observer } from 'mobx-react';
+import intl from '../../store/intl';
 
 interface IProps{
     lableChange:(table:string)=>void
@@ -26,8 +27,8 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     }
 
     public options:IOption[]=[
-        {id:'exchange',name:'CGAS兑换',icon:ICON.exchange},
-        {id:'browser',name:'区块链浏览器',icon:ICON.bc},
+        {id:'exchange',name:intl.message.mywallet.cgasExchange,icon:ICON.exchange},
+        {id:'browser',name:intl.message.mywallet.explorer,icon:ICON.bc},
         {id:'nns',name:'NNS',icon:ICON.nns},
         // {id:'dice',name:'DICE',icon:ICON.nns}
     ]
@@ -100,8 +101,8 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                     </div>
                 </div>
                 <div className="labellist">
-                    <div className={history} onClick={this.showHistory}><span>交易记录</span></div>
-                    <div className={assets} onClick={this.showAssets}><span>资产</span></div>
+                    <div className={history} onClick={this.showHistory}><span>{intl.message.mywallet.records}</span></div>
+                    <div className={assets} onClick={this.showAssets}><span>{intl.message.mywallet.assets}</span></div>
                 </div>
                 <Exchange show={this.state.exchange} onHide={this.closeExchange}></Exchange>
             </div>
