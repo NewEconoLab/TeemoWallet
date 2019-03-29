@@ -62,7 +62,7 @@ export default {
     error:"Wrong password"
   },
   mywallet:{
-    records:"Transaction records",
+    records:"records",
     assets:"Assets",
     mainnet:"MainNet",
     testnet:"TestNet",
@@ -73,7 +73,7 @@ export default {
   },
   history:{
     wait:"Waiting in line",
-    tranHistory:"Transaction history",
+    tranHistory:"history",
     contract:"Contract interaction",
     waitConfirm:"Waiting for confirmation",
     failed:"Transaction failed",
@@ -114,4 +114,13 @@ export default {
     assetlist:"Asset list",
     copy:"Click address to copy it directly",
   },
+  notify:{
+    message1:"Tries connecting to your wallet.",
+    message2:" Please check if you are at the right site. ",
+    from:"From……",
+    dappNote:"Note from dApp",
+    tranData:"Transaction data",
+    method:"Method",
+    scriptHash:"Parameter hash",
+  }
 }

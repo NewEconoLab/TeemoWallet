@@ -40,11 +40,17 @@ export default class WalletHeader extends React.Component<IProps, {}> {
 
     public cutFunction =(option:IOption)=>
     {
+        console.log(option);
+        
         if(option.id == 'exchange')
         {
             this.setState({
                 exchange:true
             })
+        }
+        if(option.id == 'browser')
+        {
+            window.open(`https://scan.nel.group/${common.network=='TestNet'?'test':''}`,'_blank')
         }
     }
 

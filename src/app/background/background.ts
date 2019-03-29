@@ -2447,25 +2447,29 @@ function getBase64ByUrl(url:string) {
 
 var getHistoryList=()=>{
     const list:TaskHistory[] = [];
-    if(storage.account){
+    if(!storage.account){
         return list;
     }
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task:TaskHistory = TaskManager.shed[txid];
             if(task.network==storage.network && task.currentAddr==storage.account.address)
-            {                
+            {
                 const sendHistory = TaskManager.sendHistory[txid];
                 const invokeHistory = TaskManager.invokeHistory[txid];
                 let dappMessage=undefined;
-                if(task.type==ConfirmType.contract && task.invokeHistory)
+                if(task.type==ConfirmType.contract && invokeHistory)
                 {
-                    dappMessage = TaskManager.dappsMessage[invokeHistory.domain];                        
+                    dappMessage = TaskManager.dappsMessage[invokeHistory.domain];
+                    task['dappMessage']=dappMessage;
+                    task['invokeHistory']=invokeHistory;
+                    list.push(task);
                 }
-                task['dappMessage']=dappMessage;
-                task['invokeHistory']=invokeHistory;
-                task['sendHistory']=sendHistory;
-                list.push(task);
+                else if(task.type==ConfirmType.tranfer && sendHistory)
+                {
+                    task['sendHistory']=sendHistory;
+                    list.push(task);
+                }
             }
         }
     }

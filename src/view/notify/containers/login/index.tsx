@@ -1,17 +1,14 @@
 import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
-import { RouteComponentProps } from 'react-router-dom';
-import Label from '../../../components/Label';
-import Select, { IOption } from '../../../components/Select';
+import { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
-import Chooser from '../../../components/Chooser';
-import { AccountInfo, NepAccount } from '../../../../common/entity';
-import { neotools } from '../../utils/neotools';
+import { NepAccount } from '../../../../common/entity';
 import AddrList from './addrlist';
-import common from '../../../popup/store/common';
 import { Storage_local } from '../../../../common/util';
 import { bg } from '../../../popup/utils/storagetools';
+import intl from '../../../popup/store/intl';
+import { observer } from 'mobx-react';
 
 interface AppProps {
     goHome:(account:{address:string,label:string})=>void;
@@ -26,6 +23,7 @@ interface AppState {
     currentAccount:NepAccount,
 }
 
+@observer
 export default class Login extends React.Component<AppProps,AppState> {
     constructor(props: AppProps, state: AppState) {
         super(props, state);
@@ -45,7 +43,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         const arr = Storage_local.getAccount();
         if(arr && arr.length){            
             let options = arr.map((acc,index)=>{
-                return {id:acc.address,name:(acc.walletName?acc.walletName:["我的钱包",(index+1)].join(' '))}as IOption;
+                return {id:acc.address,name:acc.walletName}as IOption;
             });
             
             this.setState({
@@ -117,7 +115,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         return (
             <div className="loginContainer">
                 <div className="titleBackground">
-                    <div className="title">欢迎回来</div>
+                    <div className="title">{intl.message.login.welcome}</div>
                 </div>
                 <div className="content">
                     <div className="box">
@@ -131,15 +129,15 @@ export default class Login extends React.Component<AppProps,AppState> {
                                 />
                             </div>
                             <div className="login-password">
-                                <Input type='password' placeholder='输入密码' 
+                                <Input type='password' placeholder={intl.message.login.placeholder1} 
                                     value={this.state.password} 
                                     onChange={this.passwordChange}
                                     error={this.state.passwordError}
-                                    message={this.state.passwordError?"密码错误，请重试":""}
+                                    message={this.state.passwordError&&intl.message.login.error}
                                 />
                             </div>
                             <div className="login-button">
-                                <Button type='primary' size='long' text="登陆" onClick={this.loginWallet} />
+                                <Button type='primary' size='long' text={intl.message.login.button} onClick={this.loginWallet} />
                             </div>
                         </div>
                     </div>

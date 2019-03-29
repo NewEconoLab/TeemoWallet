@@ -2,10 +2,8 @@
  * 主页布局
  */
 import * as React from 'react';
-// import { observer, inject } from 'mobx-react';
 import Header from '../header';
 import Footer from '../footer';
-// import Dice from '../dice';
 import ContractRequest from '../contract'
 import './index.less';
 import Dice from '../dice';
@@ -13,8 +11,6 @@ import { Command } from '../../../../common/entity';
 import Login from '../login';
 import { Background } from '../../../../lib/background';
 import SendRequest from '../send';
-// import { injectIntl } from 'react-intl';
-// import Toast from '@/components/Toast';
 
 export default class Home extends React.Component<any, any> {
     
@@ -25,6 +21,7 @@ export default class Home extends React.Component<any, any> {
     data:null,
     login:false
   }
+
   public componentDidMount() 
   {
       if(chrome.tabs)
@@ -98,7 +95,6 @@ export default class Home extends React.Component<any, any> {
             this.state.label==Command.send &&             
             <SendRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
           }
-          {/* <Dice {...this.props} /> */}
         </div>
         <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} />
       </div>:

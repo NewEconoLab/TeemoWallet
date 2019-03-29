@@ -1944,7 +1944,7 @@ function getBase64ByUrl(url) {
 }
 var getHistoryList = () => {
     const list = [];
-    if (storage.account) {
+    if (!storage.account) {
         return list;
     }
     for (const txid in TaskManager.shed) {
@@ -1954,13 +1954,16 @@ var getHistoryList = () => {
                 const sendHistory = TaskManager.sendHistory[txid];
                 const invokeHistory = TaskManager.invokeHistory[txid];
                 let dappMessage = undefined;
-                if (task.type == ConfirmType.contract && task.invokeHistory) {
+                if (task.type == ConfirmType.contract && invokeHistory) {
                     dappMessage = TaskManager.dappsMessage[invokeHistory.domain];
+                    task['dappMessage'] = dappMessage;
+                    task['invokeHistory'] = invokeHistory;
+                    list.push(task);
                 }
-                task['dappMessage'] = dappMessage;
-                task['invokeHistory'] = invokeHistory;
-                task['sendHistory'] = sendHistory;
-                list.push(task);
+                else if (task.type == ConfirmType.tranfer && sendHistory) {
+                    task['sendHistory'] = sendHistory;
+                    list.push(task);
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ import Checkbox from '../../../components/Checkbox';
 import { Invoke, InvokeArgs, Argument } from '../../../../common/entity';
 import { Storage_local } from '../../../../common/util';
 import { Background } from '../../../../lib/background';
+import intl from '../../../popup/store/intl';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -110,10 +111,10 @@ export default class ContractRequest extends React.Component<IProps, IState>
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
-          来自 {this.props.domain}
+          {`${intl.message.history.from} ${this.props.domain}`}
         </div>
         <div className="second-line">
-          合约交互
+          {intl.message.history.contract}
         </div>
         {/* <div className="second-line">
           请求签名 
@@ -121,10 +122,10 @@ export default class ContractRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 0 && (
             <>
-              <div className="contract-title">交易详情</div>
+              <div className="contract-title">{intl.message.history.tranHistory}</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">合约hash</div>
+                  <div className="line-left">{intl.message.history.scriptHash}</div>
                   <div className="line-right">
                     {
                       this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
@@ -135,7 +136,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
                   </div>
                 </div>
                 <div className="line-wrap">
-                  <div className="line-left">花费</div>
+                  <div className="line-left">{intl.message.history.amount}</div>
                   <div className="line-right">
                     <span>
                     {this.state.expenses.map(val=> parseFloat(val.amount)+" "+val.symbol).join(',')}
@@ -145,7 +146,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
                 {
                   parseFloat(this.state.fee) !== 0 && (
                     <div className="line-wrap">
-                      <div className="line-left">手续费</div>
+                      <div className="line-left">{intl.message.history.fee}</div>
                       <div className="line-right">
                         <span>{this.state.fee} GAS</span>
                       </div>
@@ -156,11 +157,11 @@ export default class ContractRequest extends React.Component<IProps, IState>
               {
                 parseFloat(this.state.fee) === 0 && (
                   <div className="check-fee">
-                    <Checkbox text="优先确认交易（支付0.001 GAS）" onClick={this.netfeeChange}></Checkbox>
+                    <Checkbox text={intl.message.transfer.payfee} onClick={this.netfeeChange}></Checkbox>
                   </div>
                 )
               }
-              <div className="contract-title">来自应用的备注</div>
+              <div className="contract-title">{intl.message.notify.dappNote}</div>
               <div className="remark-content white-wrap">
                 {
                   this.state.description.length !== 0 && this.state.description.map((k, v) =>
@@ -183,7 +184,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
 
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">合约hash</div>
+                  <div className="line-left">{intl.message.history.contract}</div>
                   <div className="line-right">
                   {
                       this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
@@ -201,7 +202,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
                       <div className="line-wrap line-method">
                         <div className="one-line">
                           <div className="line-left">
-                            <p className="first-p">方法</p>
+                            <p className="first-p">{intl.message.notify.method}</p>
                           </div>
                           <div className="line-right">
                             <p className="first-p">{okey}</p>

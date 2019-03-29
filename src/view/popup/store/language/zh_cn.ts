@@ -70,8 +70,7 @@ export default {
     testnet:"测试网",
     currentnet:"网络",
     cgasExchange:"CGAS兑换",
-    explorer:"区块链浏览器",
-    
+    explorer:"区块链浏览器"
   },
   history:{
     wait:"排队中",
@@ -116,4 +115,13 @@ export default {
     assetlist:"资产列表",
     copy:"点击地址直接复制",
   },
+  notify:{
+    message1:"想要连接到您的钱包",
+    message2:"请检查您是否在正确的站点",
+    from:"来自……",
+    dappNote:"来自应用的备注",
+    tranData:"交易数据",
+    method:"方法",
+    scriptHash:"参数hash",
+  }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './reset.less';
 import Home from './containers/home';
-import Dice from './containers/dice';
+import { observer } from 'mobx-react';
 
 export interface Props
 {
@@ -9,6 +9,7 @@ export interface Props
     enthusiasmLevel?: number;
 }
 
+@observer
 export default class Notify extends React.Component<Props, any> 
 {
     constructor(props: Props, state: any) 
@@ -27,7 +28,6 @@ export default class Notify extends React.Component<Props, any>
     public setStorage()
     {
         chrome.storage.local.set({name:"notify"},()=>{
-            alert("数据已存储");
         })
     }
 

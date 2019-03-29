@@ -4,8 +4,8 @@
 import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
-import Button from '../../../components/Button';
-// import { observer } from 'mobx-react';
+import { observer } from 'mobx-react';
+import intl from '../../../popup/store/intl';
 
 interface IPorps
 {
@@ -14,7 +14,7 @@ interface IPorps
   icon:string;
 }
 
-// @observer
+@observer
 export default class Dice extends React.Component<IPorps>{
 
   public render()
@@ -34,11 +34,10 @@ export default class Dice extends React.Component<IPorps>{
         }
         </div>
         <div className="third-line">
-          <p>想要连接到您的钱包</p>
-          <p>请检查您是否在正确的站点</p>
+          <p>{intl.message.notify.message1}</p>
+          <p>{intl.message.notify.message2}</p>
         </div>
       </div>
     );
   }
 }
-// export default injectIntl(Dice);

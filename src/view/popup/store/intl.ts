@@ -1,19 +1,20 @@
 import { observable, action } from "mobx";
-import { zh_CN, en_US } from "./language";
+import { en_US, zh_CN } from "./language";
 
 class Intl
 {
     @observable public message:{
-        button:{confirm:string,cancel:string};
-        toast:{successfully:string,failed:string,copySuccess:string};
-        welcome:{start:string,welcomeToUse:string,describe:string};
+        button:Language_Button;
+        toast:Language_Toast;
+        welcome:Language_Welcome;
         walletnew:any;
-        login:{welcome:string,goCreate:string,placeholder1:string,button:string,error:string};
+        login:Language_Login;
         mywallet:Language_MyWallet;
         history:Language_History;
         exchange:Language_exchange;
         transfer:Language_Transfer;
         assets:Language_Assets;
+        notify: Language_Notify;
     };
 
     @action public changeLanguage=(language:Language)=>
@@ -25,6 +26,34 @@ class Intl
             this.message = en_US;
         }
     }
+}
+
+export interface Language_Button
+{
+    confirm:string,
+    cancel:string
+}
+
+export interface Language_Toast
+{
+    successfully:string,
+    failed:string,
+    copySuccess:string
+}
+
+export interface Language_Welcome{start:string,welcomeToUse:string,describe:string}
+
+export interface Language_Login{welcome:string,goCreate:string,placeholder1:string,button:string,error:string}
+
+export interface Language_Notify
+{
+    message1: string;
+    message2: string;
+    from: string;
+    dappNote: string;
+    tranData: string;
+    method: string;
+    scriptHash: string;
 }
 
 export interface Language_MyWallet{

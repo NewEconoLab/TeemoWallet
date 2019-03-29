@@ -2,12 +2,10 @@
  * header 组件
  */
 import * as React from 'react';
-// import { injectIntl } from 'react-intl';
 import './index.less';
 import HeadImg from '../../utils/headimg';
 import { bg } from '../../../popup/utils/storagetools';
-// import { observer } from 'mobx-react';
-// @observer
+import intl from '../../../popup/store/intl';
 interface IProps
 {
   address: string;
@@ -32,10 +30,10 @@ export default class Header extends React.Component<IProps>{
         <div className="first-line">
           <div className="first-left">
             <div className="img-icon" id="mywalletimg" />
-            <div className="left-text">我的钱包1</div>
+            <div className="left-text">{bg.storage.account.walletName}</div>
           </div>
           <div className="first-right">
-            {this.state.network=='TestNet'?'测试网':'主网'}
+            {this.state.network=='TestNet'?intl.message.mywallet.testnet:intl.message.mywallet.mainnet}
             </div>
         </div>
         <div className="sec-line">
@@ -45,4 +43,3 @@ export default class Header extends React.Component<IProps>{
     );
   }
 }
-// export default injectIntl(Header);

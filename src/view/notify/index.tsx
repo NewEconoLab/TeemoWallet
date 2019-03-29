@@ -1,8 +1,10 @@
 import Notify from "./Notify";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import intl, { Language } from "../popup/store/intl";
 
 if(chrome.tabs){
+    intl.changeLanguage(Language.EN);
     chrome.tabs.query({ active: true, currentWindow: true }, tab => {
         const name = "Teemo Notify";
         const app = document.createElement('div');
@@ -16,6 +18,7 @@ if(chrome.tabs){
 else{
     window.onload=()=>
     {   
+        intl.changeLanguage(Language.EN);
         //初始化鼠标随机方法
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
         const app = document.createElement('div');
