@@ -13,5 +13,7 @@ export const ICON = {
     checked:require('./tick.png'),
     unchecked:require('./unchecked.png'),
     success:require('./success.png'),
-    header:require('./header_icon.png')
+    header:require('./header_icon.png'),
+    en:require('./en.png'),
+    cn:require('./zh.png')
 }

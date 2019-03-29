@@ -62,7 +62,7 @@ export default {
     error:"Wrong password"
   },
   mywallet:{
-    records:"records",
+    records:"Records",
     assets:"Assets",
     mainnet:"MainNet",
     testnet:"TestNet",
@@ -73,9 +73,9 @@ export default {
   },
   history:{
     wait:"Waiting in line",
-    tranHistory:"history",
+    tranHistory:"History",
     contract:"Contract interaction",
-    waitConfirm:"Waiting for confirmation",
+    waitConfirm:"Waiting",
     failed:"Transaction failed",
     hide:"Hide no-cost transactions",
     scriptHash:"Contract hash",

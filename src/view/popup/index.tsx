@@ -2,11 +2,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import './index.less'
 import App from './App';
-import intl, { Language } from './store/intl';
+import intl from './store/intl';
 
 if(chrome.tabs)
 {
-    intl.changeLanguage(Language.EN);
+    intl.initLanguage();
     chrome.tabs.query({ active: true, currentWindow: true }, tab => {        
         //初始化鼠标随机方法
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
@@ -19,7 +19,7 @@ else
 {
     window.onload=()=>
     {        
-        intl.changeLanguage(Language.EN);
+        intl.initLanguage();
         //初始化鼠标随机方法
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
         const popup = document.getElementById('popup');

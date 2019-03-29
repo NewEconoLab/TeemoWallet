@@ -120,12 +120,13 @@ export default class History extends React.Component<any, {}>
         })
         return (
             <div className="transactionlist">
+                {
+                waitlist.length > 0 &&
                 <div className={historyStore.taskList.length > 0?'waitlist mbottom':'waitlist'}>
-                    {
-                        waitlist.length > 0 && <div className="title">{intl.message.history.wait}</div>
-                    }
+                    <div className="title">{intl.message.history.wait}</div>
                     {waitlist.sort((a,b)=>b.startTime-a.startTime).map(task=><Panel task={task} ></Panel>)}
                 </div>
+                }
                 <div className="history">
                     <div className="title">{intl.message.history.tranHistory}</div>
                     <div className="filter">

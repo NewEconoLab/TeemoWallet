@@ -3,6 +3,8 @@ import { en_US, zh_CN } from "./language";
 
 class Intl
 {
+    @observable public currentLang:Language;
+
     @observable public message:{
         button:Language_Button;
         toast:Language_Toast;
@@ -17,13 +19,33 @@ class Intl
         notify: Language_Notify;
     };
 
+    @action public initLanguage=()=>{
+        const lang = localStorage.getItem('language');
+        if(lang)
+        {
+            this.currentLang = lang=='zh'?Language.CN:Language.EN;            
+        }
+        else
+        {
+            this.currentLang = Language.CN;
+        }
+        this.changeLanguage(this.currentLang);
+    }
+
     @action public changeLanguage=(language:Language)=>
     {
         if(language==Language.CN)
         {
+            this.currentLang = Language.CN;
             this.message = zh_CN;
+            console.log(language);
+            
+            localStorage.setItem('language', 'zh');
         }else{
+            this.currentLang = Language.EN;
             this.message = en_US;
+            console.log(language);
+            localStorage.setItem('language', 'en');
         }
     }
 }
