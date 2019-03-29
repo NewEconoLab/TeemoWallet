@@ -14,6 +14,7 @@ interface IState
 {
     hasFee:boolean;
     currentOption:IOption;
+    options:IOption[];
 }
 
 @observer
@@ -26,7 +27,14 @@ export default class History extends React.Component<any, {}>
 
     state: IState = {
         currentOption:{ id: "all", name: intl.message.history.all },
-        hasFee:false
+        hasFee:false,
+        options:
+        [
+            { id: "all", name: intl.message.history.all },
+            { id: "GAS", name: "GAS" },
+            { id: "CGAS", name: "CGAS" },
+            { id: "NEO", name: "NEO" },
+        ]
     }
 
     componentDidMount()
@@ -44,13 +52,13 @@ export default class History extends React.Component<any, {}>
             this.props.onClick();
         }
     }
-    public options: IOption[] =
-    [
-        { id: "all", name: intl.message.history.all },
-        { id: "GAS", name: "GAS" },
-        { id: "CGAS", name: "CGAS" },
-        { id: "NEO", name: "NEO" },
-    ];
+    // public options: IOption[] =
+    // [
+    //     { id: "all", name: intl.message.history.all },
+    //     { id: "GAS", name: "GAS" },
+    //     { id: "CGAS", name: "CGAS" },
+    //     { id: "NEO", name: "NEO" },
+    // ];
     onSelectModule = (call: IOption) =>
     {
         this.setState({ currentOption: call })
@@ -109,8 +117,16 @@ export default class History extends React.Component<any, {}>
 
     public render()
     {
+        const options: IOption[] =
+        [
+            { id: "all", name: intl.message.history.all },
+            { id: "GAS", name: "GAS" },
+            { id: "CGAS", name: "CGAS" },
+            { id: "NEO", name: "NEO" },
+        ];
         const waitlist=[];
         const historylist:IHistory[] = [];
+        const current = options.find(option=>option.id==this.state.currentOption.id);
         historyStore.taskList.forEach((task) =>
         {
             if (task.state == TaskState.watting || task.state == TaskState.watForLast)
@@ -131,7 +147,7 @@ export default class History extends React.Component<any, {}>
                     <div className="title">{intl.message.history.tranHistory}</div>
                     <div className="filter">
                         <div className="filter-select">
-                            <Select text="" options={this.options} onCallback={this.onSelectModule} />
+                            <Select text="" options={options} onCallback={this.onSelectModule} currentOption={current} />
                         </div>
                         <div className="filter-checkbox">
                             <Checkbox text={intl.message.history.hide} onClick={this.onCheck}></Checkbox>
