@@ -14,10 +14,8 @@ export default class WalletFoot extends React.Component<any, {}> {
 	}
 
 	public state={
-		currentNetWork:undefined,
+		currentNetWork:{id:NetWork.TestNet,name:intl.message.mywallet.testnet},
 		isShowLanguage: false,
-		languageText: intl.currentLang === Language.EN ? "En" : "中",
-		languageImg: intl.currentLang === Language.EN ? ICON.en : ICON.cn,
 	}
 
 	componentDidMount(){
@@ -53,41 +51,45 @@ export default class WalletFoot extends React.Component<any, {}> {
 		intl.changeLanguage(Language.CN)
 	}
 
-    public options:IOption[]=
-    [
-        {id:NetWork.MainNet,name:intl.message.mywallet.mainnet},
-        {id:NetWork.TestNet,name:intl.message.mywallet.testnet},
-    ]
+	public options:IOption[]=
+	[
+			{id:NetWork.MainNet,name:intl.message.mywallet.mainnet},
+			{id:NetWork.TestNet,name:intl.message.mywallet.testnet},
+	]
 
 	public render() {
+		const options:IOption[]=
+		[
+				{id:NetWork.MainNet,name:intl.message.mywallet.mainnet},
+				{id:NetWork.TestNet,name:intl.message.mywallet.testnet},
+		]
+		const current = options.find(option=>option.id==this.state.currentNetWork.id);
 		return (
 			<div className="foot">
 				<div className="content">
-					<Select currentOption={this.state.currentNetWork} options={this.options} onCallback={this.onSelect} text={intl.message.mywallet.currentnet} up={true} />
-				</div>
-				
-                <div className="language-toggle" id="language">
-                  <label onClick={this.toggleLanguage}>
-                    <div className="language-content">
-                      <span className="lang-text">{intl.currentLang==Language.CN?'中':'En'}</span>
-                      <img src={intl.currentLang==Language.CN?ICON.cn:ICON.en} alt="ch.png" />
-                    </div>
-                    <span className="middle-line" />
-                    <div className="triangle-wrap">
-                      <div className="triangle" />
-                    </div>
-                  </label>
-                  {
-                    this.state.isShowLanguage && (
-                      <div className="select-wrap" id="selectlang" onClick={this.toggleLanguage}>
-                        <ul>
-                          <li><a onClick={this.onClickChinese}>中文</a></li>
-                          <li><a onClick={this.onClickEnglish}>English</a></li>
-                        </ul>
-                      </div>
-                    )
-                  }
-                </div>
+					<Select currentOption={current} options={options} onCallback={this.onSelect} text={intl.message.mywallet.currentnet} up={true} />
+				</div>				
+					<div className="language-toggle" id="language">
+						<label onClick={this.toggleLanguage}>
+							<div className="language-content">
+								<span className="lang-text">{intl.currentLang}</span>
+								<img src={intl.currentLang==Language.CN?ICON.cn:ICON.en} alt="ch.png" />
+							</div>
+							<span className="middle-line" />
+							<div className="triangle-wrap">
+								<div className="triangle" />
+							</div>
+						</label>
+						{
+							this.state.isShowLanguage && 
+							<div className="select-wrap" id="selectlang" onClick={this.toggleLanguage}>
+								<ul>
+									<li><a onClick={this.onClickChinese}>中文</a></li>
+									<li><a onClick={this.onClickEnglish}>English</a></li>
+								</ul>
+							</div>
+						}
+					</div>
 			</div>
 		);
 	}

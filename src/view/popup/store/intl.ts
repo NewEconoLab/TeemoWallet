@@ -137,8 +137,8 @@ export interface Language_Assets{
 
 export enum Language
 {
-    CN='中文',
-    EN='English'
+    CN='中',
+    EN='En'
 }
 
 export default new Intl();

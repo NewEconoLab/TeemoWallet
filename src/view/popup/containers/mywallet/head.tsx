@@ -85,6 +85,12 @@ export default class WalletHeader extends React.Component<IProps, {}> {
 	public render() {
         const history = classnames("header-label",{"active":this.state.activeLable=="history"});
         const assets = classnames("header-label",{"active":this.state.activeLable=="assets"});
+        const options:IOption[]=[
+            {id:'exchange',name:intl.message.mywallet.cgasExchange,icon:ICON.exchange},
+            {id:'browser',name:intl.message.mywallet.explorer,icon:ICON.bc},
+            // {id:'nns',name:'NNS',icon:ICON.nns},
+            // {id:'dice',name:'DICE',icon:ICON.nns}
+        ];
 		return (
             <div className="head">
                 <div className="functionRow">
@@ -97,7 +103,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             </div>
                         </div>
                         <div className="function">
-                            <Chooser options={this.options} onCallback={this.cutFunction} >
+                            <Chooser options={options} onCallback={this.cutFunction} >
                                 <img src={ICON.FUNCTION} height={24} />
                             </Chooser>
                         </div>

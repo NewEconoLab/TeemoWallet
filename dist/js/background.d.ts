@@ -182,6 +182,11 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     EmitInvokeArgs(data: InvokeArgs | InvokeArgs[], hookTxid?: string): Uint8Array;
 }
 /**
+ * 构造合约调用交易
+ * @param invoke invoke调用参数
+ */
+declare var contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
+/**
  * 打包合并交易
  * @param data 合并合约调用参数
  */
@@ -206,11 +211,6 @@ declare var makeRefundTransaction: (transcount: number, netfee: number) => Promi
  */
 declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: number, netfee: number) => Promise<TransferGroup>;
 declare const transactionSignAndSend: (tran: Transaction) => Promise<InvokeOutput>;
-/**
- * 构造合约调用交易
- * @param invoke invoke调用参数
- */
-declare var contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
 interface NotifyMessage {
     header?: {
         title: string;

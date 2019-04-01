@@ -644,6 +644,46 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
     }
 }
 /**
+ * 构造合约调用交易
+ * @param invoke invoke调用参数
+ */
+var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
+    let tran = new Transaction();
+    const script = new ScriptBuild();
+    script.EmitInvokeArgs(invoke);
+    tran.setScript(script.ToArray());
+    try {
+        const script = new ScriptBuild();
+        script.EmitInvokeArgs(invoke);
+        tran.setScript(script.ToArray());
+        const utxos = yield MarkUtxo.getAllUtxo();
+        const fee = invoke.fee ? Neo.Fixed8.parse(invoke.fee) : Neo.Fixed8.Zero;
+        if (invoke.attachedAssets) {
+            for (const asset in invoke.attachedAssets) {
+                if (invoke.attachedAssets.hasOwnProperty(asset)) {
+                    const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));
+                    const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
+                    const utxo = utxos[asset];
+                    if (asset.includes(HASH_CONFIG.ID_GAS))
+                        tran.creatInuptAndOutup(utxo, amount, toaddr, fee);
+                    else
+                        tran.creatInuptAndOutup(utxo, amount, toaddr);
+                }
+            }
+        }
+        else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
+            const utxo = utxos[HASH_CONFIG.ID_GAS];
+            tran.creatInuptAndOutup(utxo, fee);
+        }
+        let result = yield transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
+        return result;
+    }
+    catch (error) {
+        throw error;
+    }
+});
+/**
  * 打包合并交易
  * @param data 合并合约调用参数
  */
@@ -923,46 +963,6 @@ const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, functio
     }
     catch (error) {
         console.log(error);
-    }
-});
-/**
- * 构造合约调用交易
- * @param invoke invoke调用参数
- */
-var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
-    let tran = new Transaction();
-    const script = new ScriptBuild();
-    script.EmitInvokeArgs(invoke);
-    tran.setScript(script.ToArray());
-    try {
-        const script = new ScriptBuild();
-        script.EmitInvokeArgs(invoke);
-        tran.setScript(script.ToArray());
-        const utxos = yield MarkUtxo.getAllUtxo();
-        const fee = invoke.fee ? Neo.Fixed8.parse(invoke.fee) : Neo.Fixed8.Zero;
-        if (invoke.attachedAssets) {
-            for (const asset in invoke.attachedAssets) {
-                if (invoke.attachedAssets.hasOwnProperty(asset)) {
-                    const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));
-                    const amount = Neo.Fixed8.parse(invoke.attachedAssets[asset]);
-                    const utxo = utxos[asset];
-                    if (asset.includes(HASH_CONFIG.ID_GAS))
-                        tran.creatInuptAndOutup(utxo, amount, toaddr, fee);
-                    else
-                        tran.creatInuptAndOutup(utxo, amount, toaddr);
-                }
-            }
-        }
-        else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
-            const utxo = utxos[HASH_CONFIG.ID_GAS];
-            tran.creatInuptAndOutup(utxo, fee);
-        }
-        let result = yield transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
-        return result;
-    }
-    catch (error) {
-        throw error;
     }
 });
 /**
