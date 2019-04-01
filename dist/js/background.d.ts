@@ -24,7 +24,7 @@ declare const HASH_CONFIG: {
 };
 declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
-declare const testRpcUrl = "http://47.99.223.87:20332";
+declare const testRpcUrl = "http://47.99.240.126:20332";
 declare const mainRpcUrl = "http://116.62.132.58:10332/";
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -111,6 +111,7 @@ interface IOpts {
     baseUrl?: 'common' | 'rpc';
     getAll?: boolean;
     network?: "TestNet" | "MainNet";
+    getNode?: boolean;
 }
 declare const makeRpcUrl: (url: any, method: any, params: any) => string;
 /**

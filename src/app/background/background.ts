@@ -36,7 +36,7 @@ const HASH_CONFIG = {
 
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-const testRpcUrl = "http://47.99.223.87:20332";
+const testRpcUrl = "http://47.99.240.126:20332";
 const mainRpcUrl = "http://116.62.132.58:10332/";
 
 /**
@@ -387,6 +387,7 @@ interface IOpts {
     baseUrl?:'common'|'rpc', // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
     getAll?:boolean, // 是否获取所有返回结果
     network?:"TestNet" | "MainNet",
+    getNode?:boolean;
 }
 
 const makeRpcUrl=(url, method, params)=>
@@ -427,8 +428,9 @@ async function request(opts: IOpts) {
                 return json
             }
             else
-            {   
-                return json.result;
+            {
+                const result  = opts.getNode?{nodeUrl:url,data:json.result}:json.result;
+                return result;
             }
         }
         else if(json.error["code"]===-1)
@@ -437,8 +439,6 @@ async function request(opts: IOpts) {
         }
         else
         {
-            console.log(json.error);
-            
             throw new Error(json.error);    
         }
     } 
@@ -543,7 +543,8 @@ const Api = {
         const opts:IOpts = {
             method:'sendrawtransaction',
             params:[data],
-            baseUrl:'common',
+            baseUrl:'rpc',
+            getNode:true,
             network
         }
         return request(opts);
@@ -992,12 +993,12 @@ var makeRefundTransaction = async (transcount:number,netfee:number)=>
     const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
     tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
     const data:Uint8Array = tran.GetRawData();
+    const txid:string = tran.getTxid();
     const result =await Api.sendrawtransaction(data.toHexString());
-    if(result[0].txid)
+    if(result['data'])
     {
         MarkUtxo.setMark(tran.marks);
-        const txid:string = (result[0].txid as string).replace('0x','');
-        const nodeUrl:string="https://api.nel.group/api";
+        const nodeUrl:string=result['nodeUrl'];
         let ouput:InvokeOutput ={txid,nodeUrl}
         // 为了popup显示对应的refund的数额
         // TaskManager.addInvokeData(txid,"TeemoWallet.exchangeCgas",refund);
@@ -1074,12 +1075,12 @@ const transactionSignAndSend = async (tran:Transaction)=>
         const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
         tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
         const data:Uint8Array = tran.GetRawData();
+        const txid=tran.getTxid();
         const result =await Api.sendrawtransaction(data.toHexString());
-        if(result[0].txid)
+        if(result['data'])
         {
             MarkUtxo.setMark(tran.marks);
-            const txid:string = (result[0].txid as string).replace('0x','');
-            const nodeUrl:string="https://api.nel.group/api";
+            const nodeUrl:string=result.nodeUrl;
             let ouput:InvokeOutput ={txid,nodeUrl}
             return ouput;
         }
@@ -1750,9 +1751,9 @@ const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
                     storage.domains.push(domain);
                     Storage_local.get('white_list')
                     .then(result=>{
-                        let setData = result?result:{};
-                        setData[domain]={title,icon};
-                        Storage_local.set('white_list',setData);                        
+                        let setData = result?result:{};                        
+                        TaskManager.dappsMessage[domain]=setData[domain]={title,icon};
+                        Storage_local.set('white_list',setData);
                         EventsOnChange(WalletEvents.CONNECTED,{address:storage.account.address,label:storage.account.walletName});
                     })
                     r()
@@ -1965,7 +1966,7 @@ class TransferGroup
     static update(tran:TransferGroup,network?:'TestNet'|'MainNet'){        
         Api.sendrawtransaction(tran.txhex,network)
         .then(result=>{
-            if(result)
+            if(result['data'])
             {
                 TaskManager.shed[tran.txid].state = TaskState.watting;                
             }

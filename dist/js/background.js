@@ -28,7 +28,7 @@ const HASH_CONFIG = {
 };
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-const testRpcUrl = "http://47.99.223.87:20332";
+const testRpcUrl = "http://47.99.240.126:20332";
 const mainRpcUrl = "http://116.62.132.58:10332/";
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -326,14 +326,14 @@ function request(opts) {
                     return json;
                 }
                 else {
-                    return json.result;
+                    const result = opts.getNode ? { nodeUrl: url, data: json.result } : json.result;
+                    return result;
                 }
             }
             else if (json.error["code"] === -1) {
                 return null;
             }
             else {
-                console.log(json.error);
                 throw new Error(json.error);
             }
         }
@@ -432,7 +432,8 @@ const Api = {
         const opts = {
             method: 'sendrawtransaction',
             params: [data],
-            baseUrl: 'common',
+            baseUrl: 'rpc',
+            getNode: true,
             network
         };
         return request(opts);
@@ -836,11 +837,11 @@ var makeRefundTransaction = (transcount, netfee) => __awaiter(this, void 0, void
     const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
     tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
     const data = tran.GetRawData();
+    const txid = tran.getTxid();
     const result = yield Api.sendrawtransaction(data.toHexString());
-    if (result[0].txid) {
+    if (result['data']) {
         MarkUtxo.setMark(tran.marks);
-        const txid = result[0].txid.replace('0x', '');
-        const nodeUrl = "https://api.nel.group/api";
+        const nodeUrl = result['nodeUrl'];
         let ouput = { txid, nodeUrl };
         // 为了popup显示对应的refund的数额
         // TaskManager.addInvokeData(txid,"TeemoWallet.exchangeCgas",refund);
@@ -908,11 +909,11 @@ const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, functio
         const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
         tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
         const data = tran.GetRawData();
+        const txid = tran.getTxid();
         const result = yield Api.sendrawtransaction(data.toHexString());
-        if (result[0].txid) {
+        if (result['data']) {
             MarkUtxo.setMark(tran.marks);
-            const txid = result[0].txid.replace('0x', '');
-            const nodeUrl = "https://api.nel.group/api";
+            const nodeUrl = result.nodeUrl;
             let ouput = { txid, nodeUrl };
             return ouput;
         }
@@ -1498,7 +1499,7 @@ const notifyInit = (title, domain, favIconUrl) => {
                     Storage_local.get('white_list')
                         .then(result => {
                         let setData = result ? result : {};
-                        setData[domain] = { title, icon };
+                        TaskManager.dappsMessage[domain] = setData[domain] = { title, icon };
                         Storage_local.set('white_list', setData);
                         EventsOnChange(WalletEvents.CONNECTED, { address: storage.account.address, label: storage.account.walletName });
                     });
@@ -1675,7 +1676,7 @@ class TransferGroup {
     static update(tran, network) {
         Api.sendrawtransaction(tran.txhex, network)
             .then(result => {
-            if (result) {
+            if (result['data']) {
                 TaskManager.shed[tran.txid].state = TaskState.watting;
             }
             else {
