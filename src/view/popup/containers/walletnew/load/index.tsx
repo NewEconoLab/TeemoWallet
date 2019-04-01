@@ -83,8 +83,6 @@ export default class WalletImport extends React.Component<IProps, IState> {
         }
     }
 
-
-
 	public render() {
         return(            
             <div className="form">
@@ -93,12 +91,17 @@ export default class WalletImport extends React.Component<IProps, IState> {
                 </div>
                 {
                     // 该方法为了渲染form表单对应不同栏目的内容
-                    this.state.currentOption.id==='nep6'?
-                    <Nep6Import goMyWallet={this.goMyWallet} ref='nep6'/>:
-                    (this.state.currentOption.id==='nep2'?
-                    <Nep2Import goMyWallet={this.goMyWallet} ref='nep2'/>:
-                    <WifImport goMyWallet={this.goMyWallet} ref='wif' />)
+                    this.state.currentOption.id==='nep6'&&
+                    <Nep6Import goMyWallet={this.goMyWallet} ref='nep6'/>
                 }                        
+                {
+                    this.state.currentOption.id==='nep2'&&
+                    <Nep2Import goMyWallet={this.goMyWallet} ref='nep2'/>
+                }
+                {
+                    this.state.currentOption.id==='wif'&&                    
+                    <WifImport goMyWallet={this.goMyWallet} ref='wif' />
+                }
                 <div className="form-btn-list">
                     <div className="btn-first">
                         <Button type='warn' text={intl.message.button.cancel} onClick={this.goBack}/>

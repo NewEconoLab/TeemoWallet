@@ -44,13 +44,15 @@ export default class Nep2Import extends React.Component<IPorps, IState> {
     
     public passwordChange=(event)=>{
         this.setState({
-            password:event
+            password:event,
+            password_error:false
         })
     }
     
     public nep2Change=(event)=>{
         this.setState({
-            nep2:event
+            nep2:event,
+            nep2_error:false
         })
     }
 
@@ -63,15 +65,20 @@ export default class Nep2Import extends React.Component<IPorps, IState> {
      */
     loadWallet =()=>
     {
-        bg.AccountManager.nep2Load(this.state.nep2,this.state.password)
-        .then(accounts =>{
-            this.goMyWallet();
-        })
-        .catch(error =>{
-            this.setState({
-                password_error:true
-            })      
-        })
+        if(this.state.nep2)
+        {            
+            bg.AccountManager.nep2Load(this.state.nep2,this.state.password)
+            .then(accounts =>{
+                this.goMyWallet();
+            })
+            .catch(error =>{
+                this.setState({
+                    password_error:true
+                })      
+            })
+        }else{
+            this.setState({nep2_error:true})
+        }
     }
 
 	public render() {
@@ -91,6 +98,7 @@ export default class Nep2Import extends React.Component<IPorps, IState> {
                         onChange={this.passwordChange}
                         error={this.state.password_error}
                         message={this.state.password_error?intl.message.walletnew.nep2.error2:""}
+                        onEnter={this.loadWallet}
                     />
                 </div>
             </div>

@@ -146,6 +146,7 @@ export default class Login extends React.Component<AppProps,AppState> {
                                     onChange={this.passwordChange}
                                     error={this.state.passwordError}
                                     message={this.state.passwordError&&intl.message.login.error}
+                                    onEnter={this.loginWallet}
                                 />
                             </div>
                             <div className="login-button">

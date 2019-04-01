@@ -36,11 +36,6 @@ export default class Login extends React.Component<AppProps> {
     {
         currentOption:this.options[0],
         currentLable:"import",
-        password:"",
-        filename:"",
-        confirm:"",
-        nep2:"",
-        wif:"",
     }
 
     public componentDidMount() 

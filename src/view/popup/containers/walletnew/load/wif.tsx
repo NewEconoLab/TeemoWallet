@@ -41,24 +41,21 @@ export default class WifImport extends React.Component<IPorps, IState> {
 
     public wifChange=(event)=>{
         this.setState({
-            wif:event
+            wif:event,
+            wif_error:false
         })
     }
     
     public passwordChange=(event)=>{
         this.setState({
+            password:event,
             password_error:!(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,16}$/.test(event))
-        })
-        this.setState({
-            password:event
         })
     }
 
     public password2Change=(event)=>{
         this.setState({
-            passwordconfirm:event
-        })
-        this.setState({
+            passwordconfirm:event,
             passwordconfirm_error:this.state.password!=event
         })
     }
@@ -69,24 +66,39 @@ export default class WifImport extends React.Component<IPorps, IState> {
     }
 
     loadWallet=()=>{
-        try {
-            let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
-            NepAccount.encryption(this.state.password,prikey)
-            .then(account=>{
-                common.initAccountInfo();
-                this.goMyWallet();                
-            })
-            .catch(error=>{
+        if(!this.state.wif)
+        {
+            this.setState({wif_error:true})
+        }
+        else if(!this.state.password)
+        {
+            this.setState({password_error:true});
+        }
+        else if(!this.state.passwordconfirm)
+        {
+            this.setState({passwordconfirm_error:true});
+        }
+        else
+        {
+            try {
+                let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
+                NepAccount.encryption(this.state.password,prikey)
+                .then(account=>{
+                    common.initAccountInfo();
+                    this.goMyWallet();                
+                })
+                .catch(error=>{
+                    console.log(error);
+                    this.setState({
+                        wif_error:true
+                    })
+                })
+            } catch (error) {
                 console.log(error);
                 this.setState({
                     wif_error:true
                 })
-            })
-        } catch (error) {
-            console.log(error);
-            this.setState({
-                wif_error:true
-            })
+            }
         }
     }
 
@@ -115,6 +127,7 @@ export default class WifImport extends React.Component<IPorps, IState> {
                         onChange={this.password2Change}
                         error={this.state.passwordconfirm_error}
                         message={this.state.passwordconfirm_error?intl.message.walletnew.wif.error3:""}
+                        onEnter={this.loadWallet}
                     />
                 </div>
             </div>

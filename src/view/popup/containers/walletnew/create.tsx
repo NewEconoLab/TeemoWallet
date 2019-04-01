@@ -169,6 +169,7 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                                 onChange={this.password2Change}
                                 error={this.state.passwordconfirm_error}
                                 message={this.state.passwordconfirm_error?intl.message.walletnew.create.error3:""}
+                                onEnter={disable?undefined:this.createWallet}
                             />
                         </div>
                         <div className="create-btn-list">

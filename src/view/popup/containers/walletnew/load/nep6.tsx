@@ -48,7 +48,8 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
     
     public passwordChange=(event)=>{
         this.setState({
-            password:event
+            password:event,
+            password_error:false
         })
     }
 
@@ -58,9 +59,10 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
      * @param {File} event change方法返回的文件对象
      */
     public fileChange=(event:File)=>
-    {   
+    {
         this.setState({
-            file:event
+            file:event,
+            file_error:false
         })
         this.setState({filename:event.name})
         if(event.name.includes('.json')){
@@ -83,19 +85,29 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
      */
     loadWallet =()=>
     {
-        bg.AccountManager.nep6Load(this.state.walletString,this.state.password)
-        .then(account =>{
-            common.initAccountInfo();
-            this.goMyWallet();
-        })
-        .catch(error =>{
+        if(this.state.file)
+        {
+            bg.AccountManager.nep6Load(this.state.walletString,this.state.password)
+            .then(account =>{
+                common.initAccountInfo();
+                this.goMyWallet();
+            })
+            .catch(error =>{
+                this.setState({
+                    password_error:true
+                });
+            })
+        }
+        else
+        {
             this.setState({
-                password_error:true
-            });
-        })
+                file_error:true
+            })
+        }
     }
 
 	public render() {
+        const disable = this.state.file_error||this.state.password_error;
         return(
             <div className="form-content">                            
                 <div className="input">
@@ -112,6 +124,7 @@ export default class Nep6Import extends React.Component<IPorps, IState> {
                         onChange={this.passwordChange}
                         error={this.state.password_error}
                         message={this.state.password_error?intl.message.walletnew.nep6.error2:""}
+                        onEnter={!disable&&this.loadWallet}
                     />
                 </div>
             </div>
