@@ -28,8 +28,8 @@ const HASH_CONFIG = {
 };
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-const testRpcUrl = "http://47.99.240.126:20332";
-const mainRpcUrl = "http://116.62.132.58:10332/";
+const testRpcUrl = "http://test.nel.group:20332";
+const mainRpcUrl = "http://seed.nel.group:10332";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -714,7 +714,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 const nextTran = new TransferGroup();
                 nextTran.txhex = data.toHexString();
                 nextTran.txid = tran.getTxid();
-                txids.push({ txid: nextTran.txid, nodeUrl: "https://api.nel.group/api" });
+                txids.push({ txid: nextTran.txid, nodeUrl: storage.network == 'TestNet' ? testRpcUrl : mainRpcUrl });
                 trans.push(nextTran);
                 MarkUtxo.setMark(tran.marks);
             }
