@@ -23,6 +23,7 @@
     "permissions": [
         "notifications",
         "storage",
+        "unlimitedStorage",
         "tabs",
         "http://*/*",
         "https://*/*"  

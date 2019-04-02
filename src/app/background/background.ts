@@ -416,7 +416,7 @@ async function request(opts: IOpts) {
         url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }
 
-    const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url;
+    const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url; 
     const init:RequestInit = opts.isGET ?{ method:'GET'}:{method: 'POST',body:makeRpcPostBody(opts.method,opts.params)};
     try {    
         const value = await fetch(input,init);
@@ -519,7 +519,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getUtxoBalance :  (address,assetId) => {
+    getUtxoBalance : (address,assetId) => {
         const opts:IOpts = {
         method:'getnep5balanceofaddress',
         params:[
@@ -549,7 +549,7 @@ const Api = {
         }
         return request(opts);
     },
-    getUtxo:(address)=>{
+    getUtxo: (address)=>{
         const opts:IOpts={
             method:"getutxo",
             params:[address],
@@ -558,7 +558,7 @@ const Api = {
         return request(opts);
     },
     
-    getDomainInfo:(domain)=>{
+    getDomainInfo : (domain)=>{
         return request({
             method:"getdomaininfo",
             params:[domain],
@@ -570,7 +570,7 @@ const Api = {
      * 判断交易是否入链
      * @param txid 交易id
      */
-    hasTx:(txid)=>{
+    hasTx : (txid)=>{
         const opts={
             method:"hastx",
             params:[txid]
@@ -578,7 +578,7 @@ const Api = {
         return request(opts);
     },
 
-    getrawtransaction:(txid,network?:'TestNet'|'MainNet')=>{
+    getrawtransaction : (txid,network?:'TestNet'|'MainNet')=>{
         const opts:IOpts={            
             method:"getrawtransaction",
             params:[txid,1],
@@ -590,7 +590,7 @@ const Api = {
     /**
      * 
      */
-    getrawtransaction_api:(txid)=>{
+    getrawtransaction_api : (txid)=>{
         return request(
             {
                 method:"getrawtransaction",
@@ -604,7 +604,7 @@ const Api = {
      * 判断合约调用是否抛出 notify
      * @param txid 交易id
      */
-    hasContract:(txid)=>{
+    hasContract : (txid)=>{
         const opts={
             method:"hascontract",
             params:[txid]
@@ -616,7 +616,7 @@ const Api = {
      * 判断双交易是否成功
      * @param txid 交易id
      */
-    getRehargeAndTransfer:(txid)=>{
+    getRehargeAndTransfer : (txid)=>{
         const opts={
             method:"getrechargeandtransfer",
             params:[txid]
@@ -624,7 +624,7 @@ const Api = {
         return request(opts);
     },
     
-    getBlockCount:()=>{
+    getBlockCount : ()=>{
         const opts:IOpts={
             method:"getblockcount",
             params:[],
@@ -642,7 +642,7 @@ const Api = {
         return request(opts);
     },
 
-    rechargeAndTransfer:(data1,data2)=>{
+    rechargeAndTransfer : (data1,data2)=>{
         const opts={
             method:"rechargeandtransfer",
             params:[
@@ -656,7 +656,7 @@ const Api = {
      * @method 获得nep5资产信息
      * @param asset 资产id
      */
-    getnep5asset:(asset)=>{
+    getnep5asset : (asset)=>{
         const opts={
             method:"getnep5asset",
             params:[asset]
@@ -853,7 +853,7 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                         }
                         else
                         {
-                            
+                             
                         }
                     }
                 }
