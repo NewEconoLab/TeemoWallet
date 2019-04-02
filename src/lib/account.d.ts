@@ -19,6 +19,11 @@ declare interface AccountManager{
     logout: () => void;
     setAccount: (account: AccountInfo) => void;
     getCurrent: () => WalletAccount;
+    getCurrentAccount: () => {
+        address: string;
+        walletName: string;
+    };
+    getCurrentNetWork: () => "TestNet" | "MainNet";
 }
 
 interface GetNetworksOutput {

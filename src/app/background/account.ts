@@ -97,7 +97,7 @@ var AccountManager={
         });
         return promise;
     },
-    nep6Load:async(str:string, password: string): Promise<{address:string,lable:string}>=>
+    nep6Load:async(str:string, password: string): Promise<{address:string,label:string}>=>
     {
         try
         {
@@ -131,7 +131,7 @@ var AccountManager={
                         throw error;
                     }
                 }
-                return {address:arr[0].address,lable:arr[0].walletName};
+                return {address:arr[0].address,label:arr[0].walletName};
             } else
             {
                 throw console.error("The account cannot be empty");
@@ -186,6 +186,17 @@ var AccountManager={
             EventsOnChange(WalletEvents.NETWORK_CHANGED,message);
             r(message)
         })
+    },
+
+    getCurrentAccount:()=>{
+        if(storage.account)
+            return {address:storage.account.address,walletName:storage.account.walletName}
+        else
+            return undefined;
+    },
+
+    getCurrentNetWork:()=>{
+        return storage.network
     }
 
 }

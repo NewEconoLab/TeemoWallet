@@ -12,7 +12,7 @@ interface BackStore
 }
 
 
-var storage:BackStore=
+const storage:BackStore=
 {
     network:"TestNet",
     account:undefined,
@@ -824,41 +824,51 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
  */
 const invokeGroupBuild = async(data:InvokeGroup)=>
 {
-    let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
     // 判断merge的值
     if (data.merge) 
     {
+        let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
         let tran = new Transaction();
         // let script = groupScriptBuild(data.group);
         const script = new ScriptBuild();
         script.EmitInvokeArgs(data.group)
         tran.setScript(script.ToArray());
-        let transfer:{[toaddr:string]:AttachedAssets}={} // 用来存放 将要转账的合约地址 资产id 数额
-        let utxos = await MarkUtxo.getAllUtxo();
-        let assets:{[asset:string]:string};
+        // let transfer:{[asset: string]:{}}=null // 用来存放 将要转账的合约地址 资产id 数额
+        let utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
+        // let assets:{[asset:string]:string};
         for (let index = 0; index < data.group.length; index++) // 循环算utxo资产对应的累加和相对应每笔要转走的money
         {
             const invoke = data.group[index];
             if(invoke.fee)  // 判断是否有手续费
-                netfee.add(Neo.Fixed8.parse(invoke.fee)) // 计算总共耗费多少手续费;
-            if(invoke.attachedAssets)  // 判断是否有合约转账
-            {
-                const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));         // 将scripthash 转地址    
-                for (const id in invoke.attachedAssets) {
-                    if (invoke.attachedAssets.hasOwnProperty(id)) {
-                        const number = invoke.attachedAssets[id];
-                        if(id===HASH_CONFIG.ID_GAS)
-                        {
-                            
-                        }
-                        else
-                        {
-                             
-                        }
-                    }
-                }
-                transfer[toaddr] = invoke.attachedAssets;
-            }
+                netfee = netfee.add(Neo.Fixed8.parse(invoke.fee)) // 计算总共耗费多少手续费;
+            // if(invoke.attachedAssets)  // 判断是否有合约转账
+            // {
+            //     transfer=transfer?transfer:{};
+            //     const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));         // 将scripthash 转地址 
+            //     if(transfer[toaddr])   
+            //     {
+            //         for (const id in invoke.attachedAssets) {
+            //             if (invoke.attachedAssets.hasOwnProperty(id)) {
+            //                 if(transfer[toaddr][id])
+            //                 {
+            //                     transfer[toaddr][id]=Neo.Fixed8.parse(transfer[toaddr][id]).add(Neo.Fixed8.parse(invoke.attachedAssets[id])).toString();
+            //                 }
+            //                 else
+            //                 {
+            //                     transfer[toaddr][id]=invoke.attachedAssets[id];    
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     else
+            //     {                    
+            //         transfer[toaddr] = invoke.attachedAssets;
+            //     }
+            // }
+        }
+        if(netfee.compareTo(Neo.Fixed8.Zero)>0)
+        {
+            tran.creatInuptAndOutup(utxos,netfee)
         }
         try {
             let result = await transactionSignAndSend(tran);
@@ -892,10 +902,13 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             }
             else
             {
+                let utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
                 let tran = new Transaction();
                 let script = new ScriptBuild();
                 script.EmitInvokeArgs(invoke,txids[0].txid);
                 tran.setScript(script.ToArray());
+                if(invoke.fee && invoke.fee!='0')
+                    tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
                 const message  = tran.GetMessage().clone();
                 const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);
                 tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
@@ -1981,6 +1994,7 @@ class TransferGroup
                 }
             }
             Storage_local.set(TaskManager.table,TaskManager.shed);
+            
         })
         .catch(error=>{
             

@@ -10,7 +10,7 @@ interface BackStore {
         [txid: string]: number[];
     };
 }
-declare var storage: BackStore;
+declare const storage: BackStore;
 declare const HASH_CONFIG: {
     ID_CGAS: Neo.Uint160;
     DAPP_NNC: Neo.Uint160;

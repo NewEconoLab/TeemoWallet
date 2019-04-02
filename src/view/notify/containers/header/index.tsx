@@ -17,7 +17,7 @@ export default class Header extends React.Component<IProps>{
   public componentDidMount()
   {
     this.setState({network:
-      bg.storage.network})
+      bg.AccountManager.getCurrentNetWork()})
     if(this.props.address){
       console.log(this.props.address);      
       const div = document.getElementById('mywalletimg')
@@ -30,7 +30,7 @@ export default class Header extends React.Component<IProps>{
         <div className="first-line">
           <div className="first-left">
             <div className="img-icon" id="mywalletimg" />
-            <div className="left-text">{bg.storage.account.walletName}</div>
+            <div className="left-text">{bg.AccountManager.getCurrentAccount().walletName}</div>
           </div>
           <div className="first-right">
             {this.state.network=='TestNet'?intl.message.mywallet.testnet:intl.message.mywallet.mainnet}

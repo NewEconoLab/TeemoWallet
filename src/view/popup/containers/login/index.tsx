@@ -41,7 +41,7 @@ export default class Login extends React.Component<AppProps,AppState> {
 
     public componentDidMount() 
     {
-        if(bg['storage'] && bg['storage'].account){            
+        if(bg.AccountManager.getCurrentAccount()){            
             this.props.history.push("/mywallet")
         }else if(common.accountList.length){
             this.props.history.push("/login")

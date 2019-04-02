@@ -5,12 +5,17 @@ declare var AccountManager: {
     nep2Load: (nep2: string, password: string) => Promise<boolean>;
     nep6Load: (str: string, password: string) => Promise<{
         address: string;
-        lable: string;
+        label: string;
     }>;
     getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
     setAccount: (account: AccountInfo) => void;
     logout: () => void;
     netWorkChange: (network: "TestNet" | "MainNet") => Promise<GetNetworksOutput>;
+    getCurrentAccount: () => {
+        address: string;
+        walletName: string;
+    };
+    getCurrentNetWork: () => "TestNet" | "MainNet";
 };
 /**
  * 事件出发返回方法

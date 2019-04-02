@@ -27,10 +27,11 @@ export default class Home extends React.Component<any, any> {
       if(chrome.tabs)
       {
         const bg = chrome.extension.getBackgroundPage() as Background;
-        if(bg.storage.account)
+        const account = bg.AccountManager.getCurrentAccount();
+        if(account)
         {
-          const account = {address:bg.storage.account.address,label:bg.storage.account.walletName}
-          this.setState({account,login:true});
+          const account2 = {address:account.address,label:account.walletName}
+          this.setState({account2,login:true});
         }
         else
         {

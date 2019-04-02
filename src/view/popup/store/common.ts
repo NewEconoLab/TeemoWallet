@@ -20,9 +20,8 @@ class Common
     private tabname:string;
 
     @action public initNetWork=()=>{
-        console.log(bg.storage.network);
-        
-        this.network = NetWork[bg.storage.network]        
+        const currentNet = bg.AccountManager.getCurrentNetWork();
+        this.network = NetWork[currentNet];        
     }
     
     @action public changeNetWork=(network:NetWork)=>{
@@ -69,7 +68,7 @@ class Common
     }
 
     @action public initAccountInfo=()=>{
-        const acc =Storage_internal.get<AccountInfo>(this.tabname);
+        const acc =bg.AccountManager.getCurrentAccount();
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
     }
