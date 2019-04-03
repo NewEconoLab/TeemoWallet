@@ -2,14 +2,15 @@
 import * as React from 'react';
 import { ICON } from '../../../image';
 import Chooser, { IOption } from '../../../components/Chooser';
-import Modal from '../../../components/Modal';
+// import Modal from '../../../components/Modal';
 import Exchange from '../exchange';
 import classnames = require('classnames');
 import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
-import HeadImg from '../../utils/headimg';
+// import HeadImg from '../../utils/headimg';
 import { observer } from 'mobx-react';
 import intl from '../../store/intl';
+import Toast from '../../../components/Toast';
 
 interface IProps{
     lableChange:(table:string)=>void
@@ -81,6 +82,19 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     public closeExchange=()=>{
         this.setState({exchange:false});
     }
+	// 复制地址
+	public onCopyAddress = () => {		
+		const oInput = document.createElement('input');
+		oInput.value = common.account.address;
+		document.body.appendChild(oInput);
+		oInput.select(); // 选择对象
+		document.execCommand("Copy"); // 执行浏览器复制命令
+		oInput.className = 'oInput';
+		oInput.style.display = 'none';
+		// alert(2)
+		Toast(intl.message.toast.copySuccess);
+		
+	}
 
 	public render() {
         const history = classnames("header-label",{"active":this.state.activeLable=="history"});
@@ -99,7 +113,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             <div className="headimg-wrapp" id="headimg" ><img src={ICON.header}/></div>
                             <div className="account-message">
                                 <div className=''>{common.account.lable}</div>
-                                <div className='address'>{common.account.address.substring(0,4)+'...'+common.account.address.substring(30,34)}</div>
+                                <div className='address' onClick={this.onCopyAddress}>{common.account.address.substring(0,4)+'...'+common.account.address.substring(30,34)}</div>
                             </div>
                         </div>
                         <div className="function">

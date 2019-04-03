@@ -12,6 +12,7 @@ import historyStore from './store/history.store';
 import intl from '../../store/intl';
 interface IState
 {
+    hasAmount:boolean;
     hasFee:boolean;
     currentOption:IOption;
     options:IOption[];
@@ -28,6 +29,7 @@ export default class History extends React.Component<any, {}>
     state: IState = {
         currentOption:{ id: "all", name: intl.message.history.all },
         hasFee:false,
+        hasAmount:false,
         options:
         [
             { id: "all", name: intl.message.history.all },
@@ -64,23 +66,25 @@ export default class History extends React.Component<any, {}>
         this.setState({ currentOption: call })
     }
 
-    onCheck=(hasFee:boolean)=>{
-        this.setState({hasFee})
+    onCheck=(hasAmount:boolean)=>{
+        // this.setState({hasFee})
+        this.setState({hasAmount})
     }
 
     groupBy=(historylist:IHistory[])=>{
         const list:IHistory[] = [];
         for (const history of historylist) {
-            if(this.state.hasFee)
+            if(this.state.hasAmount)
             {
                 if(history.type==ConfirmType.contract)
                 {
-                    if(history.invokeHistory.netfee&&history.invokeHistory.netfee!='0')
+                    if(history.invokeHistory.expenses&&history.invokeHistory.expenses.length>0)
                         list.push(history)
                 }
                 else
                 {
-                    if(history.sendHistory.fee&&history.sendHistory.fee!='0')
+                    // if(history.sendHistory.fee&&history.sendHistory.fee!='0')
+                    if(Neo.Fixed8.parse(history.sendHistory.amount).compareTo(Neo.Fixed8.Zero)>0)
                         list.push(history)
                 }
             }

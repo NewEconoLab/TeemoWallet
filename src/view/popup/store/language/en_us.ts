@@ -72,7 +72,7 @@ export default {
     
   },
   history:{
-    wait:"Waiting in line",
+    wait:"Pending",
     tranHistory:"History",
     contract:"Contract interaction",
     waitConfirm:"Waiting",

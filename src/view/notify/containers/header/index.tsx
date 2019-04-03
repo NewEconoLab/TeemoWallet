@@ -6,6 +6,7 @@ import './index.less';
 import HeadImg from '../../utils/headimg';
 import { bg } from '../../../popup/utils/storagetools';
 import intl from '../../../popup/store/intl';
+import { ICON } from '../../../image';
 interface IProps
 {
   address: string;
@@ -25,12 +26,16 @@ export default class Header extends React.Component<IProps>{
   }
   public render()
   {
+    const account = bg.AccountManager.getCurrentAccount();
     return (
       <div className="nheader-wrap">
         <div className="first-line">
           <div className="first-left">
-            <div className="img-icon" id="mywalletimg" />
-            <div className="left-text">{bg.AccountManager.getCurrentAccount().walletName}</div>
+            <div className="img-icon" ><img src={ICON.header}/></div>
+            <div className="account-message">
+                <div className=''>{account.walletName}</div>
+                <div className='address'>{account.address.substring(0,4)+'...'+account.address.substring(30,34)}</div>
+            </div>
           </div>
           <div className="first-right">
             {this.state.network=='TestNet'?intl.message.mywallet.testnet:intl.message.mywallet.mainnet}

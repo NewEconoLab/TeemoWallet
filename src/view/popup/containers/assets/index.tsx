@@ -88,19 +88,19 @@ export default class Assets extends React.Component<any, {}>
                     <div className="title">{intl.message.assets.assetlist}</div>
                     <div className="asset-panel" onClick={this.transferNEO}>
                         <div className="asset-name">NEO</div>
-                        <div className="asset-amount">{common.balances.NEO}</div>
+                        <div className="asset-amount">{Neo.Fixed8.fromNumber(common.balances.NEO).toString()}</div>
                     </div>
                     <div className="asset-panel" onClick={this.transferGas}>
                         <div className="asset-name">GAS</div>
-                        <div className="asset-amount">{common.balances.GAS}</div>
+                        <div className="asset-amount">{Neo.Fixed8.fromNumber(common.balances.GAS).toString()}</div>
                     </div>
                     <div className="asset-panel" onClick={this.transferCGAS}>
                         <div className="asset-name">CGAS</div>
-                        <div className="asset-amount">{common.balances.CGAS}</div>
+                        <div className="asset-amount">{Neo.Fixed8.fromNumber(common.balances.CGAS).toString()}</div>
                     </div>
                     <div className="asset-panel" onClick={this.transferNNC}>
                         <div className="asset-name">NNC</div>
-                        <div className="asset-amount">{common.balances.NNC}</div>
+                        <div className="asset-amount">{Neo.Fixed8.fromNumber(common.balances.NNC).toString()}</div>
                     </div>
                 </div>
                 <QrCodeBox show={this.state.showNumber === 1} onHide={this.onCloseModel} />

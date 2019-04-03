@@ -6,9 +6,8 @@ export const bg = chrome.extension.getBackgroundPage() as Background;
 export const Storage_local = 
 {
     setAccount:(account:AccountInfo)=>{
-        let arr = Storage_local.getAccount();
-        
-        let index: number= 0;
+        let arr = Storage_local.getAccount();        
+        let index: number= -1;
         let newacc=new NepAccount(
             account.walletName,
             account.address,
@@ -19,21 +18,23 @@ export const Storage_local =
             arr = arr.map((acc,n)=>{
                 if(acc.address===account.address)
                 {
-                    acc.walletName = newacc.walletName?newacc.walletName:acc.walletName;
+                    acc.walletName = newacc.walletName?newacc.walletName:(acc.walletName?acc.walletName:'我的钱包'+(n+1));
                     newacc.index = index = n;
                     return newacc;
                 }
                 return acc;
             });
             if(index<0){
+                newacc.walletName=newacc.walletName?newacc.walletName:'我的钱包'+(arr.length+1);
                 arr.push(newacc);
             }
         }else{
+            newacc.walletName=newacc.walletName?newacc.walletName:'我的钱包1';
             arr.push(newacc);
         }
         
         localStorage.setItem("TeemoWALLET_ACCOUNT",JSON.stringify(arr));
-        return index;
+        return newacc;
     },
     getAccount:()=>{
         const str = localStorage.getItem("TeemoWALLET_ACCOUNT");

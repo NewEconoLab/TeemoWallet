@@ -5,7 +5,7 @@ import Input from '../../../components/Input';
 import { RouteComponentProps } from 'react-router';
 import { observer } from 'mobx-react';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
-import { Storage_local } from '../../utils/storagetools';
+import { Storage_local, bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import intl from '../../store/intl';
 
@@ -80,7 +80,8 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
     }
 
     goMyWallet =()=> {
-        Storage_local.setAccount(this.state.account);
+        const account =  Storage_local.setAccount(this.state.account);
+        bg.AccountManager.setAccount(this.state.account);
         common.initAccountInfo();
         if(this.props.goMyWallet)
             this.props.goMyWallet();

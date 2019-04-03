@@ -139,10 +139,14 @@ export default class Exchange extends React.Component<IProps, IState>
 
 	public render()
 	{
+		const options:IOption[]=[
+			{id:'cgasexchange',name:intl.message.exchange.gasToCgas},
+			{id:'gasexchange',name:intl.message.exchange.cgasToGas}
+		]
 		return (
 			<Modal title={intl.message.mywallet.cgasExchange} show={this.props.show}>
 				<div className="line">
-					<Select onCallback={this.onSelect} options={this.options} text={intl.message.exchange.operationType} size="big" />
+					<Select currentOption={options.find(opt=>opt.id==this.state.currentOption.id)} onCallback={this.onSelect} options={options} text={intl.message.exchange.operationType} size="big" />
 				</div>
 				<div className="line">
 					<Input placeholder={intl.message.exchange.amount} value={this.state.amount+""} onChange={this.onChange} type="text" error={this.state.inputError} message={this.state.errorMessage} />		
