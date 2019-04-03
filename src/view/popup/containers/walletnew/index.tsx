@@ -66,6 +66,7 @@ export default class Login extends React.Component<AppProps> {
                 <div className="titleBackground">
                     <div className="title">{intl.message.walletnew.newWallet}</div>
                     <img className="teemo-bg" src={require("../../../image/owl.png")} alt=""/>
+                    
                 </div>
                 <div className="content">
                     <div className="form-label">

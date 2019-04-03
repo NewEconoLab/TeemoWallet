@@ -130,7 +130,7 @@ export default class History extends React.Component<any, {}>
         ];
         const waitlist=[];
         const historylist:IHistory[] = [];
-        const current = options.find(option=>option.id==this.state.currentOption.id);
+        // const current = options.find(option=>option.id==this.state.currentOption.id);
         historyStore.taskList.forEach((task) =>
         {
             if (task.state == TaskState.watting || task.state == TaskState.watForLast)
@@ -149,14 +149,14 @@ export default class History extends React.Component<any, {}>
                 }
                 <div className="history">
                     <div className="title">{intl.message.history.tranHistory}</div>
-                    <div className="filter">
+                    <div className="filter-checkbox">
+                        <Checkbox text={intl.message.history.hide} onClick={this.onCheck}></Checkbox>
+                    </div>
+                    {/* <div className="filter">
                         <div className="filter-select">
                             <Select text="" options={options} onCallback={this.onSelectModule} currentOption={current} />
                         </div>
-                        <div className="filter-checkbox">
-                            <Checkbox text={intl.message.history.hide} onClick={this.onCheck}></Checkbox>
-                        </div>
-                    </div>
+                    </div> */}
                     { historylist.length !== 0 && this.groupBy(historylist).map(task=><Panel task={task} ></Panel>) }
                 </div>
             </div>

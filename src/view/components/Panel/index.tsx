@@ -163,8 +163,15 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="group send">
 								<div className="title">{type=='input' ?intl.message.history.from: intl.message.history.to}</div>
 								<div className="value">
-									<a href={'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/address/'+(type=='input'?this.props.task.sendHistory.fromAddress:this.props.task.sendHistory.toAddress)}>
-										{type=='input'?this.props.task.sendHistory.fromAddress.substr(0,4)+"..."+this.props.task.sendHistory.fromAddress.substr(30,4) :this.props.task.sendHistory.toAddress.substr(0,4)+"..."+this.props.task.sendHistory.toAddress.substr(30,4)}
+									<a href={
+										'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/address/'+
+										(type=='input'?this.props.task.sendHistory.fromAddress:this.props.task.sendHistory.toAddress)
+										}
+										target="_blank">
+										{
+											type=='input'?this.props.task.sendHistory.fromAddress.substr(0,4)+"..."+this.props.task.sendHistory.fromAddress.substr(30,4) :
+											this.props.task.sendHistory.toAddress.substr(0,4)+"..."+this.props.task.sendHistory.toAddress.substr(30,4)
+										}
 									</a>
 								</div>
 							</div>
