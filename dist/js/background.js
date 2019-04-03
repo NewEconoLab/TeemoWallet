@@ -120,8 +120,7 @@ class MarkUtxo {
                     }
                     else // 对被使用过的utxo进行排除
                      {
-                        console.log("以下是被使用过的utxo被排除使用");
-                        console.log(item);
+                        console.log('被排除的utxo', item);
                     }
                 }
                 return assets;
@@ -153,25 +152,27 @@ class Utxo {
 }
 class Storage_local {
     static setAccount(account) {
+        const lang = sessionStorage.getItem('language');
+        const name = (!lang || lang == 'zh') ? '我的钱包' : 'Wallet';
         let arr = Storage_local.getAccount();
         let index = -1;
         let newacc = new NepAccount(account.walletName, account.address, account.nep2key, account.scrypt);
         if (arr.length) {
             arr = arr.map((acc, n) => {
                 if (acc.address === account.address) {
-                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : '我的钱包' + (n + 1));
+                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : name + (n + 1));
                     newacc.index = index = n;
                     return newacc;
                 }
                 return acc;
             });
             if (index < 0) {
-                newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包' + (arr.length + 1);
+                newacc.walletName = newacc.walletName ? newacc.walletName : name + (arr.length + 1);
                 arr.push(newacc);
             }
         }
         else {
-            newacc.walletName = newacc.walletName ? newacc.walletName : '我的钱包1';
+            newacc.walletName = newacc.walletName ? newacc.walletName : name + 1;
             arr.push(newacc);
         }
         localStorage.setItem("TeemoWALLET_ACCOUNT", JSON.stringify(arr));
@@ -1213,7 +1214,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         let amount;
         try {
             const result = yield invokeRead({
-                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+                "scriptHash": data.asset,
                 "operation": "decimals",
                 "arguments": [],
                 "network": "TestNet"
@@ -1571,7 +1572,9 @@ const responseMessage = (sender, request) => {
     const domain = getURLDomain(tab.url);
     const header = { title, domain, icon: tab.favIconUrl };
     if (Storage_local.getAccount().length < 1) {
-        showNotify('未检测到钱包', '请先创建或导入钱包');
+        const lang = sessionStorage.getItem('language');
+        const titles = (!lang || lang == 'zh') ? ['未检测到钱包', '请先创建或导入钱包'] : ['Wallet not detected.', 'Please create or import a wallet first. '];
+        showNotify(titles[0], titles[1]);
         const error = { type: 'CONNECTION_DENIED', description: 'No account response to current dapp request ' };
         chrome.tabs.sendMessage(tab.id, {
             return: command, ID, error

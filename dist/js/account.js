@@ -130,6 +130,7 @@ var AccountManager = {
     setAccount: (account) => {
         storage.account = account;
         EventsOnChange(WalletEvents.CONNECTED, { address: account.address, label: account.walletName });
+        EventsOnChange(WalletEvents.ACCOUNT_CHANGED, { address: account.address, label: account.walletName });
     },
     logout: () => {
         storage.account = null;

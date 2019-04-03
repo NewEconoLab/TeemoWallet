@@ -3,7 +3,6 @@
  */
 import * as React from 'react';
 import './index.less';
-import HeadImg from '../../utils/headimg';
 import { bg } from '../../../popup/utils/storagetools';
 import intl from '../../../popup/store/intl';
 import { ICON } from '../../../image';
@@ -17,12 +16,11 @@ export default class Header extends React.Component<IProps>{
   }
   public componentDidMount()
   {
-    this.setState({network:
-      bg.AccountManager.getCurrentNetWork()})
-    if(this.props.address){
-      console.log(this.props.address);      
-      const div = document.getElementById('mywalletimg')
-      HeadImg(div, this.props.address);}
+    this.setState({network:bg.AccountManager.getCurrentNetWork()})
+    // if(this.props.address){
+      // console.log(this.props.address);      
+      // const div = document.getElementById('mywalletimg')
+      // HeadImg(div, this.props.address);}
   }
   public render()
   {

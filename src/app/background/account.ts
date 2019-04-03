@@ -172,6 +172,7 @@ var AccountManager={
     setAccount:(account:AccountInfo)=>{
         storage.account = account;
         EventsOnChange(WalletEvents.CONNECTED,{address:account.address,label:account.walletName});
+        EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:account.address,label:account.walletName});
     },
 
     logout:()=>{
@@ -180,7 +181,7 @@ var AccountManager={
     },
 
     netWorkChange:(network:"TestNet"|"MainNet")=>{
-        return new Promise<GetNetworksOutput>((r,j)=>{            
+        return new Promise<GetNetworksOutput>((r,j)=>{
             storage.network=network;
             const message:GetNetworksOutput={networks:[network],defaultNetwork:network};
             EventsOnChange(WalletEvents.NETWORK_CHANGED,message);
