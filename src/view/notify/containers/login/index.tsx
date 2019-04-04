@@ -48,12 +48,21 @@ export default class Login extends React.Component<AppProps,AppState> {
             
             this.setState({
                 options,       
-            })
-            this.getcurrentOption(options[0]);
+            })            
+            const curaddr = localStorage.getItem('current-addr');            
+            if(curaddr)
+            {
+                const index = options.findIndex(opt=>opt.id==curaddr);
+                this.getcurrentOption(options[index>0?index:0])
+            }
+            else
+            {                
+                this.getcurrentOption(options[0]);
+            }
         }
     }
 
-    public getcurrentOption=(event: IOption)=>{        
+    public getcurrentOption=(event: IOption)=>{
         Storage_local.getAccount().forEach(currentAccount=>{
             if(currentAccount.address===event.id){
                 this.setState({

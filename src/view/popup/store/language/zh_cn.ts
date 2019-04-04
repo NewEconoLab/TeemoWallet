@@ -121,9 +121,11 @@ export default {
     message2:"请检查您是否在正确的站点",
     from:"来自……",
     dappNote:"来自应用的备注",
-    tranData:"交易详情",
+    tranData:"交易数据",
+    Info:"交易详情",
+    tranInfo:"转账详情",
     method:"方法",
-    scriptHash:"参数hash",
+    scriptHash:"合约hash",
     toAddress:"目标地址",
     AssetsID:"资产ID"
   }

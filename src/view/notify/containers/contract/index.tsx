@@ -122,10 +122,10 @@ export default class ContractRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 0 && (
             <>
-              <div className="contract-title">{intl.message.history.tranHistory}</div>
+              <div className="contract-title">{intl.message.notify.Info}</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">{intl.message.history.scriptHash}</div>
+                  <div className="line-left">{intl.message.notify.scriptHash}</div>
                   <div className="line-right">
                     {
                       this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>
@@ -184,7 +184,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
 
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">{intl.message.history.contract}</div>
+                  <div className="line-left">{intl.message.notify.scriptHash}</div>
                   <div className="line-right">
                   {
                       this.state.scriptHash.length !== 0 && this.state.scriptHash.map((k, v) =>

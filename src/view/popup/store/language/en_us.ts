@@ -2,7 +2,7 @@ export default {
   button:{
     confirm:"Confirm",
     cancel:"Cancel",
-    refuse:"Refuse",
+    refuse:"Cancel",
   },
   toast:{
     successfully:"Operation successful, please be patient and wait for it to be confirmed in the block .",
@@ -120,9 +120,11 @@ export default {
     message2:" Please check if you are at the right site. ",
     from:"From……",
     dappNote:"Note from dApp",
-    tranData:"Transaction data",
+    tranData:"Data",
+    Info:"Info",
+    tranInfo:"Info",
     method:"Method",
-    scriptHash:"Parameter hash",
+    scriptHash:"Contract hash",
     toAddress:"To",
     AssetsID:"Asset ID"
   }

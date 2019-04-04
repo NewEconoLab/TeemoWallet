@@ -16,6 +16,7 @@ class HistoryList implements IHistoryList
             {
                 if(task.invokeHistory.domain=="TeemoWallet.exchangeCgas"){
                     task.dappMessage={title:intl.message.mywallet.cgasExchange,icon:ICON.exchange};
+                    task.invokeHistory.descripts[0]=task.invokeHistory.descripts[0]=='cgasToGas'?intl.message.exchange.cgasToGas:intl.message.exchange.gasToCgas;
                 }
                 tasklist.push(task);
             }

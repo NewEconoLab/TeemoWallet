@@ -54,7 +54,7 @@ export interface Language_Button
 {
     confirm:string,
     cancel:string,
-    refuse:string
+    refuse: string;
 }
 
 export interface Language_Toast
@@ -70,15 +70,17 @@ export interface Language_Login{welcome:string,goCreate:string,placeholder1:stri
 
 export interface Language_Notify
 {
-    message1: string;
-    message2: string;
-    from: string;
-    dappNote: string;
-    tranData: string;
-    method: string;
-    scriptHash: string;
-    toAddress: string;
-    AssetsID:string;
+    message1:string,
+    message2:string,
+    from:string,
+    dappNote:string,
+    tranData:string,
+    Info:string,
+    tranInfo:string,
+    method:string,
+    scriptHash:string,
+    toAddress:string,
+    AssetsID:string
 }
 
 export interface Language_MyWallet{

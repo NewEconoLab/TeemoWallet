@@ -116,7 +116,7 @@ export default class SendRequest extends React.Component<IProps, IState>
           {intl.message.history.from+" "+ this.props.domain}
         </div>
         <div className="second-line">
-          {intl.message.notify.tranData}
+          {intl.message.assets.transfer}
         </div>
         {/* <div className="second-line">
           请求签名 
@@ -124,7 +124,7 @@ export default class SendRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 0 && (
             <>
-              <div className="contract-title">{intl.message.notify.tranData}</div>
+              <div className="contract-title">{intl.message.notify.tranInfo}</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">{intl.message.notify.toAddress}</div>

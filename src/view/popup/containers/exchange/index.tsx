@@ -152,7 +152,7 @@ export default class Exchange extends React.Component<IProps, IState>
 					<Input placeholder={intl.message.exchange.amount} value={this.state.amount+""} onChange={this.onChange} type="text" error={this.state.inputError} message={this.state.errorMessage} />		
 				</div>		
 				<div className="line-checkbox">
-					<Checkbox text={intl.message.exchange.payfee} onClick={this.onCheck} />
+					<Checkbox text={this.state.currentOption.id=='cgasexchange'?intl.message.transfer.payfee:intl.message.exchange.payfee} onClick={this.onCheck} />
 				</div>
 				<div className="btn-list">
 					<div className="cancel">

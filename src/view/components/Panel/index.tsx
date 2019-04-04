@@ -156,12 +156,12 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="transaction-title">{type=='input' ?intl.message.assets.receiving: intl.message.assets.transfer}</div>
 							{this.props.task.sendHistory.remark&&
 								<div className="group">
-									<div className="title">{intl.message.history.note}</div>
+									<div className="key-title">{intl.message.history.note}</div>
 									<div className="value">{this.props.task.sendHistory.remark}</div>
 								</div>
 							}
 							<div className="group send">
-								<div className="title">{type=='input' ?intl.message.history.from: intl.message.history.to}</div>
+								<div className="key-title">{type=='input' ?intl.message.history.from: intl.message.history.to}</div>
 								<div className="value">
 									<a href={
 										'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/address/'+
@@ -176,7 +176,7 @@ export default class Panel extends React.Component<IProps, IState>
 								</div>
 							</div>
 							<div className="group expense">
-								<div className="title">
+								<div className="key-title">
 									{this.props.task.sendHistory.fromAddress!==common.account.address && 
 										this.props.task.sendHistory.toAddress==common.account.address && intl.message.assets.receiving}
 									{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.fee}
@@ -184,7 +184,7 @@ export default class Panel extends React.Component<IProps, IState>
 								<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
 							</div>
 							<div className="group netfee">
-								<div className="title">{intl.message.history.fee}</div>
+								<div className="key-title">{intl.message.history.fee}</div>
 								<div className="value">{this.props.task.sendHistory.fee} GAS</div>
 							</div>
 						</div>
@@ -194,16 +194,16 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="transaction-title">{this.props.task.dappMessage.title}</div>
 							<div className="send">
 								<div className="group">
-									<div className="title">{intl.message.history.scriptHash}</div>
+									<div className="key-title">{intl.message.history.scriptHash}</div>
 									<div className="value">{this.props.task.invokeHistory.scriptHashs.map(hash=>(hash.substr(0,4)+"..."+hash.substr(hash.length-3,4))).join(',')}</div>
 								</div>
 								<div className="group">
-									<div className="title">{intl.message.history.note}</div>
+									<div className="key-title">{intl.message.history.note}</div>
 									<div className="value">{this.props.task.invokeHistory.descripts?this.props.task.invokeHistory.descripts:""}</div>
 								</div>
 							</div>
 							<div className="group expense">
-								<div className="title">{intl.message.history.amount}</div>
+								<div className="key-title">{intl.message.history.amount}</div>
 								<div className="value">
 								{this.props.task.invokeHistory.expenses.map((val,key)=>{
 									return val.amount+' '+val.symbol;
@@ -211,7 +211,7 @@ export default class Panel extends React.Component<IProps, IState>
 								</div>
 							</div>
 							<div className="group netfee">
-								<div className="title">{intl.message.history.fee}</div>
+								<div className="key-title">{intl.message.history.fee}</div>
 								<div className="value">{this.props.task.invokeHistory.netfee} GAS</div>
 							</div>
 						</div>

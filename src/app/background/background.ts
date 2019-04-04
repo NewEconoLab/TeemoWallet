@@ -989,7 +989,7 @@ var exchangeGas=async(transcount:number,netfee:number)=>{
         attachedAssets:{[HASH_CONFIG.ID_GAS]:transcount.toString()},
         network:storage.network,
         fee:netfee?"0.001":"0",
-        description:'gas换cgas'
+        description:'gasToCgas'
     }
     try {
         const result =await contractBuilder(invoke);
@@ -1037,7 +1037,7 @@ var makeRefundTransaction = async (transcount:number,netfee:number)=>
         arguments:[{type:"ByteArray",value:scriptHash.toHexString()}],
         network:storage.network,
         fee:netfee.toString(),
-        description:'cgas换cgas'
+        description:'cgasToGas'
     }
     script.EmitInvokeArgs(refund);  // 这里的方法有推随机数进去不知道具体是否有影响
     tran.setScript(script.ToArray())
@@ -1119,7 +1119,7 @@ var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:number,netfee:n
         'asset':HASH_CONFIG.ID_GAS,
         'amount':transcount.toString(),
         'fee':netfee.toString(),
-        'remark':'cgas换gas',
+        'remark':'cgasToGas',
         network:storage.network}
     TaskManager.addSendData(trandata.txid,senddata)
     return trandata;

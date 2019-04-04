@@ -54,13 +54,6 @@ export default class History extends React.Component<any, {}>
             this.props.onClick();
         }
     }
-    // public options: IOption[] =
-    // [
-    //     { id: "all", name: intl.message.history.all },
-    //     { id: "GAS", name: "GAS" },
-    //     { id: "CGAS", name: "CGAS" },
-    //     { id: "NEO", name: "NEO" },
-    // ];
     onSelectModule = (call: IOption) =>
     {
         this.setState({ currentOption: call })
@@ -79,7 +72,11 @@ export default class History extends React.Component<any, {}>
                 if(history.type==ConfirmType.contract)
                 {
                     if(history.invokeHistory.expenses&&history.invokeHistory.expenses.length>0)
+                    {
+                        // if(history.invokeHistory.domain=="TeemoWallet.exchangeCgas")
+                        //     console.log(history)
                         list.push(history)
+                    }
                 }
                 else
                 {
@@ -93,27 +90,7 @@ export default class History extends React.Component<any, {}>
                 list.push(history)
             }
         }
-        const tasklist:IHistory[] = [];
-        for (const task of list) {
-            if(this.state.currentOption.id=='all')
-                tasklist.push(task);
-            else
-            {
-                if(task.type==ConfirmType.contract){                    
-                    const res =task.invokeHistory.expenses.findIndex(task=>task.symbol==this.state.currentOption.name);
-                    if(res>-1)
-                    {                        
-                        tasklist.push(task);
-                    }
-                }
-                else
-                {
-                    if(task.sendHistory.symbol==this.state.currentOption.id)
-                    tasklist.push(task);
-                }
-            }
-        }
-        const panellist = tasklist.sort((a,b)=>{
+        const panellist = list.sort((a,b)=>{
             return b.startTime-a.startTime
         })
         return panellist;
@@ -121,16 +98,8 @@ export default class History extends React.Component<any, {}>
 
     public render()
     {
-        const options: IOption[] =
-        [
-            { id: "all", name: intl.message.history.all },
-            { id: "GAS", name: "GAS" },
-            { id: "CGAS", name: "CGAS" },
-            { id: "NEO", name: "NEO" },
-        ];
         const waitlist=[];
         const historylist:IHistory[] = [];
-        // const current = options.find(option=>option.id==this.state.currentOption.id);
         historyStore.taskList.forEach((task) =>
         {
             if (task.state == TaskState.watting || task.state == TaskState.watForLast)
@@ -152,11 +121,6 @@ export default class History extends React.Component<any, {}>
                     <div className="filter-checkbox">
                         <Checkbox text={intl.message.history.hide} onClick={this.onCheck}></Checkbox>
                     </div>
-                    {/* <div className="filter">
-                        <div className="filter-select">
-                            <Select text="" options={options} onCallback={this.onSelectModule} currentOption={current} />
-                        </div>
-                    </div> */}
                     { historylist.length !== 0 && this.groupBy(historylist).map(task=><Panel task={task} ></Panel>) }
                 </div>
             </div>
