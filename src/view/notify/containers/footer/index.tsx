@@ -5,6 +5,7 @@ import * as React from 'react';
 // import { injectIntl } from 'react-intl';
 import './index.less';
 import Button from '../../../components/Button';
+import intl from '../../../popup/store/intl';
 // import { observer } from 'mobx-react';
 interface IProps{
   onConfirm:()=>void;
@@ -18,8 +19,8 @@ export default class Footer extends React.Component<IProps>{
     return (
       <div className="nfooter-wrap">
         <div className="nfooter-btn">
-          <Button text="拒绝" type="warn" onClick={this.props.onCancel}/>
-          <Button text="确认" onClick={this.props.onConfirm}/>
+          <Button text={intl.message.button.refuse} type="warn" onClick={this.props.onCancel}/>
+          <Button text={intl.message.button.confirm} onClick={this.props.onConfirm}/>
         </div>
       </div>
     );

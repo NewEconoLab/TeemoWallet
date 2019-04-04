@@ -1,7 +1,8 @@
 export default {
   button:{
     confirm:"确定",
-    cancel:"取消"
+    cancel:"取消",
+    refuse:"拒绝",
   },
   toast:{
     successfully:"操作成功，请耐心等待区块确认。",
@@ -120,8 +121,10 @@ export default {
     message2:"请检查您是否在正确的站点",
     from:"来自……",
     dappNote:"来自应用的备注",
-    tranData:"交易数据",
+    tranData:"交易详情",
     method:"方法",
     scriptHash:"参数hash",
+    toAddress:"目标地址",
+    AssetsID:"资产ID"
   }
 }

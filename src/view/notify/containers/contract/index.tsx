@@ -180,7 +180,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
           this.state.pageNumber === 1 && (
             <>
               {/* <div className="contract-title">交易数据</div> */}
-              <div className="contract-title">签名消息</div>
+              <div className="contract-title">{intl.message.notify.tranData}</div>
 
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">

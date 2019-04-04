@@ -53,7 +53,8 @@ class Intl
 export interface Language_Button
 {
     confirm:string,
-    cancel:string
+    cancel:string,
+    refuse:string
 }
 
 export interface Language_Toast
@@ -76,6 +77,8 @@ export interface Language_Notify
     tranData: string;
     method: string;
     scriptHash: string;
+    toAddress: string;
+    AssetsID:string;
 }
 
 export interface Language_MyWallet{

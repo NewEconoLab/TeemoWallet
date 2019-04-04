@@ -72,7 +72,7 @@ export default class Login extends React.Component<AppProps,AppState> {
      */
     public passwordChange=(event:string)=>
     {
-        this.setState({password:event})
+        this.setState({password:event,passwordError:false})
     }
 
     public chooserAddr=(event:IOption)=>
@@ -80,18 +80,6 @@ export default class Login extends React.Component<AppProps,AppState> {
         this.setState({
             currentOption:event
         });
-    }
-
-    /**
-     * 输入密码后触发的改变方法
-     * @param {string} event change方法返回的字符对象
-     */
-    public nep2Change=(event:string)=>
-    {
-        this.setState({
-            password:event,
-            passwordError:false
-        })
     }
 
     public toCreateWallet=()=>

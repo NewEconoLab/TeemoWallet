@@ -8,6 +8,7 @@ import Checkbox from '../../../components/Checkbox';
 import { Storage_local } from '../../../../common/util';
 import { Background, SendArgs } from '../../../../lib/background';
 import { bg } from '../../../popup/utils/storagetools';
+import intl from '../../../popup/store/intl';
 // import { observer } from 'mobx-react';
 
 interface IProps
@@ -56,7 +57,6 @@ export default class SendRequest extends React.Component<IProps, IState>
   // 更新数据
   public getRenderState = () =>
   {
-    console.log("渲染hash");
     console.log(this.props.data);
     console.log(JSON.stringify(this.state.data))
     let sendData: SendArgs;
@@ -113,10 +113,10 @@ export default class SendRequest extends React.Component<IProps, IState>
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
-          来自 {this.props.domain}
+          {intl.message.history.from+" "+ this.props.domain}
         </div>
         <div className="second-line">
-          合约交互
+          {intl.message.notify.tranData}
         </div>
         {/* <div className="second-line">
           请求签名 
@@ -124,10 +124,10 @@ export default class SendRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 0 && (
             <>
-              <div className="contract-title">交易详情</div>
+              <div className="contract-title">{intl.message.notify.tranData}</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">目标地址</div>
+                  <div className="line-left">{intl.message.notify.toAddress}</div>
                   <div className="line-right address">
                     {
                       this.state.toAddress
@@ -135,7 +135,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                   </div>
                 </div>
                 <div className="line-wrap">
-                  <div className="line-left">花费</div>
+                  <div className="line-left">{intl.message.history.amount}</div>
                   <div className="line-right">
                     <span>
                     {this.state.amount+" "+this.state.assetSymbol}
@@ -145,7 +145,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                 {
                   parseFloat(this.state.fee) !== 0 && (
                     <div className="line-wrap">
-                      <div className="line-left">手续费</div>
+                      <div className="line-left">{intl.message.history.fee}</div>
                       <div className="line-right">
                         <span>{this.state.fee} GAS</span>
                       </div>
@@ -156,11 +156,11 @@ export default class SendRequest extends React.Component<IProps, IState>
               {
                 parseFloat(this.state.fee) === 0 && (
                   <div className="check-fee">
-                    <Checkbox text="优先确认交易（支付0.001 GAS）" onClick={this.netfeeChange}></Checkbox>
+                    <Checkbox text={intl.message.transfer.payfee} onClick={this.netfeeChange}></Checkbox>
                   </div>
                 )
               }
-              <div className="contract-title">来自应用的备注</div>
+              <div className="contract-title">{intl.message.notify.dappNote}</div>
               <div className="remark-content white-wrap">
                 {
                   this.state.remark
@@ -175,11 +175,11 @@ export default class SendRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 1 && (
             <>
-              <div className="contract-title">交易数据</div>
+              <div className="contract-title">{intl.message.notify.tranData}</div>
 
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">资产ID</div>
+                  <div className="line-left">{intl.message.notify.AssetsID}</div>
                   <div className="line-right">
                   <a href={assetHref+this.state.assetID} target="_blank">
                     { this.state.assetID.substr(0,4)+"..."+this.state.assetID.substr(this.state.assetID.length-4,4) }

@@ -39,9 +39,9 @@ export default class Header extends React.Component<IProps>{
             {this.state.network=='TestNet'?intl.message.mywallet.testnet:intl.message.mywallet.mainnet}
             </div>
         </div>
-        <div className="sec-line">
+        {/* <div className="sec-line">
           <span>{this.props.address}</span>
-        </div>
+        </div> */}
       </div>
     );
   }

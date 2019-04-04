@@ -1,7 +1,8 @@
 export default {
   button:{
     confirm:"Confirm",
-    cancel:"Cancel"
+    cancel:"Cancel",
+    refuse:"Refuse",
   },
   toast:{
     successfully:"Operation successful, please be patient and wait for it to be confirmed in the block .",
@@ -122,5 +123,7 @@ export default {
     tranData:"Transaction data",
     method:"Method",
     scriptHash:"Parameter hash",
+    toAddress:"To",
+    AssetsID:"Asset ID"
   }
 }
