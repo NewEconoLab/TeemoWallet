@@ -673,8 +673,13 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
             }
         }
         else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
-            const utxo = utxos[HASH_CONFIG.ID_GAS];
-            tran.creatInuptAndOutup(utxo, fee);
+            if (utxos && utxos[HASH_CONFIG.ID_GAS]) {
+                const utxo = utxos[HASH_CONFIG.ID_GAS];
+                tran.creatInuptAndOutup(utxo, fee);
+            }
+            else {
+                throw { type: 'INSUFFICIENT_FUNDS', description: 'The user does not have a sufficient balance to perform the requested action' };
+            }
         }
         let result = yield transactionSignAndSend(tran);
         TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
@@ -1090,15 +1095,18 @@ const invoke = (header, params) => {
             header
         };
         openNotify(data)
-            .then(checkNetFee => {
-            params.fee = (params.fee && params.fee != '0') ? params.fee : (checkNetFee ? '0.001' : '0');
-            contractBuilder(params)
-                .then(result => {
-                resolve(result);
-                TaskManager.addInvokeData(result.txid, header.domain, params);
-            })
-                .catch(error => {
-                reject(error);
+            .then(() => {
+            Storage_local.get('checkNetFee')
+                .then(checkNetFee => {
+                params.fee = (params.fee && params.fee != '0') ? params.fee : (checkNetFee ? '0.001' : '0');
+                contractBuilder(params)
+                    .then(result => {
+                    resolve(result);
+                    TaskManager.addInvokeData(result.txid, header.domain, params);
+                })
+                    .catch(error => {
+                    reject(error);
+                });
             });
         })
             .catch(error => {
