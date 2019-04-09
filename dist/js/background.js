@@ -1051,6 +1051,7 @@ const invokeGroup = (header, params) => {
             .then(confrim => {
             Storage_local.get('checkNetFee')
                 .then(check => {
+                Storage_local.set('checkNetFee', false);
                 if (params.merge) {
                     const fee = Neo.Fixed8.Zero;
                     params.group.map((invoke, index) => {
@@ -1098,6 +1099,7 @@ const invoke = (header, params) => {
             .then(() => {
             Storage_local.get('checkNetFee')
                 .then(checkNetFee => {
+                Storage_local.set('checkNetFee', false);
                 params.fee = (params.fee && params.fee != '0') ? params.fee : (checkNetFee ? '0.001' : '0');
                 contractBuilder(params)
                     .then(result => {
