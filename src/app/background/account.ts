@@ -3,6 +3,8 @@ var AccountManager={
         let wallet: ThinNeo.nep6wallet = new ThinNeo.nep6wallet();
     },
 
+    // 测试一下
+    
     // 解密方法，放在background避免popup直接访问
     deciphering:(password:string,nepaccount:NepAccount)=>{
         return new Promise<NepAccount>((resolve, reject) =>
