@@ -36,8 +36,8 @@ const HASH_CONFIG = {
 
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-const testRpcUrl = "http://test.nel.group:20331";
-const mainRpcUrl = "http://seed.nel.group:10331";
+const testRpcUrl = "http://test.nel.group:20332";
+const mainRpcUrl = "http://seed.nel.group:10332";
 
 /**
  * -------------------------以下是账户所使用到的实体类

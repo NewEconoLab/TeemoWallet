@@ -179,7 +179,7 @@ export default class Panel extends React.Component<IProps, IState>
 								<div className="key-title">
 									{this.props.task.sendHistory.fromAddress!==common.account.address && 
 										this.props.task.sendHistory.toAddress==common.account.address && intl.message.assets.receiving}
-									{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.fee}
+									{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.amount}
 								</div>
 								<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
 							</div>
