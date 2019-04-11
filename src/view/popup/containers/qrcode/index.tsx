@@ -12,8 +12,7 @@ import intl from '../../store/intl';
 
 interface IProps
 {
-	show: boolean,
-	onHide?:()=>void
+	lableChange: (table: string) => void
 }
 interface IState
 {
@@ -35,7 +34,10 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 		QrMakeCode(div,common.account.address);
 	}
 	public onHide=()=>{
-		this.props.onHide?this.props.onHide():null;
+		if (this.props.lableChange)
+		{
+			this.props.lableChange('');
+		}
 	}
 	// 复制地址
 	public onCopyAddress = () => {		
@@ -53,16 +55,13 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 	public render()
 	{
 		return (
-			<Modal title={intl.message.assets.receiving} show={this.props.show}>
+			<div className="qrcode-box">
 				<div className="qrcode-wrapper">
 					<div className="qrcode-code" id="qrcode" />
 					<div className="qrcode-addr" onClick={this.onCopyAddress}>{common.account.address}</div>
 					<p className="qrcode-copy">（{intl.message.assets.copy}）</p>
 				</div>
-				<div className="qrcode-close" onClick={this.onHide}>
-					<img src={require("../../../image/close.png")} alt="" />
-				</div>
-			</Modal>
+			</div>
 		);
 	}
 }

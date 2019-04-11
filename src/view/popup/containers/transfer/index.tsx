@@ -21,289 +21,309 @@ import intl from '../../store/intl';
 
 interface IProps
 {
-	show:boolean,
-	onHide?:()=>void,
-	asset:string,
+	lableChange: (table: string) => void
+	asset: string,
 }
 
 interface IState
 {
-	infoShow:boolean,
-	show:boolean,
-	address:string,
-	amount:string,
-	asset:string,
-	netfee:boolean,
-	errorAddr:boolean,
-	errorAmount:boolean,
-	verifyPass:boolean,
-	checkDisable:boolean,
-	addrMessage:string,
-	amountMessage:string,
-	currentOption:IOption,
-	toAddress:string,
-	domain:string,
-	confirmDisable:boolean,
+	infoShow: boolean,
+	address: string,
+	amount: string,
+	asset: string,
+	netfee: boolean,
+	errorAddr: boolean,
+	errorAmount: boolean,
+	verifyPass: boolean,
+	checkDisable: boolean,
+	addrMessage: string,
+	amountMessage: string,
+	currentOption: IOption,
+	toAddress: string,
+	domain: string,
+	confirmDisable: boolean,
 }
 
 @observer
-export default class Transfer extends React.Component<IProps, IState> 
+export default class Transfer extends React.Component<IProps, IState>
 {
 	constructor(props: IProps)
 	{
-		super(props);		
+		super(props);
 	}
 	public state = {
-		show:false,
-		infoShow:false,
-		address:"",
-		amount:"",
-		asset:"",
-		netfee:false,
-		errorAddr:false,
-		errorAmount:false,
-		verifyPass:false,
-		checkDisable:false,
-		confirmDisable:false,
-		addrMessage:'',
-		amountMessage:'',
-		currentOption:{id:HASH_CONFIG.ID_GAS,name:'GAS'},
-		toAddress:'',
-		domain:'',
+		infoShow: false,
+		address: "",
+		amount: "",
+		asset: "",
+		netfee: false,
+		errorAddr: false,
+		errorAmount: false,
+		verifyPass: false,
+		checkDisable: false,
+		confirmDisable: false,
+		addrMessage: '',
+		amountMessage: '',
+		currentOption: { id: HASH_CONFIG.ID_GAS, name: 'GAS' },
+		toAddress: '',
+		domain: '',
 	}
 
 	componentDidMount()
 	{
 		console.log(this.props.asset);
-		
-		if(this.props.asset!='')
+
+		if (this.props.asset != '')
 		{
 			console.log(this.props.asset);
-			const current =this.options.find(option=>option.id==this.props.asset);
+			const current = this.options.find(option => option.id == this.props.asset);
 			console.log(current);
-			
+
 			this.setState({
-				currentOption:this.options.find(option=>option.id==this.props.asset)
+				currentOption: this.options.find(option => option.id == this.props.asset)
 			})
 		}
 	}
 
-	public options:IOption[]=[
-		{id:HASH_CONFIG.ID_GAS,name:'GAS'},
-		{id:HASH_CONFIG.ID_CGAS.toString(),name:'CGAS'},
-		{id:HASH_CONFIG.ID_NEO,name:'NEO'},
-		{id:HASH_CONFIG.ID_NNC.toString(),name:'NNC'}
+	public options: IOption[] = [
+		{ id: HASH_CONFIG.ID_GAS, name: 'GAS' },
+		{ id: HASH_CONFIG.ID_CGAS.toString(), name: 'CGAS' },
+		{ id: HASH_CONFIG.ID_NEO, name: 'NEO' },
+		{ id: HASH_CONFIG.ID_NNC.toString(), name: 'NNC' }
 	]
-	public onSelect = (currentOption:IOption)=>{
+	public onSelect = (currentOption: IOption) =>
+	{
 		console.log(currentOption);
-		
+
 		this.setState({
 			currentOption
-		},()=>{
-			this.onAmountChange(this.state.amount)
-		})
+		}, () =>
+			{
+				this.onAmountChange(this.state.amount)
+			})
 	}
 	// 监控输入内容
-	public onAddrChange = async(event) =>
+	public onAddrChange = async (event) =>
 	{
-		let errorAddr=false;
-		let addrMessage,toAddress,domain="";
-		let address =event;
-		this.setState({address})
-		if(NNSTool.verifyDomain(event))
+		let errorAddr = false;
+		let addrMessage, toAddress, domain = "";
+		let address = event;
+		this.setState({ address })
+		if (NNSTool.verifyDomain(event))
 		{
-			try {
+			try
+			{
 				const addr = await NNSTool.resolveData(event)
-				if(!addr)
+				if (!addr)
 				{
-					errorAddr=true;
-					addrMessage=intl.message.transfer.error2
-				}else{
-					errorAddr=false;
-					addrMessage=toAddress=addr;
+					errorAddr = true;
+					addrMessage = intl.message.transfer.error2
+				} else
+				{
+					errorAddr = false;
+					addrMessage = toAddress = addr;
 					domain = event;
 				}
-			} catch (error) {
-				errorAddr=true;
-				addrMessage=intl.message.transfer.error2
+			} catch (error)
+			{
+				errorAddr = true;
+				addrMessage = intl.message.transfer.error2
 			}
 		}
-		else if(neotools.verifyAddress(event))
+		else if (neotools.verifyAddress(event))
 		{
-			errorAddr=false;
-			toAddress=event;
+			errorAddr = false;
+			toAddress = event;
 		}
 		else
 		{
-			errorAddr=true;
-			addrMessage=intl.message.transfer.error1
+			errorAddr = true;
+			addrMessage = intl.message.transfer.error1
 		}
-		this.setState({errorAddr,addrMessage,domain,toAddress},()=>{
+		this.setState({ errorAddr, addrMessage, domain, toAddress }, () =>
+		{
 			this.onVerify();
 		})
 	}
 
-	public onVerify=()=>{
+	public onVerify = () =>
+	{
 		this.setState({
-			verifyPass:(!this.state.errorAddr)&&(!this.state.errorAmount)&&(!!this.state.amount)&&(!!this.state.address)
+			verifyPass: (!this.state.errorAddr) && (!this.state.errorAmount) && (!!this.state.amount) && (!!this.state.address)
 		})
 	}
 
 	// 监控输入内容
 	public onAmountChange = (event) =>
 	{
-		const amount = asNumber(event,8);
+		const amount = asNumber(event, 8);
 		const balance = Neo.Fixed8.fromNumber(common.balances[this.state.currentOption.name])
-		let checkDisable=false;
+		let checkDisable = false;
 		let errorAmount = false;
-		let amountMessage="";
+		let amountMessage = "";
 		const compare = Neo.Fixed8.parse(amount).compareTo(balance)
-		if(compare>0)
+		if (compare > 0)
 		{
-			errorAmount=true;
-			amountMessage=intl.message.exchange.noBalance+" "+this.state.currentOption.name+' '+balance.toString();
+			errorAmount = true;
+			amountMessage = intl.message.exchange.noBalance + " " + this.state.currentOption.name + ' ' + balance.toString();
 		}
-		else if(compare==0)
+		else if (compare == 0)
 		{
-			errorAmount=false;
-			amountMessage='';
-			checkDisable=true;
+			errorAmount = false;
+			amountMessage = '';
+			checkDisable = true;
 		}
-		this.setState({amount,errorAmount,amountMessage,checkDisable},()=>{
+		this.setState({ amount, errorAmount, amountMessage, checkDisable }, () =>
+		{
 			this.onVerify()
 		})
 	}
-	public showInfo=()=>{
+	public showInfo = () =>
+	{
 		// this.props.onHide();
 		this.setState({
-			infoShow:true
+			infoShow: true
 		})
 	}
-	public closeInfo=()=>{
+	public closeInfo = () =>
+	{
 		this.setState({
-			infoShow:false
+			infoShow: false
 		})
 	}
-	public onHide=()=>{
+	public onHide = () =>
+	{
 		this.setState({
-			show:false,
-			infoShow:false,
-			address:"",
-			amount:"",
-			asset:"",
-			netfee:false,
-			errorAddr:false,
-			errorAmount:false,
-			verifyPass:false,
-			checkDisable:false,
-			addrMessage:'',
-			amountMessage:'',
-			currentOption:{id:HASH_CONFIG.ID_GAS,name:'GAS'},
-			toAddress:'',
-			domain:'',
-			confirmDisable:false
+			infoShow: false,
+			address: "",
+			amount: "",
+			asset: "",
+			netfee: false,
+			errorAddr: false,
+			errorAmount: false,
+			verifyPass: false,
+			checkDisable: false,
+			addrMessage: '',
+			amountMessage: '',
+			currentOption: { id: HASH_CONFIG.ID_GAS, name: 'GAS' },
+			toAddress: '',
+			domain: '',
+			confirmDisable: false
 		})
-		this.props.onHide?this.props.onHide():null;
+		if (this.props.lableChange)
+		{
+			this.props.lableChange('');
+		}
 	}
-	public onCheck=(event:boolean)=>{
+	public onCheck = (event: boolean) =>
+	{
 		this.setState({
-			netfee:event
+			netfee: event
 		})
 	}
-	public send=()=>
+	public send = () =>
 	{
 		console.log(this.state.currentOption.id);
 		this.setState({
-			confirmDisable:true
+			confirmDisable: true
 		})
 		bg.transfer({
-			"amount":this.state.amount,
-			"asset":this.state.currentOption.id,
-			"fromAddress":common.account.address,
-			"toAddress":this.state.toAddress,
-			"fee":this.state.netfee?"0.001":"0",
-			"network":"TestNet"
+			"amount": this.state.amount,
+			"asset": this.state.currentOption.id,
+			"fromAddress": common.account.address,
+			"toAddress": this.state.toAddress,
+			"fee": this.state.netfee ? "0.001" : "0",
+			"network": "TestNet"
 		})
-		.then(result=>{
-			Toast(intl.message.toast.successfully);
-			console.log(result);
-			this.onHide();
-		})
-		.catch(error=>{
-			Toast(intl.message.toast.failed,"error");
-			console.log(error);
-			this.onHide();
-		})
+			.then(result =>
+			{
+				Toast(intl.message.toast.successfully);
+				console.log(result);
+				this.onHide();
+			})
+			.catch(error =>
+			{
+				Toast(intl.message.toast.failed, "error");
+				console.log(error);
+				this.onHide();
+			})
 	}
 
 	public render()
-	{		
+	{
 		return (
-			<Modal title={this.state.infoShow?intl.message.transfer.title:intl.message.assets.transfer} show={this.props.show}>
-			{				
-				this.state.infoShow?
-				<div className="transfer-info">
-					<div className="info-line first">
-						<div className="title">{intl.message.transfer.title1}</div>
-						<div className="content">
-							<div className="double">{common.account.lable}</div>
-							<div className="double address">{common.account.address}</div>
+			<div className="transfer-wrapper">
+				{
+					this.state.infoShow ?
+						<div className="transfer-info">
+							<h3>{intl.message.transfer.title}</h3>
+							<div className="transfer-content">
+								<div className="info-line first">
+									<div className="title">{intl.message.transfer.title1}</div>
+									<div className="content">
+										<div className="double">{common.account.lable}</div>
+										<div className="double address">{common.account.address}</div>
+									</div>
+								</div>
+								<div className="info-line">
+									<div className="title">{intl.message.transfer.title2}</div>
+									<div className="content">{this.state.amount + " " + this.state.currentOption.name}</div>
+								</div>
+								<div className="info-line">
+									<div className="title">{intl.message.transfer.title3}</div>
+									<div className="content">
+										{this.state.domain ?
+											<>
+												<div className="double">{this.state.domain}</div>
+												<div className="double address">{this.state.toAddress}</div>
+											</> :
+											<div className="single address">{this.state.toAddress}</div>
+										}
+									</div>
+								</div>
+								<div className="info-line">
+									<div className="title">{intl.message.transfer.title4}</div>
+									<div className="content">{this.state.netfee ? '0.001 GAS' : '0 GAS'}</div>
+								</div>
+							</div>
+							<div className="btn-list">
+								<div className="cancel">
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+								</div>
+								<div className="confrim">
+									<Button type="primary" text={intl.message.button.confirm} onClick={this.send} disabled={this.state.confirmDisable} />
+								</div>
+							</div>
 						</div>
-					</div>
-					<div className="info-line">
-						<div className="title">{intl.message.transfer.title2}</div>
-						<div className="content">{this.state.amount+" "+this.state.currentOption.name}</div>
-					</div>
-					<div className="info-line">
-						<div className="title">{intl.message.transfer.title3}</div>
-						<div className="content">
-						{this.state.domain?
+						:
 						<>
-							<div className="double">{this.state.domain}</div>
-							<div className="double address">{this.state.toAddress}</div>
-						</>:
-							<div className="single address">{this.state.toAddress}</div>
-						}
-						</div>
-					</div>
-					<div className="info-line">
-						<div className="title">{intl.message.transfer.title4}</div>
-						<div className="content">{this.state.netfee?'0.001 GAS':'0 GAS'}</div>
-					</div>
-					<div className="btn-list">
-						<div className="cancel">
-							<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
-						</div>
-						<div className="confrim">
-							<Button type="primary" text={intl.message.button.confirm} onClick={this.send} disabled={this.state.confirmDisable}/>
-						</div>
-					</div>
-				</div>
-				:
-				<>
-					<div className="line">
-						<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text={intl.message.mywallet.assets} />
-					</div>
-					<div className="line">
-						<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />		
-					</div>
-					<div className="line">
-						<Input placeholder={intl.message.transfer.amount} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />		
-					</div>
-					<div className="line">
-						<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
-					</div>
-					<div className="btn-list">
-						<div className="cancel">
-							<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
-						</div>
-						<div className="confrim">
-							<Button type="primary" disabled={!this.state.verifyPass} text={intl.message.transfer.next} onClick={this.showInfo}/>
-						</div>
-					</div>
-				</>
-			}
-			</Modal>
+							<div className="line">
+								<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text={intl.message.mywallet.assets} />
+							</div>
+							<div className="line">
+								<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
+								<p className="tip-check">
+									<img className="trans-icon" src={require("../../../image/transfer.png")} alt=""/>
+									<span className="trans-text">AXnMWemN6GMdauzxHAEjb3EFJQQNmNHHw9</span>
+								</p>
+							</div>
+							<div className="line line-big">
+								<Input placeholder={intl.message.transfer.amount + "（90000 GAS可用）"} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
+							</div>
+							<div className="line">
+								<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
+							</div>
+							<div className="btn-list">
+								<div className="cancel">
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+								</div>
+								<div className="confrim">
+									<Button type="primary" disabled={!this.state.verifyPass} text={intl.message.transfer.next} onClick={this.showInfo} />
+								</div>
+							</div>
+						</>
+				}
+			</div>
 		);
 	}
 }

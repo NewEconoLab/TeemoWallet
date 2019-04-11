@@ -98,7 +98,7 @@ export default {
     noBalance:"资产余额不足",
   },
   transfer:{
-    sendTo:"发送至",
+    sendTo:"发送至（地址或NNS域名）",
     amount:"发送数量",
     payfee:"优先确认交易(支付0.001GAS)",
     next:"下一步",

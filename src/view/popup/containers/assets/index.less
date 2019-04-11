@@ -1,5 +1,6 @@
 .assets{
-    margin: 30px 15px 0 14px;
+    padding: 30px 15px 0 15px;
+    background: #f9f9f9;
     .btn-list{
         margin-top: 30px;
         .address{
@@ -12,12 +13,33 @@
     }
     .asset-list{
         margin-top: 30px;
-        margin-bottom: 40px;
+        padding-bottom: 30px;
         .title{
             font-family: NotoSansHans-Medium;
             font-size: 14px;
             color: #333333;
             text-align: left;
+            position: relative;
+            .add-balance{
+                position: absolute;
+                top: 0;
+                right: 0;
+                cursor: pointer;
+                .add-icon{
+                    width: 14px;
+                    height: 14px;
+                    vertical-align: middle;
+                    margin-right: 4px;
+                }
+                .add-text{
+                    font-size: 12px;
+                    color: #5F8DFB;
+                    vertical-align: middle;
+                    &:hover{
+                        color: #6B97FF;
+                    }
+                }
+            }
         }
         .asset-panel{
             display: flex;
@@ -40,6 +62,41 @@
                 font-size: 14px;
                 color: #333333;
                 text-align: right;
+            }
+        }
+    }
+    .claimgas-wrapper{
+        background: #FFFFFF;
+        box-shadow: 0 1px 4px 0 rgba(184,184,184,0.50);
+        border-radius: 3px;
+        font-family: NotoSansHans-Medium;
+        font-size: 14px;
+        color: #333333;
+        padding: 15px 10px;
+        position: relative;
+        .gas-text{
+            margin-bottom: 15px;
+        }
+        .claim-btn{
+            display: inline-block;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            margin-top: -15px;
+        }
+    }
+    .asset-p{
+        font-family: NotoSansHans-Regular;
+        font-size: 12px;
+        color: #333333;
+        padding-bottom: 30px;
+        .asset-a{
+            display: inline-block;
+            color: #5F8DFB;
+            text-decoration: underline;
+            cursor: pointer;
+            &:hover{
+                color: #6B97FF;
             }
         }
     }
