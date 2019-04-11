@@ -97,7 +97,7 @@ export default {
     noBalance:"Insufficient balance",
   },
   transfer:{
-    sendTo:"Sent to",
+    sendTo:"Sent to(Address or DomainName)",
     amount:"Amount",
     payfee:"Priority transaction( pay 0.001GAS)",
     next:"Next",
