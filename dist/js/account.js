@@ -10,6 +10,7 @@ var AccountManager = {
     createWallet: (key) => {
         let wallet = new ThinNeo.nep6wallet();
     },
+    // 测试一下
     // 解密方法，放在background避免popup直接访问
     deciphering: (password, nepaccount) => {
         return new Promise((resolve, reject) => {
@@ -142,6 +143,7 @@ var AccountManager = {
             storage.network = network;
             const message = { networks: [network], defaultNetwork: network };
             EventsOnChange(WalletEvents.NETWORK_CHANGED, message);
+            TaskManager.socket.socketInit();
             r(message);
         });
     },

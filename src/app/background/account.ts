@@ -188,6 +188,7 @@ var AccountManager={
             storage.network=network;
             const message:GetNetworksOutput={networks:[network],defaultNetwork:network};
             EventsOnChange(WalletEvents.NETWORK_CHANGED,message);
+            TaskManager.socket.socketInit();
             r(message)
         })
     },

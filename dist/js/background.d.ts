@@ -24,8 +24,8 @@ declare const HASH_CONFIG: {
 };
 declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
-declare const testRpcUrl = "http://test.nel.group:20331";
-declare const mainRpcUrl = "http://seed.nel.group:10331";
+declare const testRpcUrl = "http://test.nel.group:20332";
+declare const mainRpcUrl = "http://seed.nel.group:10332";
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -358,7 +358,15 @@ declare class TaskManager {
         };
     };
     static table: string;
+    static socket: SocketManager;
+    static blockDatas: {
+        blockHeight: number;
+        blockTime: number;
+        blockHash: string;
+        timeDiff: number;
+    }[];
     static start(): void;
+    static readonly webSocketURL: "wss://testws.nel.group/ws/mainnet" | "wss://testws.nel.group/ws/testnet";
     static addSendData(txid: string, data: SendArgs): void;
     static addInvokeData(txid: string, domain: string, data: InvokeArgs | InvokeArgs[]): void;
     static InvokeDataUpdate(): void;

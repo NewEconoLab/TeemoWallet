@@ -36,8 +36,8 @@ const HASH_CONFIG = {
 
 const baseCommonUrl = "https://api.nel.group/api";
 const baseUrl = "https://apiwallet.nel.group/api";
-const testRpcUrl = "http://test.nel.group:20331";
-const mainRpcUrl = "http://seed.nel.group:10331";
+const testRpcUrl = "http://test.nel.group:20332";
+const mainRpcUrl = "http://seed.nel.group:10332";
 
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -2010,7 +2010,6 @@ class TransferGroup
             
         })
         .catch(error=>{
-            
             TaskManager.shed[tran.txid].state = TaskState.fail;
             TaskManager.shed[tran.txid].next.executeError={
                 type:"RPC_ERROR",
@@ -2049,7 +2048,16 @@ class TaskManager{
 
     public static dappsMessage:{[txid:string]:{title:string,icon:string}}={};
 
-    public static table:string = "Task-Manager-shed"
+    public static table:string = "Task-Manager-shed";
+
+    public static socket = new SocketManager();
+
+    public static blockDatas=[{
+        blockHeight:-1,
+        blockTime:0,
+        blockHash:'',
+        timeDiff:0
+      }]
 
     public static start()
     {
@@ -2059,20 +2067,29 @@ class TaskManager{
             this.sendHistory=item['send-data']?item['send-data']:{};
             this.dappsMessage=item['white_list']?item['white_list']:{};
         })
-        setInterval(()=>{
-            Api.getBlockCount()
-            .then(result=>{
-                const count = (parseInt(result[0].blockcount)-1);
-                if(count - storage.height!=0)
-                {
-                    storage.height=count;
-                    this.update()
-                }
-            })
-            .catch(error=>{
-                console.log(error);
-            })
-        },15000)        
+        // this.updateBlock();
+        this.socket.socketInit();
+        
+        setInterval(this.socket.updateLastWSmsgSec,1000)
+        // setInterval(()=>{
+        //     Api.getBlockCount()
+        //     .then(result=>{
+        //         const count = (parseInt(result[0].blockcount)-1);
+        //         if(count - storage.height!=0)
+        //         {
+        //             storage.height=count;
+        //             this.update()
+        //         }
+        //     })
+        //     .catch(error=>{
+        //         console.log(error);
+        //     })
+        // },15000)        
+    }
+    
+    public static get webSocketURL(){
+        if(storage.network=='MainNet') return 'wss://testws.nel.group/ws/mainnet'
+        else return 'wss://testws.nel.group/ws/testnet'
     }
 
     public static addSendData(txid:string,data:SendArgs)
@@ -2129,7 +2146,7 @@ class TaskManager{
         for ( const key in this.shed) 
         {
             const task = this.shed[key];
-            if(task.state==TaskState.watting)
+            if(task.state==TaskState.watting && task.network==storage.network)
             {
                 if(task.type===ConfirmType.tranfer){
                     Api.getrawtransaction(task.txid,task.network)
