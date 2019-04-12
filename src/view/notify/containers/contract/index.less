@@ -72,6 +72,20 @@
       .one-line{
         display: flex;
         justify-content: space-between;
+        &:last-child{
+          .line-left{
+            .first-p{
+              margin-bottom: 0;
+            }
+          }
+          .line-right{
+            .second-p{
+              &:last-child{
+                margin-bottom: 0;
+              }              
+            }
+          }
+        }
       }
     }
   }

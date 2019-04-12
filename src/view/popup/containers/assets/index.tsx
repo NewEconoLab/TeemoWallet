@@ -109,10 +109,10 @@ export default class Assets extends React.Component<IProps, {}>
                 <ClaimGAS />
                 <div className="btn-list">
                     <div className="address">
-                        <Button text={intl.message.assets.receiving} size="adaptation" onClick={this.onShowQrcode} />
+                        <Button text={intl.message.assets.receiving} onClick={this.onShowQrcode} />
                     </div>
                     <div className="transfer">
-                        <Button text={intl.message.assets.transfer} size="adaptation" onClick={this.onShowTransfer} />
+                        <Button text={intl.message.assets.transfer} onClick={this.onShowTransfer} />
                     </div>
                 </div>
                 <div className="asset-list">
