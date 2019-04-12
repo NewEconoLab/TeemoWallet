@@ -11,7 +11,6 @@ interface BackStore
     oldUtxo:{[txid:string]:number[]}
 }
 
-
 const storage:BackStore=
 {
     network:"TestNet",
@@ -662,7 +661,15 @@ const Api = {
             params:[asset]
         }
         return request(opts);
-    }
+    },
+    getBlock:(height:number)=>{
+        return request({
+            method:'getblock',
+            params:[height],
+            baseUrl:'rpc'
+        })
+    },
+
 }
 
 const setContractMessage=(txid:string,domain:string,data)=>{
@@ -1172,6 +1179,7 @@ interface NotifyMessage{
     lable:Command
     data?:any
 }
+
 /**
  * 打开notify页面并传递信息，返回调用
  * @param call 回调方法
@@ -1827,6 +1835,31 @@ const getURLDomain=(Url:string)=>
         return Url;
 }
 
+const getBlock=(data:GetBlockArgs)=>{
+    return new Promise((resolve,reject)=>
+    {
+        Api.getBlock(data.blockHeight)
+        .then(result=>{
+            if(result)
+                resolve(result);
+            else
+                reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request"})
+        })
+        .catch(error=>{
+            
+            reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request",data:error})
+        })
+    })
+}
+
+const getApplicationLog=(data:GetApplicationLogArgs)=>{
+
+}
+
+const getTransaction=(data:GetTransactionArgs)=>{
+    
+}
+
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -1895,12 +1928,23 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
             case Command.invokeGroup:
                 sendResponse(invokeGroup(header,params));
                 break;
+            case Command.getBlock:
+                sendResponse(getBlock(params));
+                break;
+            case Command.getTransaction:
+                sendResponse(invokeGroup(header,params));
+                break;
+            case Command.getApplicationLog:
+                sendResponse(invokeGroup(header,params));
+                break;
             case Command.getAddressFromScriptHash:
-                sendResponse(new Promise((r,j)=>{try {
-                    r(ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(params)))
-                } catch (error) {
-                    j({type:"MALFORMED_INPUT",description:'This scripthash is not correct.'})
-                }}));
+                sendResponse(new Promise((r,j)=>{
+                    try {
+                            r(ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(params)))
+                    } catch (error) {
+                            j({type:"MALFORMED_INPUT",description:'This scripthash is not correct.'})
+                    }
+                }));
                 break;
             default:
                 sendResponse(new Promise((r,j)=>j({type:"NO_PROVIDER",description:"Could not find an instance of the dAPI in the webpage"})))
@@ -1924,7 +1968,6 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
         })
     }
 }
-
 
 /**
  * 监听
@@ -2188,7 +2231,6 @@ class TaskManager{
     }
 }
 
-
 TaskManager.start();
 
 const BLOCKCHAIN = 'NEO';
@@ -2207,22 +2249,25 @@ enum ArgumentDataType {
 }
 
 enum Command {
-  isReady = 'isReady',
-  getProvider = 'getProvider',
-  getNetworks = 'getNetworks',
-  getAccount = 'getAccount',
-  getPublicKey = 'getPublicKey',
-  getBalance = 'getBalance',
-  getStorage = 'getStorage',
-  invokeRead = 'invokeRead',
-  invokeReadGroup='invokeReadGroup',
-  send = 'send',
-  invoke = 'invoke',
-  invokeGroup="invokeGroup",
-  event = 'event',
-  disconnect = 'disconnect',
-  getAddressFromScriptHash='getAddressFromScriptHash'
-}
+    isReady = 'isReady',
+    getProvider = 'getProvider',
+    getNetworks = 'getNetworks',
+    getAccount = 'getAccount',
+    getPublicKey = 'getPublicKey',
+    getBalance = 'getBalance',
+    getStorage = 'getStorage',
+    invokeRead = 'invokeRead',
+    invokeReadGroup = 'invokeReadGroup',
+    send = 'send',
+    invoke = 'invoke',
+    invokeGroup="invokeGroup",
+    event = 'event',
+    disconnect = 'disconnect',
+    getAddressFromScriptHash = 'getAddressFromScriptHash',
+    getBlock='getBlock',
+    getTransaction='getTransaction',
+    getApplicationLog='getApplicationLog'
+  }
 
 enum EventName {
   READY = 'READY',
@@ -2230,6 +2275,25 @@ enum EventName {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
   NETWORK_CHANGED = 'NETWORK_CHANGED',
+}
+
+/**
+ * @param {number} blockHeight 区块高度
+ * @param {string} network 网络
+ */
+interface GetBlockArgs{
+    blockHeight:number;  // 区块高度
+    network:string // 网络
+}
+
+interface GetTransactionArgs{
+    txid:string;
+    network:string;
+}
+
+interface GetApplicationLogArgs{
+    txid:string;
+    network:string;
 }
 
 interface GetStorageArgs {
@@ -2307,6 +2371,7 @@ interface InvokeReadInput {
     arguments?: Argument[];
     network: string;
 }
+
 interface InvokeReadGroup{
     group:InvokeReadInput[];
 }

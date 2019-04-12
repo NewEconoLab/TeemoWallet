@@ -38,6 +38,9 @@ enum Command {
   event = 'event',
   disconnect = 'disconnect',
   getAddressFromScriptHash = 'getAddressFromScriptHash',
+  getBlock='getBlock',
+  getTransaction='getTransaction',
+  getApplicationLog='getApplicationLog'
 }
 
 enum EventName {
@@ -76,7 +79,6 @@ interface InvokeArgs{
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
 }
-
 
 interface InvokeReadInput {
     scriptHash: string;
@@ -130,6 +132,25 @@ interface InvokeGroupOutup{
 
 }
 
+/**
+ * @param {number} blockHeight 区块高度
+ * @param {string} network 网络
+ */
+interface GetBlockArgs{
+    blockHeight:number;  // 区块高度
+    network:string // 网络
+}
+
+interface GetTransactionArgs{
+    txid:string;
+    network:string;
+}
+
+interface GetApplicationLogArgs{
+    txid:string;
+    network:string;
+}
+
 interface BalanceRequest {
     address: string; // Address to check balance(s)
     assets?: string[]; // Asset symbol or script hash to check balance
@@ -178,7 +199,6 @@ interface SendOutput {
     txid: string;
     nodeUrl: string;
 }
-
 
 interface Provider {
     name: string;
@@ -324,6 +344,30 @@ namespace Teemo
         static getAddressFromScriptHash(params:string): Promise<string>{
             return sendMessage(Command.getAddressFromScriptHash,params);
         }
+
+        /**
+         * 查询区块信息
+         * @param params 
+         */
+        static getBlock(params:GetBlockArgs){
+            return sendMessage(Command.getBlock,params)
+        }
+
+        /**
+         * 查询交易信息
+         * @param params 
+         */
+        static getTransaction(params:GetTransactionArgs){
+            return sendMessage(Command.getTransaction,params)
+        }
+        
+        /**
+         * 查询log
+         * @param params 
+         */
+        static getApplicationLog(params:GetApplicationLogArgs){
+            return sendMessage(Command.getTransaction,params)
+        }
     }
 }
 
@@ -361,8 +405,8 @@ if (window.dispatchEvent) {
 
 EventChange();
 
-document.onload=()=>{
+// document.onload=()=>{
     // chrome.tabs.query({currentWindow:true},tabs=>{
 
     // })
-}
+// }
