@@ -13,7 +13,7 @@ interface IProps
 	disabled?: boolean, // 按钮是否禁止点击
 	text: string,
 	type?: 'primary' | 'warn' | 'disable-btn' | 'remind' | 'white', // 按钮样式
-	size?: 'normal' | 'large' | 'long' | 'small' | 'adaptation';
+	size?: 'normal' | 'large' | 'long' | 'small' | 'small-big';
 }
 
 // @observer

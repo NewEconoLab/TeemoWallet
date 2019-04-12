@@ -104,10 +104,10 @@ export default class WalletImport extends React.Component<IProps, IState> {
                 }
                 <div className="form-btn-list">
                     <div className="btn-first">
-                        <Button type='warn' text={intl.message.button.cancel} onClick={this.goBack}/>
+                        <Button type='warn' size='small-big' text={intl.message.button.cancel} onClick={this.goBack}/>
                     </div>
                     <div>
-                        <Button type='primary' text={intl.message.button.confirm} onClick={this.loadWallet}/>
+                        <Button type='primary' size='small-big' text={intl.message.button.confirm} onClick={this.loadWallet}/>
                     </div>
                 </div>
             </div>

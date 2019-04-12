@@ -175,10 +175,10 @@ export default class WalletCreate extends React.Component<IPorps, IState> {
                         </div>
                         <div className="create-btn-list">
                             <div className="btn-first">
-                                <Button type='warn' text={intl.message.button.cancel} onClick={this.goBack}/>
+                                <Button type='warn' size='small-big' text={intl.message.button.cancel} onClick={this.goBack}/>
                             </div>
                             <div>
-                                <Button type='primary' text={intl.message.button.confirm} onClick={this.createWallet} disabled={disable}/>
+                                <Button type='primary' size='small-big' text={intl.message.button.confirm} onClick={this.createWallet} disabled={disable}/>
                             </div>
                         </div>
                     </div>

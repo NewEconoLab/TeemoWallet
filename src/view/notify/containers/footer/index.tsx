@@ -19,8 +19,8 @@ export default class Footer extends React.Component<IProps>{
     return (
       <div className="nfooter-wrap">
         <div className="nfooter-btn">
-          <Button text={intl.message.button.refuse} type="warn" onClick={this.props.onCancel}/>
-          <Button text={intl.message.button.confirm} onClick={this.props.onConfirm}/>
+          <Button text={intl.message.button.refuse} size="small-big" type="warn" onClick={this.props.onCancel}/>
+          <Button text={intl.message.button.confirm} size="small-big" onClick={this.props.onConfirm}/>
         </div>
       </div>
     );
