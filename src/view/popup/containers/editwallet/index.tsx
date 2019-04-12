@@ -7,11 +7,12 @@ import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import Toast from '../../../components/Toast';
 import Backup from './backup';
-import PrivateKey from './privatekey';
-import DeleteWallet from './deletewallet';
+// import PrivateKey from './privatekey';
+// import DeleteWallet from './deletewallet';
 interface IProps
 {
-    lableChange: (table: string) => void
+    lableChange: (table: string) => void,
+    twiceChange:(label:string)=>void
 }
 @observer
 export default class EditWallet extends React.Component<IProps, {}>
@@ -31,12 +32,17 @@ export default class EditWallet extends React.Component<IProps, {}>
             walletName: e.target.value
         })
     }
-    // 跳转到创建钱包
+    // 返回上一页
     public goBack = () =>
     {
         if (this.props.lableChange)
         {
             this.props.lableChange('history');
+        }
+    }
+    public onShowTwiceDialog = (label:string) => {
+        if(this.props.twiceChange){
+            this.props.twiceChange(label);
         }
     }
      // 关闭弹框
@@ -49,17 +55,17 @@ export default class EditWallet extends React.Component<IProps, {}>
     {
         this.setState({ showDialog: 1 })
     }
-     // 弹出私钥
-     public onShowPrivate = () =>
-     {
-         this.setState({ showDialog: 2 })
-     }
+    //  // 弹出私钥
+    //  public onShowPrivate = () =>
+    //  {
+    //      this.setState({ showDialog: 2 })
+    //  }
    
-    // 弹出删除
-    public onShowDelete = () =>
-    {
-        this.setState({ showDialog: 3 })
-    }
+    // // 弹出删除
+    // public onShowDelete = () =>
+    // {
+    //     this.setState({ showDialog: 3 })
+    // }
     // 复制nep2
 	public onCopyNep2 = () => {		
 		const oInput = document.createElement('input');
@@ -107,7 +113,7 @@ export default class EditWallet extends React.Component<IProps, {}>
                             <span className="bold-text">私钥 </span>
                         </div>
                         <div className="normal-right">
-                            <Button text="显示私钥" size="small" onClick={this.onShowPrivate} />
+                            <Button text="显示私钥" size="small" onClick={this.onShowTwiceDialog.bind(this,'private')} />
                         </div>
                     </div>
                     <p className="normal-text">私钥是未经过加密的钱包备份，请勿泄露给他人。</p>
@@ -116,17 +122,20 @@ export default class EditWallet extends React.Component<IProps, {}>
                             <span className="bold-text">删除钱包 </span>
                         </div>
                         <div className="normal-right">
-                            <Button text="删除" size="small" onClick={this.onShowDelete} />
+                            <Button text="删除" size="small" onClick={this.onShowTwiceDialog.bind(this,'delete')} />
                         </div>
                     </div>
                     <p className="normal-text">从钱包列表中删除当前钱包及其全部数据。</p>
                 </div>
-                <div className="editwallet-footer">
+                {/* <div className="editwallet-footer">
                     <Button text="返回" size="adaptation" onClick={this.goBack} />
-                </div>
+                </div> */}
                 <Backup show={this.state.showDialog === 1} onHide={this.onCloseModel} />
-                <PrivateKey show={this.state.showDialog === 2} onHide={this.onCloseModel} />
-                <DeleteWallet show={this.state.showDialog === 3} onHide={this.onCloseModel} />
+                {/* {
+                    this.state.showDialog === 2 && <PrivateKey onClose={this.onCloseModel} />
+                }
+                
+                <DeleteWallet show={this.state.showDialog === 3} onHide={this.onCloseModel} /> */}
             </div>
         );
     }

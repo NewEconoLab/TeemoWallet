@@ -17,10 +17,6 @@ export default class Setting extends React.Component<IProps, {}>
     {
         super(props);
     }
-    public langOptions: IOption[] = [
-        { id: 'zh', name: '中文' },
-        { id: 'en', name: 'English' }
-    ]
     public timeOptions: IOption[] = [
         { id: '0.3', name: '30秒' },
         { id: '5', name: '5分钟' },
@@ -28,26 +24,18 @@ export default class Setting extends React.Component<IProps, {}>
         { id: '30', name: '30分钟' },
         { id: '0', name: '不上锁' }
     ]
-    // 跳转到创建钱包
-    public goBack = ()=> {
-        if (this.props.lableChange)
-        {
-            this.props.lableChange('history');
-        }
-    }
+    // 返回上一页
+    // public goBack = ()=> {
+    //     if (this.props.lableChange)
+    //     {
+    //         this.props.lableChange('history');
+    //     }
+    // }
     public render()
     {
         return (
             <div className="setting-wrapper">
                 <div className="setting-content">
-                    <div className="normal-setting">
-                        <div className="normal-left">
-                            <span className="bold-text">语言</span>
-                        </div>
-                        <div className="normal-right">
-                            <Select options={this.langOptions} text="" />
-                        </div>
-                    </div>
                     <div className="normal-setting">
                         <div className="normal-left">
                             <span className="bold-text">自动上锁 </span>
@@ -74,9 +62,9 @@ export default class Setting extends React.Component<IProps, {}>
                     </div>
                     <p className="normal-text">所有应用都需要重新请求授权，才能发起交易请求。</p>
                 </div>
-                <div className="setting-footer">
+                {/* <div className="setting-footer">
                     <Button text="确认" size="adaptation" onClick={this.goBack}/>
-                </div>
+                </div> */}
             </div>
         );
     }

@@ -12,8 +12,7 @@ import Button from '../../../components/Button';
 
 interface IProps
 {
-	show: boolean,
-	onHide?: () => void
+	onClose?: () => void
 }
 
 @observer
@@ -31,12 +30,12 @@ export default class PrivateKey extends React.Component<IProps, any>
 		})
 	}
 
-	public onHide = () =>
+	public onClose = () =>
 	{
 		this.setState({
 			showStep:0
 		})
-		this.props.onHide ? this.props.onHide() : null;
+		this.props.onClose ? this.props.onClose() : null;
 	}
 	// 复制nep2
 	public onCopyPrivate = () => {		
@@ -52,7 +51,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 	public render()
 	{
 		return (
-			<Modal title="显示私钥" show={this.props.show}>
+			<div className="twice-dialog">
 				<div className="private-wrapper">
 					<div className="red-tips">请不要将私钥展示给任何人拥有私钥的人可以拿走钱包里的一切</div>
 					{
@@ -62,7 +61,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 									<input type="text" className="private-input" placeholder="输入密码以继续 " />
 								</div>
 								<div className="step-btn">
-									<Button type="warn" text="取消" onClick={this.onHide} />
+									<Button type="warn" text="取消" onClick={this.onClose} />
 									<Button type="primary" text="下一步" onClick={this.onGoNextStep} />
 								</div>
 							</div>
@@ -79,10 +78,10 @@ export default class PrivateKey extends React.Component<IProps, any>
 						)
 					}
 				</div>
-				<div className="modal-close" onClick={this.onHide}>
+				{/* <div className="modal-close" onClick={this.onClose}>
 					<img src={require("../../../image/close.png")} alt="" />
-				</div>
-			</Modal>
+				</div> */}
+			</div>
 		);
 	}
 }

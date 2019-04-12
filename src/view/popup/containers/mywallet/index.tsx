@@ -17,6 +17,8 @@ import Setting from '../setting';
 import intl from '../../store/intl';
 import Transfer from '../transfer';
 import { HASH_CONFIG } from '../../../config';
+import PrivateKey from '../editwallet/privatekey';
+import DeleteWallet from '../editwallet/deletewallet';
 interface AppProps extends RouteComponentProps
 {
     develop: boolean;
@@ -27,7 +29,8 @@ interface AppState
     value: string;
     label: string;// 控制主页的显示窗口
     showPage: string;// 控制显示窗口
-    tranAsset:string;
+    tranAsset:string;// 转账资产
+    showTwiceDialog:string,// 控制第二次显示窗口
 }
 
 
@@ -41,7 +44,8 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
     public state = {
         value: "",
         label: "assets",// history,assets
-        showPage: "manage", // manage,setting,wallet,exchange,qrcode
+        showPage: "", // manage,setting,edit,exchange,qrcode
+        showTwiceDialog:"",// private,delete
         tranAsset:HASH_CONFIG.ID_GAS,
     }
 
@@ -56,6 +60,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
             chrome.runtime.sendMessage({ popupMounted: true });
         }
     }
+    // 切换编辑窗口
     public labelChange = (label:string,asset?:string) =>
     {
         if (label == "out")
@@ -67,6 +72,14 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
             tranAsset:asset?asset:HASH_CONFIG.ID_GAS
         });
     }
+    // 切换二次编辑窗口
+    public twiceChange = (label:string)=>
+    {
+        this.setState({
+            showTwiceDialog:label
+        })
+    }
+
     // 显示交易历史
     public showHistory = () =>
     {
@@ -90,7 +103,12 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
             showPage: ''
         })
     }
-
+    // 关闭二次窗口
+    public onCloseDialog = () => {
+        this.setState({
+            showTwiceDialog:''
+        })
+    }
     render()
     {
         const history = classnames("header-label", { "active": this.state.label == "history" });
@@ -109,7 +127,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                         )
                     }
                     {
-                        this.state.showPage !== '' && (
+                        (this.state.showPage !== '' && this.state.showTwiceDialog === '') && (
                             <div className="single-lable">
                                 {
                                     this.state.showPage === 'exchange' && <span>{intl.message.mywallet.cgasExchange}</span>
@@ -124,12 +142,25 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'manage' && <span>管理代币</span>
                                 }
                                 {
-                                    this.state.showPage === 'wallet' && <span>钱包</span>
+                                    this.state.showPage === 'edit' && <span>钱包</span>
                                 }
                                 {
                                     this.state.showPage === 'setting' && <span>设置</span>
                                 }
                                 <img onClick={this.onClosePage} className="close-page" src={require('../../../image/close-nomal.png')} alt="" />
+                            </div>
+                        )
+                    }
+                    {
+                        this.state.showTwiceDialog!==''&& (
+                            <div className="single-lable">
+                                {
+                                    this.state.showTwiceDialog === 'private' && <span>显示私钥</span>
+                                }
+                                {
+                                    this.state.showTwiceDialog === 'delete' && <span>删除钱包</span>
+                                }
+                                <img onClick={this.onCloseDialog} className="close-page" src={require('../../../image/close-nomal.png')} alt="" />
                             </div>
                         )
                     }
@@ -143,22 +174,28 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                         (this.state.label === 'assets'  && this.state.showPage==='' ) && <Assets lableChange={this.labelChange}  />
                     }
                     {
-                        this.state.showPage === 'exchange' && <Exchange lableChange={this.labelChange} />
+                        (this.state.showPage === 'exchange' && this.state.showTwiceDialog === '') && <Exchange lableChange={this.labelChange} />
                     }
                     {
-                        this.state.showPage === 'qrcode' && <Qrcode lableChange={this.labelChange} />
+                        (this.state.showPage === 'qrcode' && this.state.showTwiceDialog === '')  && <Qrcode lableChange={this.labelChange} />
                     }
                     {
-                        this.state.showPage === 'transfer' && <Transfer lableChange={this.labelChange} asset={this.state.tranAsset} />
+                        (this.state.showPage === 'transfer' && this.state.showTwiceDialog === '')  && <Transfer lableChange={this.labelChange} asset={this.state.tranAsset} />
                     }
                     {
-                        this.state.showPage === 'manage' && <ManageAsset lableChange={this.labelChange} />
+                        (this.state.showPage === 'manage' && this.state.showTwiceDialog === '')  && <ManageAsset lableChange={this.labelChange} />
                     }
                     {
-                        this.state.showPage === 'wallet' && <EditWallet lableChange={this.labelChange} />
+                        (this.state.showPage === 'edit' && this.state.showTwiceDialog === '')  && <EditWallet lableChange={this.labelChange} twiceChange={this.twiceChange} />
                     }
                     {
-                        this.state.showPage === 'setting' && <Setting lableChange={this.labelChange} />
+                        (this.state.showPage === 'setting' && this.state.showTwiceDialog === '')  && <Setting lableChange={this.labelChange} />
+                    }
+                    {
+                        this.state.showTwiceDialog === 'private' && <PrivateKey />
+                    }
+                    {
+                        this.state.showTwiceDialog === 'delete' && <DeleteWallet />
                     }
                 </div>
                 <WalletFoot />

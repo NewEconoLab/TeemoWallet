@@ -7,7 +7,7 @@ import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 interface IProps
 {
-    lableChange: (table: string) => void
+  lableChange: (table: string) => void
 }
 @observer
 export default class ManageAsset extends React.Component<IProps, {}>
@@ -18,7 +18,7 @@ export default class ManageAsset extends React.Component<IProps, {}>
   }
   public state = {
     checkedList: [],
-    inputName:'',// 搜索代币
+    inputName: '',// 搜索代币
   }
   public checkList = [
     {
@@ -71,14 +71,16 @@ export default class ManageAsset extends React.Component<IProps, {}>
     })
     console.log(this.state.checkedList)
   }
-  public onChangeInput = (e:any) => {
+  public onChangeInput = (e: any) =>
+  {
     this.setState({
-      inputName:e.target.value
+      inputName: e.target.value
     })
   }
-  public onClearInput = () => {
+  public onClearInput = () =>
+  {
     this.setState({
-      inputName:''
+      inputName: ''
     })
   }
   // 返回上一页
@@ -97,10 +99,12 @@ export default class ManageAsset extends React.Component<IProps, {}>
       this.props.lableChange('history');
     }
   }
-  public onCancel =()=>{
+  public onCancel = () =>
+  {
     alert('取消添加');
   }
-  public onAddBalance = () => {
+  public onAddBalance = () =>
+  {
     alert("添加")
   }
   public render()
@@ -112,59 +116,71 @@ export default class ManageAsset extends React.Component<IProps, {}>
           <input type="text" placeholder="请输入代币名称或哈希进行搜索" value={this.state.inputName} onChange={this.onChangeInput} />
           <img className="search-icon" src={require('../../../image/search.png')} alt="" />
           {
-            this.state.inputName!==''&& <img className="clear-search" src={require("../../../image/close3.png")} alt="" onClick={this.onClearInput}/>
-          }     
-          <div className="search-content">
-            <div className="search-list">
-              <div className="small-box active">
-                <div className="small-name">NEO</div>
-                <div className="small-txid">0xc5...7c9b</div>
-              </div>
-              <div className="small-box">
-                <div className="small-name">NEOVERSION（我是全称我...</div>
-                <div className="small-txid">0xc5...7c9b</div>
-              </div>
-              <div className="small-box active">
-                <div className="small-name">NEO</div>
-                <div className="small-txid">0xc5...7c9b</div>
-              </div>
-              <div className="small-box">
-                <div className="small-name">NEOVERSION（我是全称我...</div>
-                <div className="small-txid">0xc5...7c9b</div>
-              </div>
-            </div>
-            <div className="search-btn">
-              <Button text="取消"  type="warn" onClick={this.onCancel} />
-              <Button text="添加" type="primary" onClick={this.onAddBalance} />
-            </div>
-          </div>     
+            this.state.inputName !== '' && (
+              <>
+                <img className="clear-search" src={require("../../../image/close3.png")} alt="" onClick={this.onClearInput} />
+                <div className="search-content">
+                  <div className="search-list">
+                    <div className="small-box active">
+                      <div className="small-name">NEO</div>
+                      <div className="small-txid">0xc5...7c9b</div>
+                    </div>
+                    <div className="small-box">
+                      <div className="small-name">NEOVERSION（我是全称我...</div>
+                      <div className="small-txid">0xc5...7c9b</div>
+                    </div>
+                    <div className="small-box active">
+                      <div className="small-name">NEO</div>
+                      <div className="small-txid">0xc5...7c9b</div>
+                    </div>
+                    <div className="small-box">
+                      <div className="small-name">NEOVERSION（我是全称我...</div>
+                      <div className="small-txid">0xc5...7c9b</div>
+                    </div>
+                  </div>
+                  <div className="search-btn">
+                    <Button text="取消" type="warn" onClick={this.onCancel} />
+                    <Button text="添加" type="primary" onClick={this.onAddBalance} />
+                  </div>
+                </div>
+              </>
+            )
+          }
+
         </div>
         {/* <div className="nodata-wrapper">
           <img className="nodata-img" src={require("../../../image/quesheng.png")} alt=""/>
           <p>没有搜索结果哦</p>
         </div> */}
-        <div className="manage-list">
-          {
-            this.checkList.map((k, v) =>
-            {
-              const index = this.state.checkedList.indexOf(k.value as never);
-              return (
-                <div className="asset-wrapper">
-                  <label>
-                    <input type="checkbox" name='assets' value={k.value} onChange={this.chooseStatus} />
-                    <img className="checked-img" src={(index > -1) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
-                  </label>
-                  <span>{k.name}</span>
-                  <div className="asset-amount">{k.amount}</div>
-                </div>
-              )
-            })
-          }
-        </div>
-        <div className="manage-footer">
-          <Button text="取消"  type="warn" onClick={this.goBack} />
-          <Button text="保存" type="primary" onClick={this.onSaveManage} />
-        </div>
+        {
+          this.state.inputName === '' && (
+            <>
+              <div className="manage-list">
+                {
+                  this.checkList.map((k, v) =>
+                  {
+                    const index = this.state.checkedList.indexOf(k.value as never);
+                    return (
+                      <div className="asset-wrapper">
+                        <label>
+                          <input type="checkbox" name='assets' value={k.value} onChange={this.chooseStatus} />
+                          <img className="checked-img" src={(index > -1) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                        </label>
+                        <span>{k.name}</span>
+                        <div className="asset-amount">{k.amount}</div>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+              <div className="manage-footer">
+                <Button text="取消" type="warn" onClick={this.goBack} />
+                <Button text="保存" type="primary" onClick={this.onSaveManage} />
+              </div>
+            </>
+          )
+        }
+
       </div>
     );
   }

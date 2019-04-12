@@ -131,16 +131,16 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                                         <div className="menu-content">
                                             <div className="content-list">
                                                 <div className="normal-menu wallet-list">
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'wallet')}>
+                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
                                                         <img className="select-icon" src={require("../../../image/selected.png")} alt="" />
                                                         <span className="span-text">我的钱包1</span>
                                                         <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
                                                     </div>
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'wallet')}>
+                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
                                                         <span className="span-text">我的钱包1</span>
                                                         <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
                                                     </div>
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'wallet')}>
+                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
                                                         <span className="span-text">我的钱包1</span>
                                                         <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
                                                     </div>

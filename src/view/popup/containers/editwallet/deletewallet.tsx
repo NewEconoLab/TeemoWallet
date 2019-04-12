@@ -12,8 +12,8 @@ import Button from '../../../components/Button';
 
 interface IProps
 {
-	show: boolean,
-	onHide?:()=>void
+	// show: boolean,
+	// onHide?:()=>void
 }
 
 @observer
@@ -36,13 +36,13 @@ export default class DeleteWallet extends React.Component<IProps, any>
 		this.setState({
 			showDeleteStep:0
 		})
-		this.props.onHide?this.props.onHide():null;
+		// this.props.onHide?this.props.onHide():null;
 	}
 	
 	public render()
 	{
 		return (
-			<Modal title="删除钱包" show={this.props.show}>
+			<div className="twice-dialog">
 				<div className="delete-wrapper">
 					{
 						this.state.showDeleteStep === 0 && (
@@ -66,7 +66,7 @@ export default class DeleteWallet extends React.Component<IProps, any>
 								<div className="input-wrap last-input">
 									<input type="password" className="delete-input" placeholder="输入钱包密码" />
 								</div>
-								<div className="step-btn">
+								<div className="step-btn step2-btn">
 									<Button type="warn" text="取消" onClick={this.onHide} />
 									<Button type="primary" text="确定" onClick={this.onGoNextStep} />
 								</div>
@@ -77,7 +77,7 @@ export default class DeleteWallet extends React.Component<IProps, any>
 				<div className="modal-close" onClick={this.onHide}>
 					<img src={require("../../../image/close.png")} alt="" />
 				</div>
-			</Modal>
+			</div>
 		);
 	}
 }
