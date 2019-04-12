@@ -12,8 +12,7 @@ import Button from '../../../components/Button';
 
 interface IProps
 {
-	// show: boolean,
-	// onHide?:()=>void
+	onClose?: () => void
 }
 
 @observer
@@ -30,13 +29,14 @@ export default class DeleteWallet extends React.Component<IProps, any>
 		})
 	}
 	public onDeleteWallet = () =>{
+		alert("删除钱包")
 		this.onHide();
 	}
 	public onHide=()=>{
 		this.setState({
 			showDeleteStep:0
 		})
-		// this.props.onHide?this.props.onHide():null;
+		this.props.onClose?this.props.onClose():null;
 	}
 	
 	public render()
@@ -68,7 +68,7 @@ export default class DeleteWallet extends React.Component<IProps, any>
 								</div>
 								<div className="step-btn step2-btn">
 									<Button type="warn" text="取消" onClick={this.onHide} />
-									<Button type="primary" text="确定" onClick={this.onGoNextStep} />
+									<Button type="primary" text="确定" onClick={this.onDeleteWallet} />
 								</div>
 							</div>
 						)

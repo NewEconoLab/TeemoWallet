@@ -192,10 +192,10 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                         (this.state.showPage === 'setting' && this.state.showTwiceDialog === '')  && <Setting lableChange={this.labelChange} />
                     }
                     {
-                        this.state.showTwiceDialog === 'private' && <PrivateKey />
+                        this.state.showTwiceDialog === 'private' && <PrivateKey onClose={this.onCloseDialog}/>
                     }
                     {
-                        this.state.showTwiceDialog === 'delete' && <DeleteWallet />
+                        this.state.showTwiceDialog === 'delete' && <DeleteWallet onClose={this.onCloseDialog}/>
                     }
                 </div>
                 <WalletFoot />
