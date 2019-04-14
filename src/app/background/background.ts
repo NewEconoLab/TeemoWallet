@@ -670,6 +670,14 @@ const Api = {
         })
     },
 
+    getApplicationLog:(txid:string)=>{
+        return request({
+            method:'getapplicationlog',
+            params:[txid],
+            baseUrl:'rpc'
+        })
+    }
+
 }
 
 const setContractMessage=(txid:string,domain:string,data)=>{
@@ -1853,11 +1861,37 @@ const getBlock=(data:GetBlockArgs)=>{
 }
 
 const getApplicationLog=(data:GetApplicationLogArgs)=>{
-
+    return new Promise((resolve,reject)=>
+    {
+        Api.getApplicationLog(data.txid)
+        .then(result=>{
+            if(result)
+                resolve(result);
+            else
+                reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request"})
+        })
+        .catch(error=>{
+            
+            reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request",data:error})
+        })
+    })
 }
 
 const getTransaction=(data:GetTransactionArgs)=>{
-    
+    return new Promise((resolve,reject)=>
+    {
+        Api.getrawtransaction(data.txid)
+        .then(result=>{
+            if(result)
+                resolve(result);
+            else
+                reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request"})
+        })
+        .catch(error=>{
+            
+            reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request",data:error})
+        })
+    })
 }
 
 /**
@@ -1932,10 +1966,10 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
                 sendResponse(getBlock(params));
                 break;
             case Command.getTransaction:
-                sendResponse(invokeGroup(header,params));
+                sendResponse(getTransaction(params));
                 break;
             case Command.getApplicationLog:
-                sendResponse(invokeGroup(header,params));
+                sendResponse(getApplicationLog(params));
                 break;
             case Command.getAddressFromScriptHash:
                 sendResponse(new Promise((r,j)=>{
