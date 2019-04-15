@@ -53,7 +53,7 @@ window.addEventListener('Teemo.NEO.BLOCKHEIGHT_CHANGED',(data:CustomEvent)=>{
     var myDate = new Date();
     var eventPool = document.getElementById("event") as HTMLTextAreaElement
     eventPool.value = myDate.toLocaleTimeString()+ "  BLOCKHEIGHT_CHANGED" + "\n" + eventPool.value;
-    document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
+    document.getElementById("eventData").textContent=JSON.stringify(JSON.parse(data.detail),null,2);  
 })
 
 window.addEventListener('Teemo.NEO.TRANSACTIONCONSENSUSREACH_CHANGED',(data:CustomEvent)=>{
