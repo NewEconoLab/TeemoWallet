@@ -48,6 +48,22 @@ window.addEventListener('Teemo.NEO.NETWORK_CHANGED',(data:CustomEvent)=>{
     document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
 })
 
+window.addEventListener('Teemo.NEO.BLOCKHEIGHT_CHANGED',(data:CustomEvent)=>{
+    console.log("inject BLOCKHEIGHT_CHANGED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event") as HTMLTextAreaElement
+    eventPool.value = myDate.toLocaleTimeString()+ "  BLOCKHEIGHT_CHANGED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
+})
+
+window.addEventListener('Teemo.NEO.TRANSACTIONCONSENSUSREACH_CHANGED',(data:CustomEvent)=>{
+    console.log("inject TRANSACTIONCONSENSUSREACH_CHANGED ");
+    var myDate = new Date();
+    var eventPool = document.getElementById("event") as HTMLTextAreaElement
+    eventPool.value = myDate.toLocaleTimeString()+ "  TRANSACTIONCONSENSUSREACH_CHANGED" + "\n" + eventPool.value;
+    document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
+})
+
 class Main {
     getAccount_R:HTMLDivElement;
     address:string;
@@ -64,6 +80,21 @@ class Main {
         document.getElementById("getAccount_do").onclick = async () =>{
             await this.getAccount();
         }        
+
+        document.getElementById("getBlock_do").onclick = async () =>{ 
+            var getBlock_input = document.getElementById("getBlock_input") as HTMLTextAreaElement;
+            await this.getBlock(parseInt(JSON.parse(getBlock_input.value)['blockHeight']))
+        }
+
+        document.getElementById("getTransaction_do").onclick = async () =>{ 
+            var getTransaction_input = document.getElementById("getTransaction_input") as HTMLTextAreaElement;
+            await this.getTransaction(JSON.parse(getTransaction_input.value)['txid'])
+        }
+
+        document.getElementById("getApplicationLog_do").onclick = async () =>{ 
+            var getApplicationLog_input = document.getElementById("getApplicationLog_input") as HTMLTextAreaElement;
+            await this.getApplicationLog(JSON.parse(getApplicationLog_input.value)['txid'])
+        }
 
         document.getElementById("getBalance_do").onclick = async () =>{ 
             var getBalance_input = document.getElementById("getBalance_input") as HTMLTextAreaElement;
@@ -216,6 +247,76 @@ class Main {
                 this.getAccount_R.textContent=JSON.stringify(result, null, 2);
                 this.address=result.address;    // 当前登陆的地址
                 this.name=result.label;         // 当前钱包的名字
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
+    /**
+     * 获得余额信息
+     */
+    public getBlock(params:number)
+    {
+        // 获得余额的参数
+        const data:GetBlockArgs={
+            blockHeight:params,
+            network:"TestNet",
+        }
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getBlock(data) // 获得余额的方法
+            .then(result=>{
+                console.log(result);
+                document.getElementById("getBlock_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+
+    /**
+     * 获得余额信息
+     */
+    public getTransaction(params:string)
+    {
+        const data:GetTransactionArgs={
+            network:"TestNet",
+            txid:params
+        }
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getTransaction(data) // 获得余额的方法
+            .then(result=>{
+                console.log(result);
+                document.getElementById("getTransaction_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log(error);
+                reject();
+            })
+        })
+    }
+    
+    /**
+     * 获得余额信息
+     */
+    public getApplicationLog(params:string)
+    {
+        const data:GetApplicationLogArgs={
+            network:"TestNet",
+            txid:params
+        }
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getApplicationLog(data) // 获得余额的方法
+            .then(result=>{
+                console.log(result);
+                document.getElementById("getApplicationLog_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{

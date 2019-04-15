@@ -169,6 +169,8 @@ declare const Api: {
      * @param asset 资产id
      */
     getnep5asset: (asset: any) => Promise<any>;
+    getBlock: (height: number) => Promise<any>;
+    getApplicationLog: (txid: string) => Promise<any>;
 };
 declare const setContractMessage: (txid: string, domain: string, data: any) => void;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
@@ -290,6 +292,9 @@ declare const showNotify: (title: any, msg: any) => void;
  * @param Url url链接
  */
 declare const getURLDomain: (Url: string) => string;
+declare const getBlock: (data: GetBlockArgs) => Promise<{}>;
+declare const getApplicationLog: (data: GetApplicationLogArgs) => Promise<{}>;
+declare const getTransaction: (data: GetTransactionArgs) => Promise<{}>;
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -402,7 +407,10 @@ declare enum Command {
     invokeGroup = "invokeGroup",
     event = "event",
     disconnect = "disconnect",
-    getAddressFromScriptHash = "getAddressFromScriptHash"
+    getAddressFromScriptHash = "getAddressFromScriptHash",
+    getBlock = "getBlock",
+    getTransaction = "getTransaction",
+    getApplicationLog = "getApplicationLog"
 }
 declare enum EventName {
     READY = "READY",
@@ -410,6 +418,22 @@ declare enum EventName {
     CONNECTED = "CONNECTED",
     DISCONNECTED = "DISCONNECTED",
     NETWORK_CHANGED = "NETWORK_CHANGED"
+}
+/**
+ * @param {number} blockHeight 区块高度
+ * @param {string} network 网络
+ */
+interface GetBlockArgs {
+    blockHeight: number;
+    network: string;
+}
+interface GetTransactionArgs {
+    txid: string;
+    network: string;
+}
+interface GetApplicationLogArgs {
+    txid: string;
+    network: string;
 }
 interface GetStorageArgs {
     scriptHash: string;

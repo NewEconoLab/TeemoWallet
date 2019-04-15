@@ -665,7 +665,7 @@ const Api = {
     getBlock:(height:number)=>{
         return request({
             method:'getblock',
-            params:[height],
+            params:[height,1],
             baseUrl:'rpc'
         })
     },

@@ -85,6 +85,7 @@ class SocketManager {
                 // {
                 //     this.txids = this.txids.concat(data.tx);
                 // }
+                EventsOnChange(WalletEvents.BLOCKHEIGHT_CHANGE, event.data);
                 for (const key in TaskManager.shed) {
                     const task = TaskManager.shed[key];
                     if (task.network == storage.network && task.state == TaskState.watting) {
@@ -92,6 +93,7 @@ class SocketManager {
                             task.state = TaskState.success;
                             TaskManager.shed[key] = task;
                             Storage_local.set(TaskManager.table, TaskManager.shed);
+                            EventsOnChange(WalletEvents.TRANSACTIONCONSENSUSREACH_CHANGE, { TXID: task.txid, blockHeight: data.blockHeight, blockTime: data.blockTime });
                             if (task.next) {
                                 TransferGroup.update(task.next, task.network);
                             }

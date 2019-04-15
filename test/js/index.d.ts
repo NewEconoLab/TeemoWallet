@@ -16,6 +16,18 @@ declare class Main {
     /**
      * 获得余额信息
      */
+    getBlock(params: number): Promise<{}>;
+    /**
+     * 获得余额信息
+     */
+    getTransaction(params: string): Promise<{}>;
+    /**
+     * 获得余额信息
+     */
+    getApplicationLog(params: string): Promise<{}>;
+    /**
+     * 获得余额信息
+     */
     getBalance(params: string): Promise<{}>;
     /**
      * 试运行合约（单操作）

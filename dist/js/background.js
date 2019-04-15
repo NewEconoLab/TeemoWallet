@@ -542,6 +542,20 @@ const Api = {
             params: [asset]
         };
         return request(opts);
+    },
+    getBlock: (height) => {
+        return request({
+            method: 'getblock',
+            params: [height, 1],
+            baseUrl: 'rpc'
+        });
+    },
+    getApplicationLog: (txid) => {
+        return request({
+            method: 'getapplicationlog',
+            params: [txid],
+            baseUrl: 'rpc'
+        });
     }
 };
 const setContractMessage = (txid, domain, data) => {
@@ -1570,6 +1584,48 @@ const getURLDomain = (Url) => {
     else
         return Url;
 };
+const getBlock = (data) => {
+    return new Promise((resolve, reject) => {
+        Api.getBlock(data.blockHeight)
+            .then(result => {
+            if (result)
+                resolve(result);
+            else
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+        })
+            .catch(error => {
+            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+        });
+    });
+};
+const getApplicationLog = (data) => {
+    return new Promise((resolve, reject) => {
+        Api.getApplicationLog(data.txid)
+            .then(result => {
+            if (result)
+                resolve(result);
+            else
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+        })
+            .catch(error => {
+            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+        });
+    });
+};
+const getTransaction = (data) => {
+    return new Promise((resolve, reject) => {
+        Api.getrawtransaction(data.txid)
+            .then(result => {
+            if (result)
+                resolve(result);
+            else
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+        })
+            .catch(error => {
+            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+        });
+    });
+};
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -1634,6 +1690,15 @@ const responseMessage = (sender, request) => {
                 break;
             case Command.invokeGroup:
                 sendResponse(invokeGroup(header, params));
+                break;
+            case Command.getBlock:
+                sendResponse(getBlock(params));
+                break;
+            case Command.getTransaction:
+                sendResponse(getTransaction(params));
+                break;
+            case Command.getApplicationLog:
+                sendResponse(getApplicationLog(params));
                 break;
             case Command.getAddressFromScriptHash:
                 sendResponse(new Promise((r, j) => {
@@ -1893,6 +1958,9 @@ var Command;
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
     Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
+    Command["getBlock"] = "getBlock";
+    Command["getTransaction"] = "getTransaction";
+    Command["getApplicationLog"] = "getApplicationLog";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {

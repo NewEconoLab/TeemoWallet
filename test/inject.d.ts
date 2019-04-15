@@ -33,7 +33,10 @@ declare enum Command {
     invokeGroup = "invokeGroup",
     event = "event",
     disconnect = "disconnect",
-    getAddressFromScriptHash = "getAddressFromScriptHash"
+    getAddressFromScriptHash = "getAddressFromScriptHash",
+    getBlock = "getBlock",
+    getTransaction = "getTransaction",
+    getApplicationLog = "getApplicationLog"
 }
 declare enum EventName {
     READY = "READY",
@@ -110,6 +113,22 @@ interface InvokeGroup {
     group: InvokeArgs[];
 }
 interface InvokeGroupOutup {
+}
+/**
+ * @param {number} blockHeight 区块高度
+ * @param {string} network 网络
+ */
+interface GetBlockArgs {
+    blockHeight: number;
+    network: string;
+}
+interface GetTransactionArgs {
+    txid: string;
+    network: string;
+}
+interface GetApplicationLogArgs {
+    txid: string;
+    network: string;
 }
 interface BalanceRequest {
     address: string;
@@ -224,6 +243,21 @@ declare namespace Teemo {
          * @param params scriptHash
          */
         static getAddressFromScriptHash(params: string): Promise<string>;
+        /**
+         * 查询区块信息
+         * @param params
+         */
+        static getBlock(params: GetBlockArgs): Promise<{}>;
+        /**
+         * 查询交易信息
+         * @param params
+         */
+        static getTransaction(params: GetTransactionArgs): Promise<{}>;
+        /**
+         * 查询log
+         * @param params
+         */
+        static getApplicationLog(params: GetApplicationLogArgs): Promise<{}>;
     }
 }
 declare const EventChange: () => void;

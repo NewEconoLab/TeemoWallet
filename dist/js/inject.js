@@ -37,6 +37,9 @@ var Command;
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
     Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
+    Command["getBlock"] = "getBlock";
+    Command["getTransaction"] = "getTransaction";
+    Command["getApplicationLog"] = "getApplicationLog";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
@@ -151,6 +154,27 @@ var Teemo;
         static getAddressFromScriptHash(params) {
             return sendMessage(Command.getAddressFromScriptHash, params);
         }
+        /**
+         * 查询区块信息
+         * @param params
+         */
+        static getBlock(params) {
+            return sendMessage(Command.getBlock, params);
+        }
+        /**
+         * 查询交易信息
+         * @param params
+         */
+        static getTransaction(params) {
+            return sendMessage(Command.getTransaction, params);
+        }
+        /**
+         * 查询log
+         * @param params
+         */
+        static getApplicationLog(params) {
+            return sendMessage(Command.getTransaction, params);
+        }
     }
     NEO.getProvider = () => {
         return sendMessage(Command.getProvider);
@@ -182,8 +206,8 @@ if (window.dispatchEvent) {
     }));
 }
 EventChange();
-document.onload = () => {
-    // chrome.tabs.query({currentWindow:true},tabs=>{
-    // })
-};
+// document.onload=()=>{
+// chrome.tabs.query({currentWindow:true},tabs=>{
+// })
+// }
 //# sourceMappingURL=inject.js.map
