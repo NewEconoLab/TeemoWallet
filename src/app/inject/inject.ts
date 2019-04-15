@@ -366,7 +366,7 @@ namespace Teemo
          * @param params 
          */
         static getApplicationLog(params:GetApplicationLogArgs){
-            return sendMessage(Command.getTransaction,params)
+            return sendMessage(Command.getApplicationLog,params)
         }
     }
 }

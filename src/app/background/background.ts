@@ -672,9 +672,13 @@ const Api = {
 
     getApplicationLog:(txid:string)=>{
         return request({
-            method:'getapplicationlog',
+            // method:'getapplicationlog',
+            // params:[txid],
+            // baseUrl:'rpc'
+
+            method:'getnotify',
             params:[txid],
-            baseUrl:'rpc'
+            baseUrl:'common'
         })
     }
 

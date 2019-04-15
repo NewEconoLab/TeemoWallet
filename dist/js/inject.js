@@ -173,7 +173,7 @@ var Teemo;
          * @param params
          */
         static getApplicationLog(params) {
-            return sendMessage(Command.getTransaction, params);
+            return sendMessage(Command.getApplicationLog, params);
         }
     }
     NEO.getProvider = () => {
