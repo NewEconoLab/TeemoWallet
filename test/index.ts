@@ -48,19 +48,19 @@ window.addEventListener('Teemo.NEO.NETWORK_CHANGED',(data:CustomEvent)=>{
     document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
 })
 
-window.addEventListener('Teemo.NEO.BLOCKHEIGHT_CHANGED',(data:CustomEvent)=>{
-    console.log("inject BLOCKHEIGHT_CHANGED ");
+window.addEventListener('Teemo.NEO.BLOCK_HEIGHT_CHANGED',(data:CustomEvent)=>{
+    console.log("inject BLOCK_HEIGHT_CHANGED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event") as HTMLTextAreaElement
-    eventPool.value = myDate.toLocaleTimeString()+ "  BLOCKHEIGHT_CHANGED" + "\n" + eventPool.value;
+    eventPool.value = myDate.toLocaleTimeString()+ "  BLOCK_HEIGHT_CHANGED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent=JSON.stringify(JSON.parse(data.detail),null,2);  
 })
 
-window.addEventListener('Teemo.NEO.TRANSACTIONCONSENSUSREACH_CHANGED',(data:CustomEvent)=>{
-    console.log("inject TRANSACTIONCONSENSUSREACH_CHANGED ");
+window.addEventListener('Teemo.NEO.TRANSACTION_CONFIRMED',(data:CustomEvent)=>{
+    console.log("inject TRANSACTION_CONFIRMED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event") as HTMLTextAreaElement
-    eventPool.value = myDate.toLocaleTimeString()+ "  TRANSACTIONCONSENSUSREACH_CHANGED" + "\n" + eventPool.value;
+    eventPool.value = myDate.toLocaleTimeString()+ "  TRANSACTION_CONFIRMED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent=JSON.stringify(data.detail, null, 2);  
 })
 

@@ -1847,6 +1847,10 @@ const getURLDomain=(Url:string)=>
         return Url;
 }
 
+/**
+ * 查询区块高度
+ * @param data 查询区块信息的参数，blockHeight,network
+ */
 const getBlock=(data:GetBlockArgs)=>{
     return new Promise((resolve,reject)=>
     {
@@ -1864,6 +1868,10 @@ const getBlock=(data:GetBlockArgs)=>{
     })
 }
 
+/**
+ * 查询Application Log
+ * @param data 
+ */
 const getApplicationLog=(data:GetApplicationLogArgs)=>{
     return new Promise((resolve,reject)=>
     {
@@ -1881,6 +1889,10 @@ const getApplicationLog=(data:GetApplicationLogArgs)=>{
     })
 }
 
+/**
+ * 查询交易信息
+ * @param data 
+ */
 const getTransaction=(data:GetTransactionArgs)=>{
     return new Promise((resolve,reject)=>
     {
@@ -1895,6 +1907,137 @@ const getTransaction=(data:GetTransactionArgs)=>{
             
             reject({type:'RPC_ERROR',description:"An RPC error occured when submitting the request",data:error})
         })
+    })
+}
+
+/**
+ * 验证地址是否正确
+ * @param address 
+ */
+const validateAddress=(address:string)=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {            
+            var array: Uint8Array = Neo.Cryptography.Base58.decode(address);
+            var check = array.subarray(21, 21 + 4); //
+
+            var checkdata = array.subarray(0, 21);//
+            var hashd = Neo.Cryptography.Sha256.computeHash(checkdata);//
+            hashd = Neo.Cryptography.Sha256.computeHash(hashd);//
+            var hashd = hashd.slice(0, 4);//    
+            var checked = new Uint8Array(hashd);//
+
+            var error = false;
+            for (var i = 0; i < 4; i++)
+            {
+                if (checked[i] != check[i])
+                {
+                    error = true;
+                    break;
+                }
+            }
+            resolve(!error)
+        } catch (error) {
+            resolve(false);
+        }
+    })
+}
+
+/**
+ * 将ScriptHash转换成Address
+ * @param scriptHash 
+ */
+const getAddressFromScriptHash=(scriptHash:string)=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            const addr = ThinNeo.Helper.GetAddressFromScriptHash(scriptHash.hexToBytes());
+            resolve(addr);
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input scriptHash is not right, scripthash'})
+        }
+    })
+}
+
+/**
+ * 将hexstr转换成字符串
+ * @param hexStr 
+ */
+const getStringFromHexstr=(hexStr:string)=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            const value = ThinNeo.Helper.Bytes2String(hexStr.hexToBytes())
+            resolve(value);
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+        }
+    })
+}
+
+/**
+ * 将hex转换成BigIngteger
+ * @param hexStr 
+ */
+const getBigIntegerFromHexstr=(hexStr:string)=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            const value = Neo.BigInteger.fromUint8Array(hexStr.hexToBytes())
+            resolve(value.toString());
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+        }
+    })
+}
+
+/**
+ * 反转 HexStr
+ * @param hexStr 
+ */
+const reverseHexstr=(hexStr:string)=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            const value = hexStr.hexToBytes().reverse().toHexString()
+            resolve(value);
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+        }
+    })
+}
+
+/**
+ * 将资产精度转换到大整数
+ * @param amount 
+ * @param assetID 
+ */
+const getBigIntegerFromAssetAmount=(params:{amount:number,assetID:string})=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            // const value = hexStr.hexToBytes().reverse().toHexString()
+            // resolve(value);
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+        }
+    })
+}
+
+/**
+ * 将资产精度转换到Decimals
+ * @param amount 
+ * @param assetID 
+ */
+const getDecimalsFromAssetAmount=(params:{amount:number,assetID:string})=>{
+    return new Promise((resolve,reject)=>
+    {
+        try {   
+            // const value = hexStr.hexToBytes().reverse().toHexString()
+            // resolve(value);
+        } catch (error) {
+            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+        }
     })
 }
 
@@ -1974,6 +2117,36 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
                 break;
             case Command.getApplicationLog:
                 sendResponse(getApplicationLog(params));
+                break;
+            case Command.TOOLS_validateAddress:
+                sendResponse(validateAddress(params));
+                break;
+            case Command.TOOLS_reverseHexstr:
+                sendResponse(reverseHexstr(params));
+                break;
+            case Command.TOOLS_getStringFromHexstr:
+                sendResponse(getStringFromHexstr(params));
+                break;
+            case Command.TOOLS_getDecimalsFromAssetAmount:
+                sendResponse(getDecimalsFromAssetAmount(params));
+                break;
+            case Command.TOOLS_getBigIntegerFromHexstr:
+                sendResponse(getBigIntegerFromHexstr(params));
+                break;
+            case Command.TOOLS_getBigIntegerFromAssetAmount:
+                sendResponse(getBigIntegerFromAssetAmount(params));
+                break;
+            case Command.TOOLS_getAddressFromScriptHash:
+                sendResponse(getAddressFromScriptHash(params));
+                break;
+            case Command.NNS_getAddressFromNNS:
+                sendResponse(validateAddress(params));
+                break;
+            case Command.NNS_getNNSFromAddress:
+                sendResponse(validateAddress(params));
+                break;
+            case Command.NNS_getNamehashFromNNS:
+                sendResponse(validateAddress(params));
                 break;
             case Command.getAddressFromScriptHash:
                 sendResponse(new Promise((r,j)=>{
@@ -2302,10 +2475,20 @@ enum Command {
     event = 'event',
     disconnect = 'disconnect',
     getAddressFromScriptHash = 'getAddressFromScriptHash',
-    getBlock='getBlock',
-    getTransaction='getTransaction',
-    getApplicationLog='getApplicationLog'
-  }
+    getBlock = 'getBlock',
+    getTransaction = 'getTransaction',
+    getApplicationLog = 'getApplicationLog',
+    TOOLS_validateAddress = 'TOOLS.validateAddress',
+    TOOLS_getAddressFromScriptHash = 'TOOLS.getAddressFromScriptHash',
+    TOOLS_getStringFromHexstr = 'TOOLS.getStringFromHexstr',
+    TOOLS_getBigIntegerFromHexstr = 'TOOLS.getBigIntegerFromHexstr',
+    TOOLS_reverseHexstr = 'TOOLS.reverseHexstr',
+    TOOLS_getBigIntegerFromAssetAmount = 'TOOLS.getBigIntegerFromAssetAmount',
+    TOOLS_getDecimalsFromAssetAmount = 'TOOLS.getDecimalsFromAssetAmount',
+    NNS_getNamehashFromNNS = 'NNS.getNamehashFromNNS',
+    NNS_getAddressFromNNS = 'NNS.getAddressFromNNS',
+    NNS_getNNSFromAddress = 'NNS.getNNSFromAddress'
+}
 
 enum EventName {
   READY = 'READY',

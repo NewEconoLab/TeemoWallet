@@ -96,7 +96,7 @@ class SocketManager
                 //     this.txids = this.txids.concat(data.tx);
                 // }
                 
-                EventsOnChange(WalletEvents.BLOCKHEIGHT_CHANGE,event.data);
+                EventsOnChange(WalletEvents.BLOCK_HEIGHT_CHANGED,event.data);
 
                 for ( const key in TaskManager.shed) 
                 {
@@ -108,7 +108,7 @@ class SocketManager
                             TaskManager.shed[key]=task;
                             Storage_local.set(TaskManager.table,TaskManager.shed);
                             
-                            EventsOnChange(WalletEvents.TRANSACTIONCONSENSUSREACH_CHANGE,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
+                            EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
                             if(task.next)
                             {
                                 TransferGroup.update(task.next,task.network);

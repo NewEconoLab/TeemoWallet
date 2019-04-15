@@ -368,6 +368,30 @@ namespace Teemo
         static getApplicationLog(params:GetApplicationLogArgs){
             return sendMessage(Command.getApplicationLog,params)
         }
+
+        static TOOLS={
+            validateAddress:()=>{
+                
+            },
+            getAddressFromScriptHash:()=>{
+
+            },
+            getStringFromHexstr:()=>{
+
+            },
+            getBigIntegerFromHexstr:()=>{
+
+            },
+            reverseHexstr:()=>{
+
+            },
+            getBigIntegerFromAssetAmount:()=>{
+
+            },
+            getDecimalsFromAssetAmount:()=>{
+
+            },
+        }
     }
 }
 
