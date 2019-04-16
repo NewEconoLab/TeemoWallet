@@ -518,7 +518,7 @@ class Main {
      */
     public getAddressFromScriptHash(params:string) {
         return new Promise((resolve,reject)=>{            
-            Teemo.NEO.getAddressFromScriptHash(params)
+            Teemo.NEO.TOOLS.getAddressFromScriptHash(params)
             .then(result=>{
                 console.log(result);
                 console.log("得到的地址"+ result);
@@ -562,6 +562,144 @@ class Main {
                 
                 console.log(error);
                 document.getElementById("getStorage_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public validateAddress(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.TOOLS.validateAddress(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public reverseHexstr(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.TOOLS.reverseHexstr(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getStringFromHexstr(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.TOOLS.getStringFromHexstr(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getBigIntegerFromHexstr(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.TOOLS.getBigIntegerFromHexstr(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getDecimalsFromAssetAmount(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getAddressFromScriptHash(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getBigIntegerFromAssetAmount(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.getAddressFromScriptHash(params)
+            .then(result=>{
+                console.log(result);
+                console.log("得到的地址"+ result);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
