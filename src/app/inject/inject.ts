@@ -23,24 +23,34 @@ enum ArgumentDataType {
 }
 
 enum Command {
-  isReady = 'isReady',
-  getProvider = 'getProvider',
-  getNetworks = 'getNetworks',
-  getAccount = 'getAccount',
-  getPublicKey = 'getPublicKey',
-  getBalance = 'getBalance',
-  getStorage = 'getStorage',
-  invokeRead = 'invokeRead',
-  invokeReadGroup = 'invokeReadGroup',
-  send = 'send',
-  invoke = 'invoke',
-  invokeGroup="invokeGroup",
-  event = 'event',
-  disconnect = 'disconnect',
-  getAddressFromScriptHash = 'getAddressFromScriptHash',
-  getBlock='getBlock',
-  getTransaction='getTransaction',
-  getApplicationLog='getApplicationLog'
+    isReady = 'isReady',
+    getProvider = 'getProvider',
+    getNetworks = 'getNetworks',
+    getAccount = 'getAccount',
+    getPublicKey = 'getPublicKey',
+    getBalance = 'getBalance',
+    getStorage = 'getStorage',
+    invokeRead = 'invokeRead',
+    invokeReadGroup = 'invokeReadGroup',
+    send = 'send',
+    invoke = 'invoke',
+    invokeGroup="invokeGroup",
+    event = 'event',
+    disconnect = 'disconnect',
+    getAddressFromScriptHash = 'getAddressFromScriptHash',
+    getBlock = 'getBlock',
+    getTransaction = 'getTransaction',
+    getApplicationLog = 'getApplicationLog',
+    TOOLS_validateAddress = 'TOOLS.validateAddress',
+    TOOLS_getAddressFromScriptHash = 'TOOLS.getAddressFromScriptHash',
+    TOOLS_getStringFromHexstr = 'TOOLS.getStringFromHexstr',
+    TOOLS_getBigIntegerFromHexstr = 'TOOLS.getBigIntegerFromHexstr',
+    TOOLS_reverseHexstr = 'TOOLS.reverseHexstr',
+    TOOLS_getBigIntegerFromAssetAmount = 'TOOLS.getBigIntegerFromAssetAmount',
+    TOOLS_getDecimalsFromAssetAmount = 'TOOLS.getDecimalsFromAssetAmount',
+    NNS_getNamehashFromNNS = 'NNS.getNamehashFromNNS',
+    NNS_getAddressFromNNS = 'NNS.getAddressFromNNS',
+    NNS_getNNSFromAddress = 'NNS.getNNSFromAddress'
 }
 
 enum EventName {
@@ -211,12 +221,25 @@ interface Provider {
     };
 }
 
-
 interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     args?: Argument[];
     network: string;
+}
+
+interface GetBigIntegerFromAssetAmountArgs
+{
+    amount:number;
+    assetID:string;
+    network:'MainNet'|'TestNet';
+}
+
+interface GetDecimalsFromAssetAmountArgs
+{
+    amount:number;
+    assetID:string;
+    network:'MainNet'|'TestNet';
 }
 
 const ids = [];
@@ -370,26 +393,46 @@ namespace Teemo
         }
 
         static TOOLS={
-            validateAddress:()=>{
-                
+            /**
+             * 验证地址
+             * @param address 要验证的地址
+             */
+            validateAddress:(address:string)=>{
+                return sendMessage(Command.TOOLS_validateAddress,address)
             },
-            getAddressFromScriptHash:()=>{
-
+            /**
+             * scriptHash转地址
+             * @param scriptHash 要转换成地址的ScriptHash
+             */
+            getAddressFromScriptHash:(scriptHash:string)=>{
+                return sendMessage(Command.TOOLS_getAddressFromScriptHash,scriptHash)
             },
-            getStringFromHexstr:()=>{
-
+            /**
+             * HexStr转String
+             * @param hex hex字符串
+             */
+            getStringFromHexstr:(hex:string)=>{
+                return sendMessage(Command.TOOLS_getStringFromHexstr,hex)
             },
-            getBigIntegerFromHexstr:()=>{
-
+            /**
+             * HexStr 转 BigInteger
+             * @param hex hex字符串
+             */
+            getBigIntegerFromHexstr:(hex:string)=>{
+                return sendMessage(Command.TOOLS_getBigIntegerFromHexstr,hex)
             },
-            reverseHexstr:()=>{
-
+            /**
+             * Hex 反转
+             * @param hex hex字符串
+             */
+            reverseHexstr:(hex:string)=>{
+                return sendMessage(Command.TOOLS_reverseHexstr,hex)
             },
-            getBigIntegerFromAssetAmount:()=>{
-
+            getBigIntegerFromAssetAmount:(params:GetBigIntegerFromAssetAmountArgs)=>{
+                return sendMessage(Command.TOOLS_getBigIntegerFromAssetAmount,params)
             },
-            getDecimalsFromAssetAmount:()=>{
-
+            getDecimalsFromAssetAmount:(params:GetDecimalsFromAssetAmountArgs)=>{
+                return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount,params)
             },
         }
     }

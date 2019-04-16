@@ -337,19 +337,13 @@ declare const reverseHexstr: (hexStr: string) => Promise<{}>;
  * @param amount
  * @param assetID
  */
-declare const getBigIntegerFromAssetAmount: (params: {
-    amount: number;
-    assetID: string;
-}) => Promise<{}>;
+declare const getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<{}>;
 /**
  * 将资产精度转换到Decimals
  * @param amount
  * @param assetID
  */
-declare const getDecimalsFromAssetAmount: (params: {
-    amount: number;
-    assetID: string;
-}) => Promise<{}>;
+declare const getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -483,6 +477,16 @@ declare enum EventName {
     CONNECTED = "CONNECTED",
     DISCONNECTED = "DISCONNECTED",
     NETWORK_CHANGED = "NETWORK_CHANGED"
+}
+interface GetBigIntegerFromAssetAmountArgs {
+    amount: number;
+    assetID: string;
+    network: 'MainNet' | 'TestNet';
+}
+interface GetDecimalsFromAssetAmountArgs {
+    amount: number;
+    assetID: string;
+    network: 'MainNet' | 'TestNet';
 }
 /**
  * @param {number} blockHeight 区块高度

@@ -40,6 +40,16 @@ var Command;
     Command["getBlock"] = "getBlock";
     Command["getTransaction"] = "getTransaction";
     Command["getApplicationLog"] = "getApplicationLog";
+    Command["TOOLS_validateAddress"] = "TOOLS.validateAddress";
+    Command["TOOLS_getAddressFromScriptHash"] = "TOOLS.getAddressFromScriptHash";
+    Command["TOOLS_getStringFromHexstr"] = "TOOLS.getStringFromHexstr";
+    Command["TOOLS_getBigIntegerFromHexstr"] = "TOOLS.getBigIntegerFromHexstr";
+    Command["TOOLS_reverseHexstr"] = "TOOLS.reverseHexstr";
+    Command["TOOLS_getBigIntegerFromAssetAmount"] = "TOOLS.getBigIntegerFromAssetAmount";
+    Command["TOOLS_getDecimalsFromAssetAmount"] = "TOOLS.getDecimalsFromAssetAmount";
+    Command["NNS_getNamehashFromNNS"] = "NNS.getNamehashFromNNS";
+    Command["NNS_getAddressFromNNS"] = "NNS.getAddressFromNNS";
+    Command["NNS_getNNSFromAddress"] = "NNS.getNNSFromAddress";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
@@ -180,19 +190,46 @@ var Teemo;
         return sendMessage(Command.getProvider);
     };
     NEO.TOOLS = {
-        validateAddress: () => {
+        /**
+         * 验证地址
+         * @param address 要验证的地址
+         */
+        validateAddress: (address) => {
+            return sendMessage(Command.TOOLS_validateAddress, address);
         },
-        getAddressFromScriptHash: () => {
+        /**
+         * scriptHash转地址
+         * @param scriptHash 要转换成地址的ScriptHash
+         */
+        getAddressFromScriptHash: (scriptHash) => {
+            return sendMessage(Command.TOOLS_getAddressFromScriptHash, scriptHash);
         },
-        getStringFromHexstr: () => {
+        /**
+         * HexStr转String
+         * @param hex hex字符串
+         */
+        getStringFromHexstr: (hex) => {
+            return sendMessage(Command.TOOLS_getStringFromHexstr, hex);
         },
-        getBigIntegerFromHexstr: () => {
+        /**
+         * HexStr 转 BigInteger
+         * @param hex hex字符串
+         */
+        getBigIntegerFromHexstr: (hex) => {
+            return sendMessage(Command.TOOLS_getBigIntegerFromHexstr, hex);
         },
-        reverseHexstr: () => {
+        /**
+         * Hex 反转
+         * @param hex hex字符串
+         */
+        reverseHexstr: (hex) => {
+            return sendMessage(Command.TOOLS_reverseHexstr, hex);
         },
-        getBigIntegerFromAssetAmount: () => {
+        getBigIntegerFromAssetAmount: (params) => {
+            return sendMessage(Command.TOOLS_getBigIntegerFromAssetAmount, params);
         },
-        getDecimalsFromAssetAmount: () => {
+        getDecimalsFromAssetAmount: (params) => {
+            return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount, params);
         },
     };
     Teemo.NEO = NEO;

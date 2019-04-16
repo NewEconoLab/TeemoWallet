@@ -2012,7 +2012,7 @@ const reverseHexstr=(hexStr:string)=>{
  * @param amount 
  * @param assetID 
  */
-const getBigIntegerFromAssetAmount=(params:{amount:number,assetID:string})=>{
+const getBigIntegerFromAssetAmount=(params:GetBigIntegerFromAssetAmountArgs)=>{
     return new Promise((resolve,reject)=>
     {
         try {   
@@ -2029,7 +2029,7 @@ const getBigIntegerFromAssetAmount=(params:{amount:number,assetID:string})=>{
  * @param amount 
  * @param assetID 
  */
-const getDecimalsFromAssetAmount=(params:{amount:number,assetID:string})=>{
+const getDecimalsFromAssetAmount=(params:GetDecimalsFromAssetAmountArgs)=>{
     return new Promise((resolve,reject)=>
     {
         try {   
@@ -2496,6 +2496,20 @@ enum EventName {
   CONNECTED = 'CONNECTED',
   DISCONNECTED = 'DISCONNECTED',
   NETWORK_CHANGED = 'NETWORK_CHANGED',
+}
+
+interface GetBigIntegerFromAssetAmountArgs
+{
+    amount:number;
+    assetID:string;
+    network:'MainNet'|'TestNet';
+}
+
+interface GetDecimalsFromAssetAmountArgs
+{
+    amount:number;
+    assetID:string;
+    network:'MainNet'|'TestNet';
 }
 
 /**

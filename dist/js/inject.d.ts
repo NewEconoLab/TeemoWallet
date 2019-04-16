@@ -36,7 +36,17 @@ declare enum Command {
     getAddressFromScriptHash = "getAddressFromScriptHash",
     getBlock = "getBlock",
     getTransaction = "getTransaction",
-    getApplicationLog = "getApplicationLog"
+    getApplicationLog = "getApplicationLog",
+    TOOLS_validateAddress = "TOOLS.validateAddress",
+    TOOLS_getAddressFromScriptHash = "TOOLS.getAddressFromScriptHash",
+    TOOLS_getStringFromHexstr = "TOOLS.getStringFromHexstr",
+    TOOLS_getBigIntegerFromHexstr = "TOOLS.getBigIntegerFromHexstr",
+    TOOLS_reverseHexstr = "TOOLS.reverseHexstr",
+    TOOLS_getBigIntegerFromAssetAmount = "TOOLS.getBigIntegerFromAssetAmount",
+    TOOLS_getDecimalsFromAssetAmount = "TOOLS.getDecimalsFromAssetAmount",
+    NNS_getNamehashFromNNS = "NNS.getNamehashFromNNS",
+    NNS_getAddressFromNNS = "NNS.getAddressFromNNS",
+    NNS_getNNSFromAddress = "NNS.getNNSFromAddress"
 }
 declare enum EventName {
     READY = "READY",
@@ -188,6 +198,16 @@ interface InvokeReadInput {
     args?: Argument[];
     network: string;
 }
+interface GetBigIntegerFromAssetAmountArgs {
+    amount: number;
+    assetID: string;
+    network: 'MainNet' | 'TestNet';
+}
+interface GetDecimalsFromAssetAmountArgs {
+    amount: number;
+    assetID: string;
+    network: 'MainNet' | 'TestNet';
+}
 declare const ids: any[];
 /**
  *
@@ -259,13 +279,33 @@ declare namespace Teemo {
          */
         static getApplicationLog(params: GetApplicationLogArgs): Promise<{}>;
         static TOOLS: {
-            validateAddress: () => void;
-            getAddressFromScriptHash: () => void;
-            getStringFromHexstr: () => void;
-            getBigIntegerFromHexstr: () => void;
-            reverseHexstr: () => void;
-            getBigIntegerFromAssetAmount: () => void;
-            getDecimalsFromAssetAmount: () => void;
+            /**
+             * 验证地址
+             * @param address 要验证的地址
+             */
+            validateAddress: (address: string) => Promise<{}>;
+            /**
+             * scriptHash转地址
+             * @param scriptHash 要转换成地址的ScriptHash
+             */
+            getAddressFromScriptHash: (scriptHash: string) => Promise<{}>;
+            /**
+             * HexStr转String
+             * @param hex hex字符串
+             */
+            getStringFromHexstr: (hex: string) => Promise<{}>;
+            /**
+             * HexStr 转 BigInteger
+             * @param hex hex字符串
+             */
+            getBigIntegerFromHexstr: (hex: string) => Promise<{}>;
+            /**
+             * Hex 反转
+             * @param hex hex字符串
+             */
+            reverseHexstr: (hex: string) => Promise<{}>;
+            getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<{}>;
+            getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
         };
     }
 }
