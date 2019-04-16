@@ -48,18 +48,18 @@ window.addEventListener('Teemo.NEO.NETWORK_CHANGED', (data) => {
     eventPool.value = myDate.toLocaleTimeString() + "  NETWORK_CHANGED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
-window.addEventListener('Teemo.NEO.BLOCKHEIGHT_CHANGED', (data) => {
-    console.log("inject BLOCKHEIGHT_CHANGED ");
+window.addEventListener('Teemo.NEO.BLOCK_HEIGHT_CHANGED', (data) => {
+    console.log("inject BLOCK_HEIGHT_CHANGED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
-    eventPool.value = myDate.toLocaleTimeString() + "  BLOCKHEIGHT_CHANGED" + "\n" + eventPool.value;
+    eventPool.value = myDate.toLocaleTimeString() + "  BLOCK_HEIGHT_CHANGED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(JSON.parse(data.detail), null, 2);
 });
-window.addEventListener('Teemo.NEO.TRANSACTIONCONSENSUSREACH_CHANGED', (data) => {
-    console.log("inject TRANSACTIONCONSENSUSREACH_CHANGED ");
+window.addEventListener('Teemo.NEO.TRANSACTION_CONFIRMED', (data) => {
+    console.log("inject TRANSACTION_CONFIRMED ");
     var myDate = new Date();
     var eventPool = document.getElementById("event");
-    eventPool.value = myDate.toLocaleTimeString() + "  TRANSACTIONCONSENSUSREACH_CHANGED" + "\n" + eventPool.value;
+    eventPool.value = myDate.toLocaleTimeString() + "  TRANSACTION_CONFIRMED" + "\n" + eventPool.value;
     document.getElementById("eventData").textContent = JSON.stringify(data.detail, null, 2);
 });
 class Main {

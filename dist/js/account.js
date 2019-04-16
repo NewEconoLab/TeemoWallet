@@ -179,7 +179,7 @@ var WalletEvents;
     WalletEvents["DISCONNECTED"] = "Teemo.NEO.DISCONNECTED";
     WalletEvents["NETWORK_CHANGED"] = "Teemo.NEO.NETWORK_CHANGED";
     WalletEvents["ACCOUNT_CHANGED"] = "Teemo.NEO.ACCOUNT_CHANGED";
-    WalletEvents["BLOCKHEIGHT_CHANGE"] = "Teemo.NEO.BLOCKHEIGHT_CHANGED";
-    WalletEvents["TRANSACTIONCONSENSUSREACH_CHANGE"] = "Teemo.NEO.TRANSACTIONCONSENSUSREACH_CHANGED";
+    WalletEvents["BLOCK_HEIGHT_CHANGED"] = "Teemo.NEO.BLOCK_HEIGHT_CHANGED";
+    WalletEvents["TRANSACTION_CONFIRMED"] = "Teemo.NEO.TRANSACTION_CONFIRMED";
 })(WalletEvents || (WalletEvents = {}));
 //# sourceMappingURL=account.js.map

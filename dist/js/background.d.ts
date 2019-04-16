@@ -292,9 +292,64 @@ declare const showNotify: (title: any, msg: any) => void;
  * @param Url url链接
  */
 declare const getURLDomain: (Url: string) => string;
+/**
+ * 查询区块高度
+ * @param data 查询区块信息的参数，blockHeight,network
+ */
 declare const getBlock: (data: GetBlockArgs) => Promise<{}>;
+/**
+ * 查询Application Log
+ * @param data
+ */
 declare const getApplicationLog: (data: GetApplicationLogArgs) => Promise<{}>;
+/**
+ * 查询交易信息
+ * @param data
+ */
 declare const getTransaction: (data: GetTransactionArgs) => Promise<{}>;
+/**
+ * 验证地址是否正确
+ * @param address
+ */
+declare const validateAddress: (address: string) => Promise<{}>;
+/**
+ * 将ScriptHash转换成Address
+ * @param scriptHash
+ */
+declare const getAddressFromScriptHash: (scriptHash: string) => Promise<{}>;
+/**
+ * 将hexstr转换成字符串
+ * @param hexStr
+ */
+declare const getStringFromHexstr: (hexStr: string) => Promise<{}>;
+/**
+ * 将hex转换成BigIngteger
+ * @param hexStr
+ */
+declare const getBigIntegerFromHexstr: (hexStr: string) => Promise<{}>;
+/**
+ * 反转 HexStr
+ * @param hexStr
+ */
+declare const reverseHexstr: (hexStr: string) => Promise<{}>;
+/**
+ * 将资产精度转换到大整数
+ * @param amount
+ * @param assetID
+ */
+declare const getBigIntegerFromAssetAmount: (params: {
+    amount: number;
+    assetID: string;
+}) => Promise<{}>;
+/**
+ * 将资产精度转换到Decimals
+ * @param amount
+ * @param assetID
+ */
+declare const getDecimalsFromAssetAmount: (params: {
+    amount: number;
+    assetID: string;
+}) => Promise<{}>;
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -410,7 +465,17 @@ declare enum Command {
     getAddressFromScriptHash = "getAddressFromScriptHash",
     getBlock = "getBlock",
     getTransaction = "getTransaction",
-    getApplicationLog = "getApplicationLog"
+    getApplicationLog = "getApplicationLog",
+    TOOLS_validateAddress = "TOOLS.validateAddress",
+    TOOLS_getAddressFromScriptHash = "TOOLS.getAddressFromScriptHash",
+    TOOLS_getStringFromHexstr = "TOOLS.getStringFromHexstr",
+    TOOLS_getBigIntegerFromHexstr = "TOOLS.getBigIntegerFromHexstr",
+    TOOLS_reverseHexstr = "TOOLS.reverseHexstr",
+    TOOLS_getBigIntegerFromAssetAmount = "TOOLS.getBigIntegerFromAssetAmount",
+    TOOLS_getDecimalsFromAssetAmount = "TOOLS.getDecimalsFromAssetAmount",
+    NNS_getNamehashFromNNS = "NNS.getNamehashFromNNS",
+    NNS_getAddressFromNNS = "NNS.getAddressFromNNS",
+    NNS_getNNSFromAddress = "NNS.getNNSFromAddress"
 }
 declare enum EventName {
     READY = "READY",

@@ -179,6 +179,22 @@ var Teemo;
     NEO.getProvider = () => {
         return sendMessage(Command.getProvider);
     };
+    NEO.TOOLS = {
+        validateAddress: () => {
+        },
+        getAddressFromScriptHash: () => {
+        },
+        getStringFromHexstr: () => {
+        },
+        getBigIntegerFromHexstr: () => {
+        },
+        reverseHexstr: () => {
+        },
+        getBigIntegerFromAssetAmount: () => {
+        },
+        getDecimalsFromAssetAmount: () => {
+        },
+    };
     Teemo.NEO = NEO;
 })(Teemo || (Teemo = {}));
 const EventChange = () => {

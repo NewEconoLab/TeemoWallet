@@ -258,6 +258,15 @@ declare namespace Teemo {
          * @param params
          */
         static getApplicationLog(params: GetApplicationLogArgs): Promise<{}>;
+        static TOOLS: {
+            validateAddress: () => void;
+            getAddressFromScriptHash: () => void;
+            getStringFromHexstr: () => void;
+            getBigIntegerFromHexstr: () => void;
+            reverseHexstr: () => void;
+            getBigIntegerFromAssetAmount: () => void;
+            getDecimalsFromAssetAmount: () => void;
+        };
     }
 }
 declare const EventChange: () => void;
