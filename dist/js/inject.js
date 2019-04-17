@@ -158,13 +158,6 @@ var Teemo;
             return sendMessage(Command.invokeReadGroup, params);
         }
         /**
-         * 根据scriptHash获得Address
-         * @param params scriptHash
-         */
-        static getAddressFromScriptHash(params) {
-            return sendMessage(Command.getAddressFromScriptHash, params);
-        }
-        /**
          * 查询区块信息
          * @param params
          */
@@ -228,7 +221,7 @@ var Teemo;
         getBigIntegerFromAssetAmount: (params) => {
             return sendMessage(Command.TOOLS_getBigIntegerFromAssetAmount, params);
         },
-        getDecimalsFromAssetAmount: (params) => {
+        getDecimalsStrFromAssetAmount: (params) => {
             return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount, params);
         },
     };

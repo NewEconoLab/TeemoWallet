@@ -361,14 +361,6 @@ namespace Teemo
         }
 
         /**
-         * 根据scriptHash获得Address
-         * @param params scriptHash
-         */
-        static getAddressFromScriptHash(params:string): Promise<string>{
-            return sendMessage(Command.getAddressFromScriptHash,params);
-        }
-
-        /**
          * 查询区块信息
          * @param params 
          */
@@ -431,7 +423,7 @@ namespace Teemo
             getBigIntegerFromAssetAmount:(params:GetBigIntegerFromAssetAmountArgs)=>{
                 return sendMessage(Command.TOOLS_getBigIntegerFromAssetAmount,params)
             },
-            getDecimalsFromAssetAmount:(params:GetDecimalsFromAssetAmountArgs)=>{
+            getDecimalsStrFromAssetAmount:(params:GetDecimalsFromAssetAmountArgs)=>{
                 return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount,params)
             },
         }

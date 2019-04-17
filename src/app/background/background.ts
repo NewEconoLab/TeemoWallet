@@ -1669,13 +1669,12 @@ var invokeArgsAnalyse=async(...invokes:InvokeArgs[])=>{
     for (const key in nep5assets) {
         const amount = nep5assets[key]
         const assetstate = await queryAssetSymbol(key,invokes[0].network);
-
         var v = 1;
         for (var i = 0; i < assetstate.decimals; i++) {
             v *= 10;
         }
-        var intv = amount.divide(v).toInt32();
-        var smallv = amount.mod(v).toInt32() / v;
+        var intv = parseInt(amount.divide(v).toString());
+        var smallv = parseInt(amount.mod(v).toString()) / v;
 
         expenses.push({
             symbol:assetstate.symbol,
@@ -2034,8 +2033,8 @@ const getDecimalsFromAssetAmount= async(params:GetDecimalsFromAssetAmountArgs)=>
         for (var i = 0; i < data.decimals; i++) {
             v *= 10;
         }
-        var intv = bnum.divide(v).toInt32();
-        var smallv = bnum.mod(v).toInt32() / v;
+        var intv = parseInt(bnum.divide(v).toString());
+        var smallv = parseInt(bnum.mod(v).toString()) / v;
         return `${intv+smallv}`
     } catch (error) {
         throw({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})

@@ -1442,8 +1442,8 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
         for (var i = 0; i < assetstate.decimals; i++) {
             v *= 10;
         }
-        var intv = amount.divide(v).toInt32();
-        var smallv = amount.mod(v).toInt32() / v;
+        var intv = parseInt(amount.divide(v).toString());
+        var smallv = parseInt(amount.mod(v).toString()) / v;
         expenses.push({
             symbol: assetstate.symbol,
             amount: (intv + smallv).toString(),
@@ -1756,8 +1756,8 @@ const getDecimalsFromAssetAmount = (params) => __awaiter(this, void 0, void 0, f
         for (var i = 0; i < data.decimals; i++) {
             v *= 10;
         }
-        var intv = bnum.divide(v).toInt32();
-        var smallv = bnum.mod(v).toInt32() / v;
+        var intv = parseInt(bnum.divide(v).toString());
+        var smallv = parseInt(bnum.mod(v).toString()) / v;
         return `${intv + smallv}`;
     }
     catch (error) {

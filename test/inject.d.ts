@@ -199,7 +199,7 @@ interface InvokeReadInput {
     network: string;
 }
 interface GetBigIntegerFromAssetAmountArgs {
-    amount: string;
+    amount: number;
     assetID: string;
     network: 'MainNet' | 'TestNet';
 }
@@ -259,11 +259,6 @@ declare namespace Teemo {
         static invokeRead(params: InvokeReadInput): Promise<any>;
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
         /**
-         * 根据scriptHash获得Address
-         * @param params scriptHash
-         */
-        static getAddressFromScriptHash(params: string): Promise<string>;
-        /**
          * 查询区块信息
          * @param params
          */
@@ -305,7 +300,7 @@ declare namespace Teemo {
              */
             reverseHexstr: (hex: string) => Promise<{}>;
             getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<{}>;
-            getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
+            getDecimalsStrFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
         };
     }
 }

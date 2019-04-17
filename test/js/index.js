@@ -619,7 +619,7 @@ class Main {
      */
     getDecimalsFromAssetAmount(params) {
         return new Promise((resolve, reject) => {
-            Teemo.NEO.TOOLS.getDecimalsFromAssetAmount({ 'amount': params['amount'], 'assetID': params['assetID'], 'network': params['network'] })
+            Teemo.NEO.TOOLS.getDecimalsStrFromAssetAmount({ 'amount': params['amount'], 'assetID': params['assetID'], 'network': params['network'] })
                 .then(result => {
                 console.log(result);
                 console.log("得到的地址" + result);
