@@ -142,6 +142,18 @@ class Main {
                 var getDecimalsFromAssetAmount_input = document.getElementById("getDecimalsFromAssetAmount_input");
                 yield this.getDecimalsFromAssetAmount(JSON.parse(getDecimalsFromAssetAmount_input.value));
             });
+            document.getElementById("getDomainFromAddress_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getDomainFromAddress_input = document.getElementById("getDomainFromAddress_input");
+                yield this.getDomainFromAddress(JSON.parse(getDomainFromAddress_input.value));
+            });
+            document.getElementById("getAddressFromDomain_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getAddressFromDomain_input = document.getElementById("getAddressFromDomain_input");
+                yield this.getAddressFromDomain(JSON.parse(getAddressFromDomain_input.value));
+            });
+            document.getElementById("getNamehashFromDomain_do").onclick = () => __awaiter(this, void 0, void 0, function* () {
+                var getNamehashFromDomain_input = document.getElementById("getNamehashFromDomain_input");
+                yield this.getNamehashFromDomain(getNamehashFromDomain_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+            });
             document.getElementById("merge").onclick = () => {
                 var invokeGroup_input = document.getElementById("invokeGroup_input");
                 invokeGroup_input.value = JSON.stringify({
@@ -650,6 +662,65 @@ class Main {
                 console.log("==============进入了异常流程");
                 console.log(error);
                 document.getElementById("getBigIntegerFromAssetAmount_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            });
+        });
+    }
+    /**
+     * getAddressFromScriptHash
+     */
+    getAddressFromDomain(params) {
+        return new Promise((resolve, reject) => {
+            Teemo.NEO.NNS.getAddressFromDomain({ domain: params['domain'], network: params['network'] })
+                .then(result => {
+                console.log(result);
+                console.log("BigInteger", result);
+                document.getElementById("getAddressFromDomain_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+                .catch(error => {
+                console.log("==============进入了异常流程");
+                console.log(error);
+                document.getElementById("getAddressFromDomain_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            });
+        });
+    }
+    /**
+     * getAddressFromScriptHash
+     */
+    getDomainFromAddress(params) {
+        return new Promise((resolve, reject) => {
+            Teemo.NEO.NNS.getDomainFromAddress({ 'address': params['address'], 'network': params['network'] })
+                .then(result => {
+                console.log(result);
+                console.log("BigInteger", result);
+                document.getElementById("getDomainFromAddress_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+                .catch(error => {
+                console.log("==============进入了异常流程");
+                console.log(error);
+                document.getElementById("getDomainFromAddress_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            });
+        });
+    }
+    /**
+     * getAddressFromScriptHash
+     */
+    getNamehashFromDomain(params) {
+        return new Promise((resolve, reject) => {
+            Teemo.NEO.NNS.getNamehashFromDomain(params)
+                .then(result => {
+                console.log(result);
+                document.getElementById("getNamehashFromDomain_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+                .catch(error => {
+                console.log("==============进入了异常流程");
+                console.log(error);
+                document.getElementById("getNamehashFromDomain_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             });
         });

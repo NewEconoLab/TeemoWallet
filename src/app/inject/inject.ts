@@ -48,9 +48,9 @@ enum Command {
     TOOLS_reverseHexstr = 'TOOLS.reverseHexstr',
     TOOLS_getBigIntegerFromAssetAmount = 'TOOLS.getBigIntegerFromAssetAmount',
     TOOLS_getDecimalsFromAssetAmount = 'TOOLS.getDecimalsFromAssetAmount',
-    NNS_getNamehashFromNNS = 'NNS.getNamehashFromNNS',
-    NNS_getAddressFromNNS = 'NNS.getAddressFromNNS',
-    NNS_getNNSFromAddress = 'NNS.getNNSFromAddress'
+    NNS_getNamehashFromDomain = 'NNS.getNamehashFromDomain',
+    NNS_getAddressFromDomain = 'NNS.getAddressFromDomain',
+    NNS_getDomainFromAddress = 'NNS.getDomainFromAddress'
 }
 
 enum EventName {
@@ -230,16 +230,26 @@ interface InvokeReadInput {
 
 interface GetBigIntegerFromAssetAmountArgs
 {
-    amount:number;
+    amount:string;
     assetID:string;
     network:'MainNet'|'TestNet';
 }
 
 interface GetDecimalsFromAssetAmountArgs
 {
-    amount:number;
+    amount:string;
     assetID:string;
     network:'MainNet'|'TestNet';
+}
+
+interface DomainArgs{
+    domain:string;
+    network:'MainNet'|'TestNet'
+}
+
+interface AddressArgs{
+    address:string;
+    network:'MainNet'|'TestNet'
 }
 
 const ids = [];
@@ -397,35 +407,47 @@ namespace Teemo
              * @param scriptHash 要转换成地址的ScriptHash
              */
             getAddressFromScriptHash:(scriptHash:string)=>{
-                return sendMessage(Command.TOOLS_getAddressFromScriptHash,scriptHash)
+                return sendMessage<string>(Command.TOOLS_getAddressFromScriptHash,scriptHash)
             },
             /**
              * HexStr转String
              * @param hex hex字符串
              */
             getStringFromHexstr:(hex:string)=>{
-                return sendMessage(Command.TOOLS_getStringFromHexstr,hex)
+                return sendMessage<string>(Command.TOOLS_getStringFromHexstr,hex)
             },
             /**
              * HexStr 转 BigInteger
              * @param hex hex字符串
              */
             getBigIntegerFromHexstr:(hex:string)=>{
-                return sendMessage(Command.TOOLS_getBigIntegerFromHexstr,hex)
+                return sendMessage<string>(Command.TOOLS_getBigIntegerFromHexstr,hex)
             },
             /**
              * Hex 反转
              * @param hex hex字符串
              */
             reverseHexstr:(hex:string)=>{
-                return sendMessage(Command.TOOLS_reverseHexstr,hex)
+                return sendMessage<string>(Command.TOOLS_reverseHexstr,hex)
             },
             getBigIntegerFromAssetAmount:(params:GetBigIntegerFromAssetAmountArgs)=>{
-                return sendMessage(Command.TOOLS_getBigIntegerFromAssetAmount,params)
+                return sendMessage<string>(Command.TOOLS_getBigIntegerFromAssetAmount,params)
             },
             getDecimalsStrFromAssetAmount:(params:GetDecimalsFromAssetAmountArgs)=>{
-                return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount,params)
+                return sendMessage<string>(Command.TOOLS_getDecimalsFromAssetAmount,params)
             },
+        }
+
+        static NNS={
+            getNamehashFromDomain:(params:string)=>{
+                return sendMessage(Command.NNS_getNamehashFromDomain,params)
+            },
+            getAddressFromDomain:(params:DomainArgs)=>{
+                return sendMessage(Command.NNS_getAddressFromDomain,params)
+            },
+            getDomainFromAddress:(params:AddressArgs)=>{
+                return sendMessage(Command.NNS_getDomainFromAddress,params)
+            }
         }
     }
 }

@@ -44,9 +44,9 @@ declare enum Command {
     TOOLS_reverseHexstr = "TOOLS.reverseHexstr",
     TOOLS_getBigIntegerFromAssetAmount = "TOOLS.getBigIntegerFromAssetAmount",
     TOOLS_getDecimalsFromAssetAmount = "TOOLS.getDecimalsFromAssetAmount",
-    NNS_getNamehashFromNNS = "NNS.getNamehashFromNNS",
-    NNS_getAddressFromNNS = "NNS.getAddressFromNNS",
-    NNS_getNNSFromAddress = "NNS.getNNSFromAddress"
+    NNS_getNamehashFromDomain = "NNS.getNamehashFromDomain",
+    NNS_getAddressFromDomain = "NNS.getAddressFromDomain",
+    NNS_getDomainFromAddress = "NNS.getDomainFromAddress"
 }
 declare enum EventName {
     READY = "READY",
@@ -199,13 +199,21 @@ interface InvokeReadInput {
     network: string;
 }
 interface GetBigIntegerFromAssetAmountArgs {
-    amount: number;
+    amount: string;
     assetID: string;
     network: 'MainNet' | 'TestNet';
 }
 interface GetDecimalsFromAssetAmountArgs {
-    amount: number;
+    amount: string;
     assetID: string;
+    network: 'MainNet' | 'TestNet';
+}
+interface DomainArgs {
+    domain: string;
+    network: 'MainNet' | 'TestNet';
+}
+interface AddressArgs {
+    address: string;
     network: 'MainNet' | 'TestNet';
 }
 declare const ids: any[];
@@ -283,24 +291,29 @@ declare namespace Teemo {
              * scriptHash转地址
              * @param scriptHash 要转换成地址的ScriptHash
              */
-            getAddressFromScriptHash: (scriptHash: string) => Promise<{}>;
+            getAddressFromScriptHash: (scriptHash: string) => Promise<string>;
             /**
              * HexStr转String
              * @param hex hex字符串
              */
-            getStringFromHexstr: (hex: string) => Promise<{}>;
+            getStringFromHexstr: (hex: string) => Promise<string>;
             /**
              * HexStr 转 BigInteger
              * @param hex hex字符串
              */
-            getBigIntegerFromHexstr: (hex: string) => Promise<{}>;
+            getBigIntegerFromHexstr: (hex: string) => Promise<string>;
             /**
              * Hex 反转
              * @param hex hex字符串
              */
-            reverseHexstr: (hex: string) => Promise<{}>;
-            getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<{}>;
-            getDecimalsStrFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
+            reverseHexstr: (hex: string) => Promise<string>;
+            getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<string>;
+            getDecimalsStrFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
+        };
+        static NNS: {
+            getNamehashFromDomain: (params: string) => Promise<{}>;
+            getAddressFromDomain: (params: DomainArgs) => Promise<{}>;
+            getDomainFromAddress: (params: AddressArgs) => Promise<{}>;
         };
     }
 }

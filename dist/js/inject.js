@@ -47,9 +47,9 @@ var Command;
     Command["TOOLS_reverseHexstr"] = "TOOLS.reverseHexstr";
     Command["TOOLS_getBigIntegerFromAssetAmount"] = "TOOLS.getBigIntegerFromAssetAmount";
     Command["TOOLS_getDecimalsFromAssetAmount"] = "TOOLS.getDecimalsFromAssetAmount";
-    Command["NNS_getNamehashFromNNS"] = "NNS.getNamehashFromNNS";
-    Command["NNS_getAddressFromNNS"] = "NNS.getAddressFromNNS";
-    Command["NNS_getNNSFromAddress"] = "NNS.getNNSFromAddress";
+    Command["NNS_getNamehashFromDomain"] = "NNS.getNamehashFromDomain";
+    Command["NNS_getAddressFromDomain"] = "NNS.getAddressFromDomain";
+    Command["NNS_getDomainFromAddress"] = "NNS.getDomainFromAddress";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
@@ -224,6 +224,17 @@ var Teemo;
         getDecimalsStrFromAssetAmount: (params) => {
             return sendMessage(Command.TOOLS_getDecimalsFromAssetAmount, params);
         },
+    };
+    NEO.NNS = {
+        getNamehashFromDomain: (params) => {
+            return sendMessage(Command.NNS_getNamehashFromDomain, params);
+        },
+        getAddressFromDomain: (params) => {
+            return sendMessage(Command.NNS_getAddressFromDomain, params);
+        },
+        getDomainFromAddress: (params) => {
+            return sendMessage(Command.NNS_getDomainFromAddress, params);
+        }
     };
     Teemo.NEO = NEO;
 })(Teemo || (Teemo = {}));

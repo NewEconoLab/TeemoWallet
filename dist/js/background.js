@@ -1764,6 +1764,38 @@ const getDecimalsFromAssetAmount = (params) => __awaiter(this, void 0, void 0, f
         throw ({ type: "MALFORMED_INPUT", description: 'The input hexStr is not right, hexStr' });
     }
 });
+const getNamehashFromDomain = (params) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        return NNSTool.domainToHash(params).toString();
+    }
+    catch (error) {
+        throw "";
+    }
+});
+const getAddressFromDomain = (params) => {
+    return NNSTool.resolveData(params.domain);
+};
+const getDomainFromAddress = (params) => __awaiter(this, void 0, void 0, function* () {
+    const invoke_credit_revoke = {
+        "scriptHash": "960b41a05588d2f55acbc13a1e3aa464eec6fff5",
+        "operation": "getCreditInfo",
+        "arguments": [
+            { "type": "Address", "value": params.address },
+        ],
+        "network": params.network
+    };
+    const result = yield invokeRead(invoke_credit_revoke);
+    if (result.stack[0] != null) {
+        var stackarr = result["stack"];
+        let stack = ResultItem.FromJson(DataType.Array, stackarr).subItem[0].subItem;
+        var creditInfo = {
+            namehash: stack[0].AsHexString(),
+            fullDomainName: stack[1].AsString(),
+            TTL: stack[2].AsInteger().toString(),
+        };
+        return creditInfo;
+    }
+});
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -1859,14 +1891,14 @@ const responseMessage = (sender, request) => {
             case Command.TOOLS_getAddressFromScriptHash:
                 sendResponse(getAddressFromScriptHash(params));
                 break;
-            case Command.NNS_getAddressFromNNS:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getAddressFromDomain:
+                sendResponse(getAddressFromDomain(params));
                 break;
-            case Command.NNS_getNNSFromAddress:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getDomainFromAddress:
+                sendResponse(getDomainFromAddress(params));
                 break;
-            case Command.NNS_getNamehashFromNNS:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getNamehashFromDomain:
+                sendResponse(getNamehashFromDomain(params));
                 break;
             case Command.getAddressFromScriptHash:
                 sendResponse(new Promise((r, j) => {
@@ -2136,9 +2168,9 @@ var Command;
     Command["TOOLS_reverseHexstr"] = "TOOLS.reverseHexstr";
     Command["TOOLS_getBigIntegerFromAssetAmount"] = "TOOLS.getBigIntegerFromAssetAmount";
     Command["TOOLS_getDecimalsFromAssetAmount"] = "TOOLS.getDecimalsFromAssetAmount";
-    Command["NNS_getNamehashFromNNS"] = "NNS.getNamehashFromNNS";
-    Command["NNS_getAddressFromNNS"] = "NNS.getAddressFromNNS";
-    Command["NNS_getNNSFromAddress"] = "NNS.getNNSFromAddress";
+    Command["NNS_getNamehashFromDomain"] = "NNS.getNamehashFromDomain";
+    Command["NNS_getAddressFromDomain"] = "NNS.getAddressFromDomain";
+    Command["NNS_getDomainFromAddress"] = "NNS.getDomainFromAddress";
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
@@ -2262,4 +2294,108 @@ var getHistoryList = () => {
     }
     return list;
 };
+class NNSTool {
+    static resolveData(domain) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var scriptaddress = this.baseContract;
+            let nnshash = this.domainToHash(domain);
+            const res = yield invokeRead({
+                scriptHash: scriptaddress.toString(),
+                operation: "resolve",
+                arguments: [
+                    { type: "String", value: "addr" },
+                    { type: "Hash256", value: nnshash.toString() },
+                    { type: "String", value: "" }
+                ],
+                network: "TestNet"
+            });
+            var state = res['state'];
+            let addr = "";
+            if (state.includes("HALT, BREAK")) {
+                // info2.textContent += "Succ\n";
+                var stack = res['stack'];
+                //find name 他的type 有可能是string 或者ByteArray
+                if (stack[0].type == "ByteArray") {
+                    if (stack[0].value != "00") {
+                        let value = stack[0].value.hexToBytes();
+                        addr = ThinNeo.Helper.Bytes2String(value);
+                    }
+                }
+            }
+            return addr;
+        });
+    }
+    /**
+     * 域名转hash
+     * #region 域名转hash算法
+     * 域名转hash算法
+     * aaa.bb.test =>{"test","bb","aa"}
+     * @param domain 域名
+     */
+    static nameHash(domain) {
+        var domain_bytes = ThinNeo.Helper.String2Bytes(domain);
+        var hashd = Neo.Cryptography.Sha256.computeHash(domain_bytes);
+        return new Neo.Uint256(hashd);
+    }
+    /**
+     * 子域名转hash
+     * @param roothash  根域名hash
+     * @param subdomain 子域名
+     */
+    static nameHashSub(roothash, subdomain) {
+        var bs = ThinNeo.Helper.String2Bytes(subdomain);
+        if (bs.length == 0)
+            return roothash;
+        var domain = Neo.Cryptography.Sha256.computeHash(bs);
+        var domain_bytes = new Uint8Array(domain);
+        var domainUint8arry = domain_bytes.concat(new Uint8Array(roothash.bits.buffer));
+        var sub = Neo.Cryptography.Sha256.computeHash(domainUint8arry);
+        return new Neo.Uint256(sub);
+    }
+    /**
+     * 返回一组域名的最终hash
+     * @param domainarray 域名倒叙的数组
+     */
+    static nameHashArray(domainarray) {
+        domainarray.reverse();
+        var hash = NNSTool.nameHash(domainarray[0]);
+        for (var i = 1; i < domainarray.length; i++) {
+            hash = NNSTool.nameHashSub(hash, domainarray[i]);
+        }
+        return hash;
+    }
+    static domainToHash(domain) {
+        return this.nameHashArray(domain.split("."));
+    }
+    static verifyDomain(domain) {
+        //check domain valid
+        var reg = /^(.+\.)(test|TEST|neo|NEO[a-z][a-z])$/;
+        if (!reg.test(domain)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    static verifyAddr(addr) {
+        var reg = /^[a-zA-Z0-9]{34,34}$/;
+        if (!reg.test(addr)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    static verifyNeoDomain(domain) {
+        //check domain valid
+        var reg = /^(.+\.)(neo|Neo)$/;
+        if (!reg.test(domain)) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+}
+NNSTool.baseContract = Neo.Uint160.parse("348387116c4a75e420663277d9c02049907128c7");
 //# sourceMappingURL=background.js.map

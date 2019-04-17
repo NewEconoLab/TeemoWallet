@@ -78,5 +78,17 @@ declare class Main {
      * getAddressFromScriptHash
      */
     getBigIntegerFromAssetAmount(params: any): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getAddressFromDomain(params: DomainArgs): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getDomainFromAddress(params: any): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getNamehashFromDomain(params: string): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map

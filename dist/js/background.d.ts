@@ -263,7 +263,7 @@ declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
  * invoke试运行方法
  * @param data invokeRead 的参数
  */
-declare var invokeRead: (data: InvokeReadInput) => Promise<{}>;
+declare var invokeRead: (data: InvokeReadInput) => Promise<any>;
 declare var invokeReadTest: () => void;
 declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
 declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
@@ -344,6 +344,13 @@ declare const getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmoun
  * @param assetID
  */
 declare const getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
+declare const getNamehashFromDomain: (params: string) => Promise<string>;
+declare const getAddressFromDomain: (params: DomainArgs) => Promise<string>;
+declare const getDomainFromAddress: (params: AddressArgs) => Promise<{
+    namehash: string;
+    fullDomainName: string;
+    TTL: string;
+}>;
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -467,9 +474,9 @@ declare enum Command {
     TOOLS_reverseHexstr = "TOOLS.reverseHexstr",
     TOOLS_getBigIntegerFromAssetAmount = "TOOLS.getBigIntegerFromAssetAmount",
     TOOLS_getDecimalsFromAssetAmount = "TOOLS.getDecimalsFromAssetAmount",
-    NNS_getNamehashFromNNS = "NNS.getNamehashFromNNS",
-    NNS_getAddressFromNNS = "NNS.getAddressFromNNS",
-    NNS_getNNSFromAddress = "NNS.getNNSFromAddress"
+    NNS_getNamehashFromDomain = "NNS.getNamehashFromDomain",
+    NNS_getAddressFromDomain = "NNS.getAddressFromDomain",
+    NNS_getDomainFromAddress = "NNS.getDomainFromAddress"
 }
 declare enum EventName {
     READY = "READY",
@@ -625,6 +632,14 @@ interface GetPublickeyOutput {
     address: string;
     publickey: string;
 }
+interface DomainArgs {
+    domain: string;
+    network: 'MainNet' | 'TestNet';
+}
+interface AddressArgs {
+    address: string;
+    network: 'MainNet' | 'TestNet';
+}
 declare enum DataType {
     Array = "Array",
     ByteArray = "ByteArray",
@@ -654,5 +669,32 @@ interface TaskHistory extends Task {
     };
     invokeHistory?: InvokeHistory;
     sendHistory?: SendArgs;
+}
+declare class NNSTool {
+    static readonly baseContract: Neo.Uint160;
+    static resolveData(domain: string): Promise<string>;
+    /**
+     * 域名转hash
+     * #region 域名转hash算法
+     * 域名转hash算法
+     * aaa.bb.test =>{"test","bb","aa"}
+     * @param domain 域名
+     */
+    static nameHash(domain: string): Neo.Uint256;
+    /**
+     * 子域名转hash
+     * @param roothash  根域名hash
+     * @param subdomain 子域名
+     */
+    static nameHashSub(roothash: Neo.Uint256, subdomain: string): Neo.Uint256;
+    /**
+     * 返回一组域名的最终hash
+     * @param domainarray 域名倒叙的数组
+     */
+    static nameHashArray(domainarray: string[]): Neo.Uint256;
+    static domainToHash(domain: string): Neo.Uint256;
+    static verifyDomain(domain: any): boolean;
+    static verifyAddr(addr: any): boolean;
+    static verifyNeoDomain(domain: any): boolean;
 }
 //# sourceMappingURL=background.d.ts.map

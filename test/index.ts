@@ -166,6 +166,21 @@ class Main {
             await this.getDecimalsFromAssetAmount(JSON.parse(getDecimalsFromAssetAmount_input.value));
         }
 
+        document.getElementById("getDomainFromAddress_do").onclick=async()=>{
+            var getDomainFromAddress_input = document.getElementById("getDomainFromAddress_input") as HTMLTextAreaElement;
+            await this.getDomainFromAddress(JSON.parse(getDomainFromAddress_input.value));
+        }
+
+        document.getElementById("getAddressFromDomain_do").onclick=async()=>{
+            var getAddressFromDomain_input = document.getElementById("getAddressFromDomain_input") as HTMLTextAreaElement;
+            await this.getAddressFromDomain(JSON.parse(getAddressFromDomain_input.value));
+        }
+
+        document.getElementById("getNamehashFromDomain_do").onclick=async()=>{
+            var getNamehashFromDomain_input = document.getElementById("getNamehashFromDomain_input") as HTMLTextAreaElement;
+            await this.getNamehashFromDomain(getNamehashFromDomain_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
         document.getElementById("merge").onclick = () =>{ 
             var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
             invokeGroup_input.value = JSON.stringify({
@@ -709,7 +724,6 @@ class Main {
             })
         })
     }
-
     
     /**
      * getAddressFromScriptHash
@@ -728,6 +742,71 @@ class Main {
                 
                 console.log(error);
                 document.getElementById("getBigIntegerFromAssetAmount_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getAddressFromDomain(params:DomainArgs) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.NNS.getAddressFromDomain({domain:params['domain'],network:params['network']})
+            .then(result=>{
+                console.log(result);
+                console.log("BigInteger",result);
+                document.getElementById("getAddressFromDomain_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getAddressFromDomain_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getDomainFromAddress(params:any) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.NNS.getDomainFromAddress({'address':params['address'],'network':params['network']})
+            .then(result=>{
+                console.log(result);
+                console.log("BigInteger",result);
+                document.getElementById("getDomainFromAddress_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getDomainFromAddress_R").innerText = JSON.stringify(error, null, 2);
+                reject();
+            })
+        })
+    }
+    
+    /**
+     * getAddressFromScriptHash
+     */
+    public getNamehashFromDomain(params:string) {
+        return new Promise((resolve,reject)=>{            
+            Teemo.NEO.NNS.getNamehashFromDomain(params)
+            .then(result=>{
+                console.log(result);
+                document.getElementById("getNamehashFromDomain_R").innerText = JSON.stringify(result, null, 2);
+                resolve();
+            })
+            .catch(error=>{
+                console.log("==============进入了异常流程");
+                
+                console.log(error);
+                document.getElementById("getNamehashFromDomain_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })

@@ -1562,7 +1562,7 @@ var send = (header,params:SendArgs) =>
  * @param data invokeRead 的参数
  */
 var invokeRead=(data:InvokeReadInput)=>{
-    return new Promise((r,j)=>{
+    return new Promise<any>((r,j)=>{
         const script = new ScriptBuild();
         try {
             script.EmitArguments(data.arguments);        // 参数转换与打包
@@ -2041,6 +2041,41 @@ const getDecimalsFromAssetAmount= async(params:GetDecimalsFromAssetAmountArgs)=>
     }
 }
 
+const getNamehashFromDomain=async(params:string)=>{
+    try {
+        return NNSTool.domainToHash(params).toString();
+    } catch (error) {
+        throw "";        
+    }
+}
+
+const getAddressFromDomain=(params:DomainArgs)=>{
+    return NNSTool.resolveData(params.domain)
+}
+
+const getDomainFromAddress=async(params:AddressArgs)=>{
+    const invoke_credit_revoke:InvokeReadInput =  {
+        "scriptHash": "960b41a05588d2f55acbc13a1e3aa464eec6fff5",
+        "operation": "getCreditInfo",
+        "arguments": [
+            {"type":"Address","value":params.address},
+        ],
+        "network": params.network
+    }
+    const result = await invokeRead(invoke_credit_revoke);
+    
+    if(result.stack[0] != null){
+        var stackarr = result[ "stack" ] as any[];
+        let stack = ResultItem.FromJson(DataType.Array, stackarr).subItem[ 0 ].subItem
+        var creditInfo = {
+            namehash:stack[0].AsHexString(),
+            fullDomainName:stack[1].AsString(),
+            TTL:stack[2].AsInteger().toString(),
+        }
+        return creditInfo;
+    }
+}
+
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -2139,14 +2174,14 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
             case Command.TOOLS_getAddressFromScriptHash:
                 sendResponse(getAddressFromScriptHash(params));
                 break;
-            case Command.NNS_getAddressFromNNS:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getAddressFromDomain:
+                sendResponse(getAddressFromDomain(params));
                 break;
-            case Command.NNS_getNNSFromAddress:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getDomainFromAddress:
+                sendResponse(getDomainFromAddress(params));
                 break;
-            case Command.NNS_getNamehashFromNNS:
-                sendResponse(validateAddress(params));
+            case Command.NNS_getNamehashFromDomain:
+                sendResponse(getNamehashFromDomain(params));
                 break;
             case Command.getAddressFromScriptHash:
                 sendResponse(new Promise((r,j)=>{
@@ -2485,9 +2520,9 @@ enum Command {
     TOOLS_reverseHexstr = 'TOOLS.reverseHexstr',
     TOOLS_getBigIntegerFromAssetAmount = 'TOOLS.getBigIntegerFromAssetAmount',
     TOOLS_getDecimalsFromAssetAmount = 'TOOLS.getDecimalsFromAssetAmount',
-    NNS_getNamehashFromNNS = 'NNS.getNamehashFromNNS',
-    NNS_getAddressFromNNS = 'NNS.getAddressFromNNS',
-    NNS_getNNSFromAddress = 'NNS.getNNSFromAddress'
+    NNS_getNamehashFromDomain = 'NNS.getNamehashFromDomain',
+    NNS_getAddressFromDomain = 'NNS.getAddressFromDomain',
+    NNS_getDomainFromAddress = 'NNS.getDomainFromAddress'
 }
 
 enum EventName {
@@ -2677,6 +2712,16 @@ interface GetPublickeyOutput{
     publickey:string
 }
 
+interface DomainArgs{
+    domain:string;
+    network:'MainNet'|'TestNet'
+}
+
+interface AddressArgs{
+    address:string;
+    network:'MainNet'|'TestNet'
+}
+
 enum DataType
 {
     Array = 'Array',
@@ -2826,4 +2871,139 @@ interface TaskHistory extends Task{
     dappMessage?:{icon:string,title:string};
     invokeHistory?:InvokeHistory;
     sendHistory?:SendArgs;
+}
+
+class NNSTool
+{
+    static readonly baseContract = Neo.Uint160.parse("348387116c4a75e420663277d9c02049907128c7");
+
+    static async resolveData(domain: string)
+    {
+        
+        var scriptaddress = this.baseContract;
+        let nnshash = this.domainToHash(domain);
+        const res =await invokeRead({
+            scriptHash:scriptaddress.toString(),
+            operation:"resolve",
+            arguments:[
+                {type:"String",value:"addr"},
+                {type:"Hash256",value:nnshash.toString()},
+                {type:"String",value:""}
+            ],
+            network:"TestNet"
+        })
+        
+        var state = res['state'] as string;
+        let addr = "";
+        if (state.includes("HALT, BREAK"))
+        {
+            // info2.textContent += "Succ\n";
+            var stack = res['stack'] as any[];
+            //find name 他的type 有可能是string 或者ByteArray
+            if (stack[0].type == "ByteArray")
+            {
+                if (stack[0].value as string != "00")
+                {
+                    let value = (stack[0].value as string).hexToBytes();
+                    addr = ThinNeo.Helper.Bytes2String(value);
+                }
+            }
+        }
+        return addr;
+    }
+
+    /**
+     * 域名转hash    
+     * #region 域名转hash算法
+     * 域名转hash算法
+     * aaa.bb.test =>{"test","bb","aa"}
+     * @param domain 域名
+     */
+    static nameHash(domain: string): Neo.Uint256
+    {
+        var domain_bytes = ThinNeo.Helper.String2Bytes(domain);
+        var hashd = Neo.Cryptography.Sha256.computeHash(domain_bytes);
+        return new Neo.Uint256(hashd);
+    }
+
+    /**
+     * 子域名转hash
+     * @param roothash  根域名hash
+     * @param subdomain 子域名
+     */
+    static nameHashSub(roothash: Neo.Uint256, subdomain: string): Neo.Uint256
+    {
+        var bs: Uint8Array = ThinNeo.Helper.String2Bytes(subdomain);
+        if (bs.length == 0)
+            return roothash;
+
+        var domain = Neo.Cryptography.Sha256.computeHash(bs);
+        var domain_bytes = new Uint8Array(domain);
+        var domainUint8arry = domain_bytes.concat(new Uint8Array(roothash.bits.buffer));
+
+        var sub = Neo.Cryptography.Sha256.computeHash(domainUint8arry);
+        return new Neo.Uint256(sub);
+    }
+
+    /**
+     * 返回一组域名的最终hash
+     * @param domainarray 域名倒叙的数组
+     */
+    static nameHashArray(domainarray: string[]): Neo.Uint256
+    {
+        domainarray.reverse();
+        var hash: Neo.Uint256 = NNSTool.nameHash(domainarray[0]);
+        for (var i = 1; i < domainarray.length; i++)
+        {
+            hash = NNSTool.nameHashSub(hash, domainarray[i]);
+        }
+        return hash;
+    }
+
+    static domainToHash(domain: string): Neo.Uint256
+    {
+        return this.nameHashArray(domain.split("."));
+    }
+
+    static verifyDomain(domain)
+    {
+        //check domain valid
+        var reg = /^(.+\.)(test|TEST|neo|NEO[a-z][a-z])$/;
+        if (!reg.test(domain))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    static verifyAddr(addr)
+    {
+        var reg = /^[a-zA-Z0-9]{34,34}$/
+        if (!reg.test(addr))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    static verifyNeoDomain(domain)
+    {
+        //check domain valid
+        var reg = /^(.+\.)(neo|Neo)$/;
+        if (!reg.test(domain))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
 }
