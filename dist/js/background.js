@@ -1734,33 +1734,36 @@ const reverseHexstr = (hexStr) => {
  * @param amount
  * @param assetID
  */
-const getBigIntegerFromAssetAmount = (params) => {
-    return new Promise((resolve, reject) => {
-        try {
-            // const value = hexStr.hexToBytes().reverse().toHexString()
-            // resolve(value);
-        }
-        catch (error) {
-            reject({ type: "MALFORMED_INPUT", description: 'The input hexStr is not right, hexStr' });
-        }
-    });
-};
+const getBigIntegerFromAssetAmount = (params) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const data = yield queryAssetSymbol(params.assetID, params.network);
+        return parseFloat(params.amount).toFixed(data.decimals).replace('.', '');
+    }
+    catch (error) {
+        throw ({ type: "MALFORMED_INPUT", description: 'The input hexStr is not right, hexStr' });
+    }
+});
 /**
  * 将资产精度转换到Decimals
  * @param amount
  * @param assetID
  */
-const getDecimalsFromAssetAmount = (params) => {
-    return new Promise((resolve, reject) => {
-        try {
-            // const value = hexStr.hexToBytes().reverse().toHexString()
-            // resolve(value);
+const getDecimalsFromAssetAmount = (params) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const data = yield queryAssetSymbol(params.assetID, params.network);
+        const bnum = new Neo.BigInteger(params.amount);
+        var v = 1;
+        for (var i = 0; i < data.decimals; i++) {
+            v *= 10;
         }
-        catch (error) {
-            reject({ type: "MALFORMED_INPUT", description: 'The input hexStr is not right, hexStr' });
-        }
-    });
-};
+        var intv = bnum.divide(v).toInt32();
+        var smallv = bnum.mod(v).toInt32() / v;
+        return `${intv + smallv}`;
+    }
+    catch (error) {
+        throw ({ type: "MALFORMED_INPUT", description: 'The input hexStr is not right, hexStr' });
+    }
+});
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.

@@ -73,10 +73,10 @@ declare class Main {
     /**
      * getAddressFromScriptHash
      */
-    getDecimalsFromAssetAmount(params: string): Promise<{}>;
+    getDecimalsFromAssetAmount(params: any): Promise<{}>;
     /**
      * getAddressFromScriptHash
      */
-    getBigIntegerFromAssetAmount(params: string): Promise<{}>;
+    getBigIntegerFromAssetAmount(params: any): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map

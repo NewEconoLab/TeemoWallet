@@ -82,13 +82,6 @@
     <pre id="getStorage_R">getStorage rerurn</pre>
 
     <hr />
-    <p>input getAddressFromScriptHash params</p>
-    <textarea id="getAddressFromScriptHash_input" rows="6" cols="120" placeholder="getAddressFromScriptHash_input">72329a15ef9f2ea76cbc8dbc082c72316d87e1ae</textarea>
-    <br />
-    <button id="getAddressFromScriptHash_do">getAddressFromScriptHash</button>
-    <pre id="getAddressFromScriptHash_R">getAddressFromScriptHash rerurn</pre>
-
-    <hr />
     <p>input  invokeRead params</p>
     <textarea id="invokeRead_input" rows="6" cols="120" placeholder="invokeRead_input">
     {
@@ -231,6 +224,14 @@
     <br/>
     <hr>
     <h2>TOOLS</h2>
+
+    <hr />
+    <p>input getAddressFromScriptHash params</p>
+    <textarea id="getAddressFromScriptHash_input" rows="6" cols="120" placeholder="getAddressFromScriptHash_input">72329a15ef9f2ea76cbc8dbc082c72316d87e1ae</textarea>
+    <br />
+    <button id="getAddressFromScriptHash_do">getAddressFromScriptHash</button>
+    <pre id="getAddressFromScriptHash_R">getAddressFromScriptHash rerurn</pre>
+    
     <hr />
     <p>input validateAddress params</p>
     <textarea id="validateAddress_input" rows="6" cols="120" placeholder="validateAddress_input">AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH</textarea>
@@ -260,11 +261,24 @@
     <pre id="getBigIntegerFromHexstr_R">getBigIntegerFromHexstr rerurn</pre>
 
     <hr />
+    <p>input getBigIntegerFromAssetAmount params</p>
+    <textarea id="getBigIntegerFromAssetAmount_input" rows="6" cols="120" placeholder="getBigIntegerFromAssetAmount_input">
+    {
+        "amount":"12345.67890000",
+        "assetID":"74f2dc36a68fdc4682034178eb2220729231db76",
+        "network":"TestNet"
+    }
+    </textarea>
+    <br />
+    <button id="getBigIntegerFromAssetAmount_do">getBigIntegerFromAssetAmount</button>
+    <pre id="getBigIntegerFromAssetAmount_R">getBigIntegerFromAssetAmount rerurn</pre>
+
+    <hr />
     <p>input getDecimalsFromAssetAmount params</p>
     <textarea id="getDecimalsFromAssetAmount_input" rows="6" cols="120" placeholder="getDecimalsFromAssetAmount_input">
     {
-        "scriptHash":"03febccf81ac85e3d795bc5cbd4e84e907812aa3",
-        "key":"5065746572",
+        "amount":"1234567890000",
+        "assetID":"74f2dc36a68fdc4682034178eb2220729231db76",
         "network":"TestNet"
     }
     </textarea>

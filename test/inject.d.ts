@@ -199,7 +199,7 @@ interface InvokeReadInput {
     network: string;
 }
 interface GetBigIntegerFromAssetAmountArgs {
-    amount: number;
+    amount: string;
     assetID: string;
     network: 'MainNet' | 'TestNet';
 }

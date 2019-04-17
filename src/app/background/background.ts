@@ -2012,16 +2012,13 @@ const reverseHexstr=(hexStr:string)=>{
  * @param amount 
  * @param assetID 
  */
-const getBigIntegerFromAssetAmount=(params:GetBigIntegerFromAssetAmountArgs)=>{
-    return new Promise((resolve,reject)=>
-    {
-        try {   
-            // const value = hexStr.hexToBytes().reverse().toHexString()
-            // resolve(value);
-        } catch (error) {
-            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
-        }
-    })
+const getBigIntegerFromAssetAmount= async(params:GetBigIntegerFromAssetAmountArgs)=>{
+    try {
+        const data = await queryAssetSymbol(params.assetID,params.network);
+        return parseFloat(params.amount).toFixed(data.decimals).replace('.','');
+    } catch (error) {
+        throw({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+    }
 }
 
 /**
@@ -2029,16 +2026,20 @@ const getBigIntegerFromAssetAmount=(params:GetBigIntegerFromAssetAmountArgs)=>{
  * @param amount 
  * @param assetID 
  */
-const getDecimalsFromAssetAmount=(params:GetDecimalsFromAssetAmountArgs)=>{
-    return new Promise((resolve,reject)=>
-    {
-        try {   
-            // const value = hexStr.hexToBytes().reverse().toHexString()
-            // resolve(value);
-        } catch (error) {
-            reject({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+const getDecimalsFromAssetAmount= async(params:GetDecimalsFromAssetAmountArgs)=>{
+    try {
+        const data = await queryAssetSymbol(params.assetID,params.network);
+        const bnum = new Neo.BigInteger(params.amount);
+        var v = 1;
+        for (var i = 0; i < data.decimals; i++) {
+            v *= 10;
         }
-    })
+        var intv = bnum.divide(v).toInt32();
+        var smallv = bnum.mod(v).toInt32() / v;
+        return `${intv+smallv}`
+    } catch (error) {
+        throw({type:"MALFORMED_INPUT",description:'The input hexStr is not right, hexStr'})
+    }
 }
 
 /**
@@ -2500,14 +2501,14 @@ enum EventName {
 
 interface GetBigIntegerFromAssetAmountArgs
 {
-    amount:number;
+    amount:string;
     assetID:string;
     network:'MainNet'|'TestNet';
 }
 
 interface GetDecimalsFromAssetAmountArgs
 {
-    amount:number;
+    amount:string;
     assetID:string;
     network:'MainNet'|'TestNet';
 }

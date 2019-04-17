@@ -156,6 +156,16 @@ class Main {
             await this.getBigIntegerFromHexstr(getBigIntegerFromHexstr_input.value.replace(/(^\s*)|(\s*$)/g, ""));
         }
 
+        document.getElementById("getBigIntegerFromAssetAmount_do").onclick=async()=>{
+            var getBigIntegerFromAssetAmount_input = document.getElementById("getBigIntegerFromAssetAmount_input") as HTMLTextAreaElement;
+            await this.getBigIntegerFromAssetAmount(JSON.parse(getBigIntegerFromAssetAmount_input.value));
+        }
+
+        document.getElementById("getDecimalsFromAssetAmount_do").onclick=async()=>{
+            var getDecimalsFromAssetAmount_input = document.getElementById("getDecimalsFromAssetAmount_input") as HTMLTextAreaElement;
+            await this.getDecimalsFromAssetAmount(JSON.parse(getDecimalsFromAssetAmount_input.value));
+        }
+
         document.getElementById("merge").onclick = () =>{ 
             var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
             invokeGroup_input.value = JSON.stringify({
@@ -681,20 +691,20 @@ class Main {
     /**
      * getAddressFromScriptHash
      */
-    public getDecimalsFromAssetAmount(params:string) {
+    public getDecimalsFromAssetAmount(params:any) {
         return new Promise((resolve,reject)=>{            
-            Teemo.NEO.getAddressFromScriptHash(params)
+            Teemo.NEO.TOOLS.getDecimalsFromAssetAmount({'amount':params['amount'],'assetID':params['assetID'],'network':params['network']})
             .then(result=>{
                 console.log(result);
                 console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                document.getElementById("getDecimalsFromAssetAmount_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("getDecimalsFromAssetAmount_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
@@ -704,20 +714,20 @@ class Main {
     /**
      * getAddressFromScriptHash
      */
-    public getBigIntegerFromAssetAmount(params:string) {
+    public getBigIntegerFromAssetAmount(params:any) {
         return new Promise((resolve,reject)=>{            
-            Teemo.NEO.getAddressFromScriptHash(params)
+            Teemo.NEO.TOOLS.getBigIntegerFromAssetAmount({'amount':params['amount'],'assetID':params['assetID'],'network':params['network']})
             .then(result=>{
                 console.log(result);
-                console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                console.log("BigInteger",result);
+                document.getElementById("getBigIntegerFromAssetAmount_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("getBigIntegerFromAssetAmount_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })

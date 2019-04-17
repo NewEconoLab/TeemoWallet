@@ -337,13 +337,13 @@ declare const reverseHexstr: (hexStr: string) => Promise<{}>;
  * @param amount
  * @param assetID
  */
-declare const getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<{}>;
+declare const getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmountArgs) => Promise<string>;
 /**
  * 将资产精度转换到Decimals
  * @param amount
  * @param assetID
  */
-declare const getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<{}>;
+declare const getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
 /**
  * 处理请求并返回
  * @param sender An object containing information about the script context that sent a message or request.
@@ -479,12 +479,12 @@ declare enum EventName {
     NETWORK_CHANGED = "NETWORK_CHANGED"
 }
 interface GetBigIntegerFromAssetAmountArgs {
-    amount: number;
+    amount: string;
     assetID: string;
     network: 'MainNet' | 'TestNet';
 }
 interface GetDecimalsFromAssetAmountArgs {
-    amount: number;
+    amount: string;
     assetID: string;
     network: 'MainNet' | 'TestNet';
 }
