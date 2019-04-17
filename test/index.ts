@@ -136,6 +136,26 @@ class Main {
             await this.getAddressFromScriptHash(getAddressFromScriptHash_input.value.replace(/(^\s*)|(\s*$)/g, ""));
         }
 
+        document.getElementById("validateAddress_do").onclick=async()=>{
+            var validateAddress_input = document.getElementById("validateAddress_input") as HTMLTextAreaElement;
+            await this.validateAddress(validateAddress_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
+        document.getElementById("reverseHexstr_do").onclick=async()=>{
+            var reverseHexstr_input = document.getElementById("reverseHexstr_input") as HTMLTextAreaElement;
+            await this.reverseHexstr(reverseHexstr_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
+        document.getElementById("getStringFromHexstr_do").onclick=async()=>{
+            var getStringFromHexstr_input = document.getElementById("getStringFromHexstr_input") as HTMLTextAreaElement;
+            await this.getStringFromHexstr(getStringFromHexstr_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
+        document.getElementById("getBigIntegerFromHexstr_do").onclick=async()=>{
+            var getBigIntegerFromHexstr_input = document.getElementById("getBigIntegerFromHexstr_input") as HTMLTextAreaElement;
+            await this.getBigIntegerFromHexstr(getBigIntegerFromHexstr_input.value.replace(/(^\s*)|(\s*$)/g, ""));
+        }
+
         document.getElementById("merge").onclick = () =>{ 
             var invokeGroup_input = document.getElementById("invokeGroup_input") as HTMLTextAreaElement;
             invokeGroup_input.value = JSON.stringify({
@@ -576,15 +596,15 @@ class Main {
             Teemo.NEO.TOOLS.validateAddress(params)
             .then(result=>{
                 console.log(result);
-                console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                console.log("地址验证："+ result);
+                document.getElementById("validateAddress_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("validateAddress_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
@@ -599,15 +619,14 @@ class Main {
             Teemo.NEO.TOOLS.reverseHexstr(params)
             .then(result=>{
                 console.log(result);
-                console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                document.getElementById("reverseHexstr_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("reverseHexstr_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
@@ -622,15 +641,14 @@ class Main {
             Teemo.NEO.TOOLS.getStringFromHexstr(params)
             .then(result=>{
                 console.log(result);
-                console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                document.getElementById("getStringFromHexstr_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("getStringFromHexstr_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })
@@ -646,14 +664,14 @@ class Main {
             .then(result=>{
                 console.log(result);
                 console.log("得到的地址"+ result);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(result, null, 2);
+                document.getElementById("getBigIntegerFromHexstr_R").innerText = JSON.stringify(result, null, 2);
                 resolve();
             })
             .catch(error=>{
                 console.log("==============进入了异常流程");
                 
                 console.log(error);
-                document.getElementById("getAddressFromScriptHash_R").innerText = JSON.stringify(error, null, 2);
+                document.getElementById("getBigIntegerFromHexstr_R").innerText = JSON.stringify(error, null, 2);
                 reject();
             })
         })

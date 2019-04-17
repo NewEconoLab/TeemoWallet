@@ -54,5 +54,29 @@ declare class Main {
      */
     getAddressFromScriptHash(params: string): Promise<{}>;
     getStorage(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    validateAddress(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    reverseHexstr(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getStringFromHexstr(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getBigIntegerFromHexstr(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getDecimalsFromAssetAmount(params: string): Promise<{}>;
+    /**
+     * getAddressFromScriptHash
+     */
+    getBigIntegerFromAssetAmount(params: string): Promise<{}>;
 }
 //# sourceMappingURL=index.d.ts.map
