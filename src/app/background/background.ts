@@ -2049,11 +2049,11 @@ const getNamehashFromDomain=async(params:string)=>{
     }
 }
 
-const getAddressFromDomain=(params:DomainArgs)=>{
+var getAddressFromDomain=(params:DomainArgs)=>{
     return NNSTool.resolveData(params.domain)
 }
 
-const getDomainFromAddress=async(params:AddressArgs)=>{
+var getDomainFromAddress=async(params:AddressArgs)=>{
     const invoke_credit_revoke:InvokeReadInput =  {
         "scriptHash": "960b41a05588d2f55acbc13a1e3aa464eec6fff5",
         "operation": "getCreditInfo",
@@ -2073,6 +2073,10 @@ const getDomainFromAddress=async(params:AddressArgs)=>{
             TTL:stack[2].AsInteger().toString(),
         }
         return creditInfo;
+    }
+    else
+    {
+        return {namehash:'',fullDomainName:'',TTL:''}
     }
 }
 
@@ -2881,35 +2885,45 @@ class NNSTool
     {
         
         var scriptaddress = this.baseContract;
-        let nnshash = this.domainToHash(domain);
-        const res =await invokeRead({
-            scriptHash:scriptaddress.toString(),
-            operation:"resolve",
-            arguments:[
-                {type:"String",value:"addr"},
-                {type:'ByteArray',value:nnshash.toArray().reverse().toHexString()},
-                {type:"String",value:""}
-            ],
-            network:"TestNet"
+        let nnshash = this.domainToHash(domain).toArray().reverse().toHexString();
+        const res =await invokeReadGroup({
+            group:[
+                {
+                    scriptHash:scriptaddress.toString(),
+                    operation:"resolve",
+                    arguments:[
+                        {type:"String",value:"addr"},
+                        {type:'ByteArray',value:nnshash},
+                        {type:"String",value:""}
+                    ],
+                    network:"TestNet"
+                },
+                {
+                    scriptHash:scriptaddress.toString(),
+                    operation:'getOwnerInfo',
+                    arguments:[
+                        {type:'ByteArray',value:nnshash}
+                    ],
+                    network:"TestNet"
+                }
+            ]
         })
         
         var state = res['state'] as string;
         let addr = "";
+        let ttl="";
         if (state.includes("HALT, BREAK"))
         {
-            // info2.textContent += "Succ\n";
-            var stack = res['stack'] as any[];
-            //find name 他的type 有可能是string 或者ByteArray
-            if (stack[0].type == "ByteArray")
-            {
-                if (stack[0].value as string != "00")
-                {
-                    let value = (stack[0].value as string).hexToBytes();
-                    addr = ThinNeo.Helper.Bytes2String(value);
-                }
-            }
+            var stackarr = res[ "stack" ] as any[];
+            let stack = ResultItem.FromJson(DataType.Array, stackarr);
+            addr = stack.subItem[ 0 ].AsString();
+            const ownerInfo=stack.subItem[1].subItem;
+            ttl = ownerInfo[3].AsInteger().toString();
+            // const resolver = ownerInfo[2].AsHash160().toString();
+            // const register = ownerInfo[1].AsHash160().toString();
+            // const owner = ownerInfo[0].AsHash160().toString();
         }
-        return addr;
+        return {address:addr,TTL:ttl};
     }
 
     /**

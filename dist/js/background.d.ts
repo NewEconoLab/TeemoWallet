@@ -345,8 +345,11 @@ declare const getBigIntegerFromAssetAmount: (params: GetBigIntegerFromAssetAmoun
  */
 declare const getDecimalsFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
 declare const getNamehashFromDomain: (params: string) => Promise<string>;
-declare const getAddressFromDomain: (params: DomainArgs) => Promise<string>;
-declare const getDomainFromAddress: (params: AddressArgs) => Promise<{
+declare var getAddressFromDomain: (params: DomainArgs) => Promise<{
+    address: string;
+    TTL: string;
+}>;
+declare var getDomainFromAddress: (params: AddressArgs) => Promise<{
     namehash: string;
     fullDomainName: string;
     TTL: string;
@@ -672,7 +675,10 @@ interface TaskHistory extends Task {
 }
 declare class NNSTool {
     static readonly baseContract: Neo.Uint160;
-    static resolveData(domain: string): Promise<string>;
+    static resolveData(domain: string): Promise<{
+        address: string;
+        TTL: string;
+    }>;
     /**
      * 域名转hash
      * #region 域名转hash算法

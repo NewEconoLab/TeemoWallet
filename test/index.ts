@@ -311,7 +311,7 @@ class Main {
             blockHeight:params,
             network:"TestNet",
         }
-        return new Promise((resolve,reject)=>{            
+        return new Promise((resolve,reject)=>{
             Teemo.NEO.getBlock(data) // 获得余额的方法
             .then(result=>{
                 console.log(result);

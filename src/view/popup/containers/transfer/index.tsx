@@ -37,6 +37,7 @@ interface IState
 	verifyPass: boolean,
 	checkDisable: boolean,
 	addrMessage: string,
+	resolverMessage:string;
 	amountMessage: string,
 	currentOption: IOption,
 	toAddress: string,
@@ -64,6 +65,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		confirmDisable: false,
 		addrMessage: '',
 		amountMessage: '',
+		resolverMessage:'',
 		currentOption: { id: HASH_CONFIG.ID_GAS, name: 'GAS' },
 		toAddress: '',
 		domain: '',
@@ -95,18 +97,20 @@ export default class Transfer extends React.Component<IProps, IState>
 	{
 		console.log(currentOption);
 
-		this.setState({
-			currentOption
-		}, () =>
+		this.setState(
+			{
+				currentOption
+			}, () =>
 			{
 				this.onAmountChange(this.state.amount)
-			})
+			}
+		)
 	}
 	// 监控输入内容
 	public onAddrChange = async (event) =>
 	{
 		let errorAddr = false;
-		let addrMessage, toAddress, domain = "";
+		let resolverMessage,addrMessage, toAddress, domain = "";
 		let address = event;
 		this.setState({ address })
 		if (NNSTool.verifyDomain(event))
@@ -121,7 +125,8 @@ export default class Transfer extends React.Component<IProps, IState>
 				} else
 				{
 					errorAddr = false;
-					addrMessage = toAddress = addr;
+					// addrMessage = toAddress = addr;
+					resolverMessage = toAddress = addr;
 					domain = event;
 				}
 			} catch (error)
@@ -134,13 +139,31 @@ export default class Transfer extends React.Component<IProps, IState>
 		{
 			errorAddr = false;
 			toAddress = event;
+			try {
+				const domainInfo = await bg.getDomainFromAddress({address:event,network:common.network});
+				// const currenttime = new Neo.BigInteger(new Date().getTime()).divide(1000);
+				// console.log(domainInfo);
+				// console.log(new Date().getTime());
+				// console.log(currenttime.toString());
+				// if(domainInfo.fullDomainName!='' && currenttime.compareTo(new Neo.BigInteger(domainInfo.TTL))<0)
+				// {
+				// 	resolverMessage=domainInfo.fullDomainName;
+				// }
+				
+				if(domainInfo.fullDomainName!='')
+				{
+					resolverMessage=domainInfo.fullDomainName;
+				}
+			} catch (error) {
+				
+			}
 		}
 		else
 		{
 			errorAddr = true;
 			addrMessage = intl.message.transfer.error1
 		}
-		this.setState({ errorAddr, addrMessage, domain, toAddress }, () =>
+		this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
 		{
 			this.onVerify();
 		})
@@ -235,18 +258,18 @@ export default class Transfer extends React.Component<IProps, IState>
 			"fee": this.state.netfee ? "0.001" : "0",
 			"network": "TestNet"
 		})
-			.then(result =>
-			{
-				Toast(intl.message.toast.successfully);
-				console.log(result);
-				this.onHide();
-			})
-			.catch(error =>
-			{
-				Toast(intl.message.toast.failed, "error");
-				console.log(error);
-				this.onHide();
-			})
+		.then(result =>
+		{
+			Toast(intl.message.toast.successfully);
+			console.log(result);
+			this.onHide();
+		})
+		.catch(error =>
+		{
+			Toast(intl.message.toast.failed, "error");
+			console.log(error);
+			this.onHide();
+		})
 	}
 
 	public render()
@@ -267,12 +290,13 @@ export default class Transfer extends React.Component<IProps, IState>
 								</div>
 								<div className="info-line">
 									<div className="title">{intl.message.transfer.title2}</div>
-									<div className="content">{this.state.amount + " " + this.state.currentOption.name}</div>
+									<div className="content">{`${this.state.amount} ${this.state.currentOption.name}`}</div>
 								</div>
 								<div className="info-line">
 									<div className="title">{intl.message.transfer.title3}</div>
 									<div className="content">
-										{this.state.domain ?
+										{
+											this.state.domain ?
 											<>
 												<div className="double">{this.state.domain}</div>
 												<div className="double address">{this.state.toAddress}</div>
@@ -302,10 +326,13 @@ export default class Transfer extends React.Component<IProps, IState>
 							</div>
 							<div className="line">
 								<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
+								{
+								!!this.state.resolverMessage &&
 								<p className="tip-check">
 									<img className="trans-icon" src={require("../../../image/transfer.png")} alt=""/>
-									<span className="trans-text">AXnMWemN6GMdauzxHAEjb3EFJQQNmNHHw9</span>
+									<span className="trans-text">{this.state.resolverMessage}</span>
 								</p>
+								}
 							</div>
 							<div className="line line-big">
 								<Input placeholder={intl.message.transfer.amount + "（90000 GAS可用）"} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />

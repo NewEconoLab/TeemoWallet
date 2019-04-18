@@ -375,7 +375,7 @@ namespace Teemo
          * @param params 
          */
         static getBlock(params:GetBlockArgs){
-            return sendMessage(Command.getBlock,params)
+            return sendMessage<any>(Command.getBlock,params)
         }
 
         /**
@@ -383,7 +383,7 @@ namespace Teemo
          * @param params 
          */
         static getTransaction(params:GetTransactionArgs){
-            return sendMessage(Command.getTransaction,params)
+            return sendMessage<any>(Command.getTransaction,params)
         }
         
         /**
@@ -391,7 +391,7 @@ namespace Teemo
          * @param params 
          */
         static getApplicationLog(params:GetApplicationLogArgs){
-            return sendMessage(Command.getApplicationLog,params)
+            return sendMessage<any>(Command.getApplicationLog,params)
         }
 
         static TOOLS={
@@ -440,7 +440,7 @@ namespace Teemo
 
         static NNS={
             getNamehashFromDomain:(params:string)=>{
-                return sendMessage(Command.NNS_getNamehashFromDomain,params)
+                return sendMessage<string>(Command.NNS_getNamehashFromDomain,params)
             },
             getAddressFromDomain:(params:DomainArgs)=>{
                 return sendMessage(Command.NNS_getAddressFromDomain,params)

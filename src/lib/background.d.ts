@@ -60,6 +60,16 @@ declare interface Background extends Window{
         fee: string;
     }>;
     getHistoryList: () => IHistory[];
+    getDomainFromAddress: (params: AddressArgs) => Promise<{
+        namehash: string;
+        fullDomainName: string;
+        TTL: string;
+    }>
+}
+
+interface AddressArgs{
+    address:string;
+    network:'MainNet'|'TestNet'
 }
 
 interface SendArgs {
