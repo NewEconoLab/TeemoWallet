@@ -2043,7 +2043,7 @@ const getDecimalsFromAssetAmount= async(params:GetDecimalsFromAssetAmountArgs)=>
 
 const getNamehashFromDomain=async(params:string)=>{
     try {
-        return NNSTool.domainToHash(params).toString();
+        return NNSTool.domainToHash(params).toArray().reverse().toHexString();
     } catch (error) {
         throw "";        
     }

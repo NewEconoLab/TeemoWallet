@@ -1766,7 +1766,7 @@ const getDecimalsFromAssetAmount = (params) => __awaiter(this, void 0, void 0, f
 });
 const getNamehashFromDomain = (params) => __awaiter(this, void 0, void 0, function* () {
     try {
-        return NNSTool.domainToHash(params).toString();
+        return NNSTool.domainToHash(params).toArray().reverse().toHexString();
     }
     catch (error) {
         throw "";
