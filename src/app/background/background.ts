@@ -2887,7 +2887,7 @@ class NNSTool
             operation:"resolve",
             arguments:[
                 {type:"String",value:"addr"},
-                {type:"Hash256",value:nnshash.toString()},
+                {type:'ByteArray',value:nnshash.toArray().reverse().toHexString()},
                 {type:"String",value:""}
             ],
             network:"TestNet"
