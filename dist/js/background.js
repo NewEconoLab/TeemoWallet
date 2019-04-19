@@ -13,7 +13,8 @@ const storage = {
     height: 0,
     domains: [],
     titles: [],
-    oldUtxo: {}
+    oldUtxo: {},
+    allAssetInfo: [],
 };
 const HASH_CONFIG = {
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -389,6 +390,28 @@ const Api = {
                 assetId,
                 address
             ],
+            baseUrl: 'common'
+        };
+        return request(opts);
+    },
+    /**
+     * 获取nep5的资产（CGAS）
+     */
+    getallasset: () => {
+        const opts = {
+            method: 'getallasset',
+            params: [],
+            baseUrl: 'common'
+        };
+        return request(opts);
+    },
+    /**
+     * 获取nep5的资产（CGAS）
+     */
+    getallnep5asset: () => {
+        const opts = {
+            method: 'getallnep5asset',
+            params: [],
             baseUrl: 'common'
         };
         return request(opts);
@@ -2130,6 +2153,72 @@ TaskManager.blockDatas = [{
         timeDiff: 0
     }];
 TaskManager.start();
+class AssetManager {
+    static initAllAseetInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const nep5Assets = yield Api.getallnep5asset();
+            const allassets = yield Api.getallasset();
+            for (const asset of allassets) {
+                let assetInfo = {};
+                assetInfo.assetid = asset.id.replace('0x', '');
+                assetInfo.decimals = asset.precision;
+                assetInfo.type = 'utxo';
+                if (assetInfo.assetid == HASH_CONFIG.ID_GAS)
+                    assetInfo.symbol = 'GAS';
+                else if (assetInfo.assetid == HASH_CONFIG.ID_NEO)
+                    assetInfo.symbol = 'NEO';
+                else
+                    assetInfo.symbol = asset.name[asset.name.length - 1].name;
+                this.allAssetInfo.push(assetInfo);
+            }
+            for (const nep5 of nep5Assets) {
+                let assetInfo = {};
+                assetInfo.assetid = nep5.assetid.replace('0x', '');
+                assetInfo.decimals = nep5.decimals;
+                assetInfo.type = 'nep5';
+                assetInfo.symbol = nep5.symbol;
+                this.allAssetInfo.push(assetInfo);
+            }
+        });
+    }
+    /**
+     * 模糊搜索资产
+     * @param value 搜索值，资产名称或者id
+     */
+    static queryAsset(value) {
+        // 筛选名字或者id包含搜索值的结果(id 忽略 0x)
+        return this.allAssetInfo.filter(asset => asset.symbol.includes(value) ? true : asset.assetid.includes(value.replace('0x', '')));
+    }
+    /**
+     * 根据资产id添加资产
+     * @param assetID 资产id
+     */
+    static addAsset(assetID) {
+        const assetids = localStorage.getItem('Teemo-assetManager');
+        const list = assetids.split('|');
+        list.push(assetID);
+        const arr = list.filter((element, index, self) => self.indexOf(element) === index);
+        localStorage.setItem('Teemo-assetManager', JSON.stringify(arr));
+    }
+    /**
+     * 根据资产id删除资产
+     * @param assetID 资产id
+     */
+    static deleteAsset(assetID) {
+        const assetids = localStorage.getItem('Teemo-assetManager');
+        const list = assetids.split('|');
+        const arr = list.filter((element) => element != assetID);
+        localStorage.setItem('Teemo-assetManager', JSON.stringify(arr));
+    }
+    /**
+     * 获得用户拥有的资产列表
+     */
+    static getMyAsset() {
+        const assetids = localStorage.getItem('Teemo-assetManager');
+        return this.allAssetInfo.filter(asset => assetids.includes(asset.assetid));
+    }
+}
+AssetManager.allAssetInfo = [];
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 var ArgumentDataType;

@@ -9,6 +9,7 @@ interface BackStore {
     oldUtxo: {
         [txid: string]: number[];
     };
+    allAssetInfo: AssetInfo[];
 }
 declare const storage: BackStore;
 declare const HASH_CONFIG: {
@@ -132,6 +133,14 @@ declare const Api: {
     /**
      * 获取nep5的资产（CGAS）
      */
+    getallasset: () => Promise<any>;
+    /**
+     * 获取nep5的资产（CGAS）
+     */
+    getallnep5asset: () => Promise<any>;
+    /**
+     * 获取nep5的资产（CGAS）
+     */
     getallnep5assetofaddress: (address: any) => Promise<any>;
     /**
      * 获取nep5的资产（CGAS）
@@ -205,6 +214,36 @@ declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput
  */
 declare var exchangeCgas: (transcount: number, netfee: number) => Promise<InvokeOutput[]>;
 declare var exchangeGas: (transcount: number, netfee: number) => Promise<InvokeOutput>;
+interface AssetInfo {
+    assetid: string;
+    type: 'nep5' | 'utxo';
+    symbol: string;
+    decimals: number;
+}
+interface Nep5AssetInfo {
+    assetid: string;
+    totalsupply: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+}
+interface UtxoAssetInfo {
+    version: number;
+    id: string;
+    type: string;
+    name: {
+        lang: string;
+        name: string;
+    }[];
+    amount: string;
+    available: string;
+    precision: number;
+    owner: string;
+    admin: string;
+    issuer: string;
+    expiration: number;
+    frozen: boolean;
+}
 declare var makeRefundTransaction: (transcount: number, netfee: number) => Promise<InvokeOutput>;
 /**
  *
@@ -437,6 +476,29 @@ declare class TaskManager {
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;
     static update(): void;
+}
+declare class AssetManager {
+    static allAssetInfo: AssetInfo[];
+    static initAllAseetInfo(): Promise<void>;
+    /**
+     * 模糊搜索资产
+     * @param value 搜索值，资产名称或者id
+     */
+    static queryAsset(value: string): AssetInfo[];
+    /**
+     * 根据资产id添加资产
+     * @param assetID 资产id
+     */
+    static addAsset(assetID: string): void;
+    /**
+     * 根据资产id删除资产
+     * @param assetID 资产id
+     */
+    static deleteAsset(assetID: string): void;
+    /**
+     * 获得用户拥有的资产列表
+     */
+    static getMyAsset(): AssetInfo[];
 }
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
