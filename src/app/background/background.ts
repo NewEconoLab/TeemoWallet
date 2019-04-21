@@ -2610,7 +2610,7 @@ class AssetManager{
         const list = assetids? assetids.split('|'):[];
         list.push(assetID);
         const arr = list.filter((element,index,self)=>self.indexOf(element)===index);
-        localStorage.setItem('Teemo-assetManager',JSON.stringify(arr));
+        localStorage.setItem('Teemo-assetManager',list.join('|'));
     }
 
     /**

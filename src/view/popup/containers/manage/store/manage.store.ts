@@ -12,11 +12,11 @@ class ManagerStore implements IManagerAssets
         if(assetids)
         {
             const list = assetids.split('|');
-            return bg.assetManager.allAssetInfo.find(asset=>list.indexOf(asset.assetid)>=0);
+            this.myAssets = bg.assetManager.allAssetInfo.filter(asset=>list.indexOf(asset.assetid)>=0);
         }
         else
         {
-            return [];
+            this.myAssets = [];
         }
     }
 

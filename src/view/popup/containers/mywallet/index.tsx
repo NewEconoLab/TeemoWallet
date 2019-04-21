@@ -19,6 +19,7 @@ import Transfer from '../transfer';
 import { HASH_CONFIG } from '../../../config';
 import PrivateKey from '../editwallet/privatekey';
 import DeleteWallet from '../editwallet/deletewallet';
+import manageStore from '../manage/store/manage.store';
 interface AppProps extends RouteComponentProps
 {
     develop: boolean;
@@ -54,6 +55,8 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
         // Example of how to send a message to eventPage.ts.      
         common.initNetWork();
         common.initAccountBalance();
+        
+        manageStore.initAssetList()
         historyStore.initHistoryList();
         if (chrome.tabs)
         {

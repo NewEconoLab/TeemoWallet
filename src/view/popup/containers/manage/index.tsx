@@ -13,7 +13,7 @@ interface IProps
 
 interface IState
 {
-  checkedAssets:string[];
+  checkedAssets:{[asset:string]:boolean};
   searchList:AssetInfo[]
   checkedList:{name:string,amount:string,value:string,check:boolean}[],
   inputName:string
@@ -25,9 +25,10 @@ export default class ManageAsset extends React.Component<IProps, IState>
   constructor(props: any)
   {
     super(props);
+    manageStore.initAssetList()
   }
   public state:IState = {
-    checkedAssets:[],
+    checkedAssets:{},
     searchList:[],
     checkedList: [],
     inputName: '',// 搜索代币
@@ -112,7 +113,6 @@ export default class ManageAsset extends React.Component<IProps, IState>
   }
   public onSaveManage = () =>
   {
-    alert('保存，并返回')
     if (this.props.lableChange)
     {
       this.props.lableChange('history');
@@ -120,11 +120,29 @@ export default class ManageAsset extends React.Component<IProps, IState>
   }
   public onCancel = () =>
   {
-    alert('取消添加');
+    this.setState({
+      checkedAssets:{},
+      inputName: ''})
   }
   public onAddBalance = () =>
   {
-    alert("添加")
+    for (const key in this.state.checkedAssets) {
+      if (this.state.checkedAssets.hasOwnProperty(key)) {
+        const value = this.state.checkedAssets[key];
+        if(value)
+        {
+          manageStore.addAssetInfo(key);
+        }
+      }
+    }
+    manageStore.initAssetList();
+  }
+  public onSelect = (assetid:string)=>{
+    const checkedAssets=this.state.checkedAssets
+    checkedAssets[assetid]=!checkedAssets[assetid];
+    this.setState({
+      checkedAssets
+    },()=>{console.log(this.state.checkedAssets)})
   }
   public render()
   {
@@ -142,12 +160,13 @@ export default class ManageAsset extends React.Component<IProps, IState>
                   <div className="search-list">
                   {
                     this.state.searchList.map(asset=>{
+                      console.log(this.state.checkedAssets[asset.assetid])
                       return (                        
                       // <div className="small-box active">
                       //   <div className="small-name">NEOVERSION（我是全称我...</div>
                       //   <div className="small-txid">0xc5...7c9b</div>
                       // </div>
-                        <div className="small-box">
+                        <div className={`small-box ${this.state.checkedAssets[asset.assetid]?'active':''}`} onClick={this.onSelect.bind(this,asset.assetid)}>
                           <div className="small-name">{asset.symbol}{asset.type=='nep5'?`（${asset.name}）`:''}</div>
                           <div className="small-txid">{asset.assetid.substr(0,4)+"..."+asset.assetid.substr(asset.assetid.length-3,4)}</div>
                         </div>
@@ -174,17 +193,17 @@ export default class ManageAsset extends React.Component<IProps, IState>
             <>
               <div className="manage-list">
                 {
-                  this.checkList.map((k, v) =>
+                  manageStore.myAssets.map((k, v) =>
                   {
-                    const index = this.state.checkedList.indexOf(k.value as never);
+                    // const index = this.state.checkedList.indexOf(k as never);
                     return (
                       <div className="asset-wrapper">
                         <label>
-                          <input type="checkbox" name='assets' value={k.value} onChange={this.chooseStatus} />
-                          <img className="checked-img" src={(index > -1) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                          <input type="checkbox" name='assets' onChange={this.chooseStatus} />
+                          <img className="checked-img" src={true ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
                         </label>
-                        <span>{k.name}</span>
-                        <div className="asset-amount">{k.amount}</div>
+                        <span>{k.symbol}</span>
+                        <div className="asset-amount">{k.type}</div>
                       </div>
                     )
                   })
