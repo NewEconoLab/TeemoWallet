@@ -5,18 +5,30 @@ import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
+import manageStore from './store/manage.store';
 interface IProps
 {
   lableChange: (table: string) => void
 }
+
+interface IState
+{
+  checkedAssets:string[];
+  searchList:AssetInfo[]
+  checkedList:{name:string,amount:string,value:string,check:boolean}[],
+  inputName:string
+}
+
 @observer
-export default class ManageAsset extends React.Component<IProps, {}>
+export default class ManageAsset extends React.Component<IProps, IState>
 {
   constructor(props: any)
   {
     super(props);
   }
-  public state = {
+  public state:IState = {
+    checkedAssets:[],
+    searchList:[],
     checkedList: [],
     inputName: '',// 搜索代币
   }
@@ -64,7 +76,7 @@ export default class ManageAsset extends React.Component<IProps, {}>
     } else
     {
       console.log("不存在，添加");
-      checkedList.push(item);
+      // checkedList.push(item);
     }
     this.setState({
       checkedList
@@ -73,8 +85,15 @@ export default class ManageAsset extends React.Component<IProps, {}>
   }
   public onChangeInput = (e: any) =>
   {
+    console.log(e.target.value);
+    
+    const list = manageStore.queryAssetInfo(e.target.value);
+
+    console.log(list);
+    
     this.setState({
-      inputName: e.target.value
+      inputName: e.target.value,
+      searchList:list
     })
   }
   public onClearInput = () =>
@@ -121,22 +140,20 @@ export default class ManageAsset extends React.Component<IProps, {}>
                 <img className="clear-search" src={require("../../../image/close3.png")} alt="" onClick={this.onClearInput} />
                 <div className="search-content">
                   <div className="search-list">
-                    <div className="small-box active">
-                      <div className="small-name">NEO</div>
-                      <div className="small-txid">0xc5...7c9b</div>
-                    </div>
-                    <div className="small-box">
-                      <div className="small-name">NEOVERSION（我是全称我...</div>
-                      <div className="small-txid">0xc5...7c9b</div>
-                    </div>
-                    <div className="small-box active">
-                      <div className="small-name">NEO</div>
-                      <div className="small-txid">0xc5...7c9b</div>
-                    </div>
-                    <div className="small-box">
-                      <div className="small-name">NEOVERSION（我是全称我...</div>
-                      <div className="small-txid">0xc5...7c9b</div>
-                    </div>
+                  {
+                    this.state.searchList.map(asset=>{
+                      return (                        
+                      // <div className="small-box active">
+                      //   <div className="small-name">NEOVERSION（我是全称我...</div>
+                      //   <div className="small-txid">0xc5...7c9b</div>
+                      // </div>
+                        <div className="small-box">
+                          <div className="small-name">{asset.symbol}{asset.type=='nep5'?`（${asset.name}）`:''}</div>
+                          <div className="small-txid">{asset.assetid.substr(0,4)+"..."+asset.assetid.substr(asset.assetid.length-3,4)}</div>
+                        </div>
+                      )
+                    }) 
+                  }
                   </div>
                   <div className="search-btn">
                     <Button text="取消" type="warn" onClick={this.onCancel} />

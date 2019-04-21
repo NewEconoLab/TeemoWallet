@@ -1057,6 +1057,7 @@ interface AssetInfo
     assetid:string;
     type:'nep5'|'utxo';
     symbol:string;
+    name:string;
     decimals:number;
 }
 
@@ -2562,6 +2563,7 @@ class AssetManager{
                 assetInfo.symbol='NEO';
             else
                 assetInfo.symbol=asset.name[asset.name.length-1].name;
+            assetInfo.name=assetInfo.symbol;
             this.allAssetInfo.push(assetInfo);
         }
         for (const nep5 of nep5Assets) {
@@ -2569,7 +2571,8 @@ class AssetManager{
             assetInfo.assetid = nep5.assetid.replace('0x','');
             assetInfo.decimals = nep5.decimals;
             assetInfo.type='nep5';
-            assetInfo.symbol=nep5.symbol;
+            assetInfo.symbol=nep5.symbol?nep5.symbol:(nep5.name?nep5.name:'');
+            assetInfo.name=nep5.name;
             this.allAssetInfo.push(assetInfo);
         }
     }
@@ -2581,7 +2584,20 @@ class AssetManager{
     queryAsset(value:string)
     {
         // 筛选名字或者id包含搜索值的结果(id 忽略 0x)
-        return this.allAssetInfo.filter(asset=>asset.symbol.includes(value)?true:asset.assetid.includes(value.replace('0x','')));
+        return this.allAssetInfo.filter(
+            asset=>
+            {
+                console.log(asset);
+                try {    
+                    const result = asset.symbol.includes(value)?true:asset.assetid.includes(value.replace('0x',''))
+                    return result;
+                } catch (error) {
+                    console.log(error);
+                    
+                    return false;
+                }
+            }
+            );
     }
 
     /**
@@ -2591,7 +2607,7 @@ class AssetManager{
     addAsset(assetID:string)
     {
         const assetids =  localStorage.getItem('Teemo-assetManager');
-        const list = assetids.split('|');
+        const list = assetids? assetids.split('|'):[];
         list.push(assetID);
         const arr = list.filter((element,index,self)=>self.indexOf(element)===index);
         localStorage.setItem('Teemo-assetManager',JSON.stringify(arr));
@@ -2604,7 +2620,7 @@ class AssetManager{
     deleteAsset(assetID:string)
     {
         const assetids =  localStorage.getItem('Teemo-assetManager');
-        const list = assetids.split('|');
+        const list = assetids? assetids.split('|'):[];
         const arr = list.filter((element)=>element!=assetID);
         localStorage.setItem('Teemo-assetManager',JSON.stringify(arr));
     }

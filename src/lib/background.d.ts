@@ -65,6 +65,31 @@ declare interface Background extends Window{
         fullDomainName: string;
         TTL: string;
     }>
+    assetManager: AssetManager;
+}
+
+declare class AssetManager {
+    allAssetInfo: AssetInfo[];
+    initAllAseetInfo(): Promise<void>;
+    /**
+     * 模糊搜索资产
+     * @param value 搜索值，资产名称或者id
+     */
+    queryAsset(value: string): AssetInfo[];
+    /**
+     * 根据资产id添加资产
+     * @param assetID 资产id
+     */
+    addAsset(assetID: string): void;
+    /**
+     * 根据资产id删除资产
+     * @param assetID 资产id
+     */
+    deleteAsset(assetID: string): void;
+    /**
+     * 获得用户拥有的资产列表
+     */
+    getMyAsset(): AssetInfo[];
 }
 
 interface AddressArgs{

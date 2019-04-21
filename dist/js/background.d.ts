@@ -218,6 +218,7 @@ interface AssetInfo {
     assetid: string;
     type: 'nep5' | 'utxo';
     symbol: string;
+    name: string;
     decimals: number;
 }
 interface Nep5AssetInfo {
