@@ -531,7 +531,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getallnep5assetofaddress :  (address) => {
+    getallnep5assetofaddress : (address) => {
         const opts:IOpts = {
             method:'getallnep5assetofaddress',
             params:[
@@ -2546,9 +2546,9 @@ TaskManager.start();
 
 
 class AssetManager{
-    static allAssetInfo:AssetInfo[] = []
+    allAssetInfo:AssetInfo[] = []
     
-    static async initAllAseetInfo(){
+    async initAllAseetInfo(){
         const nep5Assets:Nep5AssetInfo[] = await Api.getallnep5asset();
         const allassets:UtxoAssetInfo[] = await Api.getallasset();
         for (const asset of allassets) {
@@ -2578,7 +2578,7 @@ class AssetManager{
      * 模糊搜索资产
      * @param value 搜索值，资产名称或者id
      */
-    static queryAsset(value:string)
+    queryAsset(value:string)
     {
         // 筛选名字或者id包含搜索值的结果(id 忽略 0x)
         return this.allAssetInfo.filter(asset=>asset.symbol.includes(value)?true:asset.assetid.includes(value.replace('0x','')));
@@ -2588,7 +2588,7 @@ class AssetManager{
      * 根据资产id添加资产
      * @param assetID 资产id
      */
-    static addAsset(assetID:string)
+    addAsset(assetID:string)
     {
         const assetids =  localStorage.getItem('Teemo-assetManager');
         const list = assetids.split('|');
@@ -2601,7 +2601,7 @@ class AssetManager{
      * 根据资产id删除资产
      * @param assetID 资产id
      */
-    static deleteAsset(assetID:string)
+    deleteAsset(assetID:string)
     {
         const assetids =  localStorage.getItem('Teemo-assetManager');
         const list = assetids.split('|');
@@ -2612,7 +2612,7 @@ class AssetManager{
     /**
      * 获得用户拥有的资产列表
      */
-    static getMyAsset()
+    getMyAsset()
     {
         const assetids =  localStorage.getItem('Teemo-assetManager');
         return this.allAssetInfo.filter(asset=>assetids.includes(asset.assetid));
@@ -2620,6 +2620,8 @@ class AssetManager{
 
 }
 
+var assetManager = new AssetManager();
+assetManager.initAllAseetInfo();
 
 
 const BLOCKCHAIN = 'NEO';

@@ -478,28 +478,29 @@ declare class TaskManager {
     static update(): void;
 }
 declare class AssetManager {
-    static allAssetInfo: AssetInfo[];
-    static initAllAseetInfo(): Promise<void>;
+    allAssetInfo: AssetInfo[];
+    initAllAseetInfo(): Promise<void>;
     /**
      * 模糊搜索资产
      * @param value 搜索值，资产名称或者id
      */
-    static queryAsset(value: string): AssetInfo[];
+    queryAsset(value: string): AssetInfo[];
     /**
      * 根据资产id添加资产
      * @param assetID 资产id
      */
-    static addAsset(assetID: string): void;
+    addAsset(assetID: string): void;
     /**
      * 根据资产id删除资产
      * @param assetID 资产id
      */
-    static deleteAsset(assetID: string): void;
+    deleteAsset(assetID: string): void;
     /**
      * 获得用户拥有的资产列表
      */
-    static getMyAsset(): AssetInfo[];
+    getMyAsset(): AssetInfo[];
 }
+declare var assetManager: AssetManager;
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
 declare enum ArgumentDataType {

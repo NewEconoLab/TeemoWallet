@@ -1,6 +1,6 @@
 import { observable, action } from 'mobx';
-import { AccountInfo, NepAccount } from "../../../common/entity";
-import { Storage_internal, Storage_local, bg } from "../utils/storagetools";
+import { NepAccount } from "../../../common/entity";
+import { Storage_local, bg } from "../utils/storagetools";
 import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
 import { HASH_CONFIG } from "../../config";
 import { IAccountBalanceStore, NetWork, IAccountMessage } from './interface/common.interface';
