@@ -2043,7 +2043,9 @@ const getStringFromHexstr=(hexStr:string)=>{
 const getBigIntegerFromHexstr=(hexStr:string)=>{
     return new Promise((resolve,reject)=>
     {
-        try {   
+        try {
+            if(hexStr=="")
+                resolve('0');
             const value = Neo.BigInteger.fromUint8Array(hexStr.hexToBytes())
             resolve(value.toString());
         } catch (error) {
@@ -2597,7 +2599,7 @@ class AssetManager{
                     return false;
                 }
             }
-            );
+        );
     }
 
     /**

@@ -147,7 +147,7 @@ interface InvokeGroupOutup{
  * @param {string} network 网络
  */
 interface GetBlockArgs{
-    blockHeight:number;  // 区块高度
+    blockHeight:number|string;  // 区块高度
     network:string // 网络
 }
 
@@ -375,6 +375,8 @@ namespace Teemo
          * @param params 
          */
         static getBlock(params:GetBlockArgs){
+            if(typeof params.blockHeight =='string')
+                params.blockHeight=parseInt(params.blockHeight)
             return sendMessage<any>(Command.getBlock,params)
         }
 
@@ -400,7 +402,7 @@ namespace Teemo
              * @param address 要验证的地址
              */
             validateAddress:(address:string)=>{
-                return sendMessage(Command.TOOLS_validateAddress,address)
+                return sendMessage<boolean>(Command.TOOLS_validateAddress,address)
             },
             /**
              * scriptHash转地址
@@ -443,10 +445,10 @@ namespace Teemo
                 return sendMessage<string>(Command.NNS_getNamehashFromDomain,params)
             },
             getAddressFromDomain:(params:DomainArgs)=>{
-                return sendMessage(Command.NNS_getAddressFromDomain,params)
+                return sendMessage<{address: string,TTL: string}>(Command.NNS_getAddressFromDomain,params)
             },
             getDomainFromAddress:(params:AddressArgs)=>{
-                return sendMessage(Command.NNS_getDomainFromAddress,params)
+                return sendMessage<{ namehash: string;fullDomainName: string;TTL: string;}>(Command.NNS_getDomainFromAddress,params)
             }
         }
     }
