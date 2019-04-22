@@ -5,14 +5,16 @@ import intl from "../../../store/intl";
 
 class ManagerStore implements IManagerAssets
 {
-    @observable myAssets: AssetInfo[];    
+    @observable myAssets: AssetInfo[];
+    @observable allAsset: AssetInfo[];
 
     @action public initAssetList = () => {
         const assetids = localStorage.getItem('Teemo-assetManager');
+        this.allAsset = bg.assetManager.allAssetInfo;
         if(assetids)
         {
             const list = assetids.split('|');
-            this.myAssets = bg.assetManager.allAssetInfo.filter(asset=>list.indexOf(asset.assetid)>=0);
+            this.myAssets = this.allAsset.filter(asset=>list.indexOf(asset.assetid)>=0);
         }
         else
         {
