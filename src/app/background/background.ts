@@ -2251,15 +2251,6 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
             case Command.NNS_getNamehashFromDomain:
                 sendResponse(getNamehashFromDomain(params));
                 break;
-            case Command.getAddressFromScriptHash:
-                sendResponse(new Promise((r,j)=>{
-                    try {
-                            r(ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(params)))
-                    } catch (error) {
-                            j({type:"MALFORMED_INPUT",description:'This scripthash is not correct.'})
-                    }
-                }));
-                break;
             default:
                 sendResponse(new Promise((r,j)=>j({type:"NO_PROVIDER",description:"Could not find an instance of the dAPI in the webpage"})))
                 break;
@@ -2554,6 +2545,7 @@ class AssetManager{
     async initAllAseetInfo(){
         const nep5Assets:Nep5AssetInfo[] = await Api.getallnep5asset();
         const allassets:UtxoAssetInfo[] = await Api.getallasset();
+        this.allAssetInfo=[];
         for (const asset of allassets) {
             let assetInfo = {} as AssetInfo;
             assetInfo.assetid = asset.id.replace('0x','');

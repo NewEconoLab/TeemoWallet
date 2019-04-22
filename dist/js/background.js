@@ -1928,16 +1928,6 @@ const responseMessage = (sender, request) => {
             case Command.NNS_getNamehashFromDomain:
                 sendResponse(getNamehashFromDomain(params));
                 break;
-            case Command.getAddressFromScriptHash:
-                sendResponse(new Promise((r, j) => {
-                    try {
-                        r(ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(params)));
-                    }
-                    catch (error) {
-                        j({ type: "MALFORMED_INPUT", description: 'This scripthash is not correct.' });
-                    }
-                }));
-                break;
             default:
                 sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
                 break;
@@ -2163,6 +2153,7 @@ class AssetManager {
         return __awaiter(this, void 0, void 0, function* () {
             const nep5Assets = yield Api.getallnep5asset();
             const allassets = yield Api.getallasset();
+            this.allAssetInfo = [];
             for (const asset of allassets) {
                 let assetInfo = {};
                 assetInfo.assetid = asset.id.replace('0x', '');

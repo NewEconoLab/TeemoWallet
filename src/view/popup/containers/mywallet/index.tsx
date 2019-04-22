@@ -112,6 +112,12 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
             showTwiceDialog:''
         })
     }
+
+    public onManageSave = ()=>{
+        const save = this.refs.manageAsset['onSaveManage']
+        save();
+        this.onClosePage();
+    }
     render()
     {
         const history = classnames("header-label", { "active": this.state.label == "history" });
@@ -142,7 +148,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'transfer' && <span>{intl.message.assets.transfer}</span>
                                 }
                                 {
-                                    this.state.showPage === 'manage' && <><span>管理代币</span><p className="close-page" onClick={this.onClosePage}>保存</p></>
+                                    this.state.showPage === 'manage' && <><span>管理代币</span><p className="close-page" onClick={this.onManageSave}>保存</p></>
                                 }
                                 {
                                     this.state.showPage === 'edit' && <span>钱包</span>
@@ -189,7 +195,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                         (this.state.showPage === 'transfer' && this.state.showTwiceDialog === '')  && <Transfer lableChange={this.labelChange} asset={this.state.tranAsset} />
                     }
                     {
-                        (this.state.showPage === 'manage' && this.state.showTwiceDialog === '')  && <ManageAsset lableChange={this.labelChange} />
+                        (this.state.showPage === 'manage' && this.state.showTwiceDialog === '')  && <ManageAsset lableChange={this.labelChange} ref="manageAsset" />
                     }
                     {
                         (this.state.showPage === 'edit' && this.state.showTwiceDialog === '')  && <EditWallet lableChange={this.labelChange} twiceChange={this.twiceChange} />

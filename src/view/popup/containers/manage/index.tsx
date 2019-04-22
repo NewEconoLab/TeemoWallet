@@ -10,8 +10,12 @@ interface IProps {
   lableChange: (table: string) => void
 }
 
+interface CheckedAsset extends AssetInfo{
+  checked:boolean;
+}
+
 interface IState {
-  checkedAssets: { [ asset: string ]: boolean };
+  checkedAssets: CheckedAsset[];
   searchList: AssetInfo[]
   checkedList: { name: string, amount: string, value: string, check: boolean }[],
   inputName: string
@@ -22,61 +26,53 @@ export default class ManageAsset extends React.Component<IProps, IState>
 {
   constructor(props: any) {
     super(props);
+    // manageStore.initAssetList()
+    this.initMyCheckedAssets();
+
+  }
+  
+  public componentDidMount()
+  {
     manageStore.initAssetList()
+    this.initMyCheckedAssets();
   }
   public state: IState = {
-    checkedAssets: {},
+    checkedAssets: [],
     searchList: [],
     checkedList: [],
     inputName: '',// 搜索代币
   }
-  public checkList = [
-    {
-      name: "NEO",
-      amount: "11111",
-      value: 'neo',
-      check: false
-    },
-    {
-      name: "NEO",
-      amount: "2222",
-      value: 'neo2',
-      check: false
-    },
-    {
-      name: "NEO",
-      amount: "111333311",
-      value: 'neo3',
-      check: false
-    }, {
-      name: "NEO",
-      amount: "11144411",
-      value: 'neo4',
-      check: false
-    },
-    {
-      name: "NEO",
-      amount: "5555",
-      value: 'neo5',
-      check: false
+
+  public initMyCheckedAssets=()=>{
+    const arr:CheckedAsset[]=[];
+    for (const asset of manageStore.myAssets) {
+      asset['checked']=true;
+      arr.push(asset as CheckedAsset)
     }
-  ]
+    this.setState({checkedAssets:arr});
+  }
+
   // 筛选状态
-  public chooseStatus = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const item: string = event.target.value;
-    const checkedList = this.state.checkedList;
-    const index = this.state.checkedList.indexOf(item as never);
-    if (index > -1) {
-      console.log("存在过，删除");
-      checkedList.splice(index, 1)
-    } else {
-      console.log("不存在，添加");
-      // checkedList.push(item);
+  public chooseStatus = (assetid:string) => {
+    console.log(assetid);
+    
+    const checkeds = this.state.checkedAssets;
+    const index = checkeds.findIndex(info=>info.assetid===assetid);
+    if(index>=0)
+    {
+      checkeds[index].checked = !checkeds[index].checked
     }
+    else
+    {
+      const assetInfo = manageStore.allAsset.find(info=>info.assetid===assetid)
+      assetInfo['checked']=true;
+      checkeds.push(assetInfo as CheckedAsset)
+    }
+    console.log(checkeds);
+    
     this.setState({
-      checkedList
+      checkedAssets:checkeds
     })
-    console.log(this.state.checkedList)
   }
   public onChangeInput = (e: any) => {
     console.log(e.target.value);
@@ -85,8 +81,6 @@ export default class ManageAsset extends React.Component<IProps, IState>
     },()=>{
     })
     const list = manageStore.queryAssetInfo(e.target.value);
-    console.log(list);
-
     this.setState({
       searchList: list
     })
@@ -103,13 +97,15 @@ export default class ManageAsset extends React.Component<IProps, IState>
     }
   }
   public onSaveManage = () => {
+    const arr = this.state.checkedAssets.filter(info=>info.checked).map(info=>info.assetid)
+    manageStore.saveAssets(arr);
     if (this.props.lableChange) {
       this.props.lableChange('history');
     }
   }
   public onCancel = () => {
     this.setState({
-      checkedAssets: {},
+      checkedAssets: [],
       inputName: ''
     })
   }
@@ -124,12 +120,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
     }
     manageStore.initAssetList();
   }
-  public onSelect = (assetid: string) => {
-    const checkedAssets = this.state.checkedAssets
-    checkedAssets[ assetid ] = !checkedAssets[ assetid ];
-    this.setState({
-      checkedAssets
-    }, () => { console.log(this.state.checkedAssets) })
+  public isChecked = (assetid: string) => {
+    const checked = this.state.checkedAssets.find(info=>info.assetid==assetid)
+    return checked?checked.checked:false;
   }
   public render() {
     return (
@@ -152,13 +145,14 @@ export default class ManageAsset extends React.Component<IProps, IState>
             this.state.inputName === '' ? (
               <>
                 {
-                  manageStore.myAssets.map(info => {
+                  this.state.checkedAssets.map(info => {
                     // const index = this.state.checkedList.indexOf(k as never);
                     return (
                       <div className="asset-wrapper">
                         <label>
-                          <input type="checkbox" name='assets' onChange={this.chooseStatus} />
-                          <img className="checked-img" src={true ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                          <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                            <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                          </div>
                         </label>
                         <span>{info.symbol}{info.type == 'nep5' ? `（${info.name}）` : ''}</span>
                         <div className="asset-amount">{info.assetid.substr(0, 4) + "..." + info.assetid.substr(info.assetid.length - 4, 4)}</div>
@@ -168,12 +162,13 @@ export default class ManageAsset extends React.Component<IProps, IState>
                 }
                 {
                   manageStore.allAsset.map(info => {
-                    if (manageStore.myAssets.findIndex(myasset => info.assetid == myasset.assetid) < 0) {
+                    if (this.state.checkedAssets.findIndex(myasset => info.assetid == myasset.assetid) < 0) {
                       return (
                         <div className="asset-wrapper">
                           <label>
-                            <input type="checkbox" name='assets' onChange={this.chooseStatus} />
-                            <img className="checked-img" src={false ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                            <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                              <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                            </div>
                           </label>
                           <span>{info.symbol}{info.type == 'nep5' ? `（${info.name}）` : ''}</span>
                           <div className="asset-amount">{info.assetid.substr(0, 4) + "..." + info.assetid.substr(info.assetid.length - 4, 4)}</div>
@@ -182,10 +177,6 @@ export default class ManageAsset extends React.Component<IProps, IState>
                     }
                   })
                 }
-                {/* <div className="manage-footer">
-                <Button text="取消" type="warn" onClick={this.goBack} />
-                <Button text="保存" type="primary" onClick={this.onSaveManage} />
-              </div> */}
               </>
             ) :
               (
@@ -194,8 +185,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
                   return (
                     <div className="asset-wrapper">
                       <label>
-                        <input type="checkbox" name='assets' onChange={this.chooseStatus} />
-                        <img className="checked-img" src={true ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                        <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                          <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                        </div>
                       </label>
                       <span>{info.symbol}{info.type == 'nep5' ? `（${info.name}）` : ''}</span>
                       <div className="asset-amount">{info.assetid.substr(0, 4) + "..." + info.assetid.substr(info.assetid.length - 4, 4)}</div>
