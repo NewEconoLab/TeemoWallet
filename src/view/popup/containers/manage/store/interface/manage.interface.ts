@@ -5,6 +5,11 @@ interface IManagerAssets
     initAssetList:()=>void;
 
     queryAssetInfo:(value:string)=>AssetInfo[];
+
+    addAssetInfo:(assetID:string)=>void;
+
+    saveAssets:(assets:string[])=>void;
+
 }
 
 

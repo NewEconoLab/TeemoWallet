@@ -86,14 +86,12 @@ export default class ManageAsset extends React.Component<IProps, IState>
   }
   public onChangeInput = (e: any) =>
   {
-    console.log(e.target.value);
-    
-    const list = manageStore.queryAssetInfo(e.target.value);
-
-    console.log(list);
     
     this.setState({
       inputName: e.target.value,
+    })
+    const list = manageStore.queryAssetInfo(e.target.value);
+    this.setState({
       searchList:list
     })
   }

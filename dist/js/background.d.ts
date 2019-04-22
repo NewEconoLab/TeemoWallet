@@ -486,6 +486,7 @@ declare class AssetManager {
      * @param value 搜索值，资产名称或者id
      */
     queryAsset(value: string): AssetInfo[];
+    saveAsset(assets: string[]): void;
     /**
      * 根据资产id添加资产
      * @param assetID 资产id

@@ -1729,6 +1729,8 @@ const getStringFromHexstr = (hexStr) => {
 const getBigIntegerFromHexstr = (hexStr) => {
     return new Promise((resolve, reject) => {
         try {
+            if (hexStr == "")
+                resolve('0');
             const value = Neo.BigInteger.fromUint8Array(hexStr.hexToBytes());
             resolve(value.toString());
         }
@@ -2195,14 +2197,18 @@ class AssetManager {
         return this.allAssetInfo.filter(asset => {
             console.log(asset);
             try {
-                const result = asset.symbol.includes(value) ? true : asset.assetid.includes(value.replace('0x', ''));
+                const result = asset.symbol.toUpperCase().indexOf(value.toUpperCase()) >= 0;
                 return result;
             }
             catch (error) {
                 console.log(error);
                 return false;
             }
-        });
+        })
+            .sort((a, b) => { return a.symbol.toUpperCase().indexOf(value.toUpperCase()) - b.symbol.toUpperCase().indexOf(value.toUpperCase()); });
+    }
+    saveAsset(assets) {
+        localStorage.setItem('Teemo-assetManager', assets.join('|'));
     }
     /**
      * 根据资产id添加资产

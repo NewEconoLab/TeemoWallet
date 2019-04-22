@@ -162,6 +162,8 @@ var Teemo;
          * @param params
          */
         static getBlock(params) {
+            if (typeof params.blockHeight == 'string')
+                params.blockHeight = parseInt(params.blockHeight);
             return sendMessage(Command.getBlock, params);
         }
         /**

@@ -129,7 +129,7 @@ interface InvokeGroupOutup {
  * @param {string} network 网络
  */
 interface GetBlockArgs {
-    blockHeight: number;
+    blockHeight: number | string;
     network: string;
 }
 interface GetTransactionArgs {
@@ -270,23 +270,23 @@ declare namespace Teemo {
          * 查询区块信息
          * @param params
          */
-        static getBlock(params: GetBlockArgs): Promise<{}>;
+        static getBlock(params: GetBlockArgs): Promise<any>;
         /**
          * 查询交易信息
          * @param params
          */
-        static getTransaction(params: GetTransactionArgs): Promise<{}>;
+        static getTransaction(params: GetTransactionArgs): Promise<any>;
         /**
          * 查询log
          * @param params
          */
-        static getApplicationLog(params: GetApplicationLogArgs): Promise<{}>;
+        static getApplicationLog(params: GetApplicationLogArgs): Promise<any>;
         static TOOLS: {
             /**
              * 验证地址
              * @param address 要验证的地址
              */
-            validateAddress: (address: string) => Promise<{}>;
+            validateAddress: (address: string) => Promise<boolean>;
             /**
              * scriptHash转地址
              * @param scriptHash 要转换成地址的ScriptHash
@@ -311,9 +311,16 @@ declare namespace Teemo {
             getDecimalsStrFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
         };
         static NNS: {
-            getNamehashFromDomain: (params: string) => Promise<{}>;
-            getAddressFromDomain: (params: DomainArgs) => Promise<{}>;
-            getDomainFromAddress: (params: AddressArgs) => Promise<{}>;
+            getNamehashFromDomain: (params: string) => Promise<string>;
+            getAddressFromDomain: (params: DomainArgs) => Promise<{
+                address: string;
+                TTL: string;
+            }>;
+            getDomainFromAddress: (params: AddressArgs) => Promise<{
+                namehash: string;
+                fullDomainName: string;
+                TTL: string;
+            }>;
         };
     }
 }

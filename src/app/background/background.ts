@@ -2591,7 +2591,7 @@ class AssetManager{
             {
                 console.log(asset);
                 try {    
-                    const result = asset.symbol.includes(value)?true:asset.assetid.includes(value.replace('0x',''))
+                    const result = asset.symbol.toUpperCase().indexOf(value.toUpperCase())>=0;
                     return result;
                 } catch (error) {
                     console.log(error);
@@ -2599,7 +2599,13 @@ class AssetManager{
                     return false;
                 }
             }
-        );
+        )
+        .sort((a,b)=>{return a.symbol.toUpperCase().indexOf(value.toUpperCase())-b.symbol.toUpperCase().indexOf(value.toUpperCase())})
+    }
+
+    saveAsset(assets:string[])
+    {
+        localStorage.setItem('Teemo-assetManager',assets.join('|'));
     }
 
     /**

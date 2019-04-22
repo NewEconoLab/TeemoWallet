@@ -20,13 +20,17 @@ class ManagerStore implements IManagerAssets
         }
     }
 
-    @action public queryAssetInfo=(value: string) =>{
+    @action public queryAssetInfo = (value: string) =>{
         return bg.assetManager.queryAsset(value);;
     }
 
-    @action public addAssetInfo=(assetID:string)=>{
+    @action public addAssetInfo = (assetID:string)=>{
         bg.assetManager.addAsset(assetID);
     }
+
+    @action public saveAssets = (assets: string[]) => {        
+        localStorage.setItem('Teemo-assetManager',assets.join('|'));
+    }    
     
 }
 export default new ManagerStore();
