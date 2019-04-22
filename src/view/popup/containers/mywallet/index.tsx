@@ -142,7 +142,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'transfer' && <span>{intl.message.assets.transfer}</span>
                                 }
                                 {
-                                    this.state.showPage === 'manage' && <span>管理代币</span>
+                                    this.state.showPage === 'manage' && <><span>管理代币</span><p className="close-page" onClick={this.onClosePage}>保存</p></>
                                 }
                                 {
                                     this.state.showPage === 'edit' && <span>钱包</span>
@@ -150,7 +150,10 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                 {
                                     this.state.showPage === 'setting' && <span>设置</span>
                                 }
+                                {
+                                    this.state.showPage != 'manage' && 
                                 <img onClick={this.onClosePage} className="close-page" src={require('../../../image/close-nomal.png')} alt="" />
+                                }
                             </div>
                         )
                     }
