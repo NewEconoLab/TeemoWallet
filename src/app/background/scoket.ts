@@ -103,12 +103,21 @@ class SocketManager
                     const task = TaskManager.shed[key];
                     if( task.network == storage.network && task.state==TaskState.watting)
                     {
-                        if(data.tx.findIndex(txid=>txid.txid.replace('0x','')==task.txid)>0){
+                        if(data.tx.findIndex(txid=>txid.txid.replace('0x','')==task.txid)>0)
+                        {
                             task.state = TaskState.success;
                             TaskManager.shed[key]=task;
                             Storage_local.set(TaskManager.table,TaskManager.shed);
                             
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
+                            if(task.type==ConfirmType.toClaimgas)
+                            {
+                                claimGas();
+                            }
+                            if(task.type==ConfirmType.claimgas)
+                            {
+                                localStorage.setItem('Teemo-claimgasState-'+task.network,'');
+                            }
                             if(task.next)
                             {
                                 TransferGroup.update(task.next,task.network);

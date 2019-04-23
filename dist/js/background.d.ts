@@ -180,6 +180,15 @@ declare const Api: {
     getnep5asset: (asset: any) => Promise<any>;
     getBlock: (height: number) => Promise<any>;
     getApplicationLog: (txid: string) => Promise<any>;
+    /**
+     * 获得claimgas的utxo
+     * @param address 地址
+     * @param type 类型 1:不可领取；其余：可领取
+     * @param page 页数
+     * @param size 每页条数
+     */
+    getClaimgasUtxoList: (address: string, type: number, page: number, size: number) => Promise<any>;
+    getclaimgas: (address: string, type: number, size: number, hide: number) => Promise<any>;
 };
 declare const setContractMessage: (txid: string, domain: string, data: any) => void;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
@@ -402,7 +411,9 @@ declare var getDomainFromAddress: (params: AddressArgs) => Promise<{
 declare const responseMessage: (sender: chrome.runtime.MessageSender, request: any) => void;
 declare enum ConfirmType {
     tranfer = 0,
-    contract = 1
+    contract = 1,
+    toClaimgas = 2,
+    claimgas = 3
 }
 declare enum TaskState {
     watting = 0,
@@ -477,6 +488,22 @@ declare class TaskManager {
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;
     static update(): void;
+}
+declare var getClaimGasAmount: () => Promise<string>;
+declare var getClaimGasState: () => string;
+declare var doClaimGas: () => Promise<void>;
+declare const claimGas: () => Promise<InvokeOutput>;
+interface Claim {
+    addr: string;
+    asset: string;
+    claimed: boolean;
+    createHeight: number;
+    n: number;
+    txid: string;
+    useHeight: number;
+    used: string;
+    value: number;
+    gas: number;
 }
 declare class AssetManager {
     allAssetInfo: AssetInfo[];

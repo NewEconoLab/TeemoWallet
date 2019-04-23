@@ -582,6 +582,27 @@ const Api = {
             params: [txid],
             baseUrl: 'common'
         });
+    },
+    /**
+     * 获得claimgas的utxo
+     * @param address 地址
+     * @param type 类型 1:不可领取；其余：可领取
+     * @param page 页数
+     * @param size 每页条数
+     */
+    getClaimgasUtxoList: (address, type, page, size) => {
+        return request({
+            method: 'getclaimgasUtxoList',
+            params: [address, type, page, size],
+            baseUrl: 'common',
+        });
+    },
+    getclaimgas: (address, type, size, hide) => {
+        return request({
+            method: 'getclaimgas',
+            params: [address, type, size, hide],
+            baseUrl: 'common',
+        });
     }
 };
 const setContractMessage = (txid, domain, data) => {
@@ -1961,6 +1982,8 @@ var ConfirmType;
 (function (ConfirmType) {
     ConfirmType[ConfirmType["tranfer"] = 0] = "tranfer";
     ConfirmType[ConfirmType["contract"] = 1] = "contract";
+    ConfirmType[ConfirmType["toClaimgas"] = 2] = "toClaimgas";
+    ConfirmType[ConfirmType["claimgas"] = 3] = "claimgas";
 })(ConfirmType || (ConfirmType = {}));
 var TaskState;
 (function (TaskState) {
@@ -2009,14 +2032,6 @@ class TransferGroup {
                 data: tran.txhex
             };
             Storage_local.set(TaskManager.table, TaskManager.shed);
-            // if(error)
-            // {
-            //     tran.executeError={
-            //         type:"RPC_ERROR",
-            //         description:"An RPC error occured when submitting the request",
-            //         data:error
-            //     }
-            // }
         });
     }
 }
@@ -2044,7 +2059,7 @@ class TaskManager {
         //     .catch(error=>{
         //         console.log(error);
         //     })
-        // },15000)        
+        // },15000)
     }
     static get webSocketURL() {
         if (storage.network == 'MainNet')
@@ -2112,7 +2127,35 @@ class TaskManager {
                         console.log(error);
                     });
                 }
-                else {
+                else if (task.type == ConfirmType.toClaimgas) {
+                    Api.getrawtransaction(task.txid, task.network)
+                        .then(result => {
+                        if (result['blockhash']) {
+                            task.state = TaskState.success;
+                            this.shed[key] = task;
+                            Storage_local.set(this.table, this.shed);
+                            claimGas();
+                        }
+                    })
+                        .catch(error => {
+                        console.log(error);
+                    });
+                }
+                else if (task.type == ConfirmType.claimgas) {
+                    Api.getrawtransaction(task.txid, task.network)
+                        .then(result => {
+                        if (result['blockhash']) {
+                            task.state = TaskState.success;
+                            this.shed[key] = task;
+                            Storage_local.set(this.table, this.shed);
+                            localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                        }
+                    })
+                        .catch(error => {
+                        console.log(error);
+                    });
+                }
+                else if (task.type == ConfirmType.contract) {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
                         if (result['blockhash']) {
@@ -2145,6 +2188,84 @@ TaskManager.blockDatas = [{
         timeDiff: 0
     }];
 TaskManager.start();
+var getClaimGasAmount = () => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const claims = yield Api.getclaimgas(storage.account.address, 0, 1, 0);
+        const noclaims = yield Api.getclaimgas(storage.account.address, 1, 1, 0);
+        let sum1 = Neo.Fixed8.parse(claims[0]["gas"].toFixed(8));
+        let sum2 = Neo.Fixed8.parse(noclaims[0]["gas"].toFixed(8));
+        let sum = sum1.add(sum2).toString();
+        return sum;
+    }
+    catch (error) {
+    }
+});
+var getClaimGasState = () => {
+    const state = localStorage.getItem('Teemo-claimgasState-' + storage.network);
+    return state ? state : '';
+};
+var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
+    const neoutxo = yield MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_NEO);
+    if (neoutxo) {
+        let sum = Neo.Fixed8.Zero;
+        const tran = new Transaction();
+        for (const utxo of neoutxo) {
+            const input = new ThinNeo.TransactionInput();
+            input.hash = utxo.txid.hexToBytes().reverse();
+            input.index = utxo.n;
+            input.addr = utxo.addr;
+            sum = sum.add(utxo.count);
+            tran.inputs.push(input);
+            tran.marks.push(new MarkUtxo(utxo.txid, utxo.n));
+        }
+        const output = new ThinNeo.TransactionOutput();
+        const assetId = neoutxo[0].asset.hexToBytes().reverse();
+        output.assetId = assetId;
+        output.value = sum;
+        output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
+        tran.outputs.push(output);
+        const result = yield transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.toClaimgas, result.txid));
+        localStorage.setItem('Teemo-claimgasState-' + storage.network, 'wait');
+    }
+    else {
+        claimGas();
+    }
+});
+const claimGas = () => __awaiter(this, void 0, void 0, function* () {
+    var address = storage.account.address;
+    let claimresult = yield Api.getClaimgasUtxoList(address, 1, 0, 0);
+    let claimsAmount = yield Api.getclaimgas(storage.account.address, 0, 1, 0);
+    let claims = claimresult[0]["list"];
+    let count = claimresult[0]['count'];
+    let sum = Neo.Fixed8.Zero;
+    // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
+    var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
+    //交易类型为合约交易
+    tran.type = ThinNeo.TransactionType.ClaimTransaction;
+    tran.version = 0; //0 or 1
+    tran.extdata = new ThinNeo.ClaimTransData(); //JSON.parse(JSON.stringify(claims));
+    tran.extdata.claims = [];
+    for (const claim of claims) {
+        var input = new ThinNeo.TransactionInput();
+        input.hash = (claim.txid).hexToBytes().reverse();
+        input.index = claim.n;
+        input["_addr"] = claim.addr;
+        sum = sum.add(Neo.Fixed8.parse(claim.gas.toString()));
+        tran.extdata.claims.push(input);
+    }
+    var output = new ThinNeo.TransactionOutput();
+    output.assetId = (HASH_CONFIG.ID_GAS).hexToBytes().reverse();
+    output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(address);
+    // output.value = amount;
+    output.value = sum;
+    tran.outputs = [];
+    tran.outputs.push(output);
+    const result = yield transactionSignAndSend(tran);
+    TaskManager.addTask(new Task(ConfirmType.claimgas, result.txid));
+    localStorage.setItem('Teemo-claimgasState-' + storage.network, 'wait');
+    return result;
+});
 class AssetManager {
     constructor() {
         this.allAssetInfo = [];

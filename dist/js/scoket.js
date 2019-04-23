@@ -94,6 +94,12 @@ class SocketManager {
                             TaskManager.shed[key] = task;
                             Storage_local.set(TaskManager.table, TaskManager.shed);
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: data.blockHeight, blockTime: data.blockTime });
+                            if (task.type == ConfirmType.toClaimgas) {
+                                claimGas();
+                            }
+                            if (task.type == ConfirmType.claimgas) {
+                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                            }
                             if (task.next) {
                                 TransferGroup.update(task.next, task.network);
                             }

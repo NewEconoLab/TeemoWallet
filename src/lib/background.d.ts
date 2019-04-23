@@ -64,7 +64,10 @@ declare interface Background extends Window{
         namehash: string;
         fullDomainName: string;
         TTL: string;
-    }>
+    }>;
+    doClaimGas: () => Promise<void>;
+    getClaimGasAmount: () => Promise<string>;
+    getClaimGasState: () => string;
     assetManager: AssetManager;
 }
 
