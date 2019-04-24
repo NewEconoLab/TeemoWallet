@@ -25,6 +25,7 @@ declare interface AccountManager{
     };
     getCurrentNetWork: () => "TestNet" | "MainNet";
     settingDisconnection: (time: number) => void;
+    cleanTrustList: () => void;
 }
 
 interface GetNetworksOutput {

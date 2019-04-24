@@ -2134,7 +2134,12 @@ class TaskManager {
                             task.state = TaskState.success;
                             this.shed[key] = task;
                             Storage_local.set(this.table, this.shed);
-                            claimGas();
+                            if (storage.account && storage.account.address == task.message) {
+                                claimGas();
+                            }
+                            else {
+                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                            }
                         }
                     })
                         .catch(error => {
@@ -2233,11 +2238,18 @@ var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
         output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
         tran.outputs.push(output);
         const result = yield transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.toClaimgas, result.txid));
+        TaskManager.addTask(new Task(ConfirmType.toClaimgas, result.txid, undefined, TaskState.watting, storage.account.address));
         localStorage.setItem('Teemo-claimgasState-' + storage.network, 'wait');
     }
     else {
-        claimGas();
+        try {
+            if (storage.account && storage.account.address) {
+                claimGas();
+            }
+        }
+        catch (error) {
+            localStorage.setItem('Teemo-claimgasState-' + storage.network, '');
+        }
     }
 });
 const claimGas = () => __awaiter(this, void 0, void 0, function* () {
@@ -2306,6 +2318,7 @@ class AssetManager {
                 assetInfo.name = nep5.name;
                 this.allAssetInfo.push(assetInfo);
             }
+            return true;
         });
     }
     /**
@@ -2328,34 +2341,34 @@ class AssetManager {
             .sort((a, b) => { return a.symbol.toUpperCase().indexOf(value.toUpperCase()) - b.symbol.toUpperCase().indexOf(value.toUpperCase()); });
     }
     saveAsset(assets) {
-        localStorage.setItem('Teemo-assetManager', assets.join('|'));
+        localStorage.setItem('Teemo-assetManager-' + storage.network, assets.join('|'));
     }
     /**
      * 根据资产id添加资产
      * @param assetID 资产id
      */
     addAsset(assetID) {
-        const assetids = localStorage.getItem('Teemo-assetManager');
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
         const list = assetids ? assetids.split('|') : [];
         list.push(assetID);
         const arr = list.filter((element, index, self) => self.indexOf(element) === index);
-        localStorage.setItem('Teemo-assetManager', list.join('|'));
+        localStorage.setItem('Teemo-assetManager-' + storage.network, list.join('|'));
     }
     /**
      * 根据资产id删除资产
      * @param assetID 资产id
      */
     deleteAsset(assetID) {
-        const assetids = localStorage.getItem('Teemo-assetManager');
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
         const list = assetids ? assetids.split('|') : [];
         const arr = list.filter((element) => element != assetID);
-        localStorage.setItem('Teemo-assetManager', JSON.stringify(arr));
+        localStorage.setItem('Teemo-assetManager-' + storage.network, JSON.stringify(arr));
     }
     /**
      * 获得用户拥有的资产列表
      */
     getMyAsset() {
-        const assetids = localStorage.getItem('Teemo-assetManager');
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
         return this.allAssetInfo.filter(asset => assetids.includes(asset.assetid));
     }
 }

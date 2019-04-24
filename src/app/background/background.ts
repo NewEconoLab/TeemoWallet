@@ -2539,7 +2539,14 @@ class TaskManager{
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
-                            claimGas();
+                            if(storage.account && storage.account.address == task.message)
+                            {
+                                claimGas();
+                            }
+                            else
+                            {
+                                localStorage.setItem('Teemo-claimgasState-'+task.network,'');
+                            }
                         }
                     })
                     .catch(error=>{
@@ -2625,7 +2632,7 @@ var doClaimGas=async()=>{
             input.addr = utxo.addr;
             sum = sum.add(utxo.count);
             tran.inputs.push(input);
-            tran.marks.push(new MarkUtxo(utxo.txid,utxo.n)); 
+            tran.marks.push(new MarkUtxo(utxo.txid,utxo.n));
         }
         
         const output = new ThinNeo.TransactionOutput();
@@ -2635,12 +2642,19 @@ var doClaimGas=async()=>{
         output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address);
         tran.outputs.push(output); 
         const result = await transactionSignAndSend(tran)
-        TaskManager.addTask(new Task(ConfirmType.toClaimgas,result.txid,));
+        TaskManager.addTask(new Task(ConfirmType.toClaimgas,result.txid,undefined,TaskState.watting,storage.account.address));
         localStorage.setItem('Teemo-claimgasState-'+storage.network,'wait')
     }
     else
     {
-        claimGas();
+        try {
+            if(storage.account && storage.account.address)
+            {
+                claimGas();
+            }
+        } catch (error) {
+            localStorage.setItem('Teemo-claimgasState-'+storage.network,'')
+        }
     }
 }
 
@@ -2725,6 +2739,7 @@ class AssetManager{
             assetInfo.name=nep5.name;
             this.allAssetInfo.push(assetInfo);
         }
+        return true;
     }
 
     /**
@@ -2753,7 +2768,7 @@ class AssetManager{
 
     saveAsset(assets:string[])
     {
-        localStorage.setItem('Teemo-assetManager',assets.join('|'));
+        localStorage.setItem('Teemo-assetManager-'+storage.network,assets.join('|'));
     }
 
     /**
@@ -2762,11 +2777,11 @@ class AssetManager{
      */
     addAsset(assetID:string)
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager');
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
         const list = assetids? assetids.split('|'):[];
         list.push(assetID);
         const arr = list.filter((element,index,self)=>self.indexOf(element)===index);
-        localStorage.setItem('Teemo-assetManager',list.join('|'));
+        localStorage.setItem('Teemo-assetManager-'+storage.network,list.join('|'));
     }
 
     /**
@@ -2775,10 +2790,10 @@ class AssetManager{
      */
     deleteAsset(assetID:string)
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager');
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
         const list = assetids? assetids.split('|'):[];
         const arr = list.filter((element)=>element!=assetID);
-        localStorage.setItem('Teemo-assetManager',JSON.stringify(arr));
+        localStorage.setItem('Teemo-assetManager-'+storage.network,JSON.stringify(arr));
     }
 
     /**
@@ -2786,7 +2801,7 @@ class AssetManager{
      */
     getMyAsset()
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager');
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
         return this.allAssetInfo.filter(asset=>assetids.includes(asset.assetid));
     }
 

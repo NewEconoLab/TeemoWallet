@@ -507,7 +507,7 @@ interface Claim {
 }
 declare class AssetManager {
     allAssetInfo: AssetInfo[];
-    initAllAseetInfo(): Promise<void>;
+    initAllAseetInfo(): Promise<boolean>;
     /**
      * 模糊搜索资产
      * @param value 搜索值，资产名称或者id

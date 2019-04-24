@@ -7,6 +7,7 @@ import './index.less';
 import Button from '../../../components/Button';
 import { observer } from 'mobx-react';import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
+import Toast from '../../../components/Toast';
 ;
 
 @observer
@@ -45,11 +46,16 @@ export default class ClaimGAS extends React.Component
   }
   
   public onClaimGAS = () => {
-    bg.doClaimGas();
-    localStorage.setItem('Teemo-claimgasState-'+common.network,'wait');
-    this.setState({
-      claimStatus:2
-    })
+    try {
+      bg.doClaimGas();
+      localStorage.setItem('Teemo-claimgasState-'+common.network,'wait');
+      Toast("正在提取gas，请勿退出钱包。")
+      this.setState({
+        claimStatus:2
+      })
+    } catch (error) {
+      
+    }
   }
   public render()
   {
@@ -61,7 +67,7 @@ export default class ClaimGAS extends React.Component
         <div className="gas-number">
           {common.claimGasAmount}
         </div>
-        {this.state.claimsAmount !='0' &&
+        {common.claimGasAmount !='0' &&
           <div className="claim-btn">
             <Button text={this.state.claimStatus === 0?"提取":"提取中"} size="small" type={this.state.claimStatus === 0 ? 'primary':'disable-btn'} onClick={this.onClaimGAS} />
           </div>      

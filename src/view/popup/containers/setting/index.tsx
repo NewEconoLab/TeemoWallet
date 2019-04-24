@@ -7,6 +7,7 @@ import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import Select, { IOption } from '../../../components/Select';
 import { bg } from '../../utils/storagetools';
+import Toast from '../../../components/Toast';
 interface IProps
 {
     lableChange: (table: string) => void
@@ -56,6 +57,11 @@ export default class Setting extends React.Component<IProps, {}>
         bg.AccountManager.settingDisconnection(parseInt(event.id));
     }
 
+    public cleanTrustList = ()=>{
+        bg.AccountManager.cleanTrustList();
+        Toast('授权已清除')
+    }
+
     public render()
     {
         const timeOptions: IOption[] = [
@@ -89,7 +95,7 @@ export default class Setting extends React.Component<IProps, {}>
                             <span className="bold-text">清除授权</span>                            
                         </div>
                         <div className="normal-right">
-                            <Button text="清除" size="small" />
+                            <Button text="清除" size="small" onClick={this.cleanTrustList} />
                         </div>
                     </div>
                     <p className="normal-text">所有应用都需要重新请求授权，才能发起交易请求。</p>

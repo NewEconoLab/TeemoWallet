@@ -17,6 +17,7 @@ declare var AccountManager: {
     };
     getCurrentNetWork: () => "TestNet" | "MainNet";
     settingDisconnection: (time: number) => void;
+    cleanTrustList: () => void;
 };
 /**
  * 事件出发返回方法

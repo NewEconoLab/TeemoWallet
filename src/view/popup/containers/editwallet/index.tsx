@@ -7,6 +7,7 @@ import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import Toast from '../../../components/Toast';
 import Backup from './backup';
+import common from '../../store/common';
 // import PrivateKey from './privatekey';
 // import DeleteWallet from './deletewallet';
 interface IProps
@@ -83,12 +84,12 @@ export default class EditWallet extends React.Component<IProps, {}>
             <div className="editwallet-wrapper">
                 <div className="editwallet-content">
                     <div className="editname-wrap">
-                        <input className="edit-input" type="text" value={this.state.walletName} onChange={this.onChangeWalletName} />
+                        <input className="edit-input" type="text" value={common.account.lable} onChange={this.onChangeWalletName} />
                         <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" />
                     </div>
                     <div className="edit-address">
                         <div className="bold-text">地址</div>
-                        <span className="bold-text">ALp9DVGJAvApjLWSQbA6S9qX7dEwnRwdaf </span>
+                        <span className="bold-text">{common.account.address} </span>
                     </div>
                     <div className="edit-nep">
                         <div className="bold-text">Nep2加密密钥 </div>

@@ -176,10 +176,12 @@ var AccountManager={
         localStorage.setItem('current-addr',account.address)
         EventsOnChange(WalletEvents.CONNECTED,{address:account.address,label:account.walletName});
         EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:account.address,label:account.walletName});
+        localStorage.setItem('Teemo-claimgasState-'+storage.network,'');
     },
 
     logout:()=>{
         storage.account=null;
+        localStorage.setItem('Teemo-claimgasState-'+storage.network,'');
         EventsOnChange(WalletEvents.DISCONNECTED);
     },
 
@@ -206,6 +208,10 @@ var AccountManager={
 
     settingDisconnection:(time:number)=>{
         localStorage.setItem('Teemo-setting-disconnection', time===0?'':time.toString())
+    },
+
+    cleanTrustList:()=>{
+        storage.domains=[];
     }
 }
 /**
