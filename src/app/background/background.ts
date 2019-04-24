@@ -2589,17 +2589,22 @@ class TaskManager{
 TaskManager.start();
 
 var getClaimGasAmount= async()=>{
-    try {        
-        const claims = await Api.getclaimgas(storage.account.address,0,1,0);
-        const noclaims = await Api.getclaimgas(storage.account.address,1,1,0);
-        
-        let sum1 = Neo.Fixed8.parse(claims[0]["gas"].toFixed(8));
-        let sum2 = Neo.Fixed8.parse(noclaims[0]["gas"].toFixed(8));
-        let sum = sum1.add(sum2).toString()
-        return sum;
+    let claims:Neo.Fixed8;
+    let noclaims:Neo.Fixed8;
+    try {      
+        const result = await Api.getclaimgas(storage.account.address,0,1,0);
+        claims = result[0]["gas"].toFixed(8);
     } catch (error) {
-        
+        claims=Neo.Fixed8.Zero;
     }
+    try {
+        const result = await Api.getclaimgas(storage.account.address,1,1,0);
+        noclaims = Neo.Fixed8.parse(result[0]['gas'].toFixed(8));
+    } catch (error) {
+        noclaims=Neo.Fixed8.Zero;
+    }
+    let sum = claims.add(noclaims).toString()
+    return sum;
 }
 
 var getClaimGasState=()=>{
