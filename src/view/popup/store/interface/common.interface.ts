@@ -26,12 +26,13 @@ export interface IAccountMessage{
 
 export interface ICommonStore {
     account:IAccountMessage,
-    accountList:NepAccount[]
-    language: string,
+    accountList:NepAccount[],
+    claimGasAmount:string;
     network: string,
-    balances:IAccountBalanceStore,  // 账户余额的信息
+    balances:{[asset:string]:number},  // 账户余额的信息
     changeNetWork:(network:NetWork)=>Promise<NetWork>,
-    initAccountList:()=>void,
+    // initAccountList:()=>void,
     initAccountInfo:()=>void,
     initAccountBalance:() => void, // 初始化账户余额
+    initClaimGasAmount:() => void; // 初始化可提取的Gas金额
 }

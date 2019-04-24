@@ -18,28 +18,27 @@ export default class ClaimGAS extends React.Component
   }
 
   componentDidMount(){
-    bg.getClaimGasAmount()
-    .then(result=>{
-      console.log(result);
-      
-      this.setState({claimsAmount:result})
-    })
+    common.initClaimGasAmount()
     const state = localStorage.getItem('Teemo-claimgasState-'+common.network);
     if(state && state=='wait')
     {
       this.setState({claimStatus:2});
     }
     setInterval(()=>{
+      const status = localStorage.getItem('Teemo-claimgasState-'+common.network);
       if(this.state.claimStatus==2)
       {
-        const state = localStorage.getItem('Teemo-claimgasState-'+common.network);
-        if(state !='wait')
+        if(status !='wait')
         {
+          common.initClaimGasAmount();
           this.setState({claimStatus:0});
-          bg.getClaimGasAmount()
-          .then(result=>{
-            this.setState({claimsAmount:result})
-          })
+        }
+      }else
+      {
+        if(status =='wait')
+        {
+          common.initClaimGasAmount();
+          this.setState({claimStatus:2});
         }
       }
     },1000)
@@ -47,6 +46,7 @@ export default class ClaimGAS extends React.Component
   
   public onClaimGAS = () => {
     bg.doClaimGas();
+    localStorage.setItem('Teemo-claimgasState-'+common.network,'wait');
     this.setState({
       claimStatus:2
     })
@@ -59,7 +59,7 @@ export default class ClaimGAS extends React.Component
           可提取GAS
         </div>
         <div className="gas-number">
-          {this.state.claimsAmount}
+          {common.claimGasAmount}
         </div>
         {this.state.claimsAmount !='0' &&
           <div className="claim-btn">

@@ -3,18 +3,20 @@ import { NepAccount } from "../../../common/entity";
 import { Storage_local, bg } from "../utils/storagetools";
 import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
 import { HASH_CONFIG } from "../../config";
-import { IAccountBalanceStore, NetWork, IAccountMessage } from './interface/common.interface';
+import { NetWork, IAccountMessage, ICommonStore } from './interface/common.interface';
 import historyStore from '../containers/history/store/history.store';
 import manageStore from '../containers/manage/store/manage.store';
 
 /**
  * 我的账户管理
  */
-class Common
+class Common implements ICommonStore
 {
+    @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:''};
     @observable public network:NetWork=NetWork.TestNet;
     @observable public balances:{[asset:string]:number}={};
+
     constructor(){
         this.tabname="account"
     }
@@ -26,12 +28,14 @@ class Common
     }
     
     @action public changeNetWork=(network:NetWork)=>{
-        return new Promise((r,j)=>{ 
+        return new Promise<NetWork>((r,j)=>{ 
             bg.AccountManager.netWorkChange(network)
             .then(result=>{
                 this.network = network;
                 this.initAccountBalance();
                 historyStore.initHistoryList();
+                this.initClaimGasAmount()
+                r(this.network);
             })
         })
     }
@@ -52,20 +56,6 @@ class Common
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{
                 this.balances[value.symbol]=parseFloat(value.amount);
-                // switch(value.symbol){
-                //     case 'NEO':
-                //         this.balances.NEO = parseFloat(value.amount);
-                //         break;
-                //     case 'GAS':
-                //         this.balances.GAS = parseFloat(value.amount);
-                //         break;
-                //     case 'CGAS':
-                //         this.balances.CGAS = parseFloat(value.amount);
-                //         break;
-                //     case 'NNC':
-                //         this.balances.NNC = parseFloat(value.amount);
-                //         break;                    
-                // }
             })
         })
     }
@@ -74,6 +64,13 @@ class Common
         const acc =bg.AccountManager.getCurrentAccount();
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
+    }
+    
+    @action public initClaimGasAmount= () => {
+        bg.getClaimGasAmount()
+        .then(result=>{
+            this.claimGasAmount=result;
+        })
     }
     
     private _accountList:NepAccount[];
