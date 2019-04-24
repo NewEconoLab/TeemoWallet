@@ -34,7 +34,8 @@ class Common implements ICommonStore
                 this.network = network;
                 this.initAccountBalance();
                 historyStore.initHistoryList();
-                this.initClaimGasAmount()
+                this.initClaimGasAmount();
+                manageStore.initAssetList();
                 r(this.network);
             })
         })

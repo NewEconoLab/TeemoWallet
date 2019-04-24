@@ -10,6 +10,7 @@ class ManagerStore implements IManagerAssets
 
     @action public initAssetList = () => {
         const assetids = localStorage.getItem('Teemo-assetManager');
+        bg.assetManager.initAllAseetInfo()
         this.allAsset = bg.assetManager.allAssetInfo;
         if(assetids)
         {
