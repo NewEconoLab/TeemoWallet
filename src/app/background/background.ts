@@ -2593,13 +2593,13 @@ var getClaimGasAmount= async()=>{
     let noclaims:Neo.Fixed8;
     try {
         const result = await Api.getclaimgas(storage.account.address,0,1,0);
-        claims = result[0]["gas"].toFixed(8);
+        claims = Neo.Fixed8.parse(result[0]["gas"].toString());
     } catch (error) {
         claims=Neo.Fixed8.Zero;
     }
     try {
         const result = await Api.getclaimgas(storage.account.address,1,1,0);
-        noclaims = Neo.Fixed8.parse(result[0]['gas'].toFixed(8));
+        noclaims = Neo.Fixed8.parse(result[0]['gas'].toString());
     } catch (error) {
         noclaims=Neo.Fixed8.Zero;
     }

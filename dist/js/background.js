@@ -2193,14 +2193,14 @@ var getClaimGasAmount = () => __awaiter(this, void 0, void 0, function* () {
     let noclaims;
     try {
         const result = yield Api.getclaimgas(storage.account.address, 0, 1, 0);
-        claims = result[0]["gas"].toFixed(8);
+        claims = Neo.Fixed8.parse(result[0]["gas"].toString());
     }
     catch (error) {
         claims = Neo.Fixed8.Zero;
     }
     try {
         const result = yield Api.getclaimgas(storage.account.address, 1, 1, 0);
-        noclaims = Neo.Fixed8.parse(result[0]['gas'].toFixed(8));
+        noclaims = Neo.Fixed8.parse(result[0]['gas'].toString());
     }
     catch (error) {
         noclaims = Neo.Fixed8.Zero;
