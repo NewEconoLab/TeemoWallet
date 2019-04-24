@@ -10,6 +10,7 @@ if(chrome.tabs)
     chrome.tabs.query({ active: true, currentWindow: true }, tab => {        
         //初始化鼠标随机方法
         Neo.Cryptography.RandomNumberGenerator.startCollectors();
+        var port = chrome.runtime.connect();
         ReactDOM.render(
             <App/>, document.getElementById('popup')
         );

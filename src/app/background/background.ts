@@ -2591,7 +2591,7 @@ TaskManager.start();
 var getClaimGasAmount= async()=>{
     let claims:Neo.Fixed8;
     let noclaims:Neo.Fixed8;
-    try {      
+    try {
         const result = await Api.getclaimgas(storage.account.address,0,1,0);
         claims = result[0]["gas"].toFixed(8);
     } catch (error) {

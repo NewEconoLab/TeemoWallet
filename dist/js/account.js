@@ -155,6 +155,9 @@ var AccountManager = {
     },
     getCurrentNetWork: () => {
         return storage.network;
+    },
+    settingDisconnection: (time) => {
+        localStorage.setItem('Teemo-setting-disconnection', time === 0 ? '' : time.toString());
     }
 };
 /**
@@ -172,6 +175,22 @@ const EventsOnChange = (event, data) => {
         }
     });
 };
+let settime;
+chrome.runtime.onConnect.addListener((externalPort) => {
+    console.log("连接成功");
+    if (settime)
+        clearTimeout(settime);
+    externalPort.onDisconnect.addListener(() => {
+        var ignoreError = chrome.runtime.lastError;
+        console.log("链接中断", ignoreError);
+        const timestr = localStorage.getItem('Teemo-setting-disconnection');
+        if (timestr) {
+            settime = setTimeout(() => {
+                storage.account = null;
+            }, parseInt(timestr));
+        }
+    });
+});
 var WalletEvents;
 (function (WalletEvents) {
     WalletEvents["READY"] = "Teemo.NEO.READY";

@@ -16,6 +16,7 @@ declare var AccountManager: {
         walletName: string;
     };
     getCurrentNetWork: () => "TestNet" | "MainNet";
+    settingDisconnection: (time: number) => void;
 };
 /**
  * 事件出发返回方法
@@ -23,6 +24,7 @@ declare var AccountManager: {
  * @param data 传递参数
  */
 declare const EventsOnChange: (event: WalletEvents, data?: any) => void;
+declare let settime: any;
 declare enum WalletEvents {
     READY = "Teemo.NEO.READY",
     CONNECTED = "Teemo.NEO.CONNECTED",

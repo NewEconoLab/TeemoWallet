@@ -24,6 +24,7 @@ declare interface AccountManager{
         walletName: string;
     };
     getCurrentNetWork: () => "TestNet" | "MainNet";
+    settingDisconnection: (time: number) => void;
 }
 
 interface GetNetworksOutput {

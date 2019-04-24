@@ -6,6 +6,7 @@ import './index.less';
 import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import Select, { IOption } from '../../../components/Select';
+import { bg } from '../../utils/storagetools';
 interface IProps
 {
     lableChange: (table: string) => void
@@ -16,23 +17,54 @@ export default class Setting extends React.Component<IProps, {}>
     constructor(props: any)
     {
         super(props);
+        const time = localStorage.getItem('Teemo-setting-disconnection')
+        this.setState({
+            currentOptins:time
+        })
     }
+
+    public state={
+        currentOptin:'0'
+    }
+
     public timeOptions: IOption[] = [
-        { id: '0.3', name: '30秒' },
-        { id: '5', name: '5分钟' },
-        { id: '15', name: '15分钟' },
-        { id: '30', name: '30分钟' },
-        { id: '0', name: '不上锁' }
+        { id: '0', name: '不上锁' },
+        { id: '30000', name: '30秒' },
+        { id: '300000', name: '5分钟' },
+        { id: '900000', name: '15分钟' },
+        { id: '1800000', name: '30分钟' },
     ]
     // 返回上一页
-    // public goBack = ()=> {
-    //     if (this.props.lableChange)
-    //     {
-    //         this.props.lableChange('history');
-    //     }
-    // }
+    
+    public componentDidMount()
+    {
+        console.log("进来了");
+        
+        const time = localStorage.getItem('Teemo-setting-disconnection');
+        console.log(time);
+        
+        this.setState({
+            currentOptin:time
+        },()=>{
+            console.log('初始化结束',this.state.currentOptin);
+            
+        });
+    }
+
+    public settingDisconne=(event:IOption)=>{
+        this.setState({currentOptin:event.id});
+        bg.AccountManager.settingDisconnection(parseInt(event.id));
+    }
+
     public render()
     {
+        const timeOptions: IOption[] = [
+            { id: '0', name: '不上锁' },
+            { id: '30000', name: '30秒' },
+            { id: '300000', name: '5分钟' },
+            { id: '900000', name: '15分钟' },
+            { id: '1800000', name: '30分钟' },
+        ]
         return (
             <div className="setting-wrapper">
                 <div className="setting-content">
@@ -41,7 +73,7 @@ export default class Setting extends React.Component<IProps, {}>
                             <span className="bold-text">自动上锁 </span>
                         </div>
                         <div className="normal-right">
-                            <Select options={this.timeOptions} text="" />
+                            <Select options={timeOptions} text="" onCallback={this.settingDisconne}  currentOption={timeOptions.find(opt => opt.id == this.state.currentOptin)} />
                         </div>
                     </div>
                     <div className="normal-setting">
