@@ -42,7 +42,7 @@ export default class ClaimGAS extends React.Component
           })
         }
       }
-    },2000)
+    },1000)
   }
   
   public onClaimGAS = () => {
@@ -61,9 +61,11 @@ export default class ClaimGAS extends React.Component
         <div className="gas-number">
           {this.state.claimsAmount}
         </div>
-        <div className="claim-btn">
-        <Button text={this.state.claimStatus === 0?"提取":"提取中"} size="small" type={this.state.claimStatus === 0 ? 'primary':'disable-btn'} onClick={this.onClaimGAS} />
-        </div>        
+        {this.state.claimsAmount !='0' &&
+          <div className="claim-btn">
+            <Button text={this.state.claimStatus === 0?"提取":"提取中"} size="small" type={this.state.claimStatus === 0 ? 'primary':'disable-btn'} onClick={this.onClaimGAS} />
+          </div>      
+        }  
       </div>
     );
   }
