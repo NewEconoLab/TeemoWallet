@@ -53,6 +53,7 @@ class Common implements ICommonStore
             "params":params
         }
         // this.balances={NEO:0,GAS:0,NNC:0,CGAS:0,CNEO:0};
+        this.balances={};
         bg.getBalance(data)
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{
