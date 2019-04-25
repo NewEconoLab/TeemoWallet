@@ -20,6 +20,8 @@ declare var AccountManager: {
     getCurrentNetWork: () => "TestNet" | "MainNet";
     settingDisconnection: (time: number) => void;
     cleanTrustList: () => void;
+    deleteCurrentAccount: () => boolean;
+    verifyCurrentAccount: (password: string) => Promise<boolean>;
 };
 /**
  * 事件出发返回方法

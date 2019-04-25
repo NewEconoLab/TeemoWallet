@@ -9,8 +9,11 @@ import common from '../../store/common';
 import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'
 import Button from '../../../components/Button';
+import Input from '../../../components/Input';
+import { bg } from '../../utils/storagetools';
+import { RouteComponentProps } from 'react-router';
 
-interface IProps
+interface IProps extends RouteComponentProps
 {
 	onClose?: () => void
 }
@@ -20,6 +23,8 @@ export default class DeleteWallet extends React.Component<IProps, any>
 {
 	public state = {
 		showDeleteStep: 0,
+		confrimName:'',
+		password:''
 	}
 	// 下一步
 	public onGoNextStep = () =>
@@ -29,14 +34,42 @@ export default class DeleteWallet extends React.Component<IProps, any>
 		})
 	}
 	public onDeleteWallet = () =>{
-		alert("删除钱包")
-		this.onHide();
+		if(this.state.confrimName==common.account.lable)
+		{
+			bg.AccountManager.verifyCurrentAccount(this.state.password)
+			.then(result=>{
+				if(result)
+				{
+					bg.AccountManager.deleteCurrentAccount()
+					this.props.history.push('/login');
+					Toast('钱包删除成功');
+				}
+				else
+				{
+					this.setState({confrimName:'',password:''})
+					Toast('密码错误','error');
+				}
+			});			
+		}
+		else
+		{
+			Toast('账户名错误','error');
+			this.setState({confrimName:'',password:''})
+		}
 	}
 	public onHide=()=>{
 		this.setState({
 			showDeleteStep:0
 		})
 		this.props.onClose?this.props.onClose():null;
+	}
+
+	public onNameChange = (event:any)=>{
+		this.setState({confrimName:event.target.value})
+	}
+
+	public onPwdChange = (event:any) =>{
+		this.setState({password:event.target.value})
 	}
 	
 	public render()
@@ -61,10 +94,11 @@ export default class DeleteWallet extends React.Component<IProps, any>
 						this.state.showDeleteStep === 1 && (
 							<div className="step-box">
 								<div className="input-wrap">
-									<input type="text" className="delete-input" placeholder="输入你要删除的钱包名称以确认" />
+									<input type="text" className="delete-input" placeholder="输入你要删除的钱包名称以确认" onChange={this.onNameChange} value={this.state.confrimName} />
+									{/* <Input type="text" placeholder="输入你要删除的钱包名称以确认"  onChange={this.onNameChange} value={this.state.confrimName} /> */}
 								</div>
 								<div className="input-wrap last-input">
-									<input type="password" className="delete-input" placeholder="输入钱包密码" />
+									<input type="password" className="delete-input" placeholder="输入钱包密码" onChange={this.onPwdChange} value={this.state.password} />
 								</div>
 								<div className="step-btn step2-btn">
 									<Button type="warn" text="取消" onClick={this.onHide} />

@@ -62,6 +62,11 @@ export default class Setting extends React.Component<IProps, {}>
         Toast('授权已清除')
     }
 
+    public cleanHistory = ()=>{
+        bg.cleanHistory();
+        Toast('交易清除');
+    }
+
     public render()
     {
         const timeOptions: IOption[] = [
@@ -87,7 +92,7 @@ export default class Setting extends React.Component<IProps, {}>
                             <span className="bold-text">清空交易记录 </span>
                         </div>
                         <div className="normal-right">
-                            <Button text="清空" size="small" />
+                            <Button text="清空" size="small" onClick={this.cleanHistory} />
                         </div>
                     </div>
                     <div className="normal-setting">

@@ -2442,22 +2442,7 @@ class TaskManager{
         })
         // this.updateBlock();
         this.socket.socketInit();
-        
-        setInterval(this.socket.updateLastWSmsgSec,1000)
-        // setInterval(()=>{
-        //     Api.getBlockCount()
-        //     .then(result=>{
-        //         const count = (parseInt(result[0].blockcount)-1);
-        //         if(count - storage.height!=0)
-        //         {
-        //             storage.height=count;
-        //             this.update()
-        //         }
-        //     })
-        //     .catch(error=>{
-        //         console.log(error);
-        //     })
-        // },15000)
+        this.socket.updateLastWSmsgSec()
     }
     
     public static get webSocketURL(){
@@ -2523,7 +2508,7 @@ class TaskManager{
             {
                 if(task.type===ConfirmType.tranfer){
                     Api.getrawtransaction(task.txid,task.network)
-                    .then(result=>{                        
+                    .then(result=>{
                         if(result['blockhash'])
                         {      
                             task.state = TaskState.success;
@@ -2603,6 +2588,33 @@ class TaskManager{
 }
 
 TaskManager.start();
+
+var cleanHistory=()=>
+{
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task:TaskHistory = TaskManager.shed[txid];
+            if(task.state !== TaskState.watting && task.state !== TaskState.watForLast)
+            {
+                delete TaskManager.shed[txid];
+            }
+        }
+    }
+    Storage_local.set(TaskManager.table,this.shed);
+}
+
+var cleanTaskForAddr=(address:string)=>{
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task:TaskHistory = TaskManager.shed[txid];
+            if(task.currentAddr == address)
+            {
+                delete TaskManager.shed[txid];
+            }
+        }
+    }
+    Storage_local.set(TaskManager.table,this.shed);
+}
 
 var getClaimGasAmount= async()=>{
     let claims:Neo.Fixed8;

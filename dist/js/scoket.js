@@ -14,35 +14,41 @@ class SocketManager {
         this.reconnection = 0;
         this.txids = [];
         this.updateLastWSmsgSec = () => {
-            this.lastWSmsgSec = (new Date().getTime() - this.lastWSmsgTime) / 1000;
-            //webstock 如果2分钟取不到最新块，会发送心跳数据包
-            if (this.lastWSmsgSec > 75) {
-                if (this.reconnection >= 3) {
-                    this.socket.close();
-                    this.reconnection = 0;
-                    setInterval(() => {
-                        Api.getBlockCount()
-                            .then(result => {
-                            const count = (parseInt(result[0].blockcount) - 1);
-                            if (count - storage.height != 0) {
-                                storage.height = count;
-                                TaskManager.update();
-                            }
-                        })
-                            .catch(error => {
-                            console.log(error);
-                        });
-                    }, 15000);
+            setTimeout(() => {
+                this.lastWSmsgSec = (new Date().getTime() - this.lastWSmsgTime) / 1000;
+                //webstock 如果2分钟取不到最新块，会发送心跳数据包
+                if (this.lastWSmsgSec > 75) {
+                    if (this.reconnection >= 3) {
+                        this.socket.close();
+                        this.reconnection = 0;
+                        setInterval(() => {
+                            Api.getBlockCount()
+                                .then(result => {
+                                const count = (parseInt(result[0].blockcount) - 1);
+                                if (count - storage.height != 0) {
+                                    storage.height = count;
+                                    TaskManager.update();
+                                }
+                            })
+                                .catch(error => {
+                                console.log(error);
+                            });
+                        }, 15000);
+                    }
+                    else {
+                        this.lastWSmsgTime = new Date().getTime(),
+                            this.lastWSmsgSec = 0;
+                        this.socketInit();
+                        this.reconnection++;
+                        this.updateLastWSmsgSec(); // 回调自己
+                    }
                 }
                 else {
-                    this.lastWSmsgTime = new Date().getTime(),
-                        this.lastWSmsgSec = 0;
-                    this.socketInit();
-                    this.reconnection++;
+                    this.updateLastWSmsgSec(); // 回调自己
                 }
-            }
-            if (this.socket)
-                this.socketReadyState = this.socket.readyState;
+                if (this.socket)
+                    this.socketReadyState = this.socket.readyState;
+            }, 1000);
         };
     }
     get webSocketURL() {

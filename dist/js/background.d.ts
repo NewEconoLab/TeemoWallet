@@ -489,6 +489,8 @@ declare class TaskManager {
     static initShed(): Promise<{}>;
     static update(): void;
 }
+declare var cleanHistory: () => void;
+declare var cleanTaskForAddr: (address: string) => void;
 declare var getClaimGasAmount: () => Promise<string>;
 declare var getClaimGasState: () => string;
 declare var doClaimGas: () => Promise<void>;

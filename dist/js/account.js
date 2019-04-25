@@ -179,7 +179,42 @@ var AccountManager = {
     },
     cleanTrustList: () => {
         storage.domains = [];
-    }
+    },
+    deleteCurrentAccount: () => {
+        try {
+            cleanTaskForAddr(storage.account.address);
+            const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
+            let accounts = [];
+            if (str) {
+                let arr = [];
+                accounts = accounts.concat(JSON.parse(str));
+                for (let index = 0; index < accounts.length; index++) {
+                    if (accounts[index].address != storage.account.address) {
+                        arr.push(accounts[index]);
+                    }
+                }
+                localStorage.setItem('TeemoWALLET_ACCOUNT', JSON.stringify(arr));
+            }
+            storage.account = null;
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+        // EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:storage.account.address,label:storage.account.walletName});
+    },
+    verifyCurrentAccount: (password) => __awaiter(this, void 0, void 0, function* () {
+        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
+        let accounts = [];
+        accounts = accounts.concat(JSON.parse(str));
+        try {
+            const account = yield AccountManager.deciphering(password, accounts.find(acc => acc.address == storage.account.address));
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    }),
 };
 /**
  * 事件出发返回方法

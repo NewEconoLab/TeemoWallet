@@ -28,6 +28,8 @@ declare interface AccountManager{
     getCurrentNetWork: () => "TestNet" | "MainNet";
     settingDisconnection: (time: number) => void;
     cleanTrustList: () => void;
+    deleteCurrentAccount: () => boolean;
+    verifyCurrentAccount: (password: string) => Promise<boolean>;
 }
 
 interface GetNetworksOutput {

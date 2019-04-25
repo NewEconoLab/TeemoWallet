@@ -2053,21 +2053,7 @@ class TaskManager {
         });
         // this.updateBlock();
         this.socket.socketInit();
-        setInterval(this.socket.updateLastWSmsgSec, 1000);
-        // setInterval(()=>{
-        //     Api.getBlockCount()
-        //     .then(result=>{
-        //         const count = (parseInt(result[0].blockcount)-1);
-        //         if(count - storage.height!=0)
-        //         {
-        //             storage.height=count;
-        //             this.update()
-        //         }
-        //     })
-        //     .catch(error=>{
-        //         console.log(error);
-        //     })
-        // },15000)
+        this.socket.updateLastWSmsgSec();
     }
     static get webSocketURL() {
         if (storage.network == 'MainNet')
@@ -2201,6 +2187,28 @@ TaskManager.blockDatas = [{
         timeDiff: 0
     }];
 TaskManager.start();
+var cleanHistory = () => {
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task = TaskManager.shed[txid];
+            if (task.state !== TaskState.watting && task.state !== TaskState.watForLast) {
+                delete TaskManager.shed[txid];
+            }
+        }
+    }
+    Storage_local.set(TaskManager.table, this.shed);
+};
+var cleanTaskForAddr = (address) => {
+    for (const txid in TaskManager.shed) {
+        if (TaskManager.shed.hasOwnProperty(txid)) {
+            const task = TaskManager.shed[txid];
+            if (task.currentAddr == address) {
+                delete TaskManager.shed[txid];
+            }
+        }
+    }
+    Storage_local.set(TaskManager.table, this.shed);
+};
 var getClaimGasAmount = () => __awaiter(this, void 0, void 0, function* () {
     let claims;
     let noclaims;

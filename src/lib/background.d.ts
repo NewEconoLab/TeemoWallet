@@ -69,6 +69,8 @@ declare interface Background extends Window{
     getClaimGasAmount: () => Promise<string>;
     getClaimGasState: () => string;
     assetManager: AssetManager;
+    cleanHistory: () => void;
+    cleanTaskForAddr: (address: string) => void;
 }
 
 declare class AssetManager {
