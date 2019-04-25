@@ -13,7 +13,7 @@ import manageStore from '../containers/manage/store/manage.store';
 class Common implements ICommonStore
 {
     @observable public claimGasAmount: string='0';
-    @observable public account:IAccountMessage={address:'',lable:''};
+    @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
     @observable public balances:{[asset:string]:number}={};
 
@@ -66,6 +66,7 @@ class Common implements ICommonStore
         const acc =bg.AccountManager.getCurrentAccount();
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
+        this.account.pubkeyHex = acc.pubkeyHex;
     }
     
     @action public initClaimGasAmount= () => {

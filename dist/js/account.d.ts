@@ -14,6 +14,7 @@ declare var AccountManager: {
     getCurrentAccount: () => {
         address: string;
         walletName: string;
+        pubkeyHex: string;
     };
     getCurrentNetWork: () => "TestNet" | "MainNet";
     settingDisconnection: (time: number) => void;

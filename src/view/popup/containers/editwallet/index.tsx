@@ -18,10 +18,30 @@ interface IProps
 @observer
 export default class EditWallet extends React.Component<IProps, {}>
 {
+    constructor(props: any)
+    {
+        super(props);
+    }
+
+    componentDidMount(){        
+        const wallet: ThinNeo.nep6wallet = new ThinNeo.nep6wallet();
+        const nepAccount = common.accountList.find(acc=> common.account.address==acc.address);
+        wallet.scrypt=nepAccount.scrypt;
+        wallet.accounts=[];
+        wallet.accounts[0]=new ThinNeo.nep6account();
+        wallet.accounts[0].nep2key=nepAccount.nep2key;
+        wallet.accounts[0].address=nepAccount.address;
+        wallet.accounts[0].contract= new ThinNeo.contract();
+        wallet.accounts[0].contract.script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(common.account.pubkeyHex.hexToBytes()).toHexString();
+        var jsonstr = JSON.stringify(wallet.toJson());
+        var blob = new Blob([ ThinNeo.Helper.String2Bytes(jsonstr) ]);
+        this.setState({downloadHref:URL.createObjectURL(blob)})
+    }
+
     public state = {
-        walletName: '我的钱包1',
         showDialog: 0,  // 0为不显示，1为备份弹框，2为私钥弹框，3为删除弹框
-        codeLink:''
+        codeLink:'',
+        downloadHref:''
     }
     public onChangeWalletName = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
@@ -105,7 +125,12 @@ export default class EditWallet extends React.Component<IProps, {}>
                             <span className="bold-text">Nep6备份文件</span>
                         </div>
                         <div className="normal-right">
-                            <Button text="下载" size="small" onClick={this.onShowBackup} />
+                            {this.state.downloadHref?
+                            <a download={common.account.lable+'.json'} href={this.state.downloadHref}>
+                                <Button text="下载" size="small" onClick={this.onShowBackup} />
+                            </a>:
+                                <Button text="下载" size="small" type="disable-btn" />
+                            }
                         </div>
                     </div>
                     <p className="normal-text">备份您的钱包，使用时将需要密码。</p>

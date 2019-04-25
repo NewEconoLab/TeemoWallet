@@ -22,6 +22,7 @@ export interface IAccountBalanceStore
 export interface IAccountMessage{
     address:string;
     lable:string;
+    pubkeyHex:string;
 }
 
 export interface ICommonStore {

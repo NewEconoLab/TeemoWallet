@@ -151,7 +151,7 @@ var AccountManager = {
     },
     getCurrentAccount: () => {
         if (storage.account)
-            return { address: storage.account.address, walletName: storage.account.walletName };
+            return { address: storage.account.address, walletName: storage.account.walletName, pubkeyHex: storage.account.pubkeyHex };
         else
             return undefined;
     },
