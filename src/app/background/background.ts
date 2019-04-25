@@ -1480,6 +1480,11 @@ var getBalance = async (data:GetBalanceArgs)=>{
                                 if(assets[id]){
                                     assetArray.push(assets[id]);
                                 }
+                                else
+                                {
+                                    const info = assetManager.allAssetInfo.find(asset=>asset.assetid==id);
+                                    assetArray.push({assetID:info.assetid,symbol:info.symbol,amount:'0'})
+                                }
                             }
                         }
                 }
@@ -1516,6 +1521,10 @@ var getBalance = async (data:GetBalanceArgs)=>{
                     for (const id of utxoasset) {
                         if(assets[id]){
                             assetArray.push(assets[id]);
+                        }else
+                        {
+                            const info = assetManager.allAssetInfo.find(asset=>asset.assetid==id);
+                            assetArray.push({assetID:info.assetid,symbol:info.symbol,amount:'0'})
                         }
                     }
                 }
@@ -2710,7 +2719,22 @@ interface Claim
 }
 
 class AssetManager{
-    allAssetInfo:AssetInfo[] = []
+    testAssetInfo : AssetInfo[] = [];
+    mainAssetInfo : AssetInfo[] = [];
+    get allAssetInfo(){
+        return storage.network=='MainNet'?this.mainAssetInfo:this.testAssetInfo;
+    }
+    set allAssetInfo(arr: AssetInfo[])
+    {
+        if(storage.network=="MainNet")
+        {
+            this.mainAssetInfo=arr;
+        }
+        if(storage.network=="TestNet")
+        {
+            this.testAssetInfo=arr;
+        }
+    }
     
     async initAllAseetInfo(){
         const nep5Assets:Nep5AssetInfo[] = await Api.getallnep5asset();

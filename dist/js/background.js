@@ -1238,6 +1238,10 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
                             if (assets[id]) {
                                 assetArray.push(assets[id]);
                             }
+                            else {
+                                const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
+                                assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' });
+                            }
                         }
                     }
                 }
@@ -1268,6 +1272,10 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
                     for (const id of utxoasset) {
                         if (assets[id]) {
                             assetArray.push(assets[id]);
+                        }
+                        else {
+                            const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
+                            assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' });
                         }
                     }
                 }
@@ -2288,7 +2296,19 @@ const claimGas = () => __awaiter(this, void 0, void 0, function* () {
 });
 class AssetManager {
     constructor() {
-        this.allAssetInfo = [];
+        this.testAssetInfo = [];
+        this.mainAssetInfo = [];
+    }
+    get allAssetInfo() {
+        return storage.network == 'MainNet' ? this.mainAssetInfo : this.testAssetInfo;
+    }
+    set allAssetInfo(arr) {
+        if (storage.network == "MainNet") {
+            this.mainAssetInfo = arr;
+        }
+        if (storage.network == "TestNet") {
+            this.testAssetInfo = arr;
+        }
     }
     initAllAseetInfo() {
         return __awaiter(this, void 0, void 0, function* () {

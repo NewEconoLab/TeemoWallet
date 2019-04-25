@@ -506,6 +506,8 @@ interface Claim {
     gas: number;
 }
 declare class AssetManager {
+    testAssetInfo: AssetInfo[];
+    mainAssetInfo: AssetInfo[];
     allAssetInfo: AssetInfo[];
     initAllAseetInfo(): Promise<boolean>;
     /**
