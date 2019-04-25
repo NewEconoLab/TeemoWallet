@@ -70,7 +70,7 @@ export default class EditWallet extends React.Component<IProps, {}>
     // 复制nep2
 	public onCopyNep2 = () => {		
 		const oInput = document.createElement('input');
-		oInput.value = this.state.codeLink;
+		oInput.value = common.accountList.find(acc=> common.account.address==acc.address).nep2key
 		document.body.appendChild(oInput);
 		oInput.select(); // 选择对象
 		document.execCommand("Copy"); // 执行浏览器复制命令
@@ -96,7 +96,7 @@ export default class EditWallet extends React.Component<IProps, {}>
                         <p className="tips-msg">使用NEP2加密密钥及密码可以在其他地方打开您的钱包。
                         <br />您的加密密钥是:</p>
                         <div className="nep-wrapper">
-                            <div className="nep-text" onClick={this.onCopyNep2}>a939367dbbfd2b45dca5102769585e67137f6babbdb841d20d59c069d3278d97</div>
+                            <div className="nep-text" onClick={this.onCopyNep2}>{common.accountList.find(acc=> common.account.address==acc.address).nep2key}</div>
                             <span className="copy-text">（点击直接复制）</span>
                         </div>
                     </div>
