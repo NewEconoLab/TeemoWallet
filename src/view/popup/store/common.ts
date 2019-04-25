@@ -64,7 +64,6 @@ class Common implements ICommonStore
 
     @action public initAccountInfo=()=>{
         const acc = bg.AccountManager.getCurrentAccount();
-        console.log(acc);
         
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
