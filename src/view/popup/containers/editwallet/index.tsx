@@ -8,6 +8,7 @@ import { observer } from 'mobx-react';
 import Toast from '../../../components/Toast';
 import Backup from './backup';
 import common from '../../store/common';
+import { bg } from '../../utils/storagetools';
 // import PrivateKey from './privatekey';
 // import DeleteWallet from './deletewallet';
 interface IProps
@@ -41,7 +42,8 @@ export default class EditWallet extends React.Component<IProps, {}>
     public state = {
         showDialog: 0,  // 0为不显示，1为备份弹框，2为私钥弹框，3为删除弹框
         codeLink:'',
-        downloadHref:''
+        downloadHref:'',
+        walletName:common.account.lable
     }
     public onChangeWalletName = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
@@ -76,6 +78,10 @@ export default class EditWallet extends React.Component<IProps, {}>
     {
         this.setState({ showDialog: 1 })
     }
+    public toChangeWalletName = () =>{
+        bg.AccountManager.setAccountName(this.state.walletName);
+        common.initAccountInfo();
+    }
     //  // 弹出私钥
     //  public onShowPrivate = () =>
     //  {
@@ -104,7 +110,7 @@ export default class EditWallet extends React.Component<IProps, {}>
             <div className="editwallet-wrapper">
                 <div className="editwallet-content">
                     <div className="editname-wrap">
-                        <input className="edit-input" type="text" value={common.account.lable} onChange={this.onChangeWalletName} />
+                        <input className="edit-input" type="text" value={this.state.walletName} onChange={this.onChangeWalletName} onBlur={this.toChangeWalletName} />
                         <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" />
                     </div>
                     <div className="edit-address">

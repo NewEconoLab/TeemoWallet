@@ -197,9 +197,30 @@ var AccountManager={
 
     getCurrentAccount:()=>{
         if(storage.account)
+        {
             return {address:storage.account.address,walletName:storage.account.walletName,pubkeyHex:storage.account.pubkeyHex}
+        }
         else
             return undefined;
+    },
+
+    setAccountName:(label:string)=>{
+        
+        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
+        let accounts = []
+        if(str && label) 
+        {
+            let arr = accounts.concat(JSON.parse(str));
+            for (let index = 0; index < arr.length; index++) {
+                const acc = arr[index];
+                if(acc.address==storage.account.address)
+                {
+                    arr[index]['walletName']=storage.account.walletName = label;
+                }
+            }
+            localStorage.setItem('TeemoWALLET_ACCOUNT',JSON.stringify(arr));
+        }
+        EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:storage.account.address,label:storage.account.walletName});
     },
 
     getCurrentNetWork:()=>{
