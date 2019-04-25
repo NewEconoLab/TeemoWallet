@@ -10,6 +10,7 @@ class ManagerStore implements IManagerAssets
     @observable allAsset: AssetInfo[]=[];
 
     @action public initAssetList = async() => {
+        bg.assetManager.initAllAseetInfo();
         const assetids = localStorage.getItem('Teemo-assetManager-'+common.network);
         this.allAsset = bg.assetManager.allAssetInfo;
         if(assetids)
