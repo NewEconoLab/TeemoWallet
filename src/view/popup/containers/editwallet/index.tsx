@@ -14,7 +14,7 @@ import { bg } from '../../utils/storagetools';
 interface IProps
 {
     lableChange: (table: string) => void,
-    twiceChange:(label:string)=>void
+    twiceChange:(label:string)=>void,
 }
 @observer
 export default class EditWallet extends React.Component<IProps, {}>
@@ -36,14 +36,18 @@ export default class EditWallet extends React.Component<IProps, {}>
         wallet.accounts[0].contract.script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(common.account.pubkeyHex.hexToBytes()).toHexString();
         var jsonstr = JSON.stringify(wallet.toJson());
         var blob = new Blob([ ThinNeo.Helper.String2Bytes(jsonstr) ]);
-        this.setState({downloadHref:URL.createObjectURL(blob)})
+        this.setState({
+            downloadHref:URL.createObjectURL(blob),
+            codeLink:nepAccount.nep2key,
+            walletName:nepAccount.walletName
+        })
     }
 
     public state = {
         showDialog: 0,  // 0为不显示，1为备份弹框，2为私钥弹框，3为删除弹框
         codeLink:'',
         downloadHref:'',
-        walletName:common.account.lable
+        walletName:'',
     }
     public onChangeWalletName = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
@@ -96,7 +100,7 @@ export default class EditWallet extends React.Component<IProps, {}>
     // 复制nep2
 	public onCopyNep2 = () => {		
 		const oInput = document.createElement('input');
-		oInput.value = common.accountList.find(acc=> common.account.address==acc.address).nep2key
+		oInput.value = this.state.codeLink;
 		document.body.appendChild(oInput);
 		oInput.select(); // 选择对象
 		document.execCommand("Copy"); // 执行浏览器复制命令
@@ -122,7 +126,7 @@ export default class EditWallet extends React.Component<IProps, {}>
                         <p className="tips-msg">使用NEP2加密密钥及密码可以在其他地方打开您的钱包。
                         <br />您的加密密钥是:</p>
                         <div className="nep-wrapper">
-                            <div className="nep-text" onClick={this.onCopyNep2}>{common.accountList.find(acc=> common.account.address==acc.address).nep2key}</div>
+                            <div className="nep-text" onClick={this.onCopyNep2}>{this.state.codeLink}</div>
                             <span className="copy-text">（点击直接复制）</span>
                         </div>
                     </div>
@@ -132,7 +136,7 @@ export default class EditWallet extends React.Component<IProps, {}>
                         </div>
                         <div className="normal-right">
                             {this.state.downloadHref?
-                            <a download={common.account.lable+'.json'} href={this.state.downloadHref}>
+                            <a download={this.state.walletName+'.json'} href={this.state.downloadHref}>
                                 <Button text="下载" size="small" onClick={this.onShowBackup} />
                             </a>:
                                 <Button text="下载" size="small" type="disable-btn" />

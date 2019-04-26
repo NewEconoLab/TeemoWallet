@@ -36,7 +36,7 @@ export default class DeleteWallet extends React.Component<IProps, any>
 	public onDeleteWallet = () =>{
 		if(this.state.confrimName==common.account.lable)
 		{
-			bg.AccountManager.verifyCurrentAccount(this.state.password)
+			bg.AccountManager.verifyCurrentAccount(common.account.address,this.state.password)
 			.then(result=>{
 				if(result)
 				{

@@ -5,20 +5,19 @@ import { LoginInfo } from "../view/notify/utils/neotools";
 import { AccountInfo } from "../common/entity";
 import { NetWork } from "../view/popup/store/interface/common.interface";
 
-declare interface AccountManager{
+declare interface AccountManager {
     createWallet: (key: Uint8Array) => void;
-    deciphering: (password: string, nepaccount: NepAccount) => Promise<WalletAccount>;
-    encryption: (password: string, wif: string) => Promise<WalletAccount>;
-    nep2Load: (nep2: string, password: string) => Promise<WalletAccount>;
-    nep6Load: (walletstr: string, password: string) => Promise<WalletAccount>;
-    /**
-     * 获得账户私钥等信息从account解密
-     */
-    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;    
-    netWorkChange: (network: "TestNet" | "MainNet") => Promise<GetNetworksOutput>;
-    logout: () => void;
+    deciphering: (password: string, nepaccount: NepAccount) => Promise<NepAccount>;
+    encryption: (password: string, wif: string) => Promise<AccountInfo>;
+    nep2Load: (nep2: string, password: string) => Promise<boolean>;
+    nep6Load: (str: string, password: string) => Promise<{
+        address: string;
+        label: string;
+    }>;
+    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, nep2key: string) => Promise<LoginInfo>;
     setAccount: (account: AccountInfo) => void;
-    getCurrent: () => WalletAccount;
+    logout: () => void;
+    netWorkChange: (network: "TestNet" | "MainNet") => Promise<GetNetworksOutput>;
     getCurrentAccount: () => {
         address: string;
         walletName: string;
@@ -29,7 +28,9 @@ declare interface AccountManager{
     settingDisconnection: (time: number) => void;
     cleanTrustList: () => void;
     deleteCurrentAccount: () => boolean;
-    verifyCurrentAccount: (password: string) => Promise<boolean>;
+    verifyCurrentAccount: (address: string, password: string) => Promise<boolean>;
+    getWifByDeciphering: (address: string, password: string) => Promise<string>;
+    getAccountList: () => NepAccount[];
 }
 
 interface GetNetworksOutput {

@@ -9,6 +9,7 @@ import common from '../../store/common';
 import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'
 import Button from '../../../components/Button';
+import { bg } from '../../utils/storagetools';
 
 interface IProps
 {
@@ -20,13 +21,32 @@ export default class PrivateKey extends React.Component<IProps, any>
 {
 	public state = {
 		showStep: 0,
-		copyPrivate:''
+		copyPrivate:'',
+		password:''
 	}
 	// 下一步
 	public onGoNextStep = () =>
 	{
+		bg.AccountManager.getWifByDeciphering(common.account.address,this.state.password)
+		.then(result=>{
+			this.setState({
+				showStep: 1,
+				copyPrivate:result,
+				password:''
+			})
+		})
+		.catch(error=>{
+			Toast('密码错误','error');
+			this.setState({
+				password:'',
+				copyPrivate:''
+			})
+		})
+	}
+
+	public onPasswordChange =(event:any)=>{
 		this.setState({
-			showStep: 1
+			password:event.target.value
 		})
 	}
 
@@ -58,7 +78,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 						this.state.showStep === 0 && (
 							<div className="step-box">
 								<div className="input-wrap">
-									<input type="text" className="private-input" placeholder="输入密码以继续 " />
+									<input type="password" className="private-input" placeholder="输入密码以继续 " value={this.state.password} onChange={this.onPasswordChange} />
 								</div>
 								<div className="step-btn">
 									<Button type="warn" text="取消" onClick={this.onClose} />
@@ -71,7 +91,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 						this.state.showStep === 1 && (
 							<div className="step-box">
 								<div className="private-text" onClick={this.onCopyPrivate}>
-									a939367dbbfd2b45dca5102769585e67137f6babbdb841d20d59c069d3278d97
+									{this.state.copyPrivate}
 								</div>
 								<p className="copy-tips">（点击私钥直接复制）</p>
 							</div>

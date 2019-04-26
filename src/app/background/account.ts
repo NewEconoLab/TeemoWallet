@@ -118,7 +118,7 @@ var AccountManager={
                     }
                     try
                     {
-                        const info = await AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account);      
+                        const info = await AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account.nep2key);      
                         const nepacc = Storage_local.setAccount(new NepAccount("",account.address,account.nep2key,wallet.scrypt));
                         arr.push(new AccountInfo(
                             nepacc,
@@ -149,13 +149,13 @@ var AccountManager={
     getPriKeyfromAccount:(
         scrypt: ThinNeo.nep6ScryptParameters, 
         password: string, 
-        account: ThinNeo.nep6account): Promise<LoginInfo>=>
+        nep2key: string): Promise<LoginInfo>=>
     {
         const {N,r,p} = scrypt;
         let promise: Promise<LoginInfo> =
             new Promise((resolve, reject) =>
             {
-                ThinNeo.Helper.GetPrivateKeyFromNep2(account.nep2key,password,N,r,p,(info,result)=>{
+                ThinNeo.Helper.GetPrivateKeyFromNep2(nep2key,password,N,r,p,(info,result)=>{
                     if (info == "finish")
                     {
                         var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(result as Uint8Array);
@@ -205,7 +205,6 @@ var AccountManager={
     },
 
     setAccountName:(label:string)=>{
-        
         const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
         let accounts = []
         if(str && label) 
@@ -260,17 +259,38 @@ var AccountManager={
         // EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:storage.account.address,label:storage.account.walletName});
     },
 
-    verifyCurrentAccount: async(password:string)=>{        
-        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
-        let accounts:NepAccount[] = []
-        accounts = accounts.concat(JSON.parse(str));
+    verifyCurrentAccount: async(address:string,password:string)=>{        
+        const list = AccountManager.getAccountList();
+        const account =list.find(acc=>acc.address==address);
         try {
-            const account = await AccountManager.deciphering(password,accounts.find(acc=>acc.address == storage.account.address));
+            const result = await AccountManager.getPriKeyfromAccount(account.scrypt,password,account.nep2key);
             return true;
         } catch (error) {
             return false;
         }
     },
+
+    getWifByDeciphering:async (address:string,password:string)=>{
+        const list = AccountManager.getAccountList();
+        const nep = list.find(acc=>acc.address==address);
+        try {            
+            const account = await AccountManager.getPriKeyfromAccount(nep.scrypt,password,nep.nep2key);
+            const wif = ThinNeo.Helper.GetWifFromPrivateKey(account.prikey);
+            return wif;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    getAccountList:()=>{
+        const str = localStorage.getItem("TeemoWALLET_ACCOUNT");
+        let accounts:NepAccount[] = []
+        if(str)
+        {
+            accounts = accounts.concat(JSON.parse(str));        
+        }
+        return accounts;
+    }
 }
 /**
  * 事件出发返回方法

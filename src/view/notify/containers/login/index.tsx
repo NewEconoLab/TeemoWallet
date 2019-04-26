@@ -99,7 +99,7 @@ export default class Login extends React.Component<AppProps,AppState> {
         bg.AccountManager.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
             // bg['storage'].account = account;
-            this.props.goHome(account)
+            this.props.goHome({'address':account.address,'label':account.walletName})
         })
         .catch(error=>{
             console.log(error);

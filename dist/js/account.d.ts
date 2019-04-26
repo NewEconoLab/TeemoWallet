@@ -7,7 +7,7 @@ declare var AccountManager: {
         address: string;
         label: string;
     }>;
-    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, account: ThinNeo.nep6account) => Promise<LoginInfo>;
+    getPriKeyfromAccount: (scrypt: ThinNeo.nep6ScryptParameters, password: string, nep2key: string) => Promise<LoginInfo>;
     setAccount: (account: AccountInfo) => void;
     logout: () => void;
     netWorkChange: (network: "TestNet" | "MainNet") => Promise<GetNetworksOutput>;
@@ -21,7 +21,9 @@ declare var AccountManager: {
     settingDisconnection: (time: number) => void;
     cleanTrustList: () => void;
     deleteCurrentAccount: () => boolean;
-    verifyCurrentAccount: (password: string) => Promise<boolean>;
+    verifyCurrentAccount: (address: string, password: string) => Promise<boolean>;
+    getWifByDeciphering: (address: string, password: string) => Promise<string>;
+    getAccountList: () => NepAccount[];
 };
 /**
  * 事件出发返回方法
