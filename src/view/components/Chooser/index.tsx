@@ -57,13 +57,14 @@ export default class Chooser extends React.Component<IProps, IState> {
 	}
 
 	// 选择选项
-	public onSelect = (item:IOption) => {
-
+	public onSelect = (e:any,item:IOption) => {
+		console.log(e.nativeEvent);
 		this.setState({ option: item, expand: false });
 
 		if(this.props.onCallback) {
 			this.props.onCallback(item);
 		}
+		e.nativeEvent.stopImmediatePropagation()
 	}
 	// 全局点击
 	public globalClick = () => {
@@ -95,7 +96,7 @@ export default class Chooser extends React.Component<IProps, IState> {
                     <div className={content}>
 						{this.props.options.map(option=>{
 							return (
-								<div className="hint-line" key={option.id} onClick={this.onSelect.bind(this, option)} >
+								<div className="hint-line" key={option.id} onClick={this.onSelect.bind(this,event, option)} >
 									<div className="line-icon">
 										<img src={option.icon} alt=""/>
 									</div>

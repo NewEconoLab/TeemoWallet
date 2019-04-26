@@ -111,6 +111,27 @@ export default class WalletHeader extends React.Component<IProps, {}> {
         this.props.history.push('/walletnew');
     }
 
+    public goWallet =(address:string)=>{
+        localStorage.setItem('current-addr',address);  
+        bg.AccountManager.logout();
+        this.props.history.push('/login');
+    }
+
+    public editAccount = (address:string,event:any) =>{
+        console.log(address);
+        console.log(event);
+        event.cancelBubble=true;
+        console.log(event.cancelBubble);
+        this.setState({
+            showMenu: !this.state.showMenu
+        })
+        event.preventDefault();
+        event.stopPropagation();
+        event.nativeEvent.stopImmediatePropagation();
+        this.onSwitchPage('edit')
+        
+    }
+
     public render()
     {
         const options: IOption[] = [
@@ -131,19 +152,23 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                                         <div className="menu-content">
                                             <div className="content-list">
                                                 <div className="normal-menu wallet-list">
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
+                                                    <div className="wallet-line">
                                                         <img className="select-icon" src={require("../../../image/selected.png")} alt="" />
-                                                        <span className="span-text">我的钱包1</span>
-                                                        <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
+                                                        <span className="span-text">{common.account.lable}</span>
+                                                        <img className="edit-icon" src={require("../../../image/edit.png")} alt="" onClick={this.editAccount.bind(this,common.account.address)} />
                                                     </div>
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
-                                                        <span className="span-text">我的钱包1</span>
-                                                        <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
-                                                    </div>
-                                                    <div className="wallet-line" onClick={this.onSwitchPage.bind(this,'edit')}>
-                                                        <span className="span-text">我的钱包1</span>
-                                                        <img className="edit-icon" src={require("../../../image/edit.png")} alt="" />
-                                                    </div>
+                                                    {
+                                                        common.accountList.filter(acc=>acc.address!=common.account.address).map(info=>{
+                                                            return (
+                                                                <>                                                                
+                                                                <div className="wallet-line" onClick={this.goWallet.bind(this,info.address)}>
+                                                                    <span className="span-text">{info.walletName}</span>
+                                                                    <img className="edit-icon" src={require("../../../image/edit.png")} alt="" onClick={this.editAccount.bind(this,info.address)} />
+                                                                </div>
+                                                                </>
+                                                            )
+                                                        })
+                                                    }
                                                 </div>
                                                 <div className="normal-menu">
                                                     <span className="menu-span" onClick={this.goNewWallet}>创建钱包</span>

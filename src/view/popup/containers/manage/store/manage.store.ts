@@ -3,6 +3,7 @@ import { ICON } from "../../../../image";
 import { bg } from "../../../utils/storagetools";
 import intl from "../../../store/intl";
 import common from "../../../store/common";
+import { HASH_CONFIG } from "../../../../config";
 
 class ManagerStore implements IManagerAssets
 {
@@ -14,13 +15,27 @@ class ManagerStore implements IManagerAssets
         const assetids = localStorage.getItem('Teemo-assetManager-'+common.network);
         this.allAsset = bg.assetManager.allAssetInfo;
         if(assetids)
-        {
-            const list = assetids.split('|');
-            this.myAssets = this.allAsset.filter(asset=>list.indexOf(asset.assetid)>=0);
+        {                        
+            const list = JSON.parse(assetids);
+            const arr = [];
+            for (const key in list) {
+                if (list.hasOwnProperty(key)) {
+                    if(list[key])
+                    {
+                        arr.push(key)
+                    }
+                }
+            }
+            if(arr.length>0)
+                this.myAssets = this.allAsset.filter(asset=>arr.indexOf(asset.assetid)>=0);
+            else
+                this.myAssets=[];
         }
         else
         {
-            this.myAssets = [];
+            const NEO:AssetInfo = {'assetid':HASH_CONFIG.ID_NEO,'symbol':'NEO','name':'NEO','decimals':0,'type':'utxo'};
+            const GAS:AssetInfo = {'assetid':HASH_CONFIG.ID_GAS,'symbol':'GAS','name':'GAS','decimals':8,'type':'utxo'};
+            this.myAssets = [NEO,GAS];
         }
     }
 
@@ -29,11 +44,17 @@ class ManagerStore implements IManagerAssets
     }
 
     @action public addAssetInfo = (assetID:string)=>{
-        bg.assetManager.addAsset(assetID);
+        // bg.assetManager.addAsset(assetID);
     }
 
-    @action public saveAssets = (assets: string[]) => {        
-        localStorage.setItem('Teemo-assetManager-'+common.network,assets.join('|'));
+    @action public saveAssets = (assets: string[]) => {
+        const myAssets = {};
+        for (const asset of assets) {
+            myAssets[asset]=true;
+        }
+        myAssets[HASH_CONFIG.ID_NEO]= !!myAssets[HASH_CONFIG.ID_NEO];
+        myAssets[HASH_CONFIG.ID_GAS]= !!myAssets[HASH_CONFIG.ID_GAS];
+        localStorage.setItem('Teemo-assetManager-'+common.network,JSON.stringify(myAssets));
     }    
     
 }

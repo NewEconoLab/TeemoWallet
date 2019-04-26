@@ -2591,10 +2591,11 @@ TaskManager.start();
 
 var cleanHistory=()=>
 {
+    const address:string = storage.account.address
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task:TaskHistory = TaskManager.shed[txid];
-            if(task.state !== TaskState.watting && task.state !== TaskState.watForLast)
+            if(task.currentAddr == address && task.state !== TaskState.watting && task.state !== TaskState.watForLast)
             {
                 delete TaskManager.shed[txid];
             }

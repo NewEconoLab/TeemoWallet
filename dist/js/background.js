@@ -2188,10 +2188,11 @@ TaskManager.blockDatas = [{
     }];
 TaskManager.start();
 var cleanHistory = () => {
+    const address = storage.account.address;
     for (const txid in TaskManager.shed) {
         if (TaskManager.shed.hasOwnProperty(txid)) {
             const task = TaskManager.shed[txid];
-            if (task.state !== TaskState.watting && task.state !== TaskState.watForLast) {
+            if (task.currentAddr == address && task.state !== TaskState.watting && task.state !== TaskState.watForLast) {
                 delete TaskManager.shed[txid];
             }
         }
