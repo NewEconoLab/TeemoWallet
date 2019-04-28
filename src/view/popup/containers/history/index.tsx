@@ -4,7 +4,7 @@
 import * as React from 'react';
 import './index.less';
 import Panel from '../../../components/Panel';
-import Select, { IOption } from '../../../components/Select';
+import { IOption } from '../../../components/Select';
 import Checkbox from '../../../components/Checkbox';
 import { observer } from 'mobx-react';
 import { TaskState, IHistory, ConfirmType } from './store/interface/history.interface';

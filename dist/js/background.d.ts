@@ -27,6 +27,9 @@ declare const baseCommonUrl = "https://api.nel.group/api";
 declare const baseUrl = "https://apiwallet.nel.group/api";
 declare const testRpcUrl = "http://test.nel.group:20332";
 declare const mainRpcUrl = "http://seed.nel.group:10332";
+declare const testRpcUrlList: string[];
+declare const mainRpcUrlList: string[];
+declare function networkSort(): void;
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -110,6 +113,7 @@ interface IOpts {
     params: any[];
     isGET?: boolean;
     baseUrl?: 'common' | 'rpc';
+    otherUrl?: string;
     getAll?: boolean;
     network?: "TestNet" | "MainNet";
     getNode?: boolean;
@@ -170,7 +174,7 @@ declare const Api: {
      * @param txid 交易id
      */
     getRehargeAndTransfer: (txid: any) => Promise<any>;
-    getBlockCount: () => Promise<any>;
+    getBlockCount: (rpc?: string) => Promise<any>;
     getBalance: (addr: any) => Promise<any>;
     rechargeAndTransfer: (data1: any, data2: any) => Promise<any>;
     /**

@@ -40,6 +40,29 @@ const baseUrl = "https://apiwallet.nel.group/api";
 const testRpcUrl = "http://test.nel.group:20332";
 const mainRpcUrl = "http://seed.nel.group:10332";
 
+const testRpcUrlList=[
+    'http://seed5.ngd.network:20332',
+    'http://seed2.ngd.network:20332	',
+    'http://seed4.ngd.network:20332',
+    'http://seed3.ngd.network:20332	',
+    'http://seed9.ngd.network:20332	',
+    'http://seed8.ngd.network:20332',
+]
+
+const mainRpcUrlList=[
+    'http://seed5.ngd.network:10332',
+    'http://seed10.ngd.network:10332',
+    'http://seed8.ngd.network:10332',
+    'http://seed9.ngd.network:10332',
+    'http://seed4.neo.org:10332',
+    'http://node2.sgp1.bridgeprotocol.io:10332',
+]
+
+function networkSort()
+{
+    Api.getBlockCount()
+}
+
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -382,13 +405,15 @@ const makeRpcPostBody = (method, params) => {
 }
 
 interface IOpts {
-    method:string, // 接口名
-    params: any[], // 参数
-    isGET?:boolean, // 是否是get 请求（默认请求是post）
-    baseUrl?:'common'|'rpc', // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
-    getAll?:boolean, // 是否获取所有返回结果
-    network?:"TestNet" | "MainNet",
+    method:string; // 接口名
+    params: any[]; // 参数
+    isGET?:boolean; // 是否是get 请求（默认请求是post）
+    baseUrl?:'common'|'rpc'; // 如果是common 则 取 baseCommonUrl（默认 baseUrl）
+    otherUrl?:string;
+    getAll?:boolean; // 是否获取所有返回结果
+    network?:"TestNet" | "MainNet";
     getNode?:boolean;
+
 }
 
 const makeRpcUrl=(url, method, params)=>
@@ -408,7 +433,11 @@ async function request(opts: IOpts) {
     let network = opts.network?opts.network:storage.network;
     let url = '';
     // 筛选节点
-    if (opts.baseUrl === 'common') {
+    if(opts.otherUrl)
+    {
+        url = opts.otherUrl;
+    }
+    else if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
         url = network=="TestNet"?testRpcUrl:mainRpcUrl;
@@ -649,11 +678,11 @@ const Api = {
         return request(opts);
     },
     
-    getBlockCount : ()=>{
+    getBlockCount : (rpc?:string)=>{
         const opts:IOpts={
             method:"getblockcount",
             params:[],
-            baseUrl:"common"
+            baseUrl:"rpc"
         }
         return request(opts);
     },
@@ -2712,7 +2741,9 @@ const claimGas=async()=>{
     tran.outputs = [];
     tran.outputs.push(output);
     const result = await transactionSignAndSend(tran)
-    TaskManager.addTask(new Task(ConfirmType.claimgas,result.txid,));
+    TaskManager.addTask(new Task(ConfirmType.claimgas,result.txid));
+    const sendMsg:SendArgs ={fromAddress:address,toAddress:address,amount:sum.toString(),asset:HASH_CONFIG.ID_GAS,network:storage.network,remark:'提取GAS',fee:'0'};
+    TaskManager.addSendData(result.txid,sendMsg)
     localStorage.setItem('Teemo-claimgasState-'+storage.network,'wait')
     return result
 }
@@ -3226,6 +3257,11 @@ var getHistoryList=()=>{
                     list.push(task);
                 }
                 else if(task.type==ConfirmType.tranfer && sendHistory)
+                {
+                    task['sendHistory']=sendHistory;
+                    list.push(task);
+                }
+                else if(task.type==ConfirmType.claimgas)
                 {
                     task['sendHistory']=sendHistory;
                     list.push(task);

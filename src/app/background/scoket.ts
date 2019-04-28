@@ -34,7 +34,7 @@ class SocketManager
                     setInterval(()=>{
                         Api.getBlockCount()
                         .then(result=>{
-                            const count = (parseInt(result[0].blockcount)-1);
+                            const count = (parseInt(result)-1);
                             if(count - storage.height!=0)
                             {
                                 storage.height=count;
@@ -99,6 +99,8 @@ class SocketManager
             var data = JSON.parse(event.data).data
             if(data.blockHeight != null){
                 storage.height= data.blockHeight;
+                console.log('最新高度',storage.height);
+                
                 // if(data.tx && data.tx.length>0)
                 // {
                 //     this.txids = this.txids.concat(data.tx);

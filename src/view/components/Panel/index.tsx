@@ -80,14 +80,17 @@ export default class Panel extends React.Component<IProps, IState>
 		let type=''
 		if(this.props.task.sendHistory)
 		{type=this.props.task.sendHistory.fromAddress!==common.account.address && this.props.task.sendHistory.toAddress==common.account.address?'input':'output'}
+		if(this.props.task.type==ConfirmType.claimgas)
+		{type='input'}
 		return (
 			<div className="panel">
 				<div className="panel-heading" onClick={this.onClick}>
-				{this.props.task.type == ConfirmType.tranfer?
+				{
+					(this.props.task.type == ConfirmType.tranfer || this.props.task.type==ConfirmType.claimgas)?
 					<div className="transfer-type">
-						<div className="icon"><img src={ICON.output}/></div>
+						<div className="icon"><img src={type=='input'?ICON.input:ICON.output}/></div>
 						<div className="message">
-							<div className="type">{intl.message.history.presonalTransfer}</div>
+							<div className="type">{type=='input' ?intl.message.assets.receiving: intl.message.history.presonalTransfer}</div>
 							<div className="time">{format("MM-dd hh:mm:ss",this.props.task.startTime.toString(),'cn')}</div>
 						</div>
 					</div>:
@@ -141,7 +144,7 @@ export default class Panel extends React.Component<IProps, IState>
 					this.state.open && 
 					<div className="panel-body" >
 						<div className="group txid">
-							<div className="title">TXID</div>
+							<div className="key-title">TXID</div>
 							<div className="value">
 								<a href={'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/transaction/'+this.props.task.txid}
 								target="_blank"
@@ -150,7 +153,7 @@ export default class Panel extends React.Component<IProps, IState>
 								</a>
 							</div>
 						</div>
-					{this.props.task.type==ConfirmType.tranfer?
+					{(this.props.task.type==ConfirmType.tranfer || this.props.task.type==ConfirmType.claimgas)?
 					<>
 						<div className="transaction-info">
 							<div className="transaction-title">{type=='input' ?intl.message.assets.receiving: intl.message.assets.transfer}</div>
@@ -163,9 +166,10 @@ export default class Panel extends React.Component<IProps, IState>
 							<div className="group send">
 								<div className="key-title">{type=='input' ?intl.message.history.from: intl.message.history.to}</div>
 								<div className="value">
-									<a href={
-										'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/address/'+
-										(type=='input'?this.props.task.sendHistory.fromAddress:this.props.task.sendHistory.toAddress)
+									<a href=
+										{
+											'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/address/'+
+											(type=='input'?this.props.task.sendHistory.fromAddress:this.props.task.sendHistory.toAddress)
 										}
 										target="_blank">
 										{
@@ -175,18 +179,23 @@ export default class Panel extends React.Component<IProps, IState>
 									</a>
 								</div>
 							</div>
-							<div className="group expense">
-								<div className="key-title">
-									{this.props.task.sendHistory.fromAddress!==common.account.address && 
-										this.props.task.sendHistory.toAddress==common.account.address && intl.message.assets.receiving}
-									{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.fee}
+							{
+								type=='output'&&
+								<div className="money">
+									<div className="group expense">
+										<div className="key-title">
+											{this.props.task.sendHistory.fromAddress!==common.account.address && 
+												this.props.task.sendHistory.toAddress==common.account.address && intl.message.assets.receiving}
+											{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.fee}
+										</div>
+										<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
+									</div>
+									<div className="group netfee">
+										<div className="key-title">{intl.message.history.fee}</div>
+										<div className="value">{this.props.task.sendHistory.fee?this.props.task.sendHistory.fee:'0'} GAS</div>
+									</div>
 								</div>
-								<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
-							</div>
-							<div className="group netfee">
-								<div className="key-title">{intl.message.history.fee}</div>
-								<div className="value">{this.props.task.sendHistory.fee} GAS</div>
-							</div>
+							}
 						</div>
 					</>:
 					<>

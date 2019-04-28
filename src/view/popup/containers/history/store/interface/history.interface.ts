@@ -48,8 +48,10 @@ export enum TaskState
 }
 export enum ConfirmType
 {
-    tranfer = 0,
-    contract = 1
+    tranfer,
+    contract,
+    toClaimgas, // Claim GAS前的自己转自己NEO的交易
+    claimgas,   // 确认claimgas的交易
 }
 export interface TransferGroup
 {
