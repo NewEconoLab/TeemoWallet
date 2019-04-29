@@ -163,7 +163,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                                                                 <>                                                                
                                                                 <div className="wallet-line" onClick={this.goWallet.bind(this,info.address)}>
                                                                     <span className="span-text">{info.walletName}</span>
-                                                                    <img className="edit-icon" src={require("../../../image/edit.png")} alt="" onClick={this.editAccount.bind(this,info.address)} />
+                                                                    {/* <img className="edit-icon" src={require("../../../image/edit.png")} alt="" onClick={this.editAccount.bind(this,info.address)} /> */}
                                                                 </div>
                                                                 </>
                                                             )

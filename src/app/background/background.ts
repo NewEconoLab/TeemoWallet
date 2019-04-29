@@ -14,7 +14,7 @@ interface BackStore
 
 const storage:BackStore=
 {
-    network:"TestNet",
+    network:"MainNet",
     account:undefined,
     height:0,
     domains:[],
@@ -22,6 +22,9 @@ const storage:BackStore=
     oldUtxo:{},
     allAssetInfo:[],
 }
+
+const netstr = localStorage.getItem('Teemo-NetWork');
+storage.network = netstr?((netstr=='TestNet'||netstr=='MainNet')?netstr:"MainNet"):"MainNet";
 
 const HASH_CONFIG = {
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
@@ -251,7 +254,7 @@ class Storage_local
             arr = arr.map((acc,n)=>{
                 if(acc.address===account.address)
                 {
-                    acc.walletName = newacc.walletName?newacc.walletName:(acc.walletName?acc.walletName:name+(n+1));
+                    newacc.walletName = newacc.walletName?newacc.walletName:(acc.walletName?acc.walletName:name+(n+1));
                     newacc.index = index = n;
                     return newacc;
                 }

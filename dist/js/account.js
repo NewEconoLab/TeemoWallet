@@ -95,7 +95,6 @@ var AccountManager = {
                         const info = yield AccountManager.getPriKeyfromAccount(wallet.scrypt, password, account.nep2key);
                         const nepacc = Storage_local.setAccount(new NepAccount("", account.address, account.nep2key, wallet.scrypt));
                         arr.push(new AccountInfo(nepacc, info.prikey, info.pubkey));
-                        console.log(arr[0]);
                         AccountManager.setAccount(arr[0]);
                     }
                     catch (error) {
@@ -143,6 +142,7 @@ var AccountManager = {
     netWorkChange: (network) => {
         return new Promise((r, j) => {
             storage.network = network;
+            localStorage.setItem('Teemo-NetWork', network);
             const message = { networks: [network], defaultNetwork: network };
             EventsOnChange(WalletEvents.NETWORK_CHANGED, message);
             TaskManager.socket.socketInit();
@@ -172,6 +172,8 @@ var AccountManager = {
         EventsOnChange(WalletEvents.ACCOUNT_CHANGED, { address: storage.account.address, label: storage.account.walletName });
     },
     getCurrentNetWork: () => {
+        // const netstr = localStorage.getItem('Teemo-NetWork');
+        // storage.network = netstr?((netstr=='TestNet'||netstr=='MainNet')?netstr:"MainNet"):"MainNet";
         return storage.network;
     },
     settingDisconnection: (time) => {

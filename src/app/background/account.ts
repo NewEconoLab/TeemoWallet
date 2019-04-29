@@ -125,8 +125,6 @@ var AccountManager={
                             info.prikey,
                             info.pubkey
                         ));
-                        console.log(arr[0]);
-                        
                         AccountManager.setAccount(arr[0]);
                     } catch (error)
                     {
@@ -188,6 +186,7 @@ var AccountManager={
     netWorkChange:(network:"TestNet"|"MainNet")=>{
         return new Promise<GetNetworksOutput>((r,j)=>{
             storage.network=network;
+            localStorage.setItem('Teemo-NetWork',network);
             const message:GetNetworksOutput={networks:[network],defaultNetwork:network};
             EventsOnChange(WalletEvents.NETWORK_CHANGED,message);
             TaskManager.socket.socketInit();
@@ -223,6 +222,8 @@ var AccountManager={
     },
 
     getCurrentNetWork:()=>{
+        // const netstr = localStorage.getItem('Teemo-NetWork');
+        // storage.network = netstr?((netstr=='TestNet'||netstr=='MainNet')?netstr:"MainNet"):"MainNet";
         return storage.network
     },
 

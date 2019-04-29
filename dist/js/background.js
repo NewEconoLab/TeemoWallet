@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const storage = {
-    network: "TestNet",
+    network: "MainNet",
     account: undefined,
     height: 0,
     domains: [],
@@ -16,6 +16,8 @@ const storage = {
     oldUtxo: {},
     allAssetInfo: [],
 };
+const netstr = localStorage.getItem('Teemo-NetWork');
+storage.network = netstr ? ((netstr == 'TestNet' || netstr == 'MainNet') ? netstr : "MainNet") : "MainNet";
 const HASH_CONFIG = {
     ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
     DAPP_NNC: Neo.Uint160.parse("fc732edee1efdf968c23c20a9628eaa5a6ccb934"),
@@ -180,7 +182,7 @@ class Storage_local {
         if (arr.length) {
             arr = arr.map((acc, n) => {
                 if (acc.address === account.address) {
-                    acc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : name + (n + 1));
+                    newacc.walletName = newacc.walletName ? newacc.walletName : (acc.walletName ? acc.walletName : name + (n + 1));
                     newacc.index = index = n;
                     return newacc;
                 }

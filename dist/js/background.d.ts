@@ -12,6 +12,7 @@ interface BackStore {
     allAssetInfo: AssetInfo[];
 }
 declare const storage: BackStore;
+declare const netstr: string;
 declare const HASH_CONFIG: {
     ID_CGAS: Neo.Uint160;
     DAPP_NNC: Neo.Uint160;
