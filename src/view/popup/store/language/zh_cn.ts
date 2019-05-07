@@ -128,5 +128,16 @@ export default {
     scriptHash:"合约hash",
     toAddress:"目标地址",
     AssetsID:"资产ID"
+  },
+  setting:{
+    successful:"操作成功",
+    message:'所有应许都需要重新请求授权，才能发起交易请求。',
+    clearAuthorization:'清除授权',
+    clear:'清空',
+    clearTx:'清空交易记录',
+    autoLock:'自动上锁',
+    off:'不上锁',
+    second:'秒',
+    minute:'分钟'
   }
 }

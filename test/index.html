@@ -1,182 +1,171 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Teemo Demo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="index.css">
-    <link rel="shortcut icon" href="icon128.png" type="image/x-icon">
-    <script src="js/index.js"></script>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Teemo Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" media="screen" href="index.css">
+<link rel="shortcut icon" href="icon128.png" type="image/x-icon">
+<script src="js/index.js"></script>
 </head>
 <body>
-    <textarea id="event" rows="5" cols="60" placeholder="event pool"></textarea>
-    <pre id="eventData"></pre>
-    <hr />
-    <button id="getNetworks_do">getNetworks</button>
-    <pre id="getNetworks_R">getNetworks return</pre>
+<textarea id="event" rows="5" cols="60" placeholder="event pool"></textarea>
+<pre id="eventData"></pre>
+<hr />
+<button id="getNetworks_do">getNetworks</button>
+<pre id="getNetworks_R">getNetworks return</pre>
 
-    <hr />
-    <button id="getAccount_do">getAccount</button>
-    <pre id="getAccount_R">getAccount return</pre>
+<hr />
+<button id="getAccount_do">getAccount</button>
+<pre id="getAccount_R">getAccount return</pre>
 
-    <hr />
-    <p>input  getBlock params</p>
-    <textarea id="getBlock_input" rows="5" cols="120" placeholder="getBlock_input">
-    {  
-        "blockHeight": "1112",  
-        "network": "TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getBlock_do">getBlock</button>
-    <pre id="getBlock_R">getBlock rerurn</pre>
+<hr />
+<p>input  getBlock params</p>
+<textarea id="getBlock_input" rows="5" cols="120" placeholder="getBlock_input">
+{  
+    "blockHeight": "1112"
+}
+</textarea>
+<br />
+<button id="getBlock_do">getBlock</button>
+<pre id="getBlock_R">getBlock rerurn</pre>
 
-    <hr />
-    <p>input  getTransaction params</p>
-    <textarea id="getTransaction_input" rows="5" cols="120" placeholder="getTransaction_input">
-    {  
-        "txid": "0c13d46dd72a47b61baf9b14cf787a8325f14cb1bfd5eafb7d407852e53299c6",  
-        "network": "TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getTransaction_do">getTransaction</button>
-    <pre id="getTransaction_R">getTransaction rerurn</pre>
+<hr />
+<p>input  getTransaction params</p>
+<textarea id="getTransaction_input" rows="5" cols="120" placeholder="getTransaction_input">
+{  
+    "txid": "0c13d46dd72a47b61baf9b14cf787a8325f14cb1bfd5eafb7d407852e53299c6"
+}
+</textarea>
+<br />
+<button id="getTransaction_do">getTransaction</button>
+<pre id="getTransaction_R">getTransaction rerurn</pre>
 
-    <hr />
-    <p>input  getApplicationLog params</p>
-    <textarea id="getApplicationLog_input" rows="5" cols="120" placeholder="getApplicationLog_input">
-    {  
-        "txid": "0c13d46dd72a47b61baf9b14cf787a8325f14cb1bfd5eafb7d407852e53299c6",  
-        "network": "TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getApplicationLog_do">getApplicationLog</button>
-    <pre id="getApplicationLog_R">getApplicationLog rerurn</pre>
+<hr />
+<p>input  getApplicationLog params</p>
+<textarea id="getApplicationLog_input" rows="5" cols="120" placeholder="getApplicationLog_input">
+{  
+    "txid": "0c13d46dd72a47b61baf9b14cf787a8325f14cb1bfd5eafb7d407852e53299c6"
+}
+</textarea>
+<br />
+<button id="getApplicationLog_do">getApplicationLog</button>
+<pre id="getApplicationLog_R">getApplicationLog rerurn</pre>
 
-    <hr />
-    <p>input  getBalance params</p>
-    <textarea id="getBalance_input" rows="5" cols="120" placeholder="getBalance_input">
-    {  
-        "address": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",  
-        "assets": ["602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"]
-    }
-    </textarea>
-    <br />
-    <button id="getBalance_do">getBalance</button>
-    <pre id="getBalance_R">getBalance rerurn</pre>
+<hr />
+<p>input  getBalance params</p>
+<textarea id="getBalance_input" rows="5" cols="120" placeholder="getBalance_input">
+{  
+    "address": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",  
+    "assets": ["602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7"]
+}
+</textarea>
+<br />
+<button id="getBalance_do">getBalance</button>
+<pre id="getBalance_R">getBalance rerurn</pre>
 
-    <hr />
-    <p>input getStorage params</p>
-    <textarea id="getStorage_input" rows="6" cols="120" placeholder="getStorage_input">
-    {
-        "scriptHash":"03febccf81ac85e3d795bc5cbd4e84e907812aa3",
-        "key":"5065746572",
-        "network":"TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getStorage_do">getStorage</button>
-    <pre id="getStorage_R">getStorage rerurn</pre>
+<hr />
+<p>input getStorage params</p>
+<textarea id="getStorage_input" rows="6" cols="120" placeholder="getStorage_input">
+{
+    "scriptHash":"03febccf81ac85e3d795bc5cbd4e84e907812aa3",
+    "key":"5065746572"
+}
+</textarea>
+<br />
+<button id="getStorage_do">getStorage</button>
+<pre id="getStorage_R">getStorage rerurn</pre>
 
-    <hr />
-    <p>input  invokeRead params</p>
-    <textarea id="invokeRead_input" rows="6" cols="120" placeholder="invokeRead_input">
-    {
-        "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
-        "operation": "name",
-        "arguments": [],
-        "network": "TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="invokeRead_do">invokeRead</button>
-    <pre id="invokeRead_R">invokeRead rerurn</pre>
+<hr />
+<p>input  invokeRead params</p>
+<textarea id="invokeRead_input" rows="6" cols="120" placeholder="invokeRead_input">
+{
+    "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+    "operation": "name",
+    "arguments": []
+}
+</textarea>
+<br />
+<button id="invokeRead_do">invokeRead</button>
+<pre id="invokeRead_R">invokeRead rerurn</pre>
 
-    <hr />
-    <p>input  invokeReadGroup params</p>
-    <textarea id="invokeReadGroup_input" rows="20" cols="120" placeholder="invokeReadGroup_input">
-    {
-        "group":[
-            {
-                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
-                "operation": "totalSupply",
-                "arguments": [],
-                "network": "TestNet"
-            },
-            {
-                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
-                "operation": "name",
-                "arguments": [],
-                "network": "TestNet"
-            },
-            {
-                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
-                "operation": "symbol",
-                "arguments":[],
-                "network": "TestNet"
-            },
-            {
-                "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
-                "operation": "decimals",
-                "arguments": [],
-                "network": "TestNet"
-            }
-        ]
-    }
-    </textarea>
-    <br />
-    <button id="invokeReadGroup_do">invokeReadGroup</button>
-    <pre id="invokeReadGroup_R">invokeReadGroup rerurn</pre>
+<hr />
+<p>input  invokeReadGroup params</p>
+<textarea id="invokeReadGroup_input" rows="20" cols="120" placeholder="invokeReadGroup_input">
+{
+    "group":[
+        {
+            "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+            "operation": "totalSupply",
+            "arguments": []
+        },
+        {
+            "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+            "operation": "name",
+            "arguments": []
+        },
+        {
+            "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+            "operation": "symbol",
+            "arguments":[]
+        },
+        {
+            "scriptHash": "fc732edee1efdf968c23c20a9628eaa5a6ccb934",
+            "operation": "decimals",
+            "arguments": []
+        }
+    ]
+}
+</textarea>
+<br />
+<button id="invokeReadGroup_do">invokeReadGroup</button>
+<pre id="invokeReadGroup_R">invokeReadGroup rerurn</pre>
 
-    <hr />
-    <p>input  send params</p>
-    <textarea id="send_input" rows="10" cols="120" placeholder="send_input">
-    {
-        "fromAddress": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",
-        "toAddress": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",
-        "asset": "602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7",
-        "amount": "0.123",
-        "remark": "test send",
-        "fee": "0.001",
-        "network": "TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="send_do">send</button>
-    <pre id="send_R">send rerurn</pre>
+<hr />
+<p>input  send params</p>
+<textarea id="send_input" rows="10" cols="120" placeholder="send_input">
+{
+    "fromAddress": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",
+    "toAddress": "ASBhJFN3XiDu38EdEQyMY3N2XwGh1gd5WW",
+    "asset": "602c79718b16e442de58778e148d0b1084e3b2dffd5de6b7b16cee7969282de7",
+    "amount": "0.123",
+    "remark": "test send",
+    "fee": "0.001"
+}
+</textarea>
+<br />
+<button id="send_do">send</button>
+<pre id="send_R">send rerurn</pre>
 
-    <hr />
-    <p>input  invoke params</p>
-    <textarea id="invoke_input" rows="10" cols="120" placeholder="invoke_input">
-    {
-        "scriptHash":"74f2dc36a68fdc4682034178eb2220729231db76",
-        "operation":"transfer",
-        "arguments":[
-            {"type":"Address","value":"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
-            {"type":"Address","value":"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
-            {"type":"Integer","value":"100000"}
-        ],
-        "fee":"0.001",
-        "description":"NNC转账",
-        "network":"TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="invoke_do">invoke</button>
-    <pre id="invoke_R">invoke rerurn</pre>
+<hr />
+<p>input  invoke params</p>
+<textarea id="invoke_input" rows="10" cols="120" placeholder="invoke_input">
+{
+    "scriptHash":"74f2dc36a68fdc4682034178eb2220729231db76",
+    "operation":"transfer",
+    "arguments":[
+        {"type":"Address","value":"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"},
+        {"type":"Address","value":"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
+        {"type":"Integer","value":"100000"}
+    ],
+    "fee":"0.001",
+    "description":"NNC转账"        
+}
+</textarea>
+<br />
+<button id="invoke_do">invoke</button>
+<pre id="invoke_R">invoke rerurn</pre>
 
-    <hr name="invokeGroup" id="invokeGroup" />
-    <p>input  invokeGroup params</p>
-    <a id="merge" href="#invokeGroup">merge</a>  <a id="unmerge" href="#invokeGroup">unmerge</a>
-    <br />
-    <textarea id="invokeGroup_input" rows="20" cols="120" placeholder="invokeGroup_input">
-    {
-        "merge": true,
-        "group": [
-            {
+<hr name="invokeGroup" id="invokeGroup" />
+<p>input  invokeGroup params</p>
+<a id="merge" href="#invokeGroup">merge</a>  <a id="unmerge" href="#invokeGroup">unmerge</a>
+<br />
+<textarea id="invokeGroup_input" rows="20" cols="120" placeholder="invokeGroup_input">
+{
+    "merge": true,
+    "group": [
+        {
             "scriptHash": "74f2dc36a68fdc4682034178eb2220729231db76",
             "operation": "transfer",
             "arguments": [
@@ -193,11 +182,10 @@
                 "value": "100000"
                 }
             ],
-            "description":"NNC转账",
-            "fee":"0",
-            "network": "TestNet"
-            },
-            {
+        "description":"NNC转账",
+        "fee":"0"
+        },
+        {
             "scriptHash": "00d00d0ac467a5b7b2ad04052de154bb9fe8c2ff",
             "operation": "setmoneyin",
             "arguments": [
@@ -211,113 +199,108 @@
                 }
             ],
             "description":"充值确认",
-            "fee":"0.001",
-            "network": "TestNet"
-            }
-        ]
+            "fee":"0.001"
         }
-    </textarea>
-    <br />
-    <button id="invokeGroup_do">invokeGroup</button>
-    <pre id="invokeGroup_R">invokeGroup rerurn</pre>
+    ]
+}
+</textarea>
+<br />
+<button id="invokeGroup_do">invokeGroup</button>
+<pre id="invokeGroup_R">invokeGroup rerurn</pre>
 
-    <br/>
-    <hr>
-    <h2>TOOLS</h2>
+<br/>
+<hr>
+<h2>TOOLS</h2>
 
-    <hr />
-    <p>input getAddressFromScriptHash params</p>
-    <textarea id="getAddressFromScriptHash_input" rows="6" cols="120" placeholder="getAddressFromScriptHash_input">72329a15ef9f2ea76cbc8dbc082c72316d87e1ae</textarea>
-    <br />
-    <button id="getAddressFromScriptHash_do">getAddressFromScriptHash</button>
-    <pre id="getAddressFromScriptHash_R">getAddressFromScriptHash rerurn</pre>
-    
-    <hr />
-    <p>input validateAddress params</p>
-    <textarea id="validateAddress_input" rows="6" cols="120" placeholder="validateAddress_input">AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH</textarea>
-    <br />
-    <button id="validateAddress_do">validateAddress</button>
-    <pre id="validateAddress_R">validateAddress rerurn</pre>
+<hr />
+<p>input getAddressFromScriptHash params</p>
+<textarea id="getAddressFromScriptHash_input" rows="6" cols="120" placeholder="getAddressFromScriptHash_input">72329a15ef9f2ea76cbc8dbc082c72316d87e1ae</textarea>
+<br />
+<button id="getAddressFromScriptHash_do">getAddressFromScriptHash</button>
+<pre id="getAddressFromScriptHash_R">getAddressFromScriptHash rerurn</pre>
 
-    <hr />
-    <p>input reverseHexstr params</p>
-    <textarea id="reverseHexstr_input" rows="6" cols="120" placeholder="reverseHexstr_input">03febccf81ac85e3d795bc5cbd4e84e907812aa3</textarea>
-    <br />
-    <button id="reverseHexstr_do">reverseHexstr</button>
-    <pre id="reverseHexstr_R">reverseHexstr rerurn</pre>
+<hr />
+<p>input validateAddress params</p>
+<textarea id="validateAddress_input" rows="6" cols="120" placeholder="validateAddress_input">AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH</textarea>
+<br />
+<button id="validateAddress_do">validateAddress</button>
+<pre id="validateAddress_R">validateAddress rerurn</pre>
 
-    <hr />
-    <p>input getStringFromHexstr params</p>
-    <textarea id="getStringFromHexstr_input" rows="6" cols="120" placeholder="getStringFromHexstr_input">746573742064656d6f</textarea>
-    <br />
-    <button id="getStringFromHexstr_do">getStringFromHexstr</button>
-    <pre id="getStringFromHexstr_R">getStringFromHexstr rerurn</pre>
+<hr />
+<p>input reverseHexstr params</p>
+<textarea id="reverseHexstr_input" rows="6" cols="120" placeholder="reverseHexstr_input">03febccf81ac85e3d795bc5cbd4e84e907812aa3</textarea>
+<br />
+<button id="reverseHexstr_do">reverseHexstr</button>
+<pre id="reverseHexstr_R">reverseHexstr rerurn</pre>
 
-    <hr />
-    <p>input getBigIntegerFromHexstr params</p>
-    <textarea id="getBigIntegerFromHexstr_input" rows="6" cols="120" placeholder="getBigIntegerFromHexstr_input">3fb83001</textarea>
-    <br />
-    <button id="getBigIntegerFromHexstr_do">getBigIntegerFromHexstr</button>
-    <pre id="getBigIntegerFromHexstr_R">getBigIntegerFromHexstr rerurn</pre>
+<hr />
+<p>input getStringFromHexstr params</p>
+<textarea id="getStringFromHexstr_input" rows="6" cols="120" placeholder="getStringFromHexstr_input">746573742064656d6f</textarea>
+<br />
+<button id="getStringFromHexstr_do">getStringFromHexstr</button>
+<pre id="getStringFromHexstr_R">getStringFromHexstr rerurn</pre>
 
-    <hr />
-    <p>input getBigIntegerFromAssetAmount params</p>
-    <textarea id="getBigIntegerFromAssetAmount_input" rows="6" cols="120" placeholder="getBigIntegerFromAssetAmount_input">
-    {
-        "amount":"12345.67890000",
-        "assetID":"74f2dc36a68fdc4682034178eb2220729231db76",
-        "network":"TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getBigIntegerFromAssetAmount_do">getBigIntegerFromAssetAmount</button>
-    <pre id="getBigIntegerFromAssetAmount_R">getBigIntegerFromAssetAmount rerurn</pre>
+<hr />
+<p>input getBigIntegerFromHexstr params</p>
+<textarea id="getBigIntegerFromHexstr_input" rows="6" cols="120" placeholder="getBigIntegerFromHexstr_input">3fb83001</textarea>
+<br />
+<button id="getBigIntegerFromHexstr_do">getBigIntegerFromHexstr</button>
+<pre id="getBigIntegerFromHexstr_R">getBigIntegerFromHexstr rerurn</pre>
 
-    <hr />
-    <p>input getDecimalsFromAssetAmount params</p>
-    <textarea id="getDecimalsFromAssetAmount_input" rows="6" cols="120" placeholder="getDecimalsFromAssetAmount_input">
-    {
-        "amount":"1234567890000",
-        "assetID":"74f2dc36a68fdc4682034178eb2220729231db76",
-        "network":"TestNet"
-    }
-    </textarea>
-    <br />
-    <button id="getDecimalsFromAssetAmount_do">getDecimalsFromAssetAmount</button>
-    <pre id="getDecimalsFromAssetAmount_R">getDecimalsFromAssetAmount rerurn</pre>
-    <br/>
-    <hr>
-    <h2>NNS</h2>
+<hr />
+<p>input getBigIntegerFromAssetAmount params</p>
+<textarea id="getBigIntegerFromAssetAmount_input" rows="6" cols="120" placeholder="getBigIntegerFromAssetAmount_input">
+{
+    "amount":"12345.67890000",
+    "assetID":"74f2dc36a68fdc4682034178eb2220729231db76"
+}
+</textarea>
+<br />
+<button id="getBigIntegerFromAssetAmount_do">getBigIntegerFromAssetAmount</button>
+<pre id="getBigIntegerFromAssetAmount_R">getBigIntegerFromAssetAmount rerurn</pre>
 
-    <hr />
-    <p>input getNamehashFromDomain params</p>
-    <textarea id="getNamehashFromDomain_input" rows="6" cols="120" placeholder="getNamehashFromDomain_input">test222.neo</textarea>
-    <br />
-    <button id="getNamehashFromDomain_do">getNamehashFromDomain</button>
-    <pre id="getNamehashFromDomain_R">getNamehashFromDomain rerurn</pre>
+<hr />
+<p>input getDecimalsFromAssetAmount params</p>
+<textarea id="getDecimalsFromAssetAmount_input" rows="6" cols="120" placeholder="getDecimalsFromAssetAmount_input">
+{
+    "amount":"1234567890000",
+    "assetID":"74f2dc36a68fdc4682034178eb2220729231db76"
+}
+</textarea>
+<br />
+<button id="getDecimalsFromAssetAmount_do">getDecimalsFromAssetAmount</button>
+<pre id="getDecimalsFromAssetAmount_R">getDecimalsFromAssetAmount rerurn</pre>
+<br/>
+<hr>
+<h2>NNS</h2>
 
-    <hr />
-    <p>input getAddressFromDomain params</p>
-    <textarea id="getAddressFromDomain_input" rows="6" cols="120" placeholder="getAddressFromDomain_input">
-        {
-            "domain":"test222.neo",
-            "network":"TestNet"
-        }
-    </textarea>
-    <br />
-    <button id="getAddressFromDomain_do">getAddressFromDomain</button>
-    <pre id="getAddressFromDomain_R">getAddressFromDomain rerurn</pre>
+<hr />
+<p>input getNamehashFromDomain params</p>
+<textarea id="getNamehashFromDomain_input" rows="6" cols="120" placeholder="getNamehashFromDomain_input">test222.neo</textarea>
+<br />
+<button id="getNamehashFromDomain_do">getNamehashFromDomain</button>
+<pre id="getNamehashFromDomain_R">getNamehashFromDomain rerurn</pre>
 
-    <hr />
-    <p>input getDomainFromAddress params</p>
-    <textarea id="getDomainFromAddress_input" rows="6" cols="120" placeholder="getDomainFromAddress_input">
-        {
-            "address":"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF",
-            "network":"TestNet"
-        }
-    </textarea>
-    <br />
-    <button id="getDomainFromAddress_do">getDomainFromAddress</button>
-    <pre id="getDomainFromAddress_R">getDomainFromAddress rerurn</pre>
+<hr />
+<p>input getAddressFromDomain params</p>
+<textarea id="getAddressFromDomain_input" rows="6" cols="120" placeholder="getAddressFromDomain_input">
+{
+    "domain":"test222.neo"
+}
+</textarea>
+<br />
+<button id="getAddressFromDomain_do">getAddressFromDomain</button>
+<pre id="getAddressFromDomain_R">getAddressFromDomain rerurn</pre>
+
+<hr />
+<p>input getDomainFromAddress params</p>
+<textarea id="getDomainFromAddress_input" rows="6" cols="120" placeholder="getDomainFromAddress_input">
+{
+    "address":"AHDV7M54NHukq8f76QQtBTbrCqKJrBH9UF"
+}
+</textarea>
+<br />
+<button id="getDomainFromAddress_do">getDomainFromAddress</button>
+<pre id="getDomainFromAddress_R">getDomainFromAddress rerurn</pre>
 </body>
 </html>

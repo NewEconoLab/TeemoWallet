@@ -1,10 +1,8 @@
 import * as React from 'react';
 import './index.less';
-import Button from '../../../components/Button';
 import { RouteComponentProps } from 'react-router-dom';
 import Label from '../../../components/Label';
-import Select, { IOption } from '../../../components/Select';
-import Input from '../../../components/Input';
+import { IOption } from '../../../components/Select';
 import WalletCreate from './create';
 import WalletImport from './load';
 import common from '../../store/common';

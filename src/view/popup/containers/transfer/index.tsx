@@ -4,7 +4,6 @@
 import * as React from 'react';
 // import { observer } from 'mobx-react';
 import './index.less';
-import Modal from '../../../components/Modal';
 import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
 import Checkbox from '../../../components/Checkbox';

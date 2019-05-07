@@ -1,7 +1,5 @@
 // 输入框组件
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { BADFLAGS } from 'dns';
 import Select, { IOption } from '../../../../components/Select';
 import Button from '../../../../components/Button';
 import Nep6Import from './nep6';

@@ -196,7 +196,7 @@ class Main {
                         ],
                         "description":"NNC转账",
                         "fee":"0",
-                        network:"TestNet",
+                        // network:"TestNet",
                         // assets: 暂时用不到
                     },
                     {
@@ -213,7 +213,7 @@ class Main {
                         ],
                         "description":"充值确认",
                         "fee":"0.001",
-                        network:"TestNet"
+                        // network:"TestNet"
                     }
                 ]
             },null,2)
@@ -233,7 +233,7 @@ class Main {
                         ],
                         "description":"NNC转账",
                         "fee":"0.001",
-                        network:"TestNet",
+                        // network:"TestNet",
                         // assets: 暂时用不到
                     },
                     {
@@ -250,7 +250,7 @@ class Main {
                         ],
                         "description":"充值确认",
                         "fee":"0.001",
-                        network:"TestNet"
+                        // network:"TestNet"
                     }
                 ]
             },null,2)
@@ -309,7 +309,7 @@ class Main {
         // 获得余额的参数
         const data:GetBlockArgs={
             blockHeight:params,
-            network:"TestNet",
+            // network:"TestNet",
         }
         return new Promise((resolve,reject)=>{
             Teemo.NEO.getBlock(data) // 获得余额的方法
@@ -331,7 +331,7 @@ class Main {
     public getTransaction(params:string)
     {
         const data:GetTransactionArgs={
-            network:"TestNet",
+            // network:"TestNet",
             txid:params
         }
         return new Promise((resolve,reject)=>{            
@@ -354,7 +354,7 @@ class Main {
     public getApplicationLog(params:string)
     {
         const data:GetApplicationLogArgs={
-            network:"TestNet",
+            // network:"TestNet",
             txid:params
         }
         return new Promise((resolve,reject)=>{            
@@ -383,7 +383,7 @@ class Main {
         // }
         // 获得余额的参数
         const data:GetBalanceArgs={
-            network:"TestNet",
+            // network:"TestNet",
             params:JSON.parse(params) as BalanceRequest
         }
         return new Promise((resolve,reject)=>{            
@@ -482,7 +482,7 @@ class Main {
         //         {type:"Integer",value:"100000"}
         //     ],
         //     fee:'0.001',
-        //     network:"TestNet",
+        //     // network:"TestNet",
         //     // assets: 暂时用不到
         // }
         return new Promise((resolve,reject)=>{            
@@ -522,7 +522,7 @@ class Main {
         //                 {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
         //                 {type:"Integer",value:"100000"}
         //             ],
-        //             network:"TestNet",
+        //             // network:"TestNet",
         //             // assets: 暂时用不到
         //         },
         //         {
@@ -537,7 +537,7 @@ class Main {
         //                 {type:"Hook_Txid",value:0}, // 
         //                 {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
         //             ],
-        //             network:"TestNet"
+        //             // network:"TestNet"
         //         }
         //     ]
         // }
@@ -591,7 +591,7 @@ class Main {
         //         {type:"Integer",value:"100000"}
         //     ],
         //     fee:'0.001',
-        //     network:"TestNet",
+        //     // network:"TestNet",
         //     // assets: 暂时用不到
         // }
         return new Promise((resolve,reject)=>{            
@@ -827,7 +827,7 @@ class Main {
     //                     {type:"Address",value:"AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"},
     //                     {type:"Integer",value:"1000"}
     //                 ],
-    //                 network:"TestNet",
+    //                 // network:"TestNet",
     //                 // assets: 暂时用不到
     //             },
     //             {
@@ -842,7 +842,7 @@ class Main {
     //                     {type:"Hook_Txid",value:0}, // 
     //                     {type:"Hash160",value:"74f2dc36a68fdc4682034178eb2220729231db76"},
     //                 ],
-    //                 network:"TestNet"
+    //                 // network:"TestNet"
     //             }
     //         ]
     //     }

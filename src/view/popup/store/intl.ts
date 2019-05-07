@@ -17,6 +17,7 @@ class Intl
         transfer:Language_Transfer;
         assets:Language_Assets;
         notify: Language_Notify;
+        setting: Language_Setting;
     };
 
     @action public initLanguage=()=>{
@@ -138,6 +139,18 @@ export interface Language_Assets{
     transfer: string;
     assetlist: string;
     copy: string;
+}
+
+export interface Language_Setting{
+    successful: string;
+    message: string;
+    clearAuthorization: string;
+    clear: string;
+    clearTx: string;
+    autoLock: string;
+    off: string;
+    second: string;
+    minute: string;
 }
 
 export enum Language

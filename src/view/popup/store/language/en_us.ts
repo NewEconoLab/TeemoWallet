@@ -127,5 +127,16 @@ export default {
     scriptHash:"Contract hash",
     toAddress:"To",
     AssetsID:"Asset ID"
-  }
+  },
+  setting: {
+    successful: 'Successful Operation',
+    message: 'All applications need to re-request authorization to initiate a transaction request.',
+    clearAuthorization: 'Clear Authorization',
+    clear: 'Clear',
+    clearTx: 'Clear TX History',
+    autoLock: 'Auto-lock',
+    off: 'OFF',
+    second: 's',
+    minute: 'min',
+}
 }

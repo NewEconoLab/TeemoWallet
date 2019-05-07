@@ -58,7 +58,7 @@ declare enum EventName {
 interface GetStorageArgs {
     scriptHash: string;
     key: string;
-    network: string;
+    network?: string;
 }
 interface GetStorageOutput {
     result: string;
@@ -74,7 +74,7 @@ interface InvokeArgs {
     scriptHash: string;
     operation: string;
     fee?: string;
-    network: "TestNet" | "MainNet";
+    network?: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;
     description?: string;
@@ -85,7 +85,7 @@ interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     arguments?: Argument[];
-    network: string;
+    network?: string;
 }
 interface InvokeReadGroup {
     group: InvokeReadInput[];
@@ -130,15 +130,15 @@ interface InvokeGroupOutup {
  */
 interface GetBlockArgs {
     blockHeight: number;
-    network: string;
+    network?: string;
 }
 interface GetTransactionArgs {
     txid: string;
-    network: string;
+    network?: string;
 }
 interface GetApplicationLogArgs {
     txid: string;
-    network: string;
+    network?: string;
 }
 interface BalanceRequest {
     address: string;
@@ -147,7 +147,7 @@ interface BalanceRequest {
 }
 interface GetBalanceArgs {
     params: BalanceRequest | BalanceRequest[];
-    network: string;
+    network?: string;
 }
 interface BalanceResults {
     [address: string]: Balance[];
@@ -176,7 +176,7 @@ interface SendArgs {
     amount: string;
     remark?: string;
     fee?: string;
-    network: string;
+    network?: string;
 }
 interface SendOutput {
     txid: string;
@@ -196,25 +196,25 @@ interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     args?: Argument[];
-    network: string;
+    network?: string;
 }
 interface GetBigIntegerFromAssetAmountArgs {
     amount: string;
     assetID: string;
-    network: 'MainNet' | 'TestNet';
+    network?: 'MainNet' | 'TestNet';
 }
 interface GetDecimalsFromAssetAmountArgs {
     amount: string;
     assetID: string;
-    network: 'MainNet' | 'TestNet';
+    network?: 'MainNet' | 'TestNet';
 }
 interface DomainArgs {
     domain: string;
-    network: 'MainNet' | 'TestNet';
+    network?: 'MainNet' | 'TestNet';
 }
 interface AddressArgs {
     address: string;
-    network: 'MainNet' | 'TestNet';
+    network?: 'MainNet' | 'TestNet';
 }
 declare const ids: any[];
 /**

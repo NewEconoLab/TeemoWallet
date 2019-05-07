@@ -4,7 +4,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import './index.less';
-import Modal from '../../../components/Modal';
 import common from '../../store/common';
 import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'

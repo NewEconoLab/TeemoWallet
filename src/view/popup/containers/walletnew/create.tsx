@@ -2,7 +2,6 @@
 import * as React from 'react';
 import Button from '../../../components/Button';
 import Input from '../../../components/Input';
-import { RouteComponentProps } from 'react-router';
 import { observer } from 'mobx-react';
 import { AccountInfo, NepAccount } from '../../../../common/entity';
 import { Storage_local, bg } from '../../utils/storagetools';
