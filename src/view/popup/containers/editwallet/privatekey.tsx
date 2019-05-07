@@ -4,12 +4,11 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import './index.less';
-import Modal from '../../../components/Modal';
 import common from '../../store/common';
-import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'
 import Button from '../../../components/Button';
 import { bg } from '../../utils/storagetools';
+import intl from '../../store/intl';
 
 interface IProps
 {
@@ -36,7 +35,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 			})
 		})
 		.catch(error=>{
-			Toast('密码错误','error');
+			Toast(intl.message.login.error,'error');
 			this.setState({
 				password:'',
 				copyPrivate:''
@@ -66,23 +65,23 @@ export default class PrivateKey extends React.Component<IProps, any>
 		document.execCommand("Copy"); // 执行浏览器复制命令
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
-		Toast("复制成功");		
+		Toast(intl.message.toast.copySuccess);		
 	  }
 	public render()
 	{
 		return (
 			<div className="twice-dialog">
 				<div className="private-wrapper">
-					<div className="red-tips">请不要将私钥展示给任何人拥有私钥的人可以拿走钱包里的一切</div>
+					<div className="red-tips">{intl.message.editwallet.msg9}</div>
 					{
 						this.state.showStep === 0 && (
 							<div className="step-box">
 								<div className="input-wrap">
-									<input type="password" className="private-input" placeholder="输入密码以继续 " value={this.state.password} onChange={this.onPasswordChange} />
+									<input type="password" className="private-input" placeholder={intl.message.editwallet.msg10} value={this.state.password} onChange={this.onPasswordChange} />
 								</div>
 								<div className="step-btn">
-									<Button type="warn" text="取消" onClick={this.onClose} />
-									<Button type="primary" text="下一步" onClick={this.onGoNextStep} />
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onClose} />
+									<Button type="primary" text={intl.message.button.next} onClick={this.onGoNextStep} />
 								</div>
 							</div>
 						)
@@ -93,7 +92,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 								<div className="private-text" onClick={this.onCopyPrivate}>
 									{this.state.copyPrivate}
 								</div>
-								<p className="copy-tips">（点击私钥直接复制）</p>
+								<p className="copy-tips">（{intl.message.editwallet.msg3}）</p>
 							</div>
 						)
 					}

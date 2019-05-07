@@ -3,6 +3,8 @@ export default {
     confirm:"确定",
     cancel:"取消",
     refuse:"拒绝",
+    next:'下一步',
+    delete:"删除",
   },
   toast:{
     successfully:"操作成功，请耐心等待区块确认。",
@@ -61,7 +63,7 @@ export default {
     welcome:"欢迎回来",
     goCreate:"点击这里创建或导入新钱包",
     placeholder1:"输入密码",
-    button:"登陆",
+    button:"登录",
     error:"密码错误"
   },
   mywallet:{
@@ -115,6 +117,12 @@ export default {
     transfer:"转账",
     assetlist:"资产列表",
     copy:"点击地址直接复制",
+    manager:'管理代币',
+    GasClaimable:'可提取GAS',
+    claim:'提取',
+    claiming:'提取中',
+    message:'正在提取gas，请勿退出钱包',
+    claimGas:"提取GAS"
   },
   notify:{
     message1:"想要连接到您的钱包",
@@ -139,5 +147,35 @@ export default {
     off:'不上锁',
     second:'秒',
     minute:'分钟'
+  },
+  editwallet:{
+    create:'创建钱包',
+    import:'导入钱包',
+    setting:'设置',
+    address:'地址',
+    download:'下载',
+    prikey:'私钥',
+    nep2key:'NEP2加密密钥',
+    deletewallet:'删除钱包',
+    msg1:'使用NEP2加密密钥及密码可以在其他地方打开您的钱包。', 
+    msg2:'您的加密密钥是：', 
+    msg3:'点击复制', 
+    msg4:'NEP6备份文件', 
+    msg5:'备份您的钱包，使用时将需要密码', 
+    msg6:'NEP6备份文件已下载,', 
+    msg6_2:'请妥善保存并牢记密码,', 
+    msg6_3:'恢复钱包时将会要求密码。', 
+    msg7:'显示私钥',
+    msg8:'私钥是未经过加密的钱包备份，请勿泄露给他人',
+    msg9:'请不要将私钥展示给任何人，拥有私钥的人可以拿走钱包里的一切',
+    msg10:'输入密码以继续',
+    msg11:'从钱包列表中删除当前钱包及其全部数据',
+    msg12:'删除钱包会清楚本钱包的全部信息，此操作不可逆',
+    msg13:'恢复帐户需要私钥或备份文件和密码，请确保你已经进行了备份',
+    msg14:'确认删除本钱包？',
+    msg15:'输入要删除的钱包名称以确认',
+    msg16:'输入钱包密码',
+    msg17:'钱包删除成功',
+    msg18:'账户名错误'
   }
 }

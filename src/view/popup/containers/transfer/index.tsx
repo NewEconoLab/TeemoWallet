@@ -72,14 +72,8 @@ export default class Transfer extends React.Component<IProps, IState>
 
 	componentDidMount()
 	{
-		console.log(this.props.asset);
-
 		if (this.props.asset != '')
 		{
-			console.log(this.props.asset);
-			const current = this.options.find(option => option.id == this.props.asset);
-			console.log(current);
-
 			this.setState({
 				currentOption: this.options.find(option => option.id == this.props.asset)
 			})

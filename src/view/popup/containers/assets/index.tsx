@@ -5,16 +5,12 @@
 import * as React from 'react';
 import './index.less';
 import Button from '../../../components/Button';
-import Transfer from '../transfer';
-// import QrCodeBox from '../qrcode';
-// import { neotools } from '../../utils/neotools';
 import { observer } from 'mobx-react';
 import common from '../../store/common';
 import { HASH_CONFIG } from '../../../config';
 import ClaimGAS from './claimgas';
 import intl from '../../store/intl';
 import classnames from 'classnames';
-import manageStore from '../manage/store/manage.store';
 interface IProps
 {
     lableChange: (table: string, asset?: string) => void
@@ -123,15 +119,13 @@ export default class Assets extends React.Component<IProps, {}>
                         {intl.message.assets.assetlist}
                         <div className="add-balance" onClick={this.showManage}>
                             <img className="add-icon" src={require("../../../image/add.png")} alt=""/>
-                            <span className="add-text">管理代币</span>
+                            <span className="add-text">{intl.message.assets.manager}</span>
                         </div>
                     </div>
                     {   
                         common.balances && 
                         Object.keys(common.balances).map(asset=>{
-                            const amount = common.balances[asset];
-                            console.log(amount);
-                            
+                            const amount = common.balances[asset];                            
                             return(                                
                                 <div className="asset-panel" onClick={this.transfer.bind(this,asset)}>
                                     <div className="asset-name">{asset}</div>
@@ -140,24 +134,7 @@ export default class Assets extends React.Component<IProps, {}>
                             )
                         })
                     }
-                    {/* <div className="asset-panel" onClick={this.transferNEO}>
-                        <div className="asset-name">NEO</div>
-                        <div className={loadClassName}>{Neo.Fixed8.fromNumber(common.balances.NEO).toString()}</div>
-                    </div>
-                    <div className="asset-panel" onClick={this.transferGas}>
-                        <div className="asset-name">GAS</div>
-                        <div className={loadClassName}>{Neo.Fixed8.fromNumber(common.balances.GAS).toString()}</div>
-                    </div>
-                    <div className="asset-panel" onClick={this.transferCGAS}>
-                        <div className="asset-name">CGAS</div>
-                        <div className={loadClassName}>{Neo.Fixed8.fromNumber(common.balances.CGAS).toString()}</div>
-                    </div>
-                    <div className="asset-panel" onClick={this.transferNNC}>
-                        <div className="asset-name">NNC</div>
-                        <div className={loadClassName}>{Neo.Fixed8.fromNumber(common.balances.NNC).toString()}</div>
-                    </div> */}
                 </div>
-
             </div>
         );
     }

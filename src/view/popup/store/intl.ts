@@ -18,6 +18,7 @@ class Intl
         assets:Language_Assets;
         notify: Language_Notify;
         setting: Language_Setting;
+        editwallet:Language_EditWallet
     };
 
     @action public initLanguage=()=>{
@@ -51,11 +52,30 @@ class Intl
     }
 }
 
+export interface Message_lang
+{
+    button:Language_Button;
+    toast:Language_Toast;
+    welcome:Language_Welcome;
+    walletnew:any;
+    login:Language_Login;
+    mywallet:Language_MyWallet;
+    history:Language_History;
+    exchange:Language_exchange;
+    transfer:Language_Transfer;
+    assets:Language_Assets;
+    notify: Language_Notify;
+    setting: Language_Setting;
+    editwallet:Language_EditWallet;
+};
+
 export interface Language_Button
 {
     confirm:string,
     cancel:string,
     refuse: string;
+    next: string;
+    delete: string;
 }
 
 export interface Language_Toast
@@ -139,6 +159,12 @@ export interface Language_Assets{
     transfer: string;
     assetlist: string;
     copy: string;
+    manager: string;
+    GasClaimable: string;
+    claim: string;
+    claimGas:string;
+    claiming: string;
+    message : string;
 }
 
 export interface Language_Setting{
@@ -151,6 +177,37 @@ export interface Language_Setting{
     off: string;
     second: string;
     minute: string;
+}
+
+export interface Language_EditWallet{    
+    create: string;
+    import: string;
+    setting: string;
+    address: string;
+    download: string;
+    prikey: string;
+    nep2key: string;
+    deletewallet: string;
+    msg1: string;
+    msg2: string;
+    msg3: string;
+    msg4: string;
+    msg5: string;
+    msg6: string;
+    msg6_2: string;
+    msg6_3: string;
+    msg7: string;
+    msg8: string;
+    msg9: string;
+    msg10: string;
+    msg11: string;
+    msg12: string;
+    msg13: string;
+    msg14: string;
+    msg15: string;
+    msg16: string;
+    msg17: string;
+    msg18: string;
 }
 
 export enum Language

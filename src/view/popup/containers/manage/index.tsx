@@ -3,7 +3,6 @@
  */
 import * as React from 'react';
 import './index.less';
-import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import manageStore from './store/manage.store';
 interface IProps {

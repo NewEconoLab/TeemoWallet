@@ -1,7 +1,5 @@
 import { action, observable } from "mobx";
-import { ICON } from "../../../../image";
 import { bg } from "../../../utils/storagetools";
-import intl from "../../../store/intl";
 import common from "../../../store/common";
 import { HASH_CONFIG } from "../../../../config";
 

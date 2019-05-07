@@ -175,7 +175,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                                                     <span className="menu-span" onClick={this.goNewWallet}>{intl.message.walletnew.importWallet}</span>
                                                 </div>
                                                 <div className="normal-menu">
-                                                    <span className="menu-span" onClick={this.onSwitchPage.bind(this,'setting')}>设置</span>
+                                                    <span className="menu-span" onClick={this.onSwitchPage.bind(this,'setting')}>{intl.message.editwallet.setting}</span>
                                                 </div>
                                             </div>
                                         </div>

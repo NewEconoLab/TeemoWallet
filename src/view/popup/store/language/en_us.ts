@@ -3,6 +3,8 @@ export default {
     confirm:"Confirm",
     cancel:"Cancel",
     refuse:"Cancel",
+    next:'Next',
+    delete:"Delete",
   },
   toast:{
     successfully:"Operation successful, please be patient and wait for it to be confirmed in the block .",
@@ -114,6 +116,12 @@ export default {
     transfer:"Transfer",
     assetlist:"Asset list",
     copy:"Click address to copy it directly",
+    manager:'Manage Tokens',
+    GasClaimable:'GAS Claimable',
+    claim:'Claim',
+    claiming:'claming',
+    message:"Claming GAS, don't log out of Wallet.",
+    claimGas:"Claim GAS"
   },
   notify:{
     message1:"Tries connecting to your wallet.",
@@ -138,5 +146,35 @@ export default {
     off: 'OFF',
     second: 's',
     minute: 'min',
-}
+  },
+  editwallet:{
+    create:'Creat Wallet',
+    import:'Import Wallet',
+    setting:'Settings',
+    address:'Address',
+    download:'Download',
+    prikey:'Private Key',
+    nep2key:'NEP2 Encrypted Key',
+    deletewallet:'Delete Wallet',
+    msg1:'Your wallet can be opend with your NEP2 encrypted key and password elsewhere', 
+    msg2:'Your Encrypted Key is:', 
+    msg3:'Click to Copy', 
+    msg4:'NEP6 Backup File', 
+    msg5:'Back up your wallet and your password will be needed when using back-up file', 
+    msg6:'The NEP6 backup file has been downloaded.', 
+    msg6_2:"Please save and remember the password. ",
+    msg6_3:"Password is needed when restoring wallet.",
+    msg7:'Display',
+    msg8:"The private key is an unencrypted wallet backup, please don't reveal it to others",
+    msg9:"Don't show Private Key to anyone, or they can take everything in the wallet.",
+    msg10:'Enter password and continue',
+    msg11:'Delete the current wallet and all its data.',
+    msg12:'Deleting the wallet is irreversible.',
+    msg13:'Please make sure you have made a backup.',
+    msg14:'Confirm to delete this wallet?',
+    msg15:'Name of the wallet you want to delete',
+    msg16:'Password',
+    msg17:'Wallet Deleted',
+    msg18:'账户名错误'
+  }
 }

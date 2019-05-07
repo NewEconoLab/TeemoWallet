@@ -9,6 +9,7 @@ import Toast from '../../../components/Toast';
 import Backup from './backup';
 import common from '../../store/common';
 import { bg } from '../../utils/storagetools';
+import intl from '../../store/intl';
 // import PrivateKey from './privatekey';
 // import DeleteWallet from './deletewallet';
 interface IProps
@@ -106,7 +107,7 @@ export default class EditWallet extends React.Component<IProps, {}>
 		document.execCommand("Copy"); // 执行浏览器复制命令
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
-		Toast("复制成功");		
+		Toast(intl.message.toast.copySuccess);		
 	  }
     public render()
     {
@@ -118,50 +119,50 @@ export default class EditWallet extends React.Component<IProps, {}>
                         <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" />
                     </div>
                     <div className="edit-address">
-                        <div className="bold-text">地址</div>
+                        <div className="bold-text">{intl.message.editwallet.address}</div>
                         <span className="bold-text">{common.account.address} </span>
                     </div>
                     <div className="edit-nep">
-                        <div className="bold-text">Nep2加密密钥 </div>
-                        <p className="tips-msg">使用NEP2加密密钥及密码可以在其他地方打开您的钱包。
-                        <br />您的加密密钥是:</p>
+                        <div className="bold-text">{intl.message.editwallet.nep2key} </div>
+                        <p className="tips-msg">{intl.message.editwallet.msg1}
+                        <br />{intl.message.editwallet.msg2}</p>
                         <div className="nep-wrapper">
                             <div className="nep-text" onClick={this.onCopyNep2}>{this.state.codeLink}</div>
-                            <span className="copy-text">（点击直接复制）</span>
+                            <span className="copy-text">（{intl.message.editwallet.msg3}）</span>
                         </div>
                     </div>
                     <div className="normal-editwallet">
                         <div className="normal-left">
-                            <span className="bold-text">Nep6备份文件</span>
+                            <span className="bold-text">{intl.message.editwallet.msg4}</span>
                         </div>
                         <div className="normal-right">
                             {this.state.downloadHref?
                             <a download={this.state.walletName+'.json'} href={this.state.downloadHref}>
-                                <Button text="下载" size="small" onClick={this.onShowBackup} />
+                                <Button text={intl.message.editwallet.download} size="small" onClick={this.onShowBackup} />
                             </a>:
-                                <Button text="下载" size="small" type="disable-btn" />
+                                <Button text={intl.message.editwallet.download} size="small" type="disable-btn" />
                             }
                         </div>
                     </div>
-                    <p className="normal-text">备份您的钱包，使用时将需要密码。</p>
+                    <p className="normal-text">{intl.message.editwallet.msg5}</p>
                     <div className="normal-editwallet">
                         <div className="normal-left">
-                            <span className="bold-text">私钥 </span>
+                            <span className="bold-text">{intl.message.editwallet.prikey} </span>
                         </div>
                         <div className="normal-right">
-                            <Button text="显示私钥" size="small" onClick={this.onShowTwiceDialog.bind(this,'private')} />
+                            <Button text={intl.message.editwallet.msg7} size="small" onClick={this.onShowTwiceDialog.bind(this,'private')} />
                         </div>
                     </div>
-                    <p className="normal-text">私钥是未经过加密的钱包备份，请勿泄露给他人。</p>
+                    <p className="normal-text">{intl.message.editwallet.msg8}</p>
                     <div className="normal-editwallet">
                         <div className="normal-left">
-                            <span className="bold-text">删除钱包 </span>
+                            <span className="bold-text">{intl.message.editwallet.deletewallet} </span>
                         </div>
                         <div className="normal-right">
-                            <Button text="删除" size="small" onClick={this.onShowTwiceDialog.bind(this,'delete')} />
+                            <Button text={intl.message.button.delete} size="small" onClick={this.onShowTwiceDialog.bind(this,'delete')} />
                         </div>
                     </div>
-                    <p className="normal-text">从钱包列表中删除当前钱包及其全部数据。</p>
+                    <p className="normal-text">{intl.message.editwallet.msg11}</p>
                 </div>
                 {/* <div className="editwallet-footer">
                     <Button text="返回" size="adaptation" onClick={this.goBack} />

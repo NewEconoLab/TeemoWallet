@@ -4,14 +4,12 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import './index.less';
-import Modal from '../../../components/Modal';
 import common from '../../store/common';
-import QrMakeCode from '../../utils/qrcode';
 import Toast from '../../../components/Toast'
 import Button from '../../../components/Button';
-import Input from '../../../components/Input';
 import { bg } from '../../utils/storagetools';
 import { RouteComponentProps } from 'react-router';
+import intl from '../../store/intl';
 
 interface IProps extends RouteComponentProps
 {
@@ -42,18 +40,18 @@ export default class DeleteWallet extends React.Component<IProps, any>
 				{
 					bg.AccountManager.deleteCurrentAccount()
 					this.props.history.push('/login');
-					Toast('钱包删除成功');
+					Toast(intl.message.editwallet.msg17);
 				}
 				else
 				{
 					this.setState({confrimName:'',password:''})
-					Toast('密码错误','error');
+					Toast(intl.message.login.error,'error');
 				}
 			});			
 		}
 		else
 		{
-			Toast('账户名错误','error');
+			Toast(intl.message.editwallet.msg18,'error');
 			this.setState({confrimName:'',password:''})
 		}
 	}
@@ -80,12 +78,12 @@ export default class DeleteWallet extends React.Component<IProps, any>
 					{
 						this.state.showDeleteStep === 0 && (
 							<div className="step-box">
-								<p className="normal-tips">删除钱包会清除本钱包的全部信息此操作不可逆</p>								
-								<p className="normal-tips red-tips">恢复帐户需要私钥或备份文件和密码请确保你已经进行了备份</p>
-								<p className="normal-tips last-tips">确认删除本钱包？</p>
+								<p className="normal-tips">{intl.message.editwallet.msg12}</p>								
+								<p className="normal-tips red-tips">{intl.message.editwallet.msg13}</p>
+								<p className="normal-tips last-tips">{intl.message.editwallet.msg14}</p>
 								<div className="step-btn">
-									<Button type="warn" text="取消" onClick={this.onHide} />
-									<Button type="primary" text="确定" onClick={this.onGoNextStep} />
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+									<Button type="primary" text={intl.message.button.confirm} onClick={this.onGoNextStep} />
 								</div>
 							</div>
 						)
@@ -94,15 +92,14 @@ export default class DeleteWallet extends React.Component<IProps, any>
 						this.state.showDeleteStep === 1 && (
 							<div className="step-box">
 								<div className="input-wrap">
-									<input type="text" className="delete-input" placeholder="输入你要删除的钱包名称以确认" onChange={this.onNameChange} value={this.state.confrimName} />
-									{/* <Input type="text" placeholder="输入你要删除的钱包名称以确认"  onChange={this.onNameChange} value={this.state.confrimName} /> */}
+									<input type="text" className="delete-input" placeholder={intl.message.editwallet.msg15} onChange={this.onNameChange} value={this.state.confrimName} />
 								</div>
 								<div className="input-wrap last-input">
-									<input type="password" className="delete-input" placeholder="输入钱包密码" onChange={this.onPwdChange} value={this.state.password} />
+									<input type="password" className="delete-input" placeholder={intl.message.editwallet.msg16} onChange={this.onPwdChange} value={this.state.password} />
 								</div>
 								<div className="step-btn step2-btn">
-									<Button type="warn" text="取消" onClick={this.onHide} />
-									<Button type="primary" text="确定" onClick={this.onDeleteWallet} />
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+									<Button type="primary" text={intl.message.button.confirm} onClick={this.onDeleteWallet} />
 								</div>
 							</div>
 						)

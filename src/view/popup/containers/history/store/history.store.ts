@@ -26,7 +26,7 @@ class HistoryList implements IHistoryList
             }
             else if(task.type==ConfirmType.claimgas)
             {
-                task.sendHistory.remark="提取GAS";
+                task.sendHistory.remark=intl.message.assets.claimGas;
                 tasklist.push(task);
             }
         }

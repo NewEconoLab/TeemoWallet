@@ -154,7 +154,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'edit' && <span>钱包</span>
                                 }
                                 {
-                                    this.state.showPage === 'setting' && <span>设置</span>
+                                    this.state.showPage === 'setting' && <span>{intl.message.editwallet.setting}</span>
                                 }
                                 {
                                     this.state.showPage != 'manage' && 

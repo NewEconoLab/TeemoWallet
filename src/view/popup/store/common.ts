@@ -17,11 +17,6 @@ class Common implements ICommonStore
     @observable public network:NetWork=NetWork.TestNet;
     @observable public balances:{[asset:string]:number}={};
 
-    constructor(){
-        this.tabname="account"
-    }
-    private tabname:string;
-
     @action public initNetWork=()=>{
         const currentNet = bg.AccountManager.getCurrentNetWork();
         this.network = NetWork[currentNet];        
