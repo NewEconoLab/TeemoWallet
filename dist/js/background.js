@@ -2525,9 +2525,11 @@ class ResultItem {
         return (this.data).toHexString();
     }
     AsHashString() {
-        return "0x" + this.data.reverse().toHexString();
+        return this.data.reverse().toHexString();
     }
     AsString() {
+        if (this.data.length === 1 && this.data[0] === 0)
+            return "";
         return ThinNeo.Helper.Bytes2String(this.data);
     }
     AsHash160() {

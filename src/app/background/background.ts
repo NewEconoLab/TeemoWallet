@@ -3154,7 +3154,7 @@ class ResultItem
         }
         else if (type === DataType.ByteArray)
         {
-            item.data = (value as string).hexToBytes()
+            item.data = ((value as string)).hexToBytes()
         }
         else if (type === DataType.Integer)
         {
@@ -3185,10 +3185,12 @@ class ResultItem
     }
     public AsHashString(): string
     {
-        return "0x" + this.data.reverse().toHexString();
+        return this.data.reverse().toHexString();
     }
     public AsString(): string
     {
+        if (this.data.length === 1 && this.data[0] === 0)
+            return "";
         return ThinNeo.Helper.Bytes2String(this.data);
     }
     public AsHash160(): Neo.Uint160
