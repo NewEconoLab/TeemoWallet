@@ -53,11 +53,13 @@ var Command;
 })(Command || (Command = {}));
 var EventName;
 (function (EventName) {
-    EventName["READY"] = "READY";
-    EventName["ACCOUNT_CHANGED"] = "ACCOUNT_CHANGED";
-    EventName["CONNECTED"] = "CONNECTED";
-    EventName["DISCONNECTED"] = "DISCONNECTED";
-    EventName["NETWORK_CHANGED"] = "NETWORK_CHANGED";
+    EventName["READY"] = "Teemo.NEO.READY";
+    EventName["CONNECTED"] = "Teemo.NEO.CONNECTED";
+    EventName["DISCONNECTED"] = "Teemo.NEO.DISCONNECTED";
+    EventName["NETWORK_CHANGED"] = "Teemo.NEO.NETWORK_CHANGED";
+    EventName["ACCOUNT_CHANGED"] = "Teemo.NEO.ACCOUNT_CHANGED";
+    EventName["BLOCK_HEIGHT_CHANGED"] = "Teemo.NEO.BLOCK_HEIGHT_CHANGED";
+    EventName["TRANSACTION_CONFIRMED"] = "Teemo.NEO.TRANSACTION_CONFIRMED";
 })(EventName || (EventName = {}));
 const ids = [];
 /**

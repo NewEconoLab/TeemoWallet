@@ -49,11 +49,13 @@ declare enum Command {
     NNS_getDomainFromAddress = "NNS.getDomainFromAddress"
 }
 declare enum EventName {
-    READY = "READY",
-    ACCOUNT_CHANGED = "ACCOUNT_CHANGED",
-    CONNECTED = "CONNECTED",
-    DISCONNECTED = "DISCONNECTED",
-    NETWORK_CHANGED = "NETWORK_CHANGED"
+    READY = "Teemo.NEO.READY",
+    CONNECTED = "Teemo.NEO.CONNECTED",
+    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED",
+    BLOCK_HEIGHT_CHANGED = "Teemo.NEO.BLOCK_HEIGHT_CHANGED",
+    TRANSACTION_CONFIRMED = "Teemo.NEO.TRANSACTION_CONFIRMED"
 }
 interface GetStorageArgs {
     scriptHash: string;
