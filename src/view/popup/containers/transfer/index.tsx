@@ -321,7 +321,7 @@ export default class Transfer extends React.Component<IProps, IState>
 						:
 						<>
 							<div className="line">
-								<Select 
+								<Select
 								currentOption={this.state.currentOption} 
 								defaultValue={this.props.asset} 
 								options={
@@ -329,7 +329,8 @@ export default class Transfer extends React.Component<IProps, IState>
 									[]
 								} 
 								onCallback={this.onSelect} 
-								text={intl.message.mywallet.assets} />
+								text={intl.message.mywallet.assets} 
+							/>
 							</div>
 							<div className="line">
 								<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
@@ -342,7 +343,7 @@ export default class Transfer extends React.Component<IProps, IState>
 								}
 							</div>
 							<div className="line line-big">
-								<Input placeholder={`${intl.message.transfer.amount} （90000 GAS ${intl.message.transfer.available}）`} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
+								<Input placeholder={`${intl.message.transfer.amount} （9000 ${this.state.currentOption.name} ${intl.message.transfer.available}）`} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
 							</div>
 							<div className="line">
 								<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
