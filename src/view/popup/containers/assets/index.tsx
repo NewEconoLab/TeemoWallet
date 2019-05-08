@@ -7,7 +7,6 @@ import './index.less';
 import Button from '../../../components/Button';
 import { observer } from 'mobx-react';
 import common from '../../store/common';
-import { HASH_CONFIG } from '../../../config';
 import ClaimGAS from './claimgas';
 import intl from '../../store/intl';
 import classnames from 'classnames';
@@ -24,7 +23,7 @@ export default class Assets extends React.Component<IProps, {}>
     }
     public state = {
         showNumber: 0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
-        tranAsset: HASH_CONFIG.ID_GAS,
+        tranAsset: "",
         assetData: null,
         activeLable: "assets"
     }
@@ -45,6 +44,8 @@ export default class Assets extends React.Component<IProps, {}>
     {
         if (this.props.lableChange)
         {
+            console.log("按钮触发转账");
+            
             this.props.lableChange('transfer', this.state.tranAsset);
         }
     }
@@ -53,36 +54,6 @@ export default class Assets extends React.Component<IProps, {}>
     {
         this.setState({
             tranAsset: assetID
-        }, () =>
-            {
-                this.onShowTransfer();
-            })
-    }
-    // 显示CGAS转账
-    public transferCGAS = () =>
-    {
-        this.setState({
-            tranAsset: HASH_CONFIG.ID_CGAS.toString()
-        }, () =>
-            {
-                this.onShowTransfer();
-            })
-    }
-    // 显示GAS转账
-    public transferGas = () =>
-    {
-        this.setState({
-            tranAsset: HASH_CONFIG.ID_GAS
-        }, () =>
-            {
-                this.onShowTransfer();
-            })
-    }
-    // 显示NNC转账
-    public transferNNC = () =>
-    {
-        this.setState({
-            tranAsset: HASH_CONFIG.ID_NNC.toString()
         }, () =>
             {
                 this.onShowTransfer();
@@ -125,10 +96,11 @@ export default class Assets extends React.Component<IProps, {}>
                     {   
                         common.balances && 
                         Object.keys(common.balances).map(asset=>{
-                            const amount = common.balances[asset];                            
+                            const amount = common.balances[asset].amount;          
+                            const name = common.balances[asset].symbol;                           
                             return(                                
                                 <div className="asset-panel" onClick={this.transfer.bind(this,asset)}>
-                                    <div className="asset-name">{asset}</div>
+                                    <div className="asset-name">{name}</div>
                                     <div className={loadClassName}>{Neo.Fixed8.fromNumber(amount).toString()}</div>
                                 </div>
                             )

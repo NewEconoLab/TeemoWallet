@@ -72,7 +72,7 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
         }
         this.setState({
             showPage: label,
-            tranAsset:asset?asset:HASH_CONFIG.ID_GAS
+            tranAsset:asset
         });
     }
     // 切换二次编辑窗口
@@ -148,10 +148,10 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'transfer' && <span>{intl.message.assets.transfer}</span>
                                 }
                                 {
-                                    this.state.showPage === 'manage' && <><span>管理代币</span><p className="close-page" onClick={this.onManageSave}>保存</p></>
+                                    this.state.showPage === 'manage' && <><span>{intl.message.assets.manager}</span><p className="close-page" onClick={this.onManageSave}>{intl.message.assets.save}</p></>
                                 }
                                 {
-                                    this.state.showPage === 'edit' && <span>钱包</span>
+                                    this.state.showPage === 'edit' && <span>{intl.message.setting.wallet}</span>
                                 }
                                 {
                                     this.state.showPage === 'setting' && <span>{intl.message.editwallet.setting}</span>
@@ -167,10 +167,10 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                         this.state.showTwiceDialog!==''&& (
                             <div className="single-lable">
                                 {
-                                    this.state.showTwiceDialog === 'private' && <span>显示私钥</span>
+                                    this.state.showTwiceDialog === 'private' && <span>{intl.message.editwallet.msg7}</span>
                                 }
                                 {
-                                    this.state.showTwiceDialog === 'delete' && <span>删除钱包</span>
+                                    this.state.showTwiceDialog === 'delete' && <span>{intl.message.editwallet.deletewallet}</span>
                                 }
                                 <img onClick={this.onCloseDialog} className="close-page" src={require('../../../image/close-nomal.png')} alt="" />
                             </div>

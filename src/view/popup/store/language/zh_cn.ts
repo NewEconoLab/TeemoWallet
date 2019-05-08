@@ -103,6 +103,7 @@ export default {
     sendTo:"发送至（地址或NNS域名）",
     amount:"发送数量",
     payfee:"优先确认交易(支付0.001GAS)",
+    available:"可用",
     next:"下一步",
     title:"转账详情",
     title1:"从",
@@ -122,7 +123,10 @@ export default {
     claim:'提取',
     claiming:'提取中',
     message:'正在提取gas，请勿退出钱包',
-    claimGas:"提取GAS"
+    message1:'选择要显示在主页的token类型',
+    message2:'请输入代币名称或哈希进行搜索',
+    claimGas:"提取GAS",
+    save:"保存"
   },
   notify:{
     message1:"想要连接到您的钱包",
@@ -146,7 +150,8 @@ export default {
     autoLock:'自动上锁',
     off:'不上锁',
     second:'秒',
-    minute:'分钟'
+    minute:'分钟',
+    wallet:'钱包'
   },
   editwallet:{
     create:'创建钱包',

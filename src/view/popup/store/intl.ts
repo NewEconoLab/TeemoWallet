@@ -144,6 +144,7 @@ export interface Language_Transfer{
     sendTo: string;
     amount: string;
     payfee: string;
+    available:string;
     title: string;
     title1: string;
     title2: string;
@@ -165,6 +166,9 @@ export interface Language_Assets{
     claimGas:string;
     claiming: string;
     message : string;
+    message1:string;
+    message2:string;
+    save:string;
 }
 
 export interface Language_Setting{
@@ -177,6 +181,7 @@ export interface Language_Setting{
     off: string;
     second: string;
     minute: string;
+    wallet:string;
 }
 
 export interface Language_EditWallet{    

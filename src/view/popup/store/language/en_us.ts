@@ -103,6 +103,7 @@ export default {
     amount:"Amount",
     payfee:"Priority transaction( pay 0.001GAS)",
     next:"Next",
+    available:"Available",
     title:"Transaction details",
     title1:"From",
     title2:"Amount",
@@ -121,7 +122,10 @@ export default {
     claim:'Claim',
     claiming:'claming',
     message:"Claming GAS, don't log out of Wallet.",
-    claimGas:"Claim GAS"
+    message1:'Select your tokens',
+    message2:'Search tokens by name or hash',
+    claimGas:"Claim GAS",
+    save:"Save"
   },
   notify:{
     message1:"Tries connecting to your wallet.",
@@ -146,6 +150,7 @@ export default {
     off: 'OFF',
     second: 's',
     minute: 'min',
+    wallet:"Wallet"
   },
   editwallet:{
     create:'Creat Wallet',

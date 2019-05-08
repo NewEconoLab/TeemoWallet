@@ -5,6 +5,7 @@ import * as React from 'react';
 import './index.less';
 import { observer } from 'mobx-react';
 import manageStore from './store/manage.store';
+import intl from '../../store/intl';
 interface IProps {
   lableChange: (table: string) => void
 }
@@ -126,9 +127,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
   public render() {
     return (
       <div className="manage-wrapper">
-        <p className="tips-text">选择要显示在主页的token类型</p>
+        <p className="tips-text">{intl.message.assets.message1}</p>
         <div className="search-asset">
-          <input type="text" placeholder="请输入代币名称或哈希进行搜索" value={this.state.inputName} onChange={this.onChangeInput} />
+          <input type="text" placeholder={intl.message.assets.message2} value={this.state.inputName} onChange={this.onChangeInput} />
           <img className="search-icon" src={require('../../../image/search.png')} alt="" />
           {
             this.state.inputName !== '' && <img className="clear-search" src={require("../../../image/close3.png")} alt="" onClick={this.onClearInput} />

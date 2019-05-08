@@ -36,7 +36,7 @@ export default class Select extends React.Component<IProps, IState> {
 		expand: false,
 	}
 	public componentDidMount() {
-		if(this.props.defaultValue) {
+		if(this.props.defaultValue && this.props.options.length>0) {
 			this.setState({
 				options:this.props.options.filter((item) => item.id === this.props.defaultValue)[0]
 			}, () => {
@@ -44,7 +44,7 @@ export default class Select extends React.Component<IProps, IState> {
 				// 	this.props.onCallback(this.state.options);
 				// }
 			});
-		} else if(!this.props.placeholder) {
+		} else if(!this.props.placeholder && this.props.options.length>0) {
 			this.setState({
 				options:this.props.options[0]
 			});

@@ -17,6 +17,7 @@ import { HASH_CONFIG } from '../../../config';
 import Toast from '../../../components/Toast';
 import { observer } from 'mobx-react';
 import intl from '../../store/intl';
+import manageStore from '../manage/store/manage.store';
 
 interface IProps
 {
@@ -65,31 +66,36 @@ export default class Transfer extends React.Component<IProps, IState>
 		addrMessage: '',
 		amountMessage: '',
 		resolverMessage:'',
-		currentOption: { id: HASH_CONFIG.ID_GAS, name: 'GAS' },
+		currentOption: { id: '', name: '' },
+		options:[],
 		toAddress: '',
 		domain: '',
 	}
 
 	componentDidMount()
 	{
+		console.log("------------转账页面加载完毕");
+		
 		if (this.props.asset != '')
 		{
+			console.log('资产id',this.props.asset);
+			
 			this.setState({
-				currentOption: this.options.find(option => option.id == this.props.asset)
+				currentOption: this.state.options.find(option => option.id == this.props.asset)
+			})
+		}
+		else
+		{
+			this.setState({
+				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
+			},()=>{
+				console.log('资产名称',this.state.currentOption.name);
+				
 			})
 		}
 	}
-
-	public options: IOption[] = [
-		{ id: HASH_CONFIG.ID_GAS, name: 'GAS' },
-		{ id: HASH_CONFIG.ID_CGAS.toString(), name: 'CGAS' },
-		{ id: HASH_CONFIG.ID_NEO, name: 'NEO' },
-		{ id: HASH_CONFIG.ID_NNC.toString(), name: 'NNC' }
-	]
 	public onSelect = (currentOption: IOption) =>
 	{
-		console.log(currentOption);
-
 		this.setState(
 			{
 				currentOption
@@ -173,7 +179,7 @@ export default class Transfer extends React.Component<IProps, IState>
 	public onAmountChange = (event) =>
 	{
 		const amount = asNumber(event, 8);
-		const balance = Neo.Fixed8.fromNumber(common.balances[this.state.currentOption.name])
+		const balance = Neo.Fixed8.fromNumber(common.balances[this.state.currentOption.id].amount)
 		let checkDisable = false;
 		let errorAmount = false;
 		let amountMessage = "";
@@ -221,7 +227,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			checkDisable: false,
 			addrMessage: '',
 			amountMessage: '',
-			currentOption: { id: HASH_CONFIG.ID_GAS, name: 'GAS' },
+			currentOption: { id: '', name: '' },
 			toAddress: '',
 			domain: '',
 			confirmDisable: false
@@ -315,7 +321,15 @@ export default class Transfer extends React.Component<IProps, IState>
 						:
 						<>
 							<div className="line">
-								<Select currentOption={this.state.currentOption} defaultValue={this.props.asset} options={this.options} onCallback={this.onSelect} text={intl.message.mywallet.assets} />
+								<Select 
+								currentOption={this.state.currentOption} 
+								defaultValue={this.props.asset} 
+								options={
+									manageStore.myAssets? manageStore.myAssets.map(asset=> { return{id:asset.assetid,name:asset.symbol}}):
+									[]
+								} 
+								onCallback={this.onSelect} 
+								text={intl.message.mywallet.assets} />
 							</div>
 							<div className="line">
 								<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
@@ -328,7 +342,7 @@ export default class Transfer extends React.Component<IProps, IState>
 								}
 							</div>
 							<div className="line line-big">
-								<Input placeholder={intl.message.transfer.amount + "（90000 GAS可用）"} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
+								<Input placeholder={`${intl.message.transfer.amount} （90000 GAS ${intl.message.transfer.available}）`} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
 							</div>
 							<div className="line">
 								<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />

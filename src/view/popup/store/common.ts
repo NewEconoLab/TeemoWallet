@@ -2,7 +2,6 @@ import { observable, action } from 'mobx';
 import { NepAccount } from "../../../common/entity";
 import { Storage_local, bg } from "../utils/storagetools";
 import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
-import { HASH_CONFIG } from "../../config";
 import { NetWork, IAccountMessage, ICommonStore } from './interface/common.interface';
 import historyStore from '../containers/history/store/history.store';
 import manageStore from '../containers/manage/store/manage.store';
@@ -15,7 +14,7 @@ class Common implements ICommonStore
     @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
-    @observable public balances:{[asset:string]:number}={};
+    @observable public balances:{[asset:string]:{amount:number,symbol:string}}={};
 
     @action public initNetWork=()=>{
         const currentNet = bg.AccountManager.getCurrentNetWork();
@@ -52,7 +51,7 @@ class Common implements ICommonStore
         bg.getBalance(data)
         .then((result:BalanceResults)=>{
             result[this.account.address].forEach((value,index)=>{
-                this.balances[value.symbol]=parseFloat(value.amount);
+                this.balances[value.assetID]={amount:parseFloat(value.amount),symbol:value.symbol};
             })
         })
     }
