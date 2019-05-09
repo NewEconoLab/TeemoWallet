@@ -1,15 +1,6 @@
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
 
-enum WalletEvents
-{
-    READY="Teemo.NEO.READY",
-    CONNECTED="Teemo.NEO.CONNECTED",
-    DISCONNECTED="Teemo.NEO.DISCONNECTED",
-    NETWORK_CHANGED="Teemo.NEO.NETWORK_CHANGED",
-    ACCOUNT_CHANGED="Teemo.NEO.ACCOUNT_CHANGED"
-}
-
 enum ArgumentDataType {
     STRING = 'String',
     BOOLEAN = 'Boolean',
@@ -482,7 +473,7 @@ const provider:Provider = {
 }
 if (window.dispatchEvent) {
     window.dispatchEvent(
-        new CustomEvent(WalletEvents.READY,{
+        new CustomEvent(EventName.READY,{
             detail:provider,
         })
     );

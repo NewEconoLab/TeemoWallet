@@ -1,13 +1,5 @@
 const BLOCKCHAIN = 'NEO';
 const VERSION = 'v1';
-var WalletEvents;
-(function (WalletEvents) {
-    WalletEvents["READY"] = "Teemo.NEO.READY";
-    WalletEvents["CONNECTED"] = "Teemo.NEO.CONNECTED";
-    WalletEvents["DISCONNECTED"] = "Teemo.NEO.DISCONNECTED";
-    WalletEvents["NETWORK_CHANGED"] = "Teemo.NEO.NETWORK_CHANGED";
-    WalletEvents["ACCOUNT_CHANGED"] = "Teemo.NEO.ACCOUNT_CHANGED";
-})(WalletEvents || (WalletEvents = {}));
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";
@@ -262,7 +254,7 @@ const provider = {
     }
 };
 if (window.dispatchEvent) {
-    window.dispatchEvent(new CustomEvent(WalletEvents.READY, {
+    window.dispatchEvent(new CustomEvent(EventName.READY, {
         detail: provider,
     }));
 }

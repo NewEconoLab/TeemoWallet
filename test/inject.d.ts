@@ -1,12 +1,5 @@
 declare const BLOCKCHAIN = "NEO";
 declare const VERSION = "v1";
-declare enum WalletEvents {
-    READY = "Teemo.NEO.READY",
-    CONNECTED = "Teemo.NEO.CONNECTED",
-    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
-    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
-    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED"
-}
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -49,16 +42,18 @@ declare enum Command {
     NNS_getDomainFromAddress = "NNS.getDomainFromAddress"
 }
 declare enum EventName {
-    READY = "READY",
-    ACCOUNT_CHANGED = "ACCOUNT_CHANGED",
-    CONNECTED = "CONNECTED",
-    DISCONNECTED = "DISCONNECTED",
-    NETWORK_CHANGED = "NETWORK_CHANGED"
+    READY = "Teemo.NEO.READY",
+    CONNECTED = "Teemo.NEO.CONNECTED",
+    DISCONNECTED = "Teemo.NEO.DISCONNECTED",
+    NETWORK_CHANGED = "Teemo.NEO.NETWORK_CHANGED",
+    ACCOUNT_CHANGED = "Teemo.NEO.ACCOUNT_CHANGED",
+    BLOCK_HEIGHT_CHANGED = "Teemo.NEO.BLOCK_HEIGHT_CHANGED",
+    TRANSACTION_CONFIRMED = "Teemo.NEO.TRANSACTION_CONFIRMED"
 }
 interface GetStorageArgs {
     scriptHash: string;
     key: string;
-    network?: string;
+    network: string;
 }
 interface GetStorageOutput {
     result: string;
@@ -74,7 +69,7 @@ interface InvokeArgs {
     scriptHash: string;
     operation: string;
     fee?: string;
-    network?: "TestNet" | "MainNet";
+    network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;
     description?: string;
@@ -85,7 +80,7 @@ interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     arguments?: Argument[];
-    network?: string;
+    network: string;
 }
 interface InvokeReadGroup {
     group: InvokeReadInput[];
@@ -129,16 +124,16 @@ interface InvokeGroupOutup {
  * @param {string} network 网络
  */
 interface GetBlockArgs {
-    blockHeight: number;
-    network?: string;
+    blockHeight: number | string;
+    network: string;
 }
 interface GetTransactionArgs {
     txid: string;
-    network?: string;
+    network: string;
 }
 interface GetApplicationLogArgs {
     txid: string;
-    network?: string;
+    network: string;
 }
 interface BalanceRequest {
     address: string;
@@ -147,7 +142,7 @@ interface BalanceRequest {
 }
 interface GetBalanceArgs {
     params: BalanceRequest | BalanceRequest[];
-    network?: string;
+    network: string;
 }
 interface BalanceResults {
     [address: string]: Balance[];
@@ -176,7 +171,7 @@ interface SendArgs {
     amount: string;
     remark?: string;
     fee?: string;
-    network?: string;
+    network: string;
 }
 interface SendOutput {
     txid: string;
@@ -196,25 +191,25 @@ interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     args?: Argument[];
-    network?: string;
+    network: string;
 }
 interface GetBigIntegerFromAssetAmountArgs {
     amount: string;
     assetID: string;
-    network?: 'MainNet' | 'TestNet';
+    network: 'MainNet' | 'TestNet';
 }
 interface GetDecimalsFromAssetAmountArgs {
     amount: string;
     assetID: string;
-    network?: 'MainNet' | 'TestNet';
+    network: 'MainNet' | 'TestNet';
 }
 interface DomainArgs {
     domain: string;
-    network?: 'MainNet' | 'TestNet';
+    network: 'MainNet' | 'TestNet';
 }
 interface AddressArgs {
     address: string;
-    network?: 'MainNet' | 'TestNet';
+    network: 'MainNet' | 'TestNet';
 }
 declare const ids: any[];
 /**
@@ -270,23 +265,23 @@ declare namespace Teemo {
          * 查询区块信息
          * @param params
          */
-        static getBlock(params: GetBlockArgs): Promise<{}>;
+        static getBlock(params: GetBlockArgs): Promise<any>;
         /**
          * 查询交易信息
          * @param params
          */
-        static getTransaction(params: GetTransactionArgs): Promise<{}>;
+        static getTransaction(params: GetTransactionArgs): Promise<any>;
         /**
          * 查询log
          * @param params
          */
-        static getApplicationLog(params: GetApplicationLogArgs): Promise<{}>;
+        static getApplicationLog(params: GetApplicationLogArgs): Promise<any>;
         static TOOLS: {
             /**
              * 验证地址
              * @param address 要验证的地址
              */
-            validateAddress: (address: string) => Promise<{}>;
+            validateAddress: (address: string) => Promise<boolean>;
             /**
              * scriptHash转地址
              * @param scriptHash 要转换成地址的ScriptHash
@@ -311,9 +306,16 @@ declare namespace Teemo {
             getDecimalsStrFromAssetAmount: (params: GetDecimalsFromAssetAmountArgs) => Promise<string>;
         };
         static NNS: {
-            getNamehashFromDomain: (params: string) => Promise<{}>;
-            getAddressFromDomain: (params: DomainArgs) => Promise<{}>;
-            getDomainFromAddress: (params: AddressArgs) => Promise<{}>;
+            getNamehashFromDomain: (params: string) => Promise<string>;
+            getAddressFromDomain: (params: DomainArgs) => Promise<{
+                address: string;
+                TTL: string;
+            }>;
+            getDomainFromAddress: (params: AddressArgs) => Promise<{
+                namehash: string;
+                fullDomainName: string;
+                TTL: string;
+            }>;
         };
     }
 }
