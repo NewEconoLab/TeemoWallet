@@ -87,17 +87,6 @@ export default class EditWallet extends React.Component<IProps, {}>
         bg.AccountManager.setAccountName(this.state.walletName);
         common.initAccountInfo();
     }
-    //  // 弹出私钥
-    //  public onShowPrivate = () =>
-    //  {
-    //      this.setState({ showDialog: 2 })
-    //  }
-   
-    // // 弹出删除
-    // public onShowDelete = () =>
-    // {
-    //     this.setState({ showDialog: 3 })
-    // }
     // 复制nep2
 	public onCopyNep2 = () => {		
 		const oInput = document.createElement('input');

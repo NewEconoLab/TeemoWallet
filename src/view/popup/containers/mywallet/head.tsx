@@ -118,10 +118,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     }
 
     public editAccount = (address:string,event:any) =>{
-        console.log(address);
-        console.log(event);
         event.cancelBubble=true;
-        console.log(event.cancelBubble);
         this.setState({
             showMenu: !this.state.showMenu
         })
@@ -187,6 +184,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             }
                             <div className="account-message">
                                 <div className=''>{common.account.lable}</div>
+                                {/* <div className='address' onClick={this.onCopyAddress}>{common.account.address}</div> */}
                                 <div className='address' onClick={this.onCopyAddress}>{common.account.address.substring(0, 4) + '...' + common.account.address.substring(30, 34)}</div>
                             </div>
                         </div>

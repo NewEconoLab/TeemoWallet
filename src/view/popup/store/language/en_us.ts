@@ -14,7 +14,7 @@ export default {
   welcome:{
     start:'Start',
     welcomeToUse:'WELCOME TO USE',
-    describe:"Teemo, Brings NEO closer to you."
+    describe:"Brings NEO closer to you."
   },
   walletnew:{
     option_wif:"Private key",
