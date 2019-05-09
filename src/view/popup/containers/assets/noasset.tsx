@@ -27,8 +27,8 @@ export default class NoAsset extends React.Component<IProps, any>
 		return (
 			<Modal title="" show={this.props.show}>
 				<div className="alert-wrapper">
-					<p className="first-p">请先添加代币！</p>
-                    <Button type="primary" size="small-big" text="确定" onClick={this.onHide} />
+					<p className="first-p">{intl.message.assets.message3}</p>
+                    <Button type="primary" size="small-big" text={intl.message.button.confirm} onClick={this.onHide} />
 				</div>
 				<div className="modal-close" onClick={this.onHide}>
 					<img src={require("../../../image/close.png")} alt="" />

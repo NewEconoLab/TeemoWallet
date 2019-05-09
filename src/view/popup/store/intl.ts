@@ -168,6 +168,7 @@ export interface Language_Assets{
     message : string;
     message1:string;
     message2:string;
+    message3: string;
     save:string;
 }
 

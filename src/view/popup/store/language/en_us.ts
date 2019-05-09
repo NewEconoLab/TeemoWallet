@@ -124,6 +124,7 @@ export default {
     message:"Claming GAS, don't log out of Wallet.",
     message1:'Select your tokens',
     message2:'Search tokens by name or hash',
+    message3:'Please add tokens！',
     claimGas:"Claim GAS",
     save:"Save"
   },

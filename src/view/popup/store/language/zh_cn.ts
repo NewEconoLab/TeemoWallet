@@ -125,6 +125,7 @@ export default {
     message:'正在提取gas，请勿退出钱包',
     message1:'选择要显示在主页的token类型',
     message2:'请输入代币名称或哈希进行搜索',
+    message3:'请先添加代币！',
     claimGas:"提取GAS",
     save:"保存"
   },
