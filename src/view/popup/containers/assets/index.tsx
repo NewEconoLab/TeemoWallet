@@ -10,6 +10,8 @@ import common from '../../store/common';
 import ClaimGAS from './claimgas';
 import intl from '../../store/intl';
 import classnames from 'classnames';
+import NoAsset from './noasset';
+import manageStore from '../manage/store/manage.store';
 interface IProps
 {
     lableChange: (table: string, asset?: string) => void
@@ -25,7 +27,8 @@ export default class Assets extends React.Component<IProps, {}>
         showNumber: 0,  // 0为不显示弹框，1为显示收款弹框，2为显示转账弹框
         tranAsset: "",
         assetData: null,
-        activeLable: "assets"
+        activeLable: "assets",
+        showAlert:0
     }
     componentDidMount()
     {
@@ -42,7 +45,11 @@ export default class Assets extends React.Component<IProps, {}>
     // 显示转账
     public onShowTransfer = () =>
     {
-        if (this.props.lableChange)
+        if(manageStore.myAssets.length<1)
+        {
+            this.setState({showAlert:1});
+        }
+        else if (this.props.lableChange)
         {
             console.log("按钮触发转账");
             
@@ -67,13 +74,17 @@ export default class Assets extends React.Component<IProps, {}>
             this.props.lableChange('manage');
         }
     }
+    public onCloseModel =()=>{
+        this.setState({
+            showAlert:0
+        })
+    }
     public render()
     {
         const loadClassName = classnames('asset-amount', {
             'loading-amount': !this.state.assetData ? true : false
         })
         
-        console.log(common.balances);
         return (
             <div className="assets">
                 <ClaimGAS />
@@ -107,6 +118,8 @@ export default class Assets extends React.Component<IProps, {}>
                         })
                     }
                 </div>
+                
+                <NoAsset show={this.state.showAlert === 1} onHide={this.onCloseModel} />
             </div>
         );
     }
