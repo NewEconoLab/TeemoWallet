@@ -34,6 +34,17 @@ export default class Welcome extends React.Component<AppProps> {
         this.props.history.push('/walletnew')
     }
 
+    public goEn =()=>{
+        localStorage.setItem('language', 'en');
+        intl.initLanguage();
+        this.props.history.push('/walletnew')
+    }
+
+    public goZh =()=>{
+        localStorage.setItem('language', 'zh');
+        intl.initLanguage();
+        this.props.history.push('/walletnew')
+    }
 
     render() {
         return (
@@ -46,8 +57,9 @@ export default class Welcome extends React.Component<AppProps> {
                 <div className="describe">
                     {intl.message.welcome.describe}
                 </div>
-                <div className="start">                    
-                    <Button text={intl.message.welcome.start} type='white' onClick={this.start}/>
+                <div className="start">
+                    <Button text="开始" type='white' size='small-big' onClick={this.goZh} style={{'margin-right': '15px'}}/>
+                    <Button text="Start" type='white' size='small-big' onClick={this.goEn}/>
                 </div>
             </div>
         )
