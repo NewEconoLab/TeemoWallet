@@ -43,6 +43,7 @@ interface IState
 	toAddress: string,
 	domain: string,
 	confirmDisable: boolean,
+	available:string;
 }
 
 @observer
@@ -52,7 +53,7 @@ export default class Transfer extends React.Component<IProps, IState>
 	{
 		super(props);
 	}
-	public state = {
+	public state:IState = {
 		infoShow: false,
 		address: "",
 		amount: "",
@@ -66,10 +67,11 @@ export default class Transfer extends React.Component<IProps, IState>
 		addrMessage: '',
 		amountMessage: '',
 		resolverMessage:'',
-		currentOption: { id: '', name: '' },
-		options:[],
+		currentOption: undefined,
+		// options:[],
 		toAddress: '',
 		domain: '',
+		available:''
 	}
 
 	componentDidMount()
@@ -79,15 +81,21 @@ export default class Transfer extends React.Component<IProps, IState>
 		if (this.props.asset != '')
 		{
 			console.log('资产id',this.props.asset);
-			
+			const currentasset =  manageStore.myAssets.find(option => option.assetid == this.props.asset)
+
+			// currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
 			this.setState({
-				currentOption: this.state.options.find(option => option.id == this.props.asset)
+				currentOption: {id:currentasset.assetid,name:currentasset.symbol},
+				available:`${common.balances[currentasset.assetid].amount} ${currentasset.symbol}`
 			})
+			
 		}
 		else
 		{
+			
 			this.setState({
-				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
+				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol},
+				available:`${common.balances[manageStore.myAssets[0].assetid].amount} ${manageStore.myAssets[0].symbol}`
 			},()=>{
 				console.log('资产名称',this.state.currentOption.name);
 				
@@ -343,7 +351,11 @@ export default class Transfer extends React.Component<IProps, IState>
 								}
 							</div>
 							<div className="line line-big">
-								<Input placeholder={`${intl.message.transfer.amount} （9000 ${this.state.currentOption.name} ${intl.message.transfer.available}）`} value={this.state.amount} onChange={this.onAmountChange} type="text" error={this.state.errorAmount} message={this.state.amountMessage} />
+								<Input 
+								placeholder={`${intl.message.transfer.amount} （${this.state.available}） ${intl.message.transfer.available}`} 
+								value={this.state.amount} 
+								onChange={this.onAmountChange} type="text" 
+								error={this.state.errorAmount} message={this.state.amountMessage} />
 							</div>
 							<div className="line">
 								<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
