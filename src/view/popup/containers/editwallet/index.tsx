@@ -10,6 +10,7 @@ import Backup from './backup';
 import common from '../../store/common';
 import { bg } from '../../utils/storagetools';
 import intl from '../../store/intl';
+import { ICON } from '../../../image';
 // import PrivateKey from './privatekey';
 // import DeleteWallet from './deletewallet';
 interface IProps
@@ -49,6 +50,7 @@ export default class EditWallet extends React.Component<IProps, {}>
         codeLink:'',
         downloadHref:'',
         walletName:'',
+        editNameState:0
     }
     public onChangeWalletName = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
@@ -86,6 +88,7 @@ export default class EditWallet extends React.Component<IProps, {}>
     public toChangeWalletName = () =>{
         bg.AccountManager.setAccountName(this.state.walletName);
         common.initAccountInfo();
+        this.setState({editNameState:0})
     }
     // 复制nep2
 	public onCopyNep2 = () => {		
@@ -97,16 +100,26 @@ export default class EditWallet extends React.Component<IProps, {}>
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
 		Toast(intl.message.toast.copySuccess);		
-	  }
+    }
+    
+    public onEditName=()=>{
+        this.setState({editNameState:1});
+    }
     public render()
     {
         return (
             <div className="editwallet-wrapper">
                 <div className="editwallet-content">
+                {this.state.editNameState==0?                
                     <div className="editname-wrap">
-                        <input className="edit-input" type="text" value={this.state.walletName} onChange={this.onChangeWalletName} onBlur={this.toChangeWalletName} />
-                        <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" />
+                        <input className="edit-input" type="text" value={this.state.walletName} disabled={true} />
+                        <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" onClick={this.onEditName} />
+                    </div>:                    
+                    <div className="editname-wrap">
+                        <input className="edit-input" type="text" value={this.state.walletName} onChange={this.onChangeWalletName} />
+                        <img className="edit-icon" src={ICON.saveEdit} alt="" onClick={this.toChangeWalletName} />
                     </div>
+                }
                     <div className="edit-address">
                         <div className="bold-text">{intl.message.editwallet.address}</div>
                         <span className="bold-text">{common.account.address} </span>
