@@ -185,7 +185,8 @@ export interface Language_Setting{
     wallet:string;
 }
 
-export interface Language_EditWallet{    
+export interface Language_EditWallet{
+    display: string;
     create: string;
     import: string;
     setting: string;

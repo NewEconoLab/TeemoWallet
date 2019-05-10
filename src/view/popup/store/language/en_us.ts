@@ -154,6 +154,7 @@ export default {
     wallet:"Wallet"
   },
   editwallet:{
+    display:'Display',
     create:'Creat Wallet',
     import:'Import Wallet',
     setting:'Settings',
@@ -170,7 +171,7 @@ export default {
     msg6:'The NEP6 backup file has been downloaded.', 
     msg6_2:"Please save and remember the password. ",
     msg6_3:"Password is needed when restoring wallet.",
-    msg7:'Display',
+    msg7:'Display Private Key',
     msg8:"The private key is an unencrypted wallet backup, please don't reveal it to others",
     msg9:"Don't show Private Key to anyone, or they can take everything in the wallet.",
     msg10:'Enter password and continue',
