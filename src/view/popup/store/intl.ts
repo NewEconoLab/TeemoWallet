@@ -18,7 +18,8 @@ class Intl
         assets:Language_Assets;
         notify: Language_Notify;
         setting: Language_Setting;
-        editwallet:Language_EditWallet
+        editwallet:Language_EditWallet;
+        about:Language_About;
     };
 
     @action public initLanguage=()=>{
@@ -215,6 +216,16 @@ export interface Language_EditWallet{
     msg16: string;
     msg17: string;
     msg18: string;
+}
+
+export interface Language_About{
+    aboutas: string;
+    version: string;
+    website: string;
+    help: string;
+    policy: string;
+    and: string;
+    disclaimer: string;
 }
 
 export enum Language

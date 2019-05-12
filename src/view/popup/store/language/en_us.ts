@@ -183,5 +183,14 @@ export default {
     msg16:'Password',
     msg17:'Wallet Deleted',
     msg18:'账户名错误'
+  },
+  about:{
+    aboutas:"About us",
+    version:"Version",
+    website:"Visit our website",
+    help:"Help",
+    policy:"Privacy Policy",
+    and:" and ",
+    disclaimer:"Service Agreement and Disclaimer"
   }
 }

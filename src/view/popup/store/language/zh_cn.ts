@@ -184,5 +184,14 @@ export default {
     msg16:'输入钱包密码',
     msg17:'钱包删除成功',
     msg18:'账户名错误',
+  },
+  about:{
+    aboutas:"关于我们",
+    version:"版本信息",
+    website:"访问官网",
+    help:"帮助",
+    policy:"《 隐私政策 》",
+    and:" 与 ",
+    disclaimer:"《 用户协议和免责声明 》"
   }
 }

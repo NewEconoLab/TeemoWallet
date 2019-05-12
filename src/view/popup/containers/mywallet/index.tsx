@@ -20,6 +20,7 @@ import { HASH_CONFIG } from '../../../config';
 import PrivateKey from '../editwallet/privatekey';
 import DeleteWallet from '../editwallet/deletewallet';
 import manageStore from '../manage/store/manage.store';
+import About from '../about';
 interface AppProps extends RouteComponentProps
 {
     develop: boolean;
@@ -157,6 +158,9 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                                     this.state.showPage === 'setting' && <span>{intl.message.editwallet.setting}</span>
                                 }
                                 {
+                                    this.state.showPage === 'about' && <span>{intl.message.about.aboutas}</span>
+                                }
+                                {
                                     this.state.showPage != 'manage' && 
                                 <img onClick={this.onClosePage} className="close-page" src={require('../../../image/close-nomal.png')} alt="" />
                                 }
@@ -202,6 +206,9 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
                     }
                     {
                         (this.state.showPage === 'setting' && this.state.showTwiceDialog === '')  && <Setting lableChange={this.labelChange} />
+                    }
+                    {
+                        (this.state.showPage === 'about' && this.state.showTwiceDialog === '') && <About lableChange={this.labelChange} />
                     }
                     {
                         this.state.showTwiceDialog === 'private' && <PrivateKey onClose={this.onCloseDialog}/>

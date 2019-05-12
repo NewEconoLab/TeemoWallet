@@ -179,22 +179,22 @@ export default class ManageAsset extends React.Component<IProps, IState>
                 }
               </>
             ) :
-              (
-                this.state.searchList.map(info => {
-                  console.log(this.state.checkedAssets[ info.assetid ])
-                  return (
-                    <div className="asset-wrapper">
-                      <label>
-                        <div onClick={this.chooseStatus.bind(this,info.assetid)} >
-                          <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
-                        </div>
-                      </label>
-                      <span>{info.symbol}{info.type == 'nep5' ? `（${info.name}）` : ''}</span>
-                      <div className="asset-amount">{info.assetid.substr(0, 4) + "..." + info.assetid.substr(info.assetid.length - 4, 4)}</div>
-                    </div>
-                  )
-                })
-              )
+            (
+              this.state.searchList.map(info => {
+                console.log(this.state.checkedAssets[ info.assetid ])
+                return (
+                  <div className="asset-wrapper">
+                    <label>
+                      <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                        <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
+                      </div>
+                    </label>
+                    <span>{info.symbol}{info.type == 'nep5' ? `（${info.name}）` : ''}</span>
+                    <div className="asset-amount">{info.assetid.substr(0, 4) + "..." + info.assetid.substr(info.assetid.length - 4, 4)}</div>
+                  </div>
+                )
+              })
+            )
           }
         </div>
       </div>

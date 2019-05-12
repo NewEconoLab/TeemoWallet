@@ -16,5 +16,6 @@ export const ICON = {
     header:require('./header_icon.png'),
     en:require('./en.png'),
     cn:require('./zh.png'),
-    saveEdit:require('./saveEdit.png')
+    saveEdit:require('./saveEdit.png'),
+    icon:require('./owl.png')
 }
