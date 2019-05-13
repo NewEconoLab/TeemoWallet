@@ -211,17 +211,19 @@ export default class Panel extends React.Component<IProps, IState>
 									<div className="value">{this.props.task.invokeHistory.descripts?this.props.task.invokeHistory.descripts:""}</div>
 								</div>
 							</div>
-							<div className="group expense">
-								<div className="key-title">{intl.message.history.amount}</div>
-								<div className="value">
-								{this.props.task.invokeHistory.expenses.map((val,key)=>{
-									return val.amount+' '+val.symbol;
-								}).join(',')}
+							<div className="money">
+								<div className="group expense">
+									<div className="key-title">{intl.message.history.amount}</div>
+									<div className="value">
+									{this.props.task.invokeHistory.expenses.map((val,key)=>{
+										return val.amount+' '+val.symbol;
+									}).join(',')}
+									</div>
 								</div>
-							</div>
-							<div className="group netfee">
-								<div className="key-title">{intl.message.history.fee}</div>
-								<div className="value">{this.props.task.invokeHistory.netfee} GAS</div>
+								<div className="group netfee">
+									<div className="key-title">{intl.message.history.fee}</div>
+									<div className="value">{this.props.task.invokeHistory.netfee} GAS</div>
+								</div>
 							</div>
 						</div>
 					</>
