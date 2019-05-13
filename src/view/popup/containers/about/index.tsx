@@ -37,19 +37,21 @@ export default class About extends React.Component<IProps, {}>
                         <div className="icon-box">
                             <img src={ICON.icon} alt=""/>
                         </div>
-                        <div className="icon-title"></div>
+                        <div className="icon-title">
+                            <img src={ICON.teemo} alt=""/>
+                        </div>
                         <div className="about-version">{intl.message.about.version}  V1.2.0</div>
                     </div>
                     <div className="href-line about-line">
-                        <a href="">{intl.message.about.website}</a>
+                        <a href={intl.message.about.url1} target="_blank">{intl.message.about.website}</a>
                     </div>
                     <div className="href-line about-line">
-                        <a href="">{intl.message.about.help}</a>
+                        <a href={intl.message.about.url2} target="_blank">{intl.message.about.help}</a>
                     </div>
                     <div className="about-foot">
-                        <a href="">{intl.message.about.policy} </a>
+                        <a href={intl.message.about.url3} target="_blank">{intl.message.about.policy} </a>
                         {intl.message.about.and}
-                        <a href="">{intl.message.about.disclaimer}</a>
+                        <a href={intl.message.about.url4} target="_blank">{intl.message.about.disclaimer}</a>
                     </div>
                 </div>
             </div>

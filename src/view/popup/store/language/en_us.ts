@@ -191,6 +191,10 @@ export default {
     help:"Help",
     policy:"Privacy Policy",
     and:" and ",
-    disclaimer:"Service Agreement and Disclaimer"
+    disclaimer:"Service Agreement and Disclaimer",
+    url1:"https://teemo.nel.group/index-en.html",
+    url2:"https://teemo.nel.group/qa-en.html",
+    url3:"https://teemo.nel.group/privacy-en.html",
+    url4:"https://teemo.nel.group/disclaimer-en.html",
   }
 }

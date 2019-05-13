@@ -192,6 +192,10 @@ export default {
     help:"帮助",
     policy:"《 隐私政策 》",
     and:" 与 ",
-    disclaimer:"《 用户协议和免责声明 》"
+    disclaimer:"《 用户协议和免责声明 》",
+    url1:"https://teemo.nel.group",
+    url2:"https://teemo.nel.group/qa-zh.html",
+    url3:"https://teemo.nel.group/privacy-zh.html",
+    url4:"https://teemo.nel.group/disclaimer-zh.html",
   }
 }

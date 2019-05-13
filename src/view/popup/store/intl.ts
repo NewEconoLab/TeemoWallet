@@ -226,6 +226,10 @@ export interface Language_About{
     policy: string;
     and: string;
     disclaimer: string;
+    url1:string;
+    url2:string;
+    url3:string;
+    url4:string;
 }
 
 export enum Language
