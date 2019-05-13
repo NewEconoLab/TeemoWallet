@@ -201,15 +201,13 @@ export default class Panel extends React.Component<IProps, IState>
 					<>
 						<div className="transaction-info">
 							<div className="transaction-title">{this.props.task.dappMessage.title}</div>
-							<div className="send">
-								<div className="group">
-									<div className="key-title">{intl.message.history.scriptHash}</div>
-									<div className="value">{this.props.task.invokeHistory.scriptHashs.map(hash=>(hash.substr(0,4)+"..."+hash.substr(hash.length-3,4))).join(',')}</div>
-								</div>
-								<div className="group">
-									<div className="key-title">{intl.message.history.note}</div>
-									<div className="value">{this.props.task.invokeHistory.descripts?this.props.task.invokeHistory.descripts:""}</div>
-								</div>
+							<div className="group">
+								<div className="key-title">{intl.message.history.scriptHash}</div>
+								<div className="value">{this.props.task.invokeHistory.scriptHashs.map(hash=>(hash.substr(0,4)+"..."+hash.substr(hash.length-3,4))).join(',')}</div>
+							</div>
+							<div className="group">
+								<div className="key-title">{intl.message.history.note}</div>
+								<div className="value">{this.props.task.invokeHistory.descripts?this.props.task.invokeHistory.descripts:""}</div>
 							</div>
 							<div className="money">
 								<div className="group expense">
