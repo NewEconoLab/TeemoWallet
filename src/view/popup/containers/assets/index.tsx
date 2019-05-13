@@ -75,6 +75,7 @@ export default class Assets extends React.Component<IProps, {}>
         }
     }
     public onCloseModel =()=>{
+        this.props.lableChange('manage');
         this.setState({
             showAlert:0
         })

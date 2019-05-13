@@ -33,8 +33,10 @@ export default class Setting extends React.Component<IProps, {}>
     public componentDidMount()
     {
         const time = localStorage.getItem('Teemo-setting-disconnection');
+        console.log(time);
+        
         this.setState({
-            currentOptin:time
+            currentOptin:time?time:'0'
         },()=>{
             console.log('初始化结束',this.state.currentOptin);            
         });
@@ -64,6 +66,7 @@ export default class Setting extends React.Component<IProps, {}>
             { id: '900000', name: `15${intl.message.setting.minute}` },
             { id: '1800000', name: `30${intl.message.setting.minute}` },
         ]
+        const current =timeOptions.find(opt => opt.id == this.state.currentOptin)        
         return (
             <div className="setting-wrapper">
                 <div className="setting-content">
@@ -72,7 +75,7 @@ export default class Setting extends React.Component<IProps, {}>
                             <span className="bold-text">{intl.message.setting.autoLock} </span>
                         </div>
                         <div className="normal-right">
-                            <Select options={timeOptions} text="" onCallback={this.settingDisconne}  currentOption={timeOptions.find(opt => opt.id == this.state.currentOptin)} />
+                            <Select options={timeOptions} text="" onCallback={this.settingDisconne}  currentOption={current} />
                         </div>
                     </div>
                     <div className="normal-setting">
