@@ -149,7 +149,7 @@ export default class Panel extends React.Component<IProps, IState>
 								<a href={'https://scan.nel.group'+(common.network==NetWork.TestNet?'/test':'')+'/transaction/'+this.props.task.txid}
 								target="_blank"
 								>
-								{this.props.task.txid.substr(0,4)+'...'+this.props.task.txid.substr(this.props.task.txid.length-3,4)}
+								{this.props.task.txid.substr(0,4)+'...'+this.props.task.txid.substr(this.props.task.txid.length-4,4)}
 								</a>
 							</div>
 						</div>
