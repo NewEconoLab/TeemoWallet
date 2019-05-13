@@ -86,7 +86,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			// currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
 			this.setState({
 				currentOption: {id:currentasset.assetid,name:currentasset.symbol},
-				available:`${common.balances[currentasset.assetid].amount} ${currentasset.symbol}`
+				available:`${common.balances.find(asset=>asset.assetID===currentasset.assetid).amount} ${currentasset.symbol}`
 			})
 			
 		}
@@ -95,7 +95,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			
 			this.setState({
 				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol},
-				available:`${common.balances[manageStore.myAssets[0].assetid].amount} ${manageStore.myAssets[0].symbol}`
+				available:`${common.balances.find(asset=>asset.assetID===manageStore.myAssets[0].assetid).amount} ${manageStore.myAssets[0].symbol}`
 			},()=>{
 				console.log('资产名称',this.state.currentOption.name);
 				
@@ -186,8 +186,8 @@ export default class Transfer extends React.Component<IProps, IState>
 	// 监控输入内容
 	public onAmountChange = (event) =>
 	{
-		const amount = asNumber(event, 8);
-		const balance = Neo.Fixed8.fromNumber(common.balances[this.state.currentOption.id].amount)
+		const amount = asNumber(event, 8)
+		const balance = Neo.Fixed8.parse(common.balances.find(asset=>this.state.currentOption.id==asset.assetID).amount.toString())
 		let checkDisable = false;
 		let errorAmount = false;
 		let amountMessage = "";

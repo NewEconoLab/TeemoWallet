@@ -1,3 +1,5 @@
+import { Balance } from "../../../../lib/background";
+
 export interface NepAccount{
     walletName:string;
     address: string;
@@ -30,7 +32,7 @@ export interface ICommonStore {
     accountList:NepAccount[],
     claimGasAmount:string;
     network: string,
-    balances:{[asset:string]:{amount:number,symbol:string}},  // 账户余额的信息
+    balances:Balance[],  // 账户余额的信息
     changeNetWork:(network:NetWork)=>Promise<NetWork>,
     // initAccountList:()=>void,
     initAccountInfo:()=>void,

@@ -55,9 +55,8 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
     {
         // Example of how to send a message to eventPage.ts.      
         common.initNetWork();
-        common.initAccountBalance();
-        
-        manageStore.initAssetList()
+        manageStore.initAssetList();
+        // common.initAccountBalance();
         historyStore.initHistoryList();
         if (chrome.tabs)
         {

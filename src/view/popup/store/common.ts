@@ -1,7 +1,7 @@
 import { observable, action } from 'mobx';
 import { NepAccount } from "../../../common/entity";
 import { Storage_local, bg } from "../utils/storagetools";
-import { BalanceRequest, GetBalanceArgs,BalanceResults } from "../../../lib/background";
+import { BalanceRequest, GetBalanceArgs,BalanceResults, Balance } from "../../../lib/background";
 import { NetWork, IAccountMessage, ICommonStore } from './interface/common.interface';
 import historyStore from '../containers/history/store/history.store';
 import manageStore from '../containers/manage/store/manage.store';
@@ -14,11 +14,14 @@ class Common implements ICommonStore
     @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
-    @observable public balances:{[asset:string]:{amount:number,symbol:string}}={};
+    @observable public balances:Balance[]=[];
 
     @action public initNetWork=()=>{
         const currentNet = bg.AccountManager.getCurrentNetWork();
-        this.network = NetWork[currentNet];        
+        this.network = NetWork[currentNet];
+        console.log('当前网络',this.network);
+        
+        this.initAccountBalance();
     }
     
     @action public changeNetWork=(network:NetWork)=>{
@@ -35,25 +38,49 @@ class Common implements ICommonStore
         })
     }
 
-    @action public initAccountBalance=()=>{
-        manageStore.initAssetList();
-        const params: BalanceRequest = {
-            address: this.account.address,   // 你要查询的地址
-            assets: manageStore.myAssets.map(asset=>asset.assetid),
-        }
-        const data:GetBalanceArgs=
+    @action public initAccountBalance=()=>{        
+        const assetids = localStorage.getItem('Teemo-assetManager-'+this.network);
+        if(assetids)
         {
-            "network":this.network,
-            "params":params
+            const list = JSON.parse(assetids);
+            const arr = [];
+            for (const key in list) {
+                if (list.hasOwnProperty(key)) {
+                    if(list[key])
+                    {
+                        arr.push(key)
+                    }
+                }
+            }
+            if(arr.length>0)
+            {
+                const params: BalanceRequest = {
+                    address: this.account.address,   // 你要查询的地址
+                    assets: arr,
+                }
+                const data:GetBalanceArgs=
+                {
+                    "network":this.network,
+                    "params":params
+                }
+                this.balances=[];
+                bg.getBalance(data)
+                .then((result:BalanceResults)=>{
+                    this.balances=result[this.account.address];
+                    console.log(new Date().getTime(),JSON.stringify(this.balances));
+                    // result[this.account.address].forEach((value,index)=>{
+                    //     this.balances[value.assetID]={amount:parseFloat(value.amount),symbol:value.symbol};
+                    // })
+                })
+                
+            }
+            else
+            {
+                this.balances=[];
+                console.log(new Date().getTime(),JSON.stringify(this.balances));
+                
+            }
         }
-        // this.balances={NEO:0,GAS:0,NNC:0,CGAS:0,CNEO:0};
-        this.balances={};
-        bg.getBalance(data)
-        .then((result:BalanceResults)=>{
-            result[this.account.address].forEach((value,index)=>{
-                this.balances[value.assetID]={amount:parseFloat(value.amount),symbol:value.symbol};
-            })
-        })
     }
 
     @action public initAccountInfo=()=>{

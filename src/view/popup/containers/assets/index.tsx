@@ -31,8 +31,9 @@ export default class Assets extends React.Component<IProps, {}>
         showAlert:0
     }
     componentDidMount()
-    {
-        common.initAccountBalance();
+    {        
+        manageStore.initAssetList()
+        // common.initAccountBalance();
     }
     // 显示收款码
     public onShowQrcode = () =>
@@ -106,14 +107,12 @@ export default class Assets extends React.Component<IProps, {}>
                         </div>
                     </div>
                     {   
-                        common.balances && 
-                        Object.keys(common.balances).map(asset=>{
-                            const amount = common.balances[asset].amount;          
-                            const name = common.balances[asset].symbol;                           
+                        // common.balances && JSON.stringify(common.balances)!=='{}'&&
+                        common.balances && common.balances.map(asset=>{                         
                             return(                                
-                                <div className="asset-panel" onClick={this.transfer.bind(this,asset)}>
-                                    <div className="asset-name">{name}</div>
-                                    <div className={loadClassName}>{Neo.Fixed8.fromNumber(amount).toString()}</div>
+                                <div className="asset-panel" onClick={this.transfer.bind(this,asset.assetID)}>
+                                    <div className="asset-name">{asset.symbol}</div>
+                                    <div className={loadClassName}>{Neo.Fixed8.parse(asset.amount.toString()).toString()}</div>
                                 </div>
                             )
                         })
