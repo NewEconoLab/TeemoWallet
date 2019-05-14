@@ -2502,7 +2502,7 @@ class ResultItem {
             }
         }
         else if (type === DataType.ByteArray) {
-            item.data = (value).hexToBytes();
+            item.data = value.hexToBytes();
         }
         else if (type === DataType.Integer) {
             item.data = Neo.BigInteger.parse(value).toUint8Array();

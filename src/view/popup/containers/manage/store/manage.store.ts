@@ -53,6 +53,7 @@ class ManagerStore implements IManagerAssets
         myAssets[HASH_CONFIG.ID_NEO]= !!myAssets[HASH_CONFIG.ID_NEO];
         myAssets[HASH_CONFIG.ID_GAS]= !!myAssets[HASH_CONFIG.ID_GAS];
         localStorage.setItem('Teemo-assetManager-'+common.network,JSON.stringify(myAssets));
+        common.initAccountBalance();
     }    
     
 }

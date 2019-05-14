@@ -53,9 +53,7 @@ export default class ManageAsset extends React.Component<IProps, IState>
   }
 
   // 筛选状态
-  public chooseStatus = (assetid:string) => {
-    console.log(assetid);
-    
+  public chooseStatus = (assetid:string) => {    
     const checkeds = this.state.checkedAssets;
     const index = checkeds.findIndex(info=>info.assetid===assetid);
     if(index>=0)
@@ -68,14 +66,11 @@ export default class ManageAsset extends React.Component<IProps, IState>
       assetInfo['checked']=true;
       checkeds.push(assetInfo as CheckedAsset)
     }
-    console.log(checkeds);
-    
     this.setState({
       checkedAssets:checkeds
     })
   }
   public onChangeInput = (e: any) => {
-    console.log(e.target.value);
     this.setState({
       inputName: e.target.value,
     },()=>{
@@ -181,7 +176,6 @@ export default class ManageAsset extends React.Component<IProps, IState>
             ) :
             (
               this.state.searchList.map(info => {
-                console.log(this.state.checkedAssets[ info.assetid ])
                 return (
                   <div className="asset-wrapper">
                     <label>
