@@ -3,6 +3,7 @@ import './index.less';
 import Button from '../../../components/Button';
 import { RouteComponentProps } from 'react-router-dom';
 import intl from '../../store/intl';
+import { ICON } from '../../../image';
 
 interface AppProps extends RouteComponentProps {
     develop:boolean;
@@ -52,7 +53,7 @@ export default class Welcome extends React.Component<AppProps> {
                 <div className="title">{intl.message.welcome.welcomeToUse}</div>
                 <div className="popup-logo">
                     <img className="owl-img" src={require("../../../image/owl.png")} alt=""/>
-                    <img className="teemo-img" src={require("../../../image/teemo.png")} alt=""/>
+                    <img className="teemo-img" src={ICON.teemowelcome} alt=""/>
                 </div>
                 <div className="describe">
                     {intl.message.welcome.describe}

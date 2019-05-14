@@ -18,5 +18,6 @@ export const ICON = {
     cn:require('./zh.png'),
     saveEdit:require('./saveEdit.png'),
     icon:require('./owl.png'),
-    teemo:require('./teemo.png')
+    teemo:require('./teemo.png'),
+    teemowelcome:require('./teemowelcome.png'),
 }

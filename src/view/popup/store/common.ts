@@ -5,6 +5,7 @@ import { BalanceRequest, GetBalanceArgs,BalanceResults, Balance } from "../../..
 import { NetWork, IAccountMessage, ICommonStore } from './interface/common.interface';
 import historyStore from '../containers/history/store/history.store';
 import manageStore from '../containers/manage/store/manage.store';
+import { HASH_CONFIG } from '../../config';
 
 /**
  * 我的账户管理
@@ -67,25 +68,34 @@ class Common implements ICommonStore
                 bg.getBalance(data)
                 .then((result:BalanceResults)=>{
                     this.balances=result[this.account.address];
-                    console.log(new Date().getTime(),JSON.stringify(this.balances));
-                    // result[this.account.address].forEach((value,index)=>{
-                    //     this.balances[value.assetID]={amount:parseFloat(value.amount),symbol:value.symbol};
-                    // })
                 })
-                
             }
             else
             {
                 this.balances=[];
-                console.log(new Date().getTime(),JSON.stringify(this.balances));
-                
             }
+        }
+        else
+        {
+            const params: BalanceRequest = {
+                address: this.account.address,   // 你要查询的地址
+                assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS],
+            }
+            const data:GetBalanceArgs=
+            {
+                "network":this.network,
+                "params":params
+            }
+            this.balances=[];
+            bg.getBalance(data)
+            .then((result:BalanceResults)=>{
+                this.balances=result[this.account.address];
+            })
         }
     }
 
     @action public initAccountInfo=()=>{
         const acc = bg.AccountManager.getCurrentAccount();
-        
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
         this.account.pubkeyHex = acc.pubkeyHex;
