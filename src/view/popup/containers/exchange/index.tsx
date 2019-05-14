@@ -45,40 +45,55 @@ export default class Exchange extends React.Component<IProps, IState>
 		errorMessage: '',
 		currentOption: { id: 'cgasexchange', name: intl.message.exchange.gasToCgas }
 	}
-	public options: IOption[] = [
-		{ id: 'cgasexchange', name: intl.message.exchange.gasToCgas },
-		{ id: 'gasexchange', name: intl.message.exchange.cgasToGas }
-	]
 	// 监控输入内容
 	public onChange = (event) =>
 	{
 		const amount = asNumber(event, 8);
 		if (this.state.currentOption.id == 'cgasexchange')
 		{
-			if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(common.balances.find(asset=>asset.assetID===HASH_CONFIG.ID_GAS).amount.toString())) > 0)
-			{
+			common.getBalanceByAsset(HASH_CONFIG.ID_GAS)
+			.then(result=>{
+				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
+				{
+					this.setState({
+						inputError: true,
+						errorMessage: intl.message.exchange.noBalance
+					})
+				} 
+				else
+				{
+					this.setState({ inputError: false, errorMessage: "" });
+				}
+			})
+			.catch(()=>{
 				this.setState({
 					inputError: true,
 					errorMessage: intl.message.exchange.noBalance
 				})
-			} else
-			{
-				this.setState({ inputError: false, errorMessage: "" });
-			}
+			})
 		}
 		else
 		{
-			if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(common.balances.find(asset=>asset.assetID===HASH_CONFIG.ID_CGAS.toString()).amount.toString())) > 0)
-			{
+			common.getBalanceByAsset(HASH_CONFIG.ID_CGAS.toString())
+			.then(result=>{
+				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
+				{
+					this.setState({
+						inputError: true,
+						errorMessage: intl.message.exchange.noBalance
+					})
+				} 
+				else
+				{
+					this.setState({ inputError: false, errorMessage: "" });
+				}
+			})
+			.catch(()=>{
 				this.setState({
 					inputError: true,
 					errorMessage: intl.message.exchange.noBalance
 				})
-			}
-			else
-			{
-				this.setState({ inputError: false, errorMessage: "" });
-			}
+			})
 		}
 		this.setState({ amount });
 	}
@@ -141,7 +156,7 @@ export default class Exchange extends React.Component<IProps, IState>
 					console.log(error);
 					Toast(intl.message.toast.failed, "error")
 				})
-		}
+		}                                                                    
 	}
 
 	public render()

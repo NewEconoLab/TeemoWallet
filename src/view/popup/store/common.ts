@@ -107,6 +107,21 @@ class Common implements ICommonStore
             this.claimGasAmount=result;
         })
     }
+
+    @action public getBalanceByAsset=async(assetid:string)=>{
+        const params: BalanceRequest = 
+        {
+            address: this.account.address,   // 你要查询的地址
+            assets: [assetid],
+        }
+        const data:GetBalanceArgs =
+        {
+            "network":this.network,
+            "params":params
+        }
+        const result = await bg.getBalance(data)
+        return result[this.account.address][0];
+    }
     
     private _accountList:NepAccount[];
     

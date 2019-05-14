@@ -1,4 +1,4 @@
-import { Balance } from "../../../../lib/background";
+import { Balance, BalanceResults } from "../../../../lib/background";
 
 export interface NepAccount{
     walletName:string;
@@ -38,4 +38,5 @@ export interface ICommonStore {
     initAccountInfo:()=>void,
     initAccountBalance:() => void, // 初始化账户余额
     initClaimGasAmount:() => void; // 初始化可提取的Gas金额
+    getBalanceByAsset:(assetid: string) => Promise<Balance>
 }

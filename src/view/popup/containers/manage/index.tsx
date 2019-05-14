@@ -143,9 +143,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
                   this.state.checkedAssets.map(info => {
                     // const index = this.state.checkedList.indexOf(k as never);
                     return (
-                      <div className="asset-wrapper">
+                      <div className="asset-wrapper" onClick={this.chooseStatus.bind(this,info.assetid)} >
                         <label>
-                          <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                          <div>
                             <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
                           </div>
                         </label>
@@ -159,9 +159,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
                   manageStore.allAsset.map(info => {
                     if (this.state.checkedAssets.findIndex(myasset => info.assetid == myasset.assetid) < 0) {
                       return (
-                        <div className="asset-wrapper">
+                        <div className="asset-wrapper" onClick={this.chooseStatus.bind(this,info.assetid)} >
                           <label>
-                            <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                            <div>
                               <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
                             </div>
                           </label>
@@ -177,9 +177,9 @@ export default class ManageAsset extends React.Component<IProps, IState>
             (
               this.state.searchList.map(info => {
                 return (
-                  <div className="asset-wrapper">
+                  <div className="asset-wrapper" onClick={this.chooseStatus.bind(this,info.assetid)} >
                     <label>
-                      <div onClick={this.chooseStatus.bind(this,info.assetid)} >
+                      <div>
                         <img className="checked-img" src={this.isChecked(info.assetid) ? require("../../../image/tick.png") : require("../../../image/unchecked.png")} alt="" />
                       </div>
                     </label>
