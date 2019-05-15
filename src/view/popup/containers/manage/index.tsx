@@ -95,7 +95,7 @@ export default class ManageAsset extends React.Component<IProps, IState>
     const arr = this.state.checkedAssets.filter(info=>info.checked).map(info=>info.assetid)
     manageStore.saveAssets(arr);
     if (this.props.lableChange) {
-      this.props.lableChange('history');
+      this.props.lableChange('');
     }
   }
   public onCancel = () => {
