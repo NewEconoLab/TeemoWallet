@@ -119,7 +119,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		})
 		if (this.props.lableChange)
 		{
-			this.props.lableChange('');
+			this.props.lableChange("history");
 		}
 	}
 
