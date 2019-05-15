@@ -7,7 +7,7 @@ export default {
     delete:"Delete",
   },
   toast:{
-    successfully:"Operation successful, please be patient and wait for it to be confirmed in the block .",
+    successfully:"Operation successful！",
     failed:"Operation failed, please try again later.",
     copySuccess:"Copied successfully！"
   },

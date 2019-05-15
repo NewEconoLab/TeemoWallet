@@ -37,7 +37,7 @@ export default (message: string, type?: "success"|"error") =>
       setTimeout(() =>
       {
         disposeNode();
-      }, 5000)
+      }, 1500)
     }
     public render()
     {

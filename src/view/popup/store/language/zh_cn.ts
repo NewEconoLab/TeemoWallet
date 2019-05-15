@@ -7,7 +7,7 @@ export default {
     delete:"删除",
   },
   toast:{
-    successfully:"操作成功，请耐心等待区块确认。",
+    successfully:"操作成功！",
     failed:"操作失败！请稍候再次尝试。",
     copySuccess:"复制成功！"
   },
