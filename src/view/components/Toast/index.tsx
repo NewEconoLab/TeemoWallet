@@ -4,6 +4,8 @@
 import * as React from 'react';
 import  * as ReactDOM from 'react-dom';
 import './index.less';
+import intl, { Language } from '../../popup/store/intl';
+import classNames from 'classnames';
 // import classnames from 'classnames';
 
 interface IProps
@@ -37,12 +39,14 @@ export default (message: string, type?: "success"|"error") =>
       setTimeout(() =>
       {
         disposeNode();
+        // div.remove();
       }, 1500)
     }
     public render()
     {
+      const toast = classNames('comp-toast',{'max':intl.currentLang===Language.EN})
       return (
-        <div className="comp-toast">
+        <div className={toast}>
         {this.onClose()}
           <div className="img-box">
             {

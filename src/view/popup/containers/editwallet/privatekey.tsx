@@ -66,6 +66,7 @@ export default class PrivateKey extends React.Component<IProps, any>
 		oInput.className = 'oInput';
 		oInput.style.display = 'none';
 		Toast(intl.message.toast.copySuccess);		
+        oInput.remove();
 	  }
 	public render()
 	{

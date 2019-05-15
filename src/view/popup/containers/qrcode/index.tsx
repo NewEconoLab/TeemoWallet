@@ -49,7 +49,7 @@ export default class QrCodeBox extends React.Component<IProps, IState>
 		oInput.style.display = 'none';
 		// alert(2)
 		Toast(intl.message.toast.copySuccess);
-		
+        oInput.remove();		
 	}
 	public render()
 	{

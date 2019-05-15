@@ -90,6 +90,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
         oInput.className = 'oInput';
         oInput.style.display = 'none';
         Toast(intl.message.toast.copySuccess);
+        oInput.remove();
     }
     // 全局点击
     public globalClick = () =>
