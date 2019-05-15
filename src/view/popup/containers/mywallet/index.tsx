@@ -68,12 +68,25 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
     {
         if (label == "out")
         {
+            // this.setState({
+            //     showPage:''
+            // })
             this.props.history.push('/login')
         }
-        this.setState({
-            showPage: label,
-            tranAsset:asset
-        });
+        else if(label == "history")
+        {
+            this.setState({
+                label: "history",
+                showPage:''
+            })
+        }
+        else
+        {
+            this.setState({
+                showPage: label,
+                tranAsset:asset
+            });
+        }
     }
     // 切换二次编辑窗口
     public twiceChange = (label:string)=>
