@@ -30,7 +30,14 @@ declare const testRpcUrl = "http://test.nel.group:20332";
 declare const mainRpcUrl = "http://seed.nel.group:10332";
 declare const testRpcUrlList: string[];
 declare const mainRpcUrlList: string[];
-declare function networkSort(): void;
+declare let testNode: Array<{
+    node: string;
+    height: number;
+}>;
+declare let mainNode: Array<{
+    node: string;
+    height: number;
+}>;
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -195,6 +202,7 @@ declare const Api: {
     getClaimgasUtxoList: (address: string, type: number, page: number, size: number) => Promise<any>;
     getclaimgas: (address: string, type: number, size: number, hide: number) => Promise<any>;
 };
+declare function networkSort(): Promise<void>;
 declare const setContractMessage: (txid: string, domain: string, data: any) => void;
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare class ScriptBuild extends ThinNeo.ScriptBuilder {

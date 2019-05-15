@@ -34,14 +34,16 @@ const baseUrl = "https://apiwallet.nel.group/api";
 const testRpcUrl = "http://test.nel.group:20332";
 const mainRpcUrl = "http://seed.nel.group:10332";
 const testRpcUrlList = [
+    'http://test.nel.group:20332',
     'http://seed5.ngd.network:20332',
-    'http://seed2.ngd.network:20332	',
+    'http://seed2.ngd.network:20332',
     'http://seed4.ngd.network:20332',
-    'http://seed3.ngd.network:20332	',
-    'http://seed9.ngd.network:20332	',
+    'http://seed3.ngd.network:20332',
+    'http://seed9.ngd.network:20332',
     'http://seed8.ngd.network:20332',
 ];
 const mainRpcUrlList = [
+    'http://seed.nel.group:10332',
     'http://seed5.ngd.network:10332',
     'http://seed10.ngd.network:10332',
     'http://seed8.ngd.network:10332',
@@ -49,9 +51,24 @@ const mainRpcUrlList = [
     'http://seed4.neo.org:10332',
     'http://node2.sgp1.bridgeprotocol.io:10332',
 ];
-function networkSort() {
-    Api.getBlockCount();
-}
+let testNode = [
+    { node: 'http://test.nel.group:20332', height: 0 },
+    { node: 'http://seed5.ngd.network:20332', height: 0 },
+    { node: 'http://seed2.ngd.network:20332', height: 0 },
+    { node: 'http://seed4.ngd.network:20332', height: 0 },
+    { node: 'http://seed3.ngd.network:20332', height: 0 },
+    { node: 'http://seed9.ngd.network:20332', height: 0 },
+    { node: 'http://seed8.ngd.network:20332', height: 0 },
+];
+let mainNode = [
+    { node: 'http://seed.nel.group:10332', height: 0 },
+    { node: 'http://seed5.ngd.network:10332', height: 0 },
+    { node: 'http://seed10.ngd.network:10332', height: 0 },
+    { node: 'http://seed8.ngd.network:10332', height: 0 },
+    { node: 'http://seed9.ngd.network:10332', height: 0 },
+    { node: 'http://seed4.neo.org:10332', height: 0 },
+    { node: 'http://node2.sgp1.bridgeprotocol.io:10332', height: 0 },
+];
 /**
  * -------------------------以下是账户所使用到的实体类
  */
@@ -337,7 +354,7 @@ function request(opts) {
             url = [baseCommonUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
         }
         else if (opts.baseUrl === 'rpc') {
-            url = network == "TestNet" ? testRpcUrl : mainRpcUrl;
+            url = network == "TestNet" ? testNode[0].node : mainNode[0].node;
         }
         else {
             url = [baseUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
@@ -557,6 +574,7 @@ const Api = {
         const opts = {
             method: "getblockcount",
             params: [],
+            otherUrl: rpc,
             baseUrl: "rpc"
         };
         return request(opts);
@@ -629,6 +647,31 @@ const Api = {
         });
     }
 };
+function networkSort() {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let index = 0; index < testNode.length; index++) {
+            const node = testNode[index].node;
+            const result = yield Api.getBlockCount(node);
+            const height = (parseInt(result) - 1);
+            testNode[index] = { node, height };
+        }
+        testNode = testNode.sort((b, a) => {
+            return a.height - b.height;
+        });
+        for (let index = 0; index < mainNode.length; index++) {
+            const node = mainNode[index].node;
+            const result = yield Api.getBlockCount(node);
+            const height = (parseInt(result) - 1);
+            mainNode[index] = { node, height };
+        }
+        mainNode = mainNode.sort((b, a) => {
+            return a.height - b.height;
+        });
+        console.log('main rpc node', mainNode);
+        console.log('test rpc node', testNode);
+    });
+}
+networkSort();
 const setContractMessage = (txid, domain, data) => {
     Storage_local.get("invoke-message")
         .then(result => {

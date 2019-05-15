@@ -44,15 +44,17 @@ const testRpcUrl = "http://test.nel.group:20332";
 const mainRpcUrl = "http://seed.nel.group:10332";
 
 const testRpcUrlList=[
+    'http://test.nel.group:20332',
     'http://seed5.ngd.network:20332',
-    'http://seed2.ngd.network:20332	',
+    'http://seed2.ngd.network:20332',
     'http://seed4.ngd.network:20332',
-    'http://seed3.ngd.network:20332	',
-    'http://seed9.ngd.network:20332	',
+    'http://seed3.ngd.network:20332',
+    'http://seed9.ngd.network:20332',
     'http://seed8.ngd.network:20332',
 ]
 
 const mainRpcUrlList=[
+    'http://seed.nel.group:10332',
     'http://seed5.ngd.network:10332',
     'http://seed10.ngd.network:10332',
     'http://seed8.ngd.network:10332',
@@ -60,11 +62,25 @@ const mainRpcUrlList=[
     'http://seed4.neo.org:10332',
     'http://node2.sgp1.bridgeprotocol.io:10332',
 ]
+let testNode:Array<{node:string,height:number}>=[
+    {node:'http://test.nel.group:20332',height:0},
+    {node:'http://seed5.ngd.network:20332',height:0},
+    {node:'http://seed2.ngd.network:20332',height:0},
+    {node:'http://seed4.ngd.network:20332',height:0},
+    {node:'http://seed3.ngd.network:20332',height:0},
+    {node:'http://seed9.ngd.network:20332',height:0},
+    {node:'http://seed8.ngd.network:20332',height:0},
+];   
+let mainNode:Array<{node:string,height:number}>=[
+    {node:'http://seed.nel.group:10332',height:0},
+    {node:'http://seed5.ngd.network:10332',height:0},
+    {node:'http://seed10.ngd.network:10332',height:0},
+    {node:'http://seed8.ngd.network:10332',height:0},
+    {node:'http://seed9.ngd.network:10332',height:0},
+    {node:'http://seed4.neo.org:10332',height:0},
+    {node:'http://node2.sgp1.bridgeprotocol.io:10332',height:0},
+];     
 
-function networkSort()
-{
-    Api.getBlockCount()
-}
 
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -443,7 +459,7 @@ async function request(opts: IOpts) {
     else if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
-        url = network=="TestNet"?testRpcUrl:mainRpcUrl;
+        url = network=="TestNet"?testNode[0].node:mainNode[0].node;
     }else
     {
         url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
@@ -482,6 +498,7 @@ async function request(opts: IOpts) {
 }
 
 const Api = {
+
     getAssetState:(assetID:string)=>{
         return request({
             method:"getassetstate",
@@ -536,6 +553,7 @@ const Api = {
         }
         return request(opts);
     },
+
     /**
      * 获取nep5的资产（CGAS）
      */
@@ -573,6 +591,7 @@ const Api = {
         }
         return request(opts);
     },
+
     /**
      * 获取nep5的资产（CGAS）
      */
@@ -587,6 +606,7 @@ const Api = {
         }
         return request(opts);
     },
+
     getregisteraddressbalance : (address,register) => {
         return request({
             method:'getregisteraddressbalance',
@@ -596,6 +616,7 @@ const Api = {
             ]
         });
     },
+
     sendrawtransaction : (data,network?:'TestNet'|'MainNet') => {
         const opts:IOpts = {
             method:'sendrawtransaction',
@@ -606,6 +627,7 @@ const Api = {
         }
         return request(opts);
     },
+
     getUtxo: (address)=>{
         const opts:IOpts={
             method:"getutxo",
@@ -644,6 +666,7 @@ const Api = {
         }
         return request(opts);
     },
+
     /**
      * 
      */
@@ -685,6 +708,7 @@ const Api = {
         const opts:IOpts={
             method:"getblockcount",
             params:[],
+            otherUrl:rpc,
             baseUrl:"rpc"
         }
         return request(opts);
@@ -709,6 +733,7 @@ const Api = {
         }
         return request(opts);
     },
+
     /**
      * @method 获得nep5资产信息
      * @param asset 资产id
@@ -720,6 +745,7 @@ const Api = {
         }
         return request(opts);
     },
+
     getBlock:(height:number)=>{
         return request({
             method:'getblock',
@@ -754,6 +780,7 @@ const Api = {
             baseUrl:'common',
         })
     },
+
     getclaimgas:(address:string,type:number,size:number,hide:number)=>{
         return request({
             method:'getclaimgas',
@@ -763,6 +790,34 @@ const Api = {
     }
 
 }
+
+
+async function networkSort()
+{    
+    for (let index = 0; index < testNode.length; index++) {
+        const node = testNode[index].node;
+        const result = await Api.getBlockCount(node)
+        const height = (parseInt(result)-1);
+        testNode[index]={node,height};
+    }
+    testNode = testNode.sort((b,a)=>{
+        return a.height-b.height;
+    })
+    
+    for (let index = 0; index < mainNode.length; index++) {
+        const node = mainNode[index].node;
+        const result = await Api.getBlockCount(node)
+        const height = (parseInt(result)-1);
+        mainNode[index]={node,height};
+    }
+    mainNode = mainNode.sort((b,a)=>{
+        return a.height-b.height;
+    })
+    console.log('main rpc node',mainNode);
+    
+    console.log('test rpc node',testNode);
+}
+networkSort();
 
 const setContractMessage=(txid:string,domain:string,data)=>{
     Storage_local.get("invoke-message")
