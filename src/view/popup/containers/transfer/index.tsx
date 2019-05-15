@@ -242,7 +242,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		})
 		if (this.props.lableChange)
 		{
-			this.props.lableChange('');
+			this.props.lableChange("history");
 		}
 	}
 	public onCheck = (event: boolean) =>
