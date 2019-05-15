@@ -82,18 +82,18 @@ class SocketManager
         this.socket = new WebSocket(this.webSocketURL);
     
         this.socket.onclose = (event:any) => {
-            console.log(event);
+            console.log('close',event);
         };
         this.socket.onerror = (event:any) => {
-            console.log(event);
+            console.log('error',event);
         };
         this.socket.onopen = (event:any) =>{
-            console.log(event);
+            console.log('open',event);
             this.socket.send('Hello Server!');
         }
         this.socket.onmessage = (event:any) =>{
-            console.log(event);
-            console.log(event.data);
+            // console.log(event);
+            // console.log(event.data);
             this.lastWSmsgTime = new Date().getTime()
             this.time = new Date().getTime()
             var data = JSON.parse(event.data).data
