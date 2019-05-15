@@ -31,7 +31,6 @@ export default (message: string, type?: "success"|"error") =>
   const div = document.createElement('div');
   document.body.appendChild(div);
 
-
   class Toast extends React.Component<IProps>
   {
     public onClose = () =>
