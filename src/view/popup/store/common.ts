@@ -46,6 +46,8 @@ class Common implements ICommonStore
         const assetids = localStorage.getItem('Teemo-assetManager-'+this.network);
         if(assetids)
         {
+            console.log(assetids);
+            
             const list = JSON.parse(assetids);
             const arr = [];
             for (const key in list) {
@@ -71,6 +73,10 @@ class Common implements ICommonStore
                 bg.getBalance(data)
                 .then((result:BalanceResults)=>{
                     this.balances=result[this.account.address];
+                    console.log('params',params);
+                    
+                    console.log('balaces',JSON.stringify(this.balances));
+                    
                 })
             }
             else
@@ -80,6 +86,8 @@ class Common implements ICommonStore
         }
         else
         {
+            console.log("没有资产默认显示NEO，GAS",assetids);
+            
             const params: BalanceRequest = {
                 address: this.account.address,   // 你要查询的地址
                 assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS],
