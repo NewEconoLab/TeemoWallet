@@ -107,8 +107,9 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     }
     
     // 跳转到创建钱包或导入钱包
-    public goNewWallet = () =>
+    public goNewWallet = (label:string) =>
     {
+        common.selectLabel(label);
         this.props.history.push('/walletnew');
     }
 
@@ -169,8 +170,8 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                                                     }
                                                 </div>
                                                 <div className="normal-menu">
-                                                    <span className="menu-span" onClick={this.goNewWallet}>{intl.message.walletnew.createWallet}</span>
-                                                    <span className="menu-span" onClick={this.goNewWallet}>{intl.message.walletnew.importWallet}</span>
+                                                    <span className="menu-span" onClick={this.goNewWallet.bind(this,'create')}>{intl.message.walletnew.createWallet}</span>
+                                                    <span className="menu-span" onClick={this.goNewWallet.bind(this,'import')}>{intl.message.walletnew.importWallet}</span>
                                                 </div>
                                                 <div className="normal-menu">
                                                     <span className="menu-span" onClick={this.onSwitchPage.bind(this,'setting')}>{intl.message.editwallet.setting}</span>

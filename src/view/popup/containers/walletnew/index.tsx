@@ -47,10 +47,12 @@ export default class Login extends React.Component<AppProps> {
     }
 
     getCreateLable = () => {
-        this.setState({currentLable:"create"});
+        common.selectLabel('create');
+        // this.setState({currentLable:"create"});
     }
     getImoprtLable = () => {
-        this.setState({currentLable:"import"});
+        common.selectLabel('import');
+        // this.setState({currentLable:"import"});
     }
 
     goMyWallet=()=>{
@@ -68,10 +70,10 @@ export default class Login extends React.Component<AppProps> {
                 </div>
                 <div className="content">
                     <div className="form-label">
-                        <Label text={intl.message.walletnew.createWallet} active={this.state.currentLable==="create"} onClick={this.getCreateLable} />
-                        <Label text={intl.message.walletnew.importWallet} active={this.state.currentLable==="import"} onClick={this.getImoprtLable} />
+                        <Label text={intl.message.walletnew.createWallet} active={common.walletnew_label==="create"} onClick={this.getCreateLable} />
+                        <Label text={intl.message.walletnew.importWallet} active={common.walletnew_label==="import"} onClick={this.getImoprtLable} />
                     </div>
-                    {this.state.currentLable==="create"?
+                    {common.walletnew_label==="create"?
                     <WalletCreate goBack={this.goBack} goMyWallet={this.goMyWallet} />:
                     <WalletImport goMyWallet={this.goMyWallet} goBack={this.goBack} />}
                 </div>

@@ -12,11 +12,15 @@ import { HASH_CONFIG } from '../../config';
  */
 class Common implements ICommonStore
 {
-    @observable public walletnew_label: string='creat';
+    @observable public walletnew_label: string='create';
     @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
     @observable public balances:Balance[]=[];
+
+    @action public selectLabel=(lable:string)=>{
+        this.walletnew_label = lable;
+    }
 
     @action public initNetWork=()=>{
         const currentNet = bg.AccountManager.getCurrentNetWork();

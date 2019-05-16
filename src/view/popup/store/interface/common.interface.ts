@@ -29,6 +29,7 @@ export interface IAccountMessage{
 
 export interface ICommonStore {
     walletnew_label:string,
+    selectLabel:(label:string)=>void,
     account:IAccountMessage,
     accountList:NepAccount[],
     claimGasAmount:string;
