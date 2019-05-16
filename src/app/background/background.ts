@@ -452,24 +452,23 @@ async function request(opts: IOpts) {
     let network = opts.network?opts.network:storage.network;
     let url = '';
     // 筛选节点
-    if(opts.otherUrl)
-    {
+    if(opts.otherUrl){
         url = opts.otherUrl;
-    }
-    else if (opts.baseUrl === 'common') {
+    }else if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
         url = network=="TestNet"?testNode[0].node:mainNode[0].node;
-    }else
-    {
+    }else{
         url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }
 
     const input = opts.isGET?makeRpcUrl(url,opts.method,opts.params):url; 
     const init:RequestInit = opts.isGET ?{ method:'GET'}:{method: 'POST',body:makeRpcPostBody(opts.method,opts.params)};
-    try {    
+    try {
         const value = await fetch(input,init);
         const json = await value.json();
+        console.log(json);
+        
         if(json.result)
         {
             if(opts.getAll)
@@ -493,6 +492,9 @@ async function request(opts: IOpts) {
     } 
     catch (error) 
     {
+        console.log("这里是网络请求异常");
+        console.log("请求参数",opts);
+        
         throw error;    
     }
 }
@@ -796,9 +798,13 @@ async function networkSort()
 {    
     for (let index = 0; index < testNode.length; index++) {
         const node = testNode[index].node;
-        const result = await Api.getBlockCount(node)
-        const height = (parseInt(result)-1);
-        testNode[index]={node,height};
+        try {
+            const result = await Api.getBlockCount(node)
+            const height = (parseInt(result)-1);
+            testNode[index]={node,height};
+        } catch (error) {
+            console.log("异常测试节点",node);            
+        }
     }
     testNode = testNode.sort((b,a)=>{
         return a.height-b.height;
@@ -806,9 +812,13 @@ async function networkSort()
     
     for (let index = 0; index < mainNode.length; index++) {
         const node = mainNode[index].node;
-        const result = await Api.getBlockCount(node)
-        const height = (parseInt(result)-1);
-        mainNode[index]={node,height};
+        try {            
+            const result = await Api.getBlockCount(node)
+            const height = (parseInt(result)-1);
+            mainNode[index]={node,height};
+        } catch (error) {
+            console.log("异常主网节点",node);
+        }
     }
     mainNode = mainNode.sort((b,a)=>{
         return a.height-b.height;

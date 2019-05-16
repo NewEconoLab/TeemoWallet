@@ -182,7 +182,7 @@ export default {
     msg15:'Name of the wallet you want to delete',
     msg16:'Password',
     msg17:'Wallet Deleted',
-    msg18:'账户名错误'
+    msg18:'Incorrect name'
   },
   about:{
     aboutas:"About us",

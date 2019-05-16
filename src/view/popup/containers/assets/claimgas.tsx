@@ -72,6 +72,7 @@ export default class ClaimGAS extends React.Component
           <div className="claim-btn">
             <Button
               text={this.state.claimStatus === 0?intl.message.assets.claim:intl.message.assets.claiming}
+              disabled={this.state.claimStatus != 0}
               size="small" type={this.state.claimStatus === 0 ? 'primary':'disable-btn'} onClick={this.onClaimGAS}
             />
           </div>

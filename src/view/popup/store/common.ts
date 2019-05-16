@@ -12,6 +12,7 @@ import { HASH_CONFIG } from '../../config';
  */
 class Common implements ICommonStore
 {
+    @observable public walletnew_label: string;
     @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
@@ -19,9 +20,7 @@ class Common implements ICommonStore
 
     @action public initNetWork=()=>{
         const currentNet = bg.AccountManager.getCurrentNetWork();
-        this.network = NetWork[currentNet];
-        console.log('当前网络',this.network);
-        
+        this.network = NetWork[currentNet];        
         this.initAccountBalance();
     }
     

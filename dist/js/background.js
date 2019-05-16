@@ -364,6 +364,7 @@ function request(opts) {
         try {
             const value = yield fetch(input, init);
             const json = yield value.json();
+            console.log(json);
             if (json.result) {
                 if (opts.getAll) {
                     return json;
@@ -381,6 +382,8 @@ function request(opts) {
             }
         }
         catch (error) {
+            console.log("这里是网络请求异常");
+            console.log("请求参数", opts);
             throw error;
         }
     });
@@ -651,18 +654,28 @@ function networkSort() {
     return __awaiter(this, void 0, void 0, function* () {
         for (let index = 0; index < testNode.length; index++) {
             const node = testNode[index].node;
-            const result = yield Api.getBlockCount(node);
-            const height = (parseInt(result) - 1);
-            testNode[index] = { node, height };
+            try {
+                const result = yield Api.getBlockCount(node);
+                const height = (parseInt(result) - 1);
+                testNode[index] = { node, height };
+            }
+            catch (error) {
+                console.log("异常测试节点", node);
+            }
         }
         testNode = testNode.sort((b, a) => {
             return a.height - b.height;
         });
         for (let index = 0; index < mainNode.length; index++) {
             const node = mainNode[index].node;
-            const result = yield Api.getBlockCount(node);
-            const height = (parseInt(result) - 1);
-            mainNode[index] = { node, height };
+            try {
+                const result = yield Api.getBlockCount(node);
+                const height = (parseInt(result) - 1);
+                mainNode[index] = { node, height };
+            }
+            catch (error) {
+                console.log("异常主网节点", node);
+            }
         }
         mainNode = mainNode.sort((b, a) => {
             return a.height - b.height;

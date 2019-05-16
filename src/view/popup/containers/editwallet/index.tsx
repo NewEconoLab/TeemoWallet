@@ -104,8 +104,12 @@ export default class EditWallet extends React.Component<IProps, {}>
     }
     
     public onEditName=()=>{
-        this.setState({editNameState:1});
+        this.setState({editNameState:1},()=>{            
+            document.getElementById('edit-accountName').focus();
+            (document.getElementById('edit-accountName') as HTMLInputElement).select();
+        });
     }
+    
     public render()
     {
         return (
@@ -117,7 +121,7 @@ export default class EditWallet extends React.Component<IProps, {}>
                         <img className="edit-icon" src={require("../../../image/edit2.png")} alt="" onClick={this.onEditName} />
                     </div>:                    
                     <div className="editname-wrap">
-                        <input className="edit-input" type="text" value={this.state.walletName} onChange={this.onChangeWalletName} />
+                        <input className="edit-input" id='edit-accountName' type="text" value={this.state.walletName} onChange={this.onChangeWalletName} />
                         <img className="edit-icon" src={ICON.saveEdit} alt="" onClick={this.toChangeWalletName} />
                     </div>
                 }
