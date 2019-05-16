@@ -12,7 +12,7 @@ import { HASH_CONFIG } from '../../config';
  */
 class Common implements ICommonStore
 {
-    @observable public walletnew_label: string;
+    @observable public walletnew_label: string='creat';
     @observable public claimGasAmount: string='0';
     @observable public account:IAccountMessage={address:'',lable:'',pubkeyHex:''};
     @observable public network:NetWork=NetWork.TestNet;
