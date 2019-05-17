@@ -42,9 +42,8 @@ export default (message: string, type?: "success"|"error") =>
     }
     public render()
     {
-      const toast = classNames('comp-toast',{'max':intl.currentLang===Language.EN})
       return (
-        <div className={toast}>
+        <div className="comp-toast">
         {this.onClose()}
           <div className="img-box">
             {

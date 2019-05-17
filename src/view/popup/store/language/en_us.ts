@@ -7,9 +7,9 @@ export default {
     delete:"Delete",
   },
   toast:{
-    successfully:"Operation successful！",
-    failed:"Operation failed, please try again later.",
-    copySuccess:"Copied successfully！"
+    successfully:"Operation successful",
+    failed:"Failed, try again later.",
+    copySuccess:"Copied"
   },
   welcome:{
     start:'Start',
@@ -142,7 +142,7 @@ export default {
     AssetsID:"Asset ID"
   },
   setting: {
-    successful: 'Successful Operation',
+    successful: 'Operation successful',
     message: 'All applications need to re-request authorization to initiate a transaction request.',
     clearAuthorization: 'Clear Authorization',
     clear: 'Clear',
