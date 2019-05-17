@@ -1642,11 +1642,11 @@ var queryAssetSymbol = (assetID, network) => __awaiter(this, void 0, void 0, fun
 const getProvider = () => {
     return new Promise((resolve, reject) => {
         let provider = {
-            "compatibility": [""],
-            "extra": { theme: "", currency: "" },
+            "compatibility": ["TypeScript", "JavaScript"],
+            "extra": null,
             "name": "Teemo.NEO",
             "version": VERSION,
-            "website": ""
+            "website": "https://teemo.nel.group"
         };
         resolve(provider);
     });
@@ -2498,7 +2498,7 @@ class AssetManager {
 var assetManager = new AssetManager();
 assetManager.initAllAseetInfo();
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1';
+const VERSION = 'v1.2.0';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";

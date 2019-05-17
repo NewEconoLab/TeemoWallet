@@ -1943,11 +1943,11 @@ const getProvider=()=>
     {
         let provider:Provider=
         {
-            "compatibility":[""],
-            "extra":{theme:"",currency:""},
+            "compatibility":["TypeScript","JavaScript"],
+            "extra":null,
             "name":"Teemo.NEO",
             "version":VERSION,
-            "website":""
+            "website":"https://teemo.nel.group"
         }
         resolve(provider);
     })
@@ -2960,7 +2960,7 @@ assetManager.initAllAseetInfo();
 
 
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1';
+const VERSION = 'v1.2.0';
 
 enum ArgumentDataType {
     STRING = 'String',
@@ -3181,7 +3181,7 @@ interface Provider {
     version: string;
     compatibility: string[];
     website: string;
-    extra: {
+    extra?: {
         theme: string,
         currency: string,
     };

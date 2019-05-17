@@ -548,7 +548,7 @@ declare class AssetManager {
 }
 declare var assetManager: AssetManager;
 declare const BLOCKCHAIN = "NEO";
-declare const VERSION = "v1";
+declare const VERSION = "v1.2.0";
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -735,7 +735,7 @@ interface Provider {
     version: string;
     compatibility: string[];
     website: string;
-    extra: {
+    extra?: {
         theme: string;
         currency: string;
     };
