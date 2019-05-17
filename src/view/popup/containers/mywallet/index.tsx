@@ -21,6 +21,7 @@ import PrivateKey from '../editwallet/privatekey';
 import DeleteWallet from '../editwallet/deletewallet';
 import manageStore from '../manage/store/manage.store';
 import About from '../about';
+import { bg } from '../../utils/storagetools';
 interface AppProps extends RouteComponentProps
 {
     develop: boolean;
@@ -53,6 +54,14 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
 
     public componentDidMount()
     {
+        if(bg.getAccountTaskState(common.account.address)>0)
+        {
+            this.setState({label:'history',showTwiceDialog:''})
+        }
+        else
+        {
+            this.setState({label:'assets',showTwiceDialog:''})
+        }
         // Example of how to send a message to eventPage.ts.      
         common.initNetWork();
         manageStore.initAssetList();

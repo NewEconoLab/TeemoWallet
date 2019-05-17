@@ -10,6 +10,9 @@ interface BackStore {
         [txid: string]: number[];
     };
     allAssetInfo: AssetInfo[];
+    accountWaitTaskCount: {
+        [addr: string]: number;
+    };
 }
 declare const storage: BackStore;
 declare const netstr: string;
@@ -812,4 +815,5 @@ declare class NNSTool {
     static verifyAddr(addr: any): boolean;
     static verifyNeoDomain(domain: any): boolean;
 }
+declare var getAccountTaskState: (addr: string) => number;
 //# sourceMappingURL=background.d.ts.map

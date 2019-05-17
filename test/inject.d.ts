@@ -125,15 +125,15 @@ interface InvokeGroupOutup {
  */
 interface GetBlockArgs {
     blockHeight: number | string;
-    network: string;
+    network?: string;
 }
 interface GetTransactionArgs {
     txid: string;
-    network: string;
+    network?: string;
 }
 interface GetApplicationLogArgs {
     txid: string;
-    network: string;
+    network?: string;
 }
 interface BalanceRequest {
     address: string;
@@ -142,7 +142,7 @@ interface BalanceRequest {
 }
 interface GetBalanceArgs {
     params: BalanceRequest | BalanceRequest[];
-    network: string;
+    network?: string;
 }
 interface BalanceResults {
     [address: string]: Balance[];

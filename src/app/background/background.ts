@@ -10,6 +10,7 @@ interface BackStore
     titles:string[],
     oldUtxo:{[txid:string]:number[]},
     allAssetInfo:AssetInfo[],
+    accountWaitTaskCount:{[addr:string]:number}
 }
 
 const storage:BackStore=
@@ -21,6 +22,7 @@ const storage:BackStore=
     titles:[],
     oldUtxo:{},
     allAssetInfo:[],
+    accountWaitTaskCount:{}
 }
 
 const netstr = localStorage.getItem('Teemo-NetWork');
@@ -466,9 +468,7 @@ async function request(opts: IOpts) {
     const init:RequestInit = opts.isGET ?{ method:'GET'}:{method: 'POST',body:makeRpcPostBody(opts.method,opts.params)};
     try {
         const value = await fetch(input,init);
-        const json = await value.json();
-        console.log(json);
-        
+        const json = await value.json();        
         if(json.result)
         {
             if(opts.getAll)
@@ -2594,6 +2594,8 @@ class TaskManager{
     {
         this.shed[task.txid]=task;
         Storage_local.set(this.table,this.shed);
+        const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+        storage.accountWaitTaskCount[task.currentAddr]=count+1;
     }
 
     public static initShed()
@@ -2623,6 +2625,9 @@ class TaskManager{
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
+                            
+                            const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                            storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             if(task.next)
                             {
                                 TransferGroup.update(task.next,task.network);
@@ -2642,6 +2647,9 @@ class TaskManager{
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
+                            
+                            const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                            storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             if(storage.account && storage.account.address == task.message)
                             {
                                 claimGas();
@@ -2661,7 +2669,9 @@ class TaskManager{
                     Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{                        
                         if(result['blockhash'])
-                        {      
+                        {                                  
+                            const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                            storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);                            
@@ -2677,7 +2687,9 @@ class TaskManager{
                     Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{
                         if(result['blockhash'])
-                        {
+                        {                            
+                            const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                            storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
@@ -3503,4 +3515,9 @@ class NNSTool
         }
     }
 
+}
+
+var getAccountTaskState = (addr:string)=>{    
+    const count = storage.accountWaitTaskCount[addr]?storage.accountWaitTaskCount[addr]:0;
+    return count;
 }

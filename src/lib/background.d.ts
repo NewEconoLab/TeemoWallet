@@ -71,6 +71,7 @@ declare interface Background extends Window{
     assetManager: AssetManager;
     cleanHistory: () => void;
     cleanTaskForAddr: (address: string) => void;
+    getAccountTaskState: (addr: string) => number;
 }
 
 declare class AssetManager {

@@ -119,8 +119,7 @@ export default class Login extends React.Component<AppProps,AppState> {
     public loginWallet=()=>{        
         bg.AccountManager.deciphering(this.state.password,this.state.currentAccount)
         .then(account =>{
-            // bg['storage'].account = account;
-            this.props.history.push('/mywallet')
+            this.props.history.push('/mywallet');
         })
         .catch(error=>{
             console.log(error);

@@ -407,8 +407,6 @@ class Main {
     {
         return new Promise((resolve,reject)=>{        
             let json = JSON.parse(params);
-            console.log(json);
-                
             Teemo.NEO.invokeRead(JSON.parse(params) as InvokeReadInput)
             .then(result=>{
                 console.log(result);
@@ -427,10 +425,7 @@ class Main {
      */
     public invokeReadGroup(params:string)
     {
-        return new Promise((resolve,reject)=>{        
-            let json = JSON.parse(params);
-            console.log(json);
-                
+        return new Promise((resolve,reject)=>{
             Teemo.NEO.invokeReadGroup(JSON.parse(params) as InvokeReadGroup)
             .then(result=>{
                 console.log(result);

@@ -15,6 +15,7 @@ const storage = {
     titles: [],
     oldUtxo: {},
     allAssetInfo: [],
+    accountWaitTaskCount: {}
 };
 const netstr = localStorage.getItem('Teemo-NetWork');
 storage.network = netstr ? ((netstr == 'TestNet' || netstr == 'MainNet') ? netstr : "MainNet") : "MainNet";
@@ -364,7 +365,6 @@ function request(opts) {
         try {
             const value = yield fetch(input, init);
             const json = yield value.json();
-            console.log(json);
             if (json.result) {
                 if (opts.getAll) {
                     return json;
@@ -2182,6 +2182,8 @@ class TaskManager {
     static addTask(task) {
         this.shed[task.txid] = task;
         Storage_local.set(this.table, this.shed);
+        const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+        storage.accountWaitTaskCount[task.currentAddr] = count + 1;
     }
     static initShed() {
         return new Promise((resolve, reject) => {
@@ -2204,6 +2206,8 @@ class TaskManager {
                             task.state = TaskState.success;
                             this.shed[key] = task;
                             Storage_local.set(this.table, this.shed);
+                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             if (task.next) {
                                 TransferGroup.update(task.next, task.network);
                             }
@@ -2220,6 +2224,8 @@ class TaskManager {
                             task.state = TaskState.success;
                             this.shed[key] = task;
                             Storage_local.set(this.table, this.shed);
+                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             if (storage.account && storage.account.address == task.message) {
                                 claimGas();
                             }
@@ -2236,6 +2242,8 @@ class TaskManager {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
                         if (result['blockhash']) {
+                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             task.state = TaskState.success;
                             this.shed[key] = task;
                             Storage_local.set(this.table, this.shed);
@@ -2250,6 +2258,8 @@ class TaskManager {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
                         if (result['blockhash']) {
+                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             task.state = TaskState.success;
                             this.shed[key] = task;
                             Storage_local.set(this.table, this.shed);
@@ -2786,4 +2796,8 @@ class NNSTool {
     }
 }
 NNSTool.baseContract = Neo.Uint160.parse("348387116c4a75e420663277d9c02049907128c7");
+var getAccountTaskState = (addr) => {
+    const count = storage.accountWaitTaskCount[addr] ? storage.accountWaitTaskCount[addr] : 0;
+    return count;
+};
 //# sourceMappingURL=background.js.map

@@ -117,8 +117,11 @@ class SocketManager
                         {
                             task.state = TaskState.success;
                             TaskManager.shed[key]=task;
-                            Storage_local.set(TaskManager.table,TaskManager.shed);
+                            Storage_local.set(TaskManager.table,TaskManager.shed);                            
                             
+                            const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                            storage.accountWaitTaskCount[task.currentAddr]=count-1;
+
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
                             if(task.type==ConfirmType.toClaimgas)
                             {
@@ -148,6 +151,9 @@ class SocketManager
                                     task.state = TaskState.success;
                                     TaskManager.shed[key]=task;
                                     Storage_local.set(TaskManager.table,TaskManager.shed);
+                            
+                                    const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
+                                    storage.accountWaitTaskCount[task.currentAddr]=count-1;
                                     if(task.next)
                                     {
                                         TransferGroup.update(task.next,task.network);
