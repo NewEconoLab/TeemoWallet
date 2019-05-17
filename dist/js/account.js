@@ -197,6 +197,8 @@ var AccountManager = {
                 }
                 localStorage.setItem('TeemoWALLET_ACCOUNT', JSON.stringify(arr));
             }
+            localStorage.removeItem('Teemo-assetManager-' + 'TestNet' + storage.account.address);
+            localStorage.removeItem('Teemo-assetManager-' + 'MainNet' + storage.account.address);
             storage.account = null;
             return true;
         }
