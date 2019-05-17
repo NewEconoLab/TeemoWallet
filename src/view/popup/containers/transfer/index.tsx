@@ -104,9 +104,10 @@ export default class Transfer extends React.Component<IProps, IState>
 	}
 	public onSelect = (currentOption: IOption) =>
 	{
+		const available = `${common.balances.find(asset=>asset.assetID===currentOption.id).amount} ${currentOption.name}`
 		this.setState(
 			{
-				currentOption
+				currentOption,available
 			}, () =>
 			{
 				this.onAmountChange(this.state.amount)
