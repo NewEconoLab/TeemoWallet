@@ -113,6 +113,7 @@ export interface Language_MyWallet{
     currentnet: string;
     cgasExchange: string;
     explorer: string;
+    copy:string;
 }
 
 export interface Language_History{

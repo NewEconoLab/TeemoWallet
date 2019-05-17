@@ -72,7 +72,7 @@ export default {
     currentnet:"Network",
     cgasExchange:"CGAS conversion",
     explorer:"Blockchain explorer",
-    
+    copy:"Click to copy"
   },
   history:{
     wait:"Pending",

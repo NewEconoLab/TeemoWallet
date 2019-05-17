@@ -188,7 +188,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
                             <div className="account-message">
                                 <div className=''>{common.account.lable}</div>
                                 {/* <div className='address' onClick={this.onCopyAddress}>{common.account.address}</div> */}
-                                <div className='address' onClick={this.onCopyAddress}>{common.account.address.substring(0, 4) + '...' + common.account.address.substring(30, 34)}</div>
+                                <a className='address' title={intl.message.mywallet.copy} onClick={this.onCopyAddress}>{common.account.address.substring(0, 4) + '...' + common.account.address.substring(30, 34)}</a>
                             </div>
                         </div>
                         <div className="function">

@@ -7,9 +7,9 @@ export default {
     delete:"删除",
   },
   toast:{
-    successfully:"操作成功！",
-    failed:"操作失败！请稍候再次尝试。",
-    copySuccess:"复制成功！"
+    successfully:"操作成功",
+    failed:"操作失败,请稍后再试。",
+    copySuccess:"复制成功"
   },
   welcome:{
     start:'开始',
@@ -73,7 +73,8 @@ export default {
     testnet:"测试网",
     currentnet:"网络",
     cgasExchange:"CGAS兑换",
-    explorer:"区块链浏览器"
+    explorer:"区块链浏览器",
+    copy:"点击复制"
   },
   history:{
     wait:"排队中",
