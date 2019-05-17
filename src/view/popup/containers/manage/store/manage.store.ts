@@ -10,7 +10,7 @@ class ManagerStore implements IManagerAssets
 
     @action public initAssetList = async() => {
         bg.assetManager.initAllAseetInfo();
-        const assetids = localStorage.getItem('Teemo-assetManager-'+common.network);
+        const assetids = localStorage.getItem('Teemo-assetManager-'+common.network+common.account.address);
         this.allAsset = bg.assetManager.allAssetInfo;
         if(assetids)
         {                        
@@ -52,7 +52,7 @@ class ManagerStore implements IManagerAssets
         }
         myAssets[HASH_CONFIG.ID_NEO]= !!myAssets[HASH_CONFIG.ID_NEO];
         myAssets[HASH_CONFIG.ID_GAS]= !!myAssets[HASH_CONFIG.ID_GAS];
-        localStorage.setItem('Teemo-assetManager-'+common.network,JSON.stringify(myAssets));
+        localStorage.setItem('Teemo-assetManager-'+common.network+common.account.address,JSON.stringify(myAssets));
         common.initAccountBalance();
     }    
     

@@ -1306,7 +1306,13 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
                     }
                 }
                 if (nep5asset.length) {
-                    let res = yield Api.getallnep5assetofaddress(arg.address);
+                    let res = undefined;
+                    try {
+                        res = yield Api.getallnep5assetofaddress(arg.address);
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
                     let assets = {};
                     if (res) {
                         for (const iterator of res) {
@@ -1322,6 +1328,12 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
                                 const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
                                 assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' });
                             }
+                        }
+                    }
+                    else {
+                        for (const id of nep5asset) {
+                            const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
+                            assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' });
                         }
                     }
                 }
@@ -2452,34 +2464,34 @@ class AssetManager {
             .sort((a, b) => { return a.symbol.toUpperCase().indexOf(value.toUpperCase()) - b.symbol.toUpperCase().indexOf(value.toUpperCase()); });
     }
     saveAsset(assets) {
-        localStorage.setItem('Teemo-assetManager-' + storage.network, assets.join('|'));
+        localStorage.setItem('Teemo-assetManager-' + storage.network + storage.account.address, assets.join('|'));
     }
     /**
      * 根据资产id添加资产
      * @param assetID 资产id
      */
     addAsset(assetID) {
-        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network + storage.account.address);
         const list = assetids ? assetids.split('|') : [];
         list.push(assetID);
         const arr = list.filter((element, index, self) => self.indexOf(element) === index);
-        localStorage.setItem('Teemo-assetManager-' + storage.network, list.join('|'));
+        localStorage.setItem('Teemo-assetManager-' + storage.network + storage.account.address, list.join('|'));
     }
     /**
      * 根据资产id删除资产
      * @param assetID 资产id
      */
     deleteAsset(assetID) {
-        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network + storage.account.address);
         const list = assetids ? assetids.split('|') : [];
         const arr = list.filter((element) => element != assetID);
-        localStorage.setItem('Teemo-assetManager-' + storage.network, JSON.stringify(arr));
+        localStorage.setItem('Teemo-assetManager-' + storage.network + storage.account.address, JSON.stringify(arr));
     }
     /**
      * 获得用户拥有的资产列表
      */
     getMyAsset() {
-        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network);
+        const assetids = localStorage.getItem('Teemo-assetManager-' + storage.network + storage.account.address);
         return this.allAssetInfo.filter(asset => assetids.includes(asset.assetid));
     }
 }

@@ -1563,27 +1563,39 @@ var getBalance = async (data:GetBalanceArgs)=>{
                     }
                 }
                 if(nep5asset.length){
-                        let res = await Api.getallnep5assetofaddress(arg.address);
-                        let assets={};
-                        if(res)
+                    let res = undefined;
+                    try {
+                        res = await Api.getallnep5assetofaddress(arg.address);
+                    } catch (error) {
+                        console.log(error);                        
+                    }
+                    let assets={};
+                    if(res)
+                    {
+                        for (const iterator of res) 
                         {
-                            for (const iterator of res) 
-                            {
-                                const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
-                                const assetID=assetid.replace("0x","")
-                                assets[assetID]={assetID,symbol,amount:balance}
+                            const {assetid,symbol,balance} = iterator as {assetid:string,symbol:string,balance:string};
+                            const assetID=assetid.replace("0x","")
+                            assets[assetID]={assetID,symbol,amount:balance}
+                        }
+                        for (const id of nep5asset) {
+                            if(assets[id]){
+                                assetArray.push(assets[id]);
                             }
-                            for (const id of nep5asset) {
-                                if(assets[id]){
-                                    assetArray.push(assets[id]);
-                                }
-                                else
-                                {
-                                    const info = assetManager.allAssetInfo.find(asset=>asset.assetid==id);
-                                    assetArray.push({assetID:info.assetid,symbol:info.symbol,amount:'0'})
-                                }
+                            else
+                            {
+                                const info = assetManager.allAssetInfo.find(asset=>asset.assetid==id);
+                                assetArray.push({assetID:info.assetid,symbol:info.symbol,amount:'0'})
                             }
                         }
+                    }
+                    else
+                    {
+                        for (const id of nep5asset) {
+                            const info = assetManager.allAssetInfo.find(asset=>asset.assetid==id);
+                            assetArray.push({assetID:info.assetid,symbol:info.symbol,amount:'0'})
+                        }
+                    }
                 }
                 if(utxoasset.length){
                     let res = await Api.getBalance(arg.address);
@@ -2904,7 +2916,7 @@ class AssetManager{
 
     saveAsset(assets:string[])
     {
-        localStorage.setItem('Teemo-assetManager-'+storage.network,assets.join('|'));
+        localStorage.setItem('Teemo-assetManager-'+storage.network+storage.account.address,assets.join('|'));
     }
 
     /**
@@ -2913,11 +2925,11 @@ class AssetManager{
      */
     addAsset(assetID:string)
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network+storage.account.address);
         const list = assetids? assetids.split('|'):[];
         list.push(assetID);
         const arr = list.filter((element,index,self)=>self.indexOf(element)===index);
-        localStorage.setItem('Teemo-assetManager-'+storage.network,list.join('|'));
+        localStorage.setItem('Teemo-assetManager-'+storage.network+storage.account.address,list.join('|'));
     }
 
     /**
@@ -2926,10 +2938,10 @@ class AssetManager{
      */
     deleteAsset(assetID:string)
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network+storage.account.address);
         const list = assetids? assetids.split('|'):[];
         const arr = list.filter((element)=>element!=assetID);
-        localStorage.setItem('Teemo-assetManager-'+storage.network,JSON.stringify(arr));
+        localStorage.setItem('Teemo-assetManager-'+storage.network+storage.account.address,JSON.stringify(arr));
     }
 
     /**
@@ -2937,7 +2949,7 @@ class AssetManager{
      */
     getMyAsset()
     {
-        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network);
+        const assetids =  localStorage.getItem('Teemo-assetManager-'+storage.network+storage.account.address);
         return this.allAssetInfo.filter(asset=>assetids.includes(asset.assetid));
     }
 

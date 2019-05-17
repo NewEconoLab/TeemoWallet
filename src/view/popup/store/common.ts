@@ -43,7 +43,7 @@ class Common implements ICommonStore
     }
 
     @action public initAccountBalance=()=>{        
-        const assetids = localStorage.getItem('Teemo-assetManager-'+this.network);
+        const assetids = localStorage.getItem('Teemo-assetManager-'+this.network+this.account.address);
         if(assetids)
         {
             console.log(assetids);
@@ -86,6 +86,8 @@ class Common implements ICommonStore
         }
         else
         {
+            console.log(assetids);
+            
             console.log("没有资产默认显示NEO，GAS",assetids);
             
             const params: BalanceRequest = {
