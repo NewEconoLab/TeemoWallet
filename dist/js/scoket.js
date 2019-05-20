@@ -156,4 +156,25 @@ class SocketManager {
         };
     }
 }
+function TaskNotify(task) {
+    const lang = sessionStorage.getItem('language');
+    let title = (!lang || lang == 'zh') ? "交易已确认" : "Confirmed transaction";
+    let value = (!lang || lang == 'zh') ? "交易成功，请在浏览器中查看。" : "Transaction confirmed. View on NELScan.";
+    let amount = "";
+    if (task.confirm === ConfirmType.tranfer) {
+        const data = TaskManager.sendHistory[task.txid];
+        amount = data.amount + " " + data.asset + " ";
+    }
+    else if (task.confirm === ConfirmType.contract) {
+        const data = TaskManager.invokeHistory[task.txid];
+        amount = data.expenses.map(expense => {
+            "-" + expense.amount + " " + expense.symbol;
+        }).join(',');
+    }
+    else if (task.confirm === ConfirmType.claimgas) {
+        const data = TaskManager.sendHistory[task.txid];
+        amount = data.amount + " " + data.asset + " ";
+    }
+    showNotify(title, (amount ? amount : '') + value);
+}
 //# sourceMappingURL=scoket.js.map

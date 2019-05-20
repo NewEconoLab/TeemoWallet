@@ -11,12 +11,14 @@ class HistoryList implements IHistoryList
     @action public initHistoryList=()=>{
         const shed:IHistory[] = bg.getHistoryList();
         const tasklist:IHistory[] = [];
+        console.log(JSON.parse(JSON.stringify(shed)));
+        
         for (const task of shed) {
             if(task.type==ConfirmType.contract && task.invokeHistory)
-            {
+            {                
                 if(task.invokeHistory.domain=="TeemoWallet.exchangeCgas"){
                     task.dappMessage={title:intl.message.mywallet.cgasExchange,icon:ICON.exchange};
-                    task.invokeHistory.descripts[0]=task.invokeHistory.descripts[0]=='cgasToGas'?intl.message.exchange.cgasToGas:intl.message.exchange.gasToCgas;
+                    task.invokeHistory.descripts[0]=(task.invokeHistory.descripts[0]=='cgasToGas'?intl.message.exchange.cgasToGas:intl.message.exchange.gasToCgas);
                 }
                 tasklist.push(task);
             }

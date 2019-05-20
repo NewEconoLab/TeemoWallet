@@ -121,7 +121,6 @@ class SocketManager
                             
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
-
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
                             if(task.type==ConfirmType.toClaimgas)
                             {
@@ -151,7 +150,7 @@ class SocketManager
                                     task.state = TaskState.success;
                                     TaskManager.shed[key]=task;
                                     Storage_local.set(TaskManager.table,TaskManager.shed);
-                            
+                                    
                                     const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                                     storage.accountWaitTaskCount[task.currentAddr]=count-1;
                                     if(task.next)
@@ -166,7 +165,6 @@ class SocketManager
                         }
                     }
                 }
-
 
                 var blockHeightDataArray = this.blockDatas
                 if(blockHeightDataArray[0].blockHeight == -1 ) blockHeightDataArray.shift()
@@ -186,3 +184,28 @@ class SocketManager
     }
 }
 
+function TaskNotify(task:Task)
+{
+    const lang = sessionStorage.getItem('language');
+    let title = (!lang||lang=='zh')?"交易已确认":"Confirmed transaction";
+    let value = (!lang||lang=='zh')?"交易成功，请在浏览器中查看。":"Transaction confirmed. View on NELScan.";
+    let amount = "";
+    if(task.confirm === ConfirmType.tranfer)
+    {
+        const data = TaskManager.sendHistory[task.txid];
+        amount = data.amount+" "+data.asset+" "
+    }
+    else if(task.confirm === ConfirmType.contract)
+    {
+        const data = TaskManager.invokeHistory[task.txid];
+        amount = data.expenses.map(expense=>{
+            "-"+expense.amount+" "+expense.symbol
+        }).join(',');
+    }   
+    else if(task.confirm === ConfirmType.claimgas)
+    {
+        const data = TaskManager.sendHistory[task.txid];
+        amount = data.amount+" "+data.asset+" "
+    }
+    showNotify(title,(amount?amount:'')+value);
+}
