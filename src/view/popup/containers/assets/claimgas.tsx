@@ -20,7 +20,12 @@ export default class ClaimGAS extends React.Component
   }
 
   componentDidMount(){
-    common.initClaimGasAmount()
+    try {
+      common.initClaimGasAmount()
+    } catch (error) {
+      console.log('提取GAS异常',error);
+      
+    }
     const state = localStorage.getItem('Teemo-claimgasState-'+common.network);
     if(state && state=='wait')
     {
@@ -46,16 +51,19 @@ export default class ClaimGAS extends React.Component
     },1000)
   }
   
-  public onClaimGAS = () => {
+  public onClaimGAS = async () => {
     try {
-      bg.doClaimGas();
+      await bg.doClaimGas()
       localStorage.setItem('Teemo-claimgasState-'+common.network,'wait');
-      Toast(intl.message.assets.claiming)
+      Toast(intl.message.assets.claiming);
       this.setState({
         claimStatus:2
       })
     } catch (error) {
-      
+      Toast(intl.message.toast.claimFailed,'error');
+      this.setState({
+        claimStatus:0
+      })
     }
   }
   public render()

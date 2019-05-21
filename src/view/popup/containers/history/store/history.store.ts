@@ -11,7 +11,7 @@ class HistoryList implements IHistoryList
     @action public initHistoryList=()=>{
         const shed:IHistory[] = bg.getHistoryList();
         const tasklist:IHistory[] = [];
-        console.log(JSON.parse(JSON.stringify(shed)));
+        // console.log(JSON.parse(JSON.stringify(shed)));
         
         for (const task of shed) {
             if(task.type==ConfirmType.contract && task.invokeHistory)

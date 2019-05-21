@@ -9,7 +9,8 @@ export default {
   toast:{
     successfully:"操作成功",
     failed:"操作失败,请稍后再试。",
-    copySuccess:"复制成功"
+    copySuccess:"复制成功",
+    claimFailed:"提取失败，请稍后再试。"
   },
   welcome:{
     start:'开始',
