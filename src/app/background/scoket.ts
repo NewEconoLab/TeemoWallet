@@ -118,7 +118,7 @@ class SocketManager
                             task.state = TaskState.success;
                             TaskManager.shed[key]=task;
                             Storage_local.set(TaskManager.table,TaskManager.shed);                            
-                            
+                            TaskNotify(task);
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED,{TXID:task.txid,blockHeight:data.blockHeight,blockTime:data.blockTime});
@@ -150,7 +150,8 @@ class SocketManager
                                     task.state = TaskState.success;
                                     TaskManager.shed[key]=task;
                                     Storage_local.set(TaskManager.table,TaskManager.shed);
-                                    
+                                                               
+                                    TaskNotify(task);
                                     const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                                     storage.accountWaitTaskCount[task.currentAddr]=count-1;
                                     if(task.next)
@@ -184,28 +185,36 @@ class SocketManager
     }
 }
 
-function TaskNotify(task:Task)
+async function TaskNotify(task:Task)
 {
     const lang = sessionStorage.getItem('language');
     let title = (!lang||lang=='zh')?"交易已确认":"Confirmed transaction";
     let value = (!lang||lang=='zh')?"交易成功，请在浏览器中查看。":"Transaction confirmed. View on NELScan.";
     let amount = "";
-    if(task.confirm === ConfirmType.tranfer)
+    console.log(task);
+    
+    if(task.type === ConfirmType.tranfer)
     {
         const data = TaskManager.sendHistory[task.txid];
-        amount = data.amount+" "+data.asset+" "
+        const assetstate = await queryAssetSymbol(data.asset,task.network);
+        amount = "-"+data.amount+" "+assetstate.symbol
     }
-    else if(task.confirm === ConfirmType.contract)
+    else if(task.type === ConfirmType.contract)
     {
         const data = TaskManager.invokeHistory[task.txid];
+        console.log(data);
+        
         amount = data.expenses.map(expense=>{
             "-"+expense.amount+" "+expense.symbol
         }).join(',');
+        console.log(amount);
+        
     }   
-    else if(task.confirm === ConfirmType.claimgas)
+    else if(task.type === ConfirmType.claimgas)
     {
         const data = TaskManager.sendHistory[task.txid];
-        amount = data.amount+" "+data.asset+" "
+        const assetstate = await queryAssetSymbol(data.asset,task.network);
+        amount = "-"+data.amount+" "+assetstate.symbol;
     }
-    showNotify(title,(amount?amount:'')+value);
+    showNotify(title,(amount?amount+" ":'')+value);
 }

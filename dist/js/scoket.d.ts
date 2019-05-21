@@ -17,5 +17,5 @@ declare class SocketManager {
     updateLastWSmsgSec: () => void;
     socketInit(): void;
 }
-declare function TaskNotify(task: Task): void;
+declare function TaskNotify(task: Task): Promise<void>;
 //# sourceMappingURL=scoket.d.ts.map

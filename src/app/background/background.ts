@@ -2625,7 +2625,7 @@ class TaskManager{
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
-                            
+                            TaskNotify(task);
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             if(task.next)
@@ -2647,7 +2647,6 @@ class TaskManager{
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
-                            
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             if(storage.account && storage.account.address == task.message)
@@ -2669,7 +2668,8 @@ class TaskManager{
                     Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{                        
                         if(result['blockhash'])
-                        {                                  
+                        {
+                            TaskNotify(task);
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             task.state = TaskState.success;
@@ -2687,7 +2687,8 @@ class TaskManager{
                     Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{
                         if(result['blockhash'])
-                        {                            
+                        {
+                            TaskNotify(task);
                             const count = storage.accountWaitTaskCount[task.currentAddr]?storage.accountWaitTaskCount[task.currentAddr]:0;
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             task.state = TaskState.success;
