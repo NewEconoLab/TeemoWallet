@@ -192,7 +192,7 @@ class Utxo {
 }
 class Storage_local {
     static setAccount(account) {
-        const lang = sessionStorage.getItem('language');
+        const lang = localStorage.getItem('language');
         const name = (!lang || lang == 'zh') ? '我的钱包' : 'Wallet';
         let arr = Storage_local.getAccount();
         let index = -1;
@@ -1957,7 +1957,7 @@ const responseMessage = (sender, request) => {
     const domain = getURLDomain(tab.url);
     const header = { title, domain, icon: tab.favIconUrl };
     if (Storage_local.getAccount().length < 1) {
-        const lang = sessionStorage.getItem('language');
+        const lang = localStorage.getItem('language');
         const titles = (!lang || lang == 'zh') ? ['未检测到钱包', '请先创建或导入钱包'] : ['Wallet not detected.', 'Please create or import a wallet first. '];
         showNotify(titles[0], titles[1]);
         const error = { type: 'CONNECTION_DENIED', description: 'No account response to current dapp request ' };
@@ -2583,7 +2583,7 @@ class ResultItem {
             }
         }
         else if (type === DataType.ByteArray) {
-            item.data = (value).hexToBytes();
+            item.data = value.hexToBytes();
         }
         else if (type === DataType.Integer) {
             item.data = Neo.BigInteger.parse(value).toUint8Array();

@@ -258,7 +258,7 @@ class Utxo{
 class Storage_local
 {
     public static setAccount(account:NepAccount){        
-        const lang = sessionStorage.getItem('language');
+        const lang = localStorage.getItem('language');
         const name = (!lang||lang=='zh')?'我的钱包':'Wallet';
         let arr = Storage_local.getAccount();        
         let index: number= -1;
@@ -2298,7 +2298,7 @@ const responseMessage =(sender:chrome.runtime.MessageSender,request:any)=>
     const header={title,domain,icon:tab.favIconUrl};
     if(Storage_local.getAccount().length<1)
     {
-        const lang = sessionStorage.getItem('language');
+        const lang = localStorage.getItem('language');
         const titles:Array<string> = (!lang||lang=='zh')?['未检测到钱包','请先创建或导入钱包']:['Wallet not detected.', 'Please create or import a wallet first. ']
         showNotify(titles[0],titles[1]);
         const error = {type:'CONNECTION_DENIED',description:'No account response to current dapp request '}

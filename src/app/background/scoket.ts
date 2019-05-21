@@ -187,7 +187,7 @@ class SocketManager
 
 async function TaskNotify(task:Task)
 {
-    const lang = sessionStorage.getItem('language');
+    const lang = localStorage.getItem('language');
     let title = (!lang||lang=='zh')?"交易已确认":"Confirmed transaction";
     let value = (!lang||lang=='zh')?"交易成功，请在浏览器中查看。":"Transaction confirmed. View on NELScan.";
     let amount = "";
@@ -204,17 +204,17 @@ async function TaskNotify(task:Task)
         const data = TaskManager.invokeHistory[task.txid];
         console.log(data);
         
-        amount = data.expenses.map(expense=>{
-            "-"+expense.amount+" "+expense.symbol
-        }).join(',');
+        amount = data.expenses.map(expense=>"-"+expense.amount+" "+expense.symbol).join(',');
         console.log(amount);
         
     }   
     else if(task.type === ConfirmType.claimgas)
     {
         const data = TaskManager.sendHistory[task.txid];
+        console.log(data);
+        
         const assetstate = await queryAssetSymbol(data.asset,task.network);
-        amount = "-"+data.amount+" "+assetstate.symbol;
+        amount = "+"+data.amount+" "+assetstate.symbol;
     }
     showNotify(title,(amount?amount+" ":'')+value);
 }
