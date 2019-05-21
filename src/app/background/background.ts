@@ -2016,12 +2016,15 @@ const notifyInit=(title:string,domain:string,favIconUrl:string)=>{
     })
 }
 
-const showNotify = (title,msg) =>{
+const showNotify = (title:string,msg:string,call?:(notificationIds:string)=>void) =>{
     chrome.notifications.create(null, {
         type: 'basic',
         iconUrl: 'icon128.png',
         title: title,
-        message: msg
+        message: msg,
+        isClickable:true,
+    },(notificationIds:string)=>{
+        call(notificationIds);
     });
 }
 

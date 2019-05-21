@@ -1703,12 +1703,15 @@ const notifyInit = (title, domain, favIconUrl) => {
         }
     });
 };
-const showNotify = (title, msg) => {
+const showNotify = (title, msg, call) => {
     chrome.notifications.create(null, {
         type: 'basic',
         iconUrl: 'icon128.png',
         title: title,
-        message: msg
+        message: msg,
+        isClickable: true,
+    }, (notificationIds) => {
+        call(notificationIds);
     });
 };
 /**

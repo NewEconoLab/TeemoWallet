@@ -127,7 +127,7 @@ class SocketManager {
                                 TransferGroup.update(task.next, task.network);
                             }
                         }
-                        else if (task.confirm > 4) {
+                        else if (storage.height - task.height > 4) {
                             Api.getrawtransaction(task.txid, task.network)
                                 .then(result => {
                                 if (result['blockhash']) {
@@ -172,7 +172,6 @@ function TaskNotify(task) {
         let title = (!lang || lang == 'zh') ? "交易已确认" : "Confirmed transaction";
         let value = (!lang || lang == 'zh') ? "交易成功，请在浏览器中查看。" : "Transaction confirmed. View on NELScan.";
         let amount = "";
-        console.log(task);
         if (task.type === ConfirmType.tranfer) {
             const data = TaskManager.sendHistory[task.txid];
             const assetstate = yield queryAssetSymbol(data.asset, task.network);
@@ -180,17 +179,21 @@ function TaskNotify(task) {
         }
         else if (task.type === ConfirmType.contract) {
             const data = TaskManager.invokeHistory[task.txid];
-            console.log(data);
             amount = data.expenses.map(expense => "-" + expense.amount + " " + expense.symbol).join(',');
-            console.log(amount);
         }
         else if (task.type === ConfirmType.claimgas) {
             const data = TaskManager.sendHistory[task.txid];
-            console.log(data);
             const assetstate = yield queryAssetSymbol(data.asset, task.network);
             amount = "+" + data.amount + " " + assetstate.symbol;
         }
-        showNotify(title, (amount ? amount + " " : '') + value);
+        showNotify(title, (amount ? amount + " " : '') + value, notificationIds => {
+            console.log('------------------------进入Notified的回调函数了', notificationIds);
+            chrome.notifications.onClicked.addListener(id => {
+                if (notificationIds == id) {
+                    window.open(`https://scan.nel.group/${task.network == 'TestNet' ? 'test/' : ''}transaction/${task.txid}`, '_blank');
+                }
+            });
+        });
     });
 }
 //# sourceMappingURL=scoket.js.map

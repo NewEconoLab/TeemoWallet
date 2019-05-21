@@ -76,11 +76,8 @@ export default class Transfer extends React.Component<IProps, IState>
 
 	componentDidMount()
 	{
-		console.log("------------转账页面加载完毕");
-		
 		if (this.props.asset != '')
 		{
-			console.log('资产id',this.props.asset);
 			const currentasset =  manageStore.myAssets.find(option => option.assetid == this.props.asset)
 
 			// currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
@@ -97,8 +94,6 @@ export default class Transfer extends React.Component<IProps, IState>
 				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol},
 				available:`${common.balances.find(asset=>asset.assetID===manageStore.myAssets[0].assetid).amount} ${manageStore.myAssets[0].symbol}`
 			},()=>{
-				console.log('资产名称',this.state.currentOption.name);
-				
 			})
 		}
 	}
@@ -121,7 +116,11 @@ export default class Transfer extends React.Component<IProps, IState>
 		let resolverMessage,addrMessage, toAddress, domain = "";
 		let address = event;
 		this.setState({ address })
-		if (NNSTool.verifyDomain(event))
+		if(event=='')
+		{
+			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage })
+		}
+		else if (NNSTool.verifyDomain(event))
 		{
 			try
 			{
@@ -130,23 +129,39 @@ export default class Transfer extends React.Component<IProps, IState>
 				{
 					errorAddr = true;
 					addrMessage = intl.message.transfer.error2
-				} else
+				} 
+				else
 				{
 					errorAddr = false;
 					// addrMessage = toAddress = addr;
 					resolverMessage = toAddress = addr;
 					domain = event;
 				}
-			} catch (error)
+				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
+				{
+					this.onVerify();
+				})
+			} 
+			catch (error)
 			{
 				errorAddr = true;
 				addrMessage = intl.message.transfer.error2
+				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
+				{
+					this.onVerify();
+				})
 			}
 		}
 		else if (neotools.verifyAddress(event))
 		{
+			
 			errorAddr = false;
 			toAddress = event;
+			console.log('状态0',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
+			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
+			{
+				this.onVerify();
+			})
 			try {
 				const domainInfo = await bg.getDomainFromAddress({address:event,network:common.network});
 				// const currenttime = new Neo.BigInteger(new Date().getTime()).divide(1000);
@@ -162,6 +177,11 @@ export default class Transfer extends React.Component<IProps, IState>
 				{
 					resolverMessage=domainInfo.fullDomainName;
 				}
+				console.log('状态1',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
+				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
+				{
+					this.onVerify();
+				})
 			} catch (error) {
 				
 			}
@@ -170,11 +190,11 @@ export default class Transfer extends React.Component<IProps, IState>
 		{
 			errorAddr = true;
 			addrMessage = intl.message.transfer.error1
+			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
+			{
+				this.onVerify();
+			})
 		}
-		this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-		{
-			this.onVerify();
-		})
 	}
 
 	public onVerify = () =>

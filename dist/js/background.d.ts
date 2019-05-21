@@ -351,7 +351,7 @@ declare const getProvider: () => Promise<{}>;
 declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const getPublicKey: () => Promise<GetPublickeyOutput>;
 declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
-declare const showNotify: (title: any, msg: any) => void;
+declare const showNotify: (title: string, msg: string, call?: (notificationIds: string) => void) => void;
 /**
  * 通过正则获得url中的域名
  * @param Url url链接
