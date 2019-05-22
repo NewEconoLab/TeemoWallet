@@ -1092,8 +1092,8 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 MarkUtxo.setMark(tran.marks);
             }
         }
-        const task = new Task(ConfirmType.contract,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
-        TaskManager.addTask(task);
+        // const task = new Task(ConfirmType.contract,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
+        // TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
             const tran = trans[index];
             if(index<(trans.length-1)){
@@ -2851,12 +2851,19 @@ const claimGas=async()=>{
         const sendMsg:SendArgs ={fromAddress:address,toAddress:address,amount:sum.toString(),asset:HASH_CONFIG.ID_GAS,network:storage.network,remark:'提取GAS',fee:'0'};
         TaskManager.addSendData(result.txid,sendMsg)
         localStorage.setItem('Teemo-claimgasState-'+storage.network,'wait')
-        console.log('广播信息',result);
-        
         return result
     } catch (error) {
-        console.log(error);
+        localStorage.setItem('Teemo-claimgasState-'+storage.network,'');
         
+        const lang = localStorage.getItem('language');
+        if(!lang||lang=='zh')
+        {
+            showNotify("提取失败","提取失败，请稍后再试。")
+        }
+        else
+        {
+            showNotify("Claim failed","Claim failed,try again later.")
+        }
     }
 }
 
