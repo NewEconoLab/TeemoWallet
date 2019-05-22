@@ -2393,6 +2393,7 @@ const claimGas = () => __awaiter(this, void 0, void 0, function* () {
     let count = claimresult[0]['count'];
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
+    console.log(new Date().getTime(), claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
@@ -2420,6 +2421,7 @@ const claimGas = () => __awaiter(this, void 0, void 0, function* () {
         const sendMsg = { fromAddress: address, toAddress: address, amount: sum.toString(), asset: HASH_CONFIG.ID_GAS, network: storage.network, remark: '提取GAS', fee: '0' };
         TaskManager.addSendData(result.txid, sendMsg);
         localStorage.setItem('Teemo-claimgasState-' + storage.network, 'wait');
+        console.log('广播信息', result);
         return result;
     }
     catch (error) {
