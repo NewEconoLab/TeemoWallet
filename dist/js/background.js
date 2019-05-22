@@ -160,7 +160,7 @@ class MarkUtxo {
                     }
                     else // 对被使用过的utxo进行排除
                      {
-                        console.log('被排除的utxo', item);
+                        // console.log('被排除的utxo',item);
                     }
                 }
                 return assets;
@@ -382,8 +382,7 @@ function request(opts) {
             }
         }
         catch (error) {
-            console.log("这里是网络请求异常");
-            console.log("请求参数", opts);
+            console.log("网络请求异常 请求参数：", opts);
             throw error;
         }
     });
@@ -680,8 +679,8 @@ function networkSort() {
         mainNode = mainNode.sort((b, a) => {
             return a.height - b.height;
         });
-        console.log('main rpc node', mainNode);
-        console.log('test rpc node', testNode);
+        // console.log('main rpc node',mainNode);
+        // console.log('test rpc node',testNode);
     });
 }
 networkSort();
@@ -1125,8 +1124,8 @@ const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, functio
         }
     }
     catch (error) {
-        console.log('异常claimed交易体Hex', data.toHexString());
-        console.log('异常交易体', tran);
+        // console.log('异常claimed交易体Hex',data.toHexString());
+        // console.log('异常交易体',tran);
         console.error(error);
         throw error;
     }
@@ -2391,7 +2390,7 @@ const claimGas = () => __awaiter(this, void 0, void 0, function* () {
     let claims = claimresult[0]["list"];
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
-    console.log('claime utxo 获得时间: ' + new Date().getTime(), claimresult);
+    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
@@ -2486,7 +2485,7 @@ class AssetManager {
     queryAsset(value) {
         // 筛选名字或者id包含搜索值的结果(id 忽略 0x)
         return this.allAssetInfo.filter(asset => {
-            console.log(asset);
+            // console.log(asset);
             try {
                 const result = asset.symbol.toUpperCase().indexOf(value.toUpperCase()) >= 0;
                 return result;

@@ -212,7 +212,7 @@ class MarkUtxo
                 }
                 else    // 对被使用过的utxo进行排除
                 {                    
-                    console.log('被排除的utxo',item);                    
+                    // console.log('被排除的utxo',item);
                 }
             }            
             return assets;
@@ -489,12 +489,10 @@ async function request(opts: IOpts) {
         {
             throw new Error(JSON.stringify(json.error));    
         }
-    } 
+    }
     catch (error) 
     {
-        console.log("这里是网络请求异常");
-        console.log("请求参数",opts);
-        
+        console.log("网络请求异常 请求参数：",opts); 
         throw error;    
     }
 }
@@ -528,7 +526,7 @@ const Api = {
     getavailableutxos:(address: string, count: number)=>{
         return request({
             method:"getavailableutxos",
-            params:[address,count],            
+            params:[address,count],
         })
     },
 
@@ -823,9 +821,9 @@ async function networkSort()
     mainNode = mainNode.sort((b,a)=>{
         return a.height-b.height;
     })
-    console.log('main rpc node',mainNode);
+    // console.log('main rpc node',mainNode);
     
-    console.log('test rpc node',testNode);
+    // console.log('test rpc node',testNode);
 }
 networkSort();
 
@@ -1355,8 +1353,8 @@ const transactionSignAndSend = async (tran:Transaction)=>
         }
         
     } catch (error) {
-        console.log('异常claimed交易体Hex',data.toHexString());
-        console.log('异常交易体',tran);
+        // console.log('异常claimed交易体Hex',data.toHexString());
+        // console.log('异常交易体',tran);
         console.error(error);
         throw error;         
     }
@@ -2819,7 +2817,7 @@ const claimGas=async()=>{
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
 
-    console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
+    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     
 
 
@@ -2939,7 +2937,7 @@ class AssetManager{
         return this.allAssetInfo.filter(
             asset=>
             {
-                console.log(asset);
+                // console.log(asset);
                 try {    
                     const result = asset.symbol.toUpperCase().indexOf(value.toUpperCase())>=0;
                     return result;
