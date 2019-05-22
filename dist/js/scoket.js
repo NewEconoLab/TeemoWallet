@@ -140,6 +140,19 @@ class SocketManager {
                                     TaskManager.shed[key] = task;
                                     Storage_local.set(TaskManager.table, TaskManager.shed);
                                     TaskNotify(task);
+                                    if (task.type == ConfirmType.toClaimgas) {
+                                        if (storage.account && storage.account.address == task.message) {
+                                            try {
+                                                claimGas();
+                                            }
+                                            catch (error) {
+                                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                            }
+                                        }
+                                        else {
+                                            localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                        }
+                                    }
                                     const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
                                     storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                                     if (task.next) {

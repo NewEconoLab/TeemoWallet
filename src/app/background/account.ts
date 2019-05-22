@@ -175,6 +175,7 @@ var AccountManager={
         EventsOnChange(WalletEvents.CONNECTED,{address:account.address,label:account.walletName});
         EventsOnChange(WalletEvents.ACCOUNT_CHANGED,{address:account.address,label:account.walletName});
         localStorage.setItem('Teemo-claimgasState-'+storage.network,'');
+        networkSort();
     },
 
     logout:()=>{
@@ -190,6 +191,7 @@ var AccountManager={
             const message:GetNetworksOutput={networks:[network],defaultNetwork:network};
             EventsOnChange(WalletEvents.NETWORK_CHANGED,message);
             TaskManager.socket.socketInit();
+            networkSort();
             r(message)
         })
     },
