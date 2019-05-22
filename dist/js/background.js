@@ -2388,12 +2388,10 @@ var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
 const claimGas = () => __awaiter(this, void 0, void 0, function* () {
     var address = storage.account.address;
     let claimresult = yield Api.getClaimgasUtxoList(address, 1, 0, 0);
-    let claimsAmount = yield Api.getclaimgas(storage.account.address, 0, 1, 0);
     let claims = claimresult[0]["list"];
-    let count = claimresult[0]['count'];
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
-    console.log(new Date().getTime(), claimresult);
+    console.log('claime utxo 获得时间: ' + new Date().getTime(), claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
