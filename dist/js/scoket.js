@@ -114,7 +114,12 @@ class SocketManager {
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: data.blockHeight, blockTime: data.blockTime });
                             if (task.type == ConfirmType.toClaimgas) {
                                 if (storage.account && storage.account.address == task.message) {
-                                    claimGas();
+                                    try {
+                                        claimGas();
+                                    }
+                                    catch (error) {
+                                        localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                    }
                                 }
                                 else {
                                     localStorage.setItem('Teemo-claimgasState-' + task.network, '');

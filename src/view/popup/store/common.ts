@@ -33,10 +33,10 @@ class Common implements ICommonStore
             bg.AccountManager.netWorkChange(network)
             .then(result=>{
                 this.network = network;
+                manageStore.initAssetList();
                 this.initAccountBalance();
                 historyStore.initHistoryList();
                 this.initClaimGasAmount();
-                manageStore.initAssetList();
                 r(this.network);
             })
         })
@@ -46,14 +46,15 @@ class Common implements ICommonStore
         const assetids = localStorage.getItem('Teemo-assetManager-'+this.network+this.account.address);
         if(assetids)
         {
-            console.log(assetids);
-            
             const list = JSON.parse(assetids);
             const arr = [];
+            this.balances=[];
             for (const key in list) {
                 if (list.hasOwnProperty(key)) {
                     if(list[key])
                     {
+                        const asset = manageStore.allAsset.find(asset=>asset.assetid==key)
+                        if(asset)this.balances.push({symbol:asset.symbol,assetID:key,amount:'0'})
                         arr.push(key)
                     }
                 }
@@ -69,27 +70,15 @@ class Common implements ICommonStore
                     "network":this.network,
                     "params":params
                 }
-                this.balances=[];
                 bg.getBalance(data)
                 .then((result:BalanceResults)=>{
                     this.balances=result[this.account.address];
-                    console.log('params',params);
-                    
-                    console.log('balaces',JSON.stringify(this.balances));
                     
                 })
             }
-            else
-            {
-                this.balances=[];
-            }
         }
         else
-        {
-            console.log(assetids);
-            
-            console.log("没有资产默认显示NEO，GAS",assetids);
-            
+        {            
             const params: BalanceRequest = {
                 address: this.account.address,   // 你要查询的地址
                 assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS],

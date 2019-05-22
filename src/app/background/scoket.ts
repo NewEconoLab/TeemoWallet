@@ -126,7 +126,11 @@ class SocketManager
                             {
                                 if(storage.account && storage.account.address == task.message)
                                 {
-                                    claimGas();
+                                    try {
+                                        claimGas();
+                                    } catch (error) {                                        
+                                        localStorage.setItem('Teemo-claimgasState-'+task.network,'');
+                                    }
                                 }
                                 else
                                 {
@@ -202,7 +206,7 @@ async function TaskNotify(task:Task)
     {
         const data = TaskManager.invokeHistory[task.txid];
         
-        amount = data.expenses.map(expense=>"-"+expense.amount+" "+expense.symbol).join(',');        
+        amount = data.expenses.map(expense=>"-"+expense.amount+" "+expense.symbol).join(',');
     }   
     else if(task.type === ConfirmType.claimgas)
     {

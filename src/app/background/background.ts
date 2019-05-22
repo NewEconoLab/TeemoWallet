@@ -487,7 +487,7 @@ async function request(opts: IOpts) {
         }
         else
         {
-            throw new Error(json.error);    
+            throw new Error(JSON.stringify(json.error));    
         }
     } 
     catch (error) 
@@ -1335,12 +1335,12 @@ var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:number,netfee:n
 
 const transactionSignAndSend = async (tran:Transaction)=>
 {
+    const message  = tran.GetMessage().clone();
+    const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
+    tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
+    const data:Uint8Array = tran.GetRawData();
+    const txid=tran.getTxid();
     try {
-        const message  = tran.GetMessage().clone();
-        const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
-        tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
-        const data:Uint8Array = tran.GetRawData();
-        const txid=tran.getTxid();
         const result =await Api.sendrawtransaction(data.toHexString());
         if(result['data'])
         {
@@ -1355,7 +1355,10 @@ const transactionSignAndSend = async (tran:Transaction)=>
         }
         
     } catch (error) {
-        console.log(error);            
+        console.log('异常claimed交易体Hex',data.toHexString());
+        console.log('异常交易体',tran);
+        console.error(error);
+        throw error;         
     }
 }
 
@@ -2646,7 +2649,7 @@ class TaskManager{
                     Api.getrawtransaction(task.txid,task.network)
                     .then(result=>{                        
                         if(result['blockhash'])
-                        {      
+                        {
                             task.state = TaskState.success;
                             this.shed[key]=task;
                             Storage_local.set(this.table,this.shed);
@@ -2654,7 +2657,11 @@ class TaskManager{
                             storage.accountWaitTaskCount[task.currentAddr]=count-1;
                             if(storage.account && storage.account.address == task.message)
                             {
-                                claimGas();
+                                try {
+                                    claimGas();
+                                } catch (error) {                                    
+                                    localStorage.setItem('Teemo-claimgasState-'+task.network,'');
+                                }
                             }
                             else
                             {
@@ -2836,12 +2843,17 @@ const claimGas=async()=>{
     output.value = sum;
     tran.outputs = [];
     tran.outputs.push(output);
-    const result = await transactionSignAndSend(tran)
-    TaskManager.addTask(new Task(ConfirmType.claimgas,result.txid));
-    const sendMsg:SendArgs ={fromAddress:address,toAddress:address,amount:sum.toString(),asset:HASH_CONFIG.ID_GAS,network:storage.network,remark:'提取GAS',fee:'0'};
-    TaskManager.addSendData(result.txid,sendMsg)
-    localStorage.setItem('Teemo-claimgasState-'+storage.network,'wait')
-    return result
+    try {
+        const result = await transactionSignAndSend(tran)
+        TaskManager.addTask(new Task(ConfirmType.claimgas,result.txid));
+        const sendMsg:SendArgs ={fromAddress:address,toAddress:address,amount:sum.toString(),asset:HASH_CONFIG.ID_GAS,network:storage.network,remark:'提取GAS',fee:'0'};
+        TaskManager.addSendData(result.txid,sendMsg)
+        localStorage.setItem('Teemo-claimgasState-'+storage.network,'wait')
+        return result
+    } catch (error) {
+        console.log(error);
+        
+    }
 }
 
 interface Claim
