@@ -52,13 +52,13 @@ export default class ClaimGAS extends React.Component
   }
   
   public onClaimGAS = async () => {
+    this.setState({
+      claimStatus:2
+    })
     try {
       await bg.doClaimGas()
       localStorage.setItem('Teemo-claimgasState-'+common.network,'wait');
       Toast(intl.message.assets.claiming);
-      this.setState({
-        claimStatus:2
-      })
     } catch (error) {
       Toast(intl.message.toast.claimFailed,'error');
       this.setState({
