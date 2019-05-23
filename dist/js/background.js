@@ -355,7 +355,7 @@ function request(opts) {
             url = [baseCommonUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
         }
         else if (opts.baseUrl === 'rpc') {
-            url = network == "TestNet" ? testNode[0].node : mainNode[0].node;
+            url = network == "TestNet" ? testRpcUrl : mainRpcUrl;
         }
         else {
             url = [baseUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
