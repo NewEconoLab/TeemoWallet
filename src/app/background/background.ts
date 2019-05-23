@@ -2823,7 +2823,7 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
 
-    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
+    console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
@@ -2848,6 +2848,7 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
     tran.outputs.push(output);
     try {
         const result = await transactionSignAndSend(tran,network)
+        
         const task = new Task(ConfirmType.claimgas,result.txid);
         task.network=network;
         TaskManager.addTask(task);

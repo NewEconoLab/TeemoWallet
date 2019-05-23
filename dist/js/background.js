@@ -2395,7 +2395,7 @@ const claimGas = (network) => __awaiter(this, void 0, void 0, function* () {
     let claims = claimresult[0]["list"];
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
-    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
+    console.log('claime utxo 获得时间: ' + new Date().getTime(), claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
