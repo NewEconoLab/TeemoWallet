@@ -2824,7 +2824,7 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
     let claimsAmount = await Api.getclaimgas(address,0,1,0);
     const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
 
-    console.log('request claimgas',amount);    
+    console.log('request claimgas',amount.toString());    
 
     console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
@@ -2843,7 +2843,7 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
         (tran.extdata as ThinNeo.ClaimTransData).claims.push(input);
     }
     
-    console.log('sum claimgas',sum);    
+    console.log('sum claimgas',sum.toString());    
     var output = new ThinNeo.TransactionOutput();
     output.assetId = (HASH_CONFIG.ID_GAS).hexToBytes().reverse();
     output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(address)
