@@ -115,7 +115,7 @@ class SocketManager {
                             if (task.type == ConfirmType.toClaimgas) {
                                 if (storage.account && storage.account.address == task.message) {
                                     try {
-                                        claimGas();
+                                        claimGas(task.network);
                                     }
                                     catch (error) {
                                         localStorage.setItem('Teemo-claimgasState-' + task.network, '');
@@ -143,7 +143,7 @@ class SocketManager {
                                     if (task.type == ConfirmType.toClaimgas) {
                                         if (storage.account && storage.account.address == task.message) {
                                             try {
-                                                claimGas();
+                                                claimGas(task.network);
                                             }
                                             catch (error) {
                                                 localStorage.setItem('Teemo-claimgasState-' + task.network, '');

@@ -202,7 +202,7 @@ declare const Api: {
      * @param page 页数
      * @param size 每页条数
      */
-    getClaimgasUtxoList: (address: string, type: number, page: number, size: number) => Promise<any>;
+    getClaimgasUtxoList: (address: string, type: number, page: number, size: number, network?: "TestNet" | "MainNet") => Promise<any>;
     getclaimgas: (address: string, type: number, size: number, hide: number) => Promise<any>;
 };
 declare function networkSort(): Promise<void>;
@@ -277,7 +277,7 @@ declare var makeRefundTransaction: (transcount: number, netfee: number) => Promi
  * @param transcount 兑换的数量
  */
 declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: number, netfee: number) => Promise<TransferGroup>;
-declare const transactionSignAndSend: (tran: Transaction) => Promise<InvokeOutput>;
+declare const transactionSignAndSend: (tran: Transaction, net?: "TestNet" | "MainNet") => Promise<InvokeOutput>;
 interface NotifyMessage {
     header?: {
         title: string;
@@ -510,7 +510,7 @@ declare var cleanTaskForAddr: (address: string) => void;
 declare var getClaimGasAmount: () => Promise<string>;
 declare var getClaimGasState: () => string;
 declare var doClaimGas: () => Promise<void>;
-declare const claimGas: () => Promise<InvokeOutput>;
+declare const claimGas: (network: "TestNet" | "MainNet") => Promise<InvokeOutput>;
 interface Claim {
     addr: string;
     asset: string;

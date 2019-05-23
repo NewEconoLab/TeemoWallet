@@ -634,11 +634,12 @@ const Api = {
      * @param page 页数
      * @param size 每页条数
      */
-    getClaimgasUtxoList: (address, type, page, size) => {
+    getClaimgasUtxoList: (address, type, page, size, network) => {
         return request({
             method: 'getclaimgasUtxoList',
             params: [address, type, page, size],
             baseUrl: 'common',
+            network
         });
     },
     getclaimgas: (address, type, size, hide) => {
@@ -1105,14 +1106,14 @@ var makeRefundTransaction_tranGas = (utxo, transcount, netfee) => __awaiter(this
     TaskManager.addSendData(trandata.txid, senddata);
     return trandata;
 });
-const transactionSignAndSend = (tran) => __awaiter(this, void 0, void 0, function* () {
+const transactionSignAndSend = (tran, net) => __awaiter(this, void 0, void 0, function* () {
     const message = tran.GetMessage().clone();
     const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
     tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
     const data = tran.GetRawData();
     const txid = tran.getTxid();
     try {
-        const result = yield Api.sendrawtransaction(data.toHexString());
+        const result = yield Api.sendrawtransaction(data.toHexString(), net);
         if (result['data']) {
             MarkUtxo.setMark(tran.marks);
             const nodeUrl = result.nodeUrl;
@@ -2234,7 +2235,7 @@ class TaskManager {
                             storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             if (storage.account && storage.account.address == task.message) {
                                 try {
-                                    claimGas();
+                                    claimGas(task.network);
                                 }
                                 catch (error) {
                                     localStorage.setItem('Teemo-claimgasState-' + task.network, '');
@@ -2350,6 +2351,7 @@ var getClaimGasState = () => {
     return state ? state : '';
 };
 var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
+    const network = storage.network;
     const neoutxo = yield MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_NEO);
     if (neoutxo) {
         let sum = Neo.Fixed8.Zero;
@@ -2376,7 +2378,7 @@ var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
     else {
         try {
             if (storage.account && storage.account.address) {
-                claimGas();
+                claimGas(network);
             }
         }
         catch (error) {
@@ -2384,9 +2386,9 @@ var doClaimGas = () => __awaiter(this, void 0, void 0, function* () {
         }
     }
 });
-const claimGas = () => __awaiter(this, void 0, void 0, function* () {
+const claimGas = (network) => __awaiter(this, void 0, void 0, function* () {
     var address = storage.account.address;
-    let claimresult = yield Api.getClaimgasUtxoList(address, 1, 0, 0);
+    let claimresult = yield Api.getClaimgasUtxoList(address, 1, 0, 0, network);
     let claims = claimresult[0]["list"];
     let sum = Neo.Fixed8.Zero;
     // const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
@@ -2413,15 +2415,17 @@ const claimGas = () => __awaiter(this, void 0, void 0, function* () {
     tran.outputs = [];
     tran.outputs.push(output);
     try {
-        const result = yield transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.claimgas, result.txid));
-        const sendMsg = { fromAddress: address, toAddress: address, amount: sum.toString(), asset: HASH_CONFIG.ID_GAS, network: storage.network, remark: '提取GAS', fee: '0' };
+        const result = yield transactionSignAndSend(tran, network);
+        const task = new Task(ConfirmType.claimgas, result.txid);
+        task.network = network;
+        TaskManager.addTask(task);
+        const sendMsg = { fromAddress: address, toAddress: address, amount: sum.toString(), asset: HASH_CONFIG.ID_GAS, network: network, remark: '提取GAS', fee: '0' };
         TaskManager.addSendData(result.txid, sendMsg);
-        localStorage.setItem('Teemo-claimgasState-' + storage.network, 'wait');
+        localStorage.setItem('Teemo-claimgasState-' + network, 'wait');
         return result;
     }
     catch (error) {
-        localStorage.setItem('Teemo-claimgasState-' + storage.network, '');
+        localStorage.setItem('Teemo-claimgasState-' + network, '');
         const lang = localStorage.getItem('language');
         if (!lang || lang == 'zh') {
             showNotify("提取失败", "提取失败，请稍后再试。");
