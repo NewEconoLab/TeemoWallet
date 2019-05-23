@@ -1114,6 +1114,8 @@ const transactionSignAndSend = (tran, net) => __awaiter(this, void 0, void 0, fu
     const data = tran.GetRawData();
     const txid = tran.getTxid();
     try {
+        console.log(`Time:${new Date().getTime()} Txid ${txid}`, data.toHexString());
+        console.log('交易体结构', tran);
         const result = yield Api.sendrawtransaction(data.toHexString(), net);
         if (result['data']) {
             MarkUtxo.setMark(tran.marks);

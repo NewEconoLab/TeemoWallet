@@ -1341,6 +1341,9 @@ const transactionSignAndSend = async (tran:Transaction,net?:'TestNet'|'MainNet')
     const data:Uint8Array = tran.GetRawData();
     const txid=tran.getTxid();
     try {
+        console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
+        console.log('交易体结构',tran);
+        
         const result =await Api.sendrawtransaction(data.toHexString(),net);
         if(result['data'])
         {

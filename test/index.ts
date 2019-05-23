@@ -326,7 +326,7 @@ class Main {
     }
 
     /**
-     * 获得余额信息
+     * 获得转账信息
      */
     public getTransaction(params:string)
     {
@@ -349,7 +349,7 @@ class Main {
     }
     
     /**
-     * 获得余额信息
+     * 获得交易log
      */
     public getApplicationLog(params:string)
     {
@@ -358,7 +358,7 @@ class Main {
             txid:params
         }
         return new Promise((resolve,reject)=>{            
-            Teemo.NEO.getApplicationLog(data) // 获得余额的方法
+            Teemo.NEO.getApplicationLog(data)
             .then(result=>{
                 console.log(result);
                 document.getElementById("getApplicationLog_R").innerText = JSON.stringify(result, null, 2);
@@ -554,6 +554,7 @@ class Main {
     }
 
     /**
+     * 根据scripthash 获得 地址
      * getAddressFromScriptHash
      */
     public getAddressFromScriptHash(params:string) {
@@ -575,6 +576,10 @@ class Main {
         })
     }
 
+    /**
+     * 获得storage信息
+     * @param params 
+     */
     public getStorage(params:string)
     {
         // const params:InvokeArgs = {
@@ -609,7 +614,7 @@ class Main {
 
     
     /**
-     * getAddressFromScriptHash
+     * 验证地址是否正确
      */
     public validateAddress(params:string) {
         return new Promise((resolve,reject)=>{            
@@ -632,7 +637,7 @@ class Main {
 
     
     /**
-     * getAddressFromScriptHash
+     * 反转hexstring
      */
     public reverseHexstr(params:string) {
         return new Promise((resolve,reject)=>{            
@@ -654,7 +659,7 @@ class Main {
 
     
     /**
-     * getAddressFromScriptHash
+     * 转换 hex string 为 String字符串
      */
     public getStringFromHexstr(params:string) {
         return new Promise((resolve,reject)=>{            
@@ -676,7 +681,7 @@ class Main {
 
     
     /**
-     * getAddressFromScriptHash
+     * hex转bigInteger
      */
     public getBigIntegerFromHexstr(params:string) {
         return new Promise((resolve,reject)=>{            
@@ -699,7 +704,7 @@ class Main {
 
     
     /**
-     * getAddressFromScriptHash
+     *  根据资产和数额自动转换成对应位数的金额
      */
     public getDecimalsFromAssetAmount(params:any) {
         return new Promise((resolve,reject)=>{            
@@ -721,7 +726,7 @@ class Main {
     }
     
     /**
-     * getAddressFromScriptHash
+     * 根据资产和金额自动转换成BigInteger
      */
     public getBigIntegerFromAssetAmount(params:any) {
         return new Promise((resolve,reject)=>{            
@@ -743,7 +748,7 @@ class Main {
     }
     
     /**
-     * getAddressFromScriptHash
+     * 根据域名解析成地址
      */
     public getAddressFromDomain(params:DomainArgs) {
         return new Promise((resolve,reject)=>{            
@@ -765,7 +770,7 @@ class Main {
     }
     
     /**
-     * getAddressFromScriptHash
+     * 根据地址反向解析成域名
      */
     public getDomainFromAddress(params:any) {
         return new Promise((resolve,reject)=>{            
@@ -787,7 +792,7 @@ class Main {
     }
     
     /**
-     * getAddressFromScriptHash
+     * 根据域名返回对应的namehash
      */
     public getNamehashFromDomain(params:string) {
         return new Promise((resolve,reject)=>{            
