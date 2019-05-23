@@ -684,7 +684,7 @@ function networkSort() {
         // console.log('test rpc node',testNode);
     });
 }
-networkSort();
+// networkSort();
 const setContractMessage = (txid, domain, data) => {
     Storage_local.get("invoke-message")
         .then(result => {
@@ -922,6 +922,7 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 MarkUtxo.setMark(tran.marks);
             }
         }
+        TaskManager.shed[txids[0].txid].next = trans[0];
         // const task = new Task(ConfirmType.contract,txids[0].txid.replace('0x',''),trans[0],TaskState.watting);
         // TaskManager.addTask(task);
         for (let index = 0; index < trans.length; index++) {
