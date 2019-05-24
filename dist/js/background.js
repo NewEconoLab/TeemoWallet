@@ -619,12 +619,12 @@ const Api = {
     },
     getApplicationLog: (txid) => {
         return request({
-            method: 'getapplicationlog',
-            params: [txid],
-            baseUrl: 'rpc'
-            // method:'getnotify',
+            // method:'getapplicationlog',
             // params:[txid],
-            // baseUrl:'common'
+            // baseUrl:'rpc'
+            method: 'getnotify',
+            params: [txid],
+            baseUrl: 'common'
         });
     },
     /**
