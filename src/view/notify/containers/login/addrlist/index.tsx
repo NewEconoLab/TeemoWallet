@@ -49,7 +49,7 @@ export default class AddrList extends React.Component<IProps, IState> {
 			})
 		}
 		else{
-			console.log(this.props.options);
+			// console.log(this.props.options);
 			
 		}
 

@@ -1114,8 +1114,8 @@ const transactionSignAndSend = (tran, net) => __awaiter(this, void 0, void 0, fu
     const data = tran.GetRawData();
     const txid = tran.getTxid();
     try {
-        console.log(`Time:${new Date().getTime()} Txid ${txid}`, data.toHexString());
-        console.log('交易体结构', tran);
+        // console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
+        // console.log('交易体结构',tran);
         const result = yield Api.sendrawtransaction(data.toHexString(), net);
         if (result['data']) {
             MarkUtxo.setMark(tran.marks);
@@ -2396,8 +2396,8 @@ const claimGas = (network) => __awaiter(this, void 0, void 0, function* () {
     let sum = Neo.Fixed8.Zero;
     let claimsAmount = yield Api.getclaimgas(address, 0, 1, 0);
     const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8));
-    console.log('request claimgas', amount.toString());
-    console.log('claime utxo 获得时间: ' + new Date().getTime(), claimresult);
+    // console.log('request claimgas',amount.toString());    
+    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
@@ -2412,7 +2412,7 @@ const claimGas = (network) => __awaiter(this, void 0, void 0, function* () {
         sum = sum.add(Neo.Fixed8.parse(claim.gas.toString()));
         tran.extdata.claims.push(input);
     }
-    console.log('sum claimgas', sum.toString());
+    // console.log('sum claimgas',sum.toString());    
     var output = new ThinNeo.TransactionOutput();
     output.assetId = (HASH_CONFIG.ID_GAS).hexToBytes().reverse();
     output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(address);

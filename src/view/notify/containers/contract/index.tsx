@@ -82,8 +82,8 @@ export default class ContractRequest extends React.Component<IProps, IState>
         expenses: result.expenses
       }, () =>
         {
-          console.log("打印state");
-          console.log(this.state);
+          // console.log("打印state");
+          // console.log(this.state);
         }
       );
     })
@@ -197,7 +197,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
                 {
                   this.state.operation.length !== 0 && this.state.operation.map((okey, oindex) =>
                   {
-                    console.log("ok:" + okey)
+                    // console.log("ok:" + okey)
                     return (
                       <div className="line-wrap line-method">
                         <div className="one-line">

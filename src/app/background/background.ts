@@ -1341,8 +1341,8 @@ const transactionSignAndSend = async (tran:Transaction,net?:'TestNet'|'MainNet')
     const data:Uint8Array = tran.GetRawData();
     const txid=tran.getTxid();
     try {
-        console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
-        console.log('交易体结构',tran);
+        // console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
+        // console.log('交易体结构',tran);
         
         const result =await Api.sendrawtransaction(data.toHexString(),net);
         if(result['data'])
@@ -2824,9 +2824,9 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
     let claimsAmount = await Api.getclaimgas(address,0,1,0);
     const amount = Neo.Fixed8.parse(claimsAmount[0]["gas"].toFixed(8))
 
-    console.log('request claimgas',amount.toString());    
+    // console.log('request claimgas',amount.toString());    
 
-    console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
+    // console.log('claime utxo 获得时间: '+new Date().getTime(),claimresult);
     var tran = new Transaction(ThinNeo.TransactionType.ClaimTransaction);
     //交易类型为合约交易
     tran.type = ThinNeo.TransactionType.ClaimTransaction;
@@ -2843,7 +2843,7 @@ const claimGas=async(network:'TestNet'|'MainNet')=>{
         (tran.extdata as ThinNeo.ClaimTransData).claims.push(input);
     }
     
-    console.log('sum claimgas',sum.toString());    
+    // console.log('sum claimgas',sum.toString());    
     var output = new ThinNeo.TransactionOutput();
     output.assetId = (HASH_CONFIG.ID_GAS).hexToBytes().reverse();
     output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(address)

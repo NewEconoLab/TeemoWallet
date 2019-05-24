@@ -86,13 +86,13 @@ export default class WifImport extends React.Component<IPorps, IState> {
                     this.goMyWallet();                
                 })
                 .catch(error=>{
-                    console.log(error);
+                    // console.log(error);
                     this.setState({
                         wif_error:true
                     })
                 })
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 this.setState({
                     wif_error:true
                 })

@@ -23,7 +23,7 @@ export default class ClaimGAS extends React.Component
     try {
       common.initClaimGasAmount()
     } catch (error) {
-      console.log('提取GAS异常',error);
+      // console.log('提取GAS异常',error);
       
     }
     const state = localStorage.getItem('Teemo-claimgasState-'+common.network);

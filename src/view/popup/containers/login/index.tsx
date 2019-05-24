@@ -122,7 +122,7 @@ export default class Login extends React.Component<AppProps,AppState> {
             this.props.history.push('/mywallet');
         })
         .catch(error=>{
-            console.log(error);
+            // console.log(error);
             
             this.setState({
                 passwordError:true

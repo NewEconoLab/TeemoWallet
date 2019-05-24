@@ -177,7 +177,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				{
 					resolverMessage=domainInfo.fullDomainName;
 				}
-				console.log('状态1',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
+				// console.log('状态1',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
 				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
 				{
 					this.onVerify();
@@ -274,7 +274,7 @@ export default class Transfer extends React.Component<IProps, IState>
 	}
 	public send = () =>
 	{
-		console.log(this.state.currentOption.id);
+		// console.log(this.state.currentOption.id);
 		this.setState({
 			confirmDisable: true
 		})
@@ -289,13 +289,13 @@ export default class Transfer extends React.Component<IProps, IState>
 		.then(result =>
 		{
 			Toast(intl.message.toast.successfully);
-			console.log(result);
+			// console.log(result);
 			this.onHide();
 		})
 		.catch(error =>
 		{
 			Toast(intl.message.toast.failed, "error");
-			console.log(error);
+			// console.log(error);
 			this.onHide();
 		})
 	}

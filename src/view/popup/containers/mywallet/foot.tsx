@@ -32,8 +32,8 @@ export default class WalletFoot extends React.Component<any, {}> {
 
 	// 全局点击
 	public globalClick = () => {
-		console.log("全局点击事件");
-		console.log(this.state.isShowLanguage);
+		// console.log("全局点击事件");
+		// console.log(this.state.isShowLanguage);
 		
 		if(this.state.isShowLanguage)
 			this.setState({ isShowLanguage: false });

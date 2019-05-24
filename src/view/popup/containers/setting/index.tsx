@@ -33,12 +33,12 @@ export default class Setting extends React.Component<IProps, {}>
     public componentDidMount()
     {
         const time = localStorage.getItem('Teemo-setting-disconnection');
-        console.log(time);
+        // console.log(time);
         
         this.setState({
             currentOptin:time?time:'0'
         },()=>{
-            console.log('初始化结束',this.state.currentOptin);            
+            // console.log('初始化结束',this.state.currentOptin);            
         });
     }
 

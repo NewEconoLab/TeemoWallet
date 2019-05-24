@@ -44,7 +44,7 @@ export default class WalletHeader extends React.Component<IProps, {}> {
     }
     public cutFunction = (option: IOption) =>
     {
-        console.log(option);
+        // console.log(option);
 
         if (option.id == 'exchange')
         {

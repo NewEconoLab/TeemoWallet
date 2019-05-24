@@ -95,7 +95,7 @@ class SocketManager {
             var data = JSON.parse(event.data).data;
             if (data.blockHeight != null) {
                 storage.height = data.blockHeight;
-                console.log('最新高度', storage.height);
+                console.log('Current block height', storage.height);
                 // if(data.tx && data.tx.length>0)
                 // {
                 //     this.txids = this.txids.concat(data.tx);
@@ -205,7 +205,7 @@ function TaskNotify(task) {
             amount = "+" + data.amount + " " + assetstate.symbol;
         }
         showNotify(title, (amount ? amount + " " : '') + value, notificationIds => {
-            console.log('------------------------进入Notified的回调函数了', notificationIds);
+            // console.log('------------------------进入Notified的回调函数了',notificationIds);
             chrome.notifications.onClicked.addListener(id => {
                 if (notificationIds == id) {
                     window.open(`https://scan.nel.group/${task.network == 'TestNet' ? 'test/' : ''}transaction/${task.txid}`, '_blank');

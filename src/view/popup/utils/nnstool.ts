@@ -44,7 +44,7 @@ export class NNSTool
                 r(addr);
             })
             .catch(error=>{
-                console.log(error);                
+                // console.log(error);                
                 r("");
             })
         })

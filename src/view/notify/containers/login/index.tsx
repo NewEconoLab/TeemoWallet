@@ -102,7 +102,7 @@ export default class Login extends React.Component<AppProps,AppState> {
             this.props.goHome({'address':account.address,'label':account.walletName})
         })
         .catch(error=>{
-            console.log(error);
+            // console.log(error);
             
             this.setState({
                 passwordError:true

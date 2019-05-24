@@ -58,7 +58,7 @@ export default class Chooser extends React.Component<IProps, IState> {
 
 	// 选择选项
 	public onSelect = (e:any,item:IOption) => {
-		console.log(e.nativeEvent);
+		// console.log(e.nativeEvent);
 		this.setState({ option: item, expand: false });
 
 		if(this.props.onCallback) {

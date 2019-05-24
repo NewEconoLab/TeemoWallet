@@ -131,13 +131,13 @@ export default class Exchange extends React.Component<IProps, IState>
 				.then(result =>
 				{
 					Toast(intl.message.toast.successfully)
-					console.log(result);
+					// console.log(result);
 					historyStore.initHistoryList()
 					this.onHide();			
 				})
 				.catch(error =>
 				{
-					console.log(error);
+					// console.log(error);
 					Toast(intl.message.toast.failed, "error")
 				})
 		}
@@ -148,12 +148,12 @@ export default class Exchange extends React.Component<IProps, IState>
 				{
 					Toast(intl.message.toast.successfully)
 					historyStore.initHistoryList()
-					console.log(result);
+					// console.log(result);
 					this.onHide();	
 				})
 				.catch(error =>
 				{
-					console.log(error);
+					// console.log(error);
 					Toast(intl.message.toast.failed, "error")
 				})
 		}                                                                    

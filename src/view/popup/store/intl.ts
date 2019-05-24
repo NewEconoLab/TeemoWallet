@@ -41,13 +41,13 @@ class Intl
         {
             this.currentLang = Language.CN;
             this.message = zh_CN;
-            console.log(language);
+            // console.log(language);
             
             localStorage.setItem('language', 'zh');
         }else{
             this.currentLang = Language.EN;
             this.message = en_US;
-            console.log(language);
+            // console.log(language);
             localStorage.setItem('language', 'en');
         }
     }
