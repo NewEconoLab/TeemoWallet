@@ -107,7 +107,7 @@ declare class Transaction extends ThinNeo.Transaction {
     /**
      * setScript 往交易中塞入脚本 修改交易类型为 InvokeTransaction
      */
-    setScript(script: Uint8Array): void;
+    setScript(script: Uint8Array, sys_fee?: Neo.Fixed8): void;
     /**
      * 创建一个交易中的输入和输出 将使用过的utxo 放入 marks
      * @param utxos 资产的utxo
@@ -115,7 +115,7 @@ declare class Transaction extends ThinNeo.Transaction {
      * @param target 对方地址
      * @param netfee 有手续费的时候使用，并且使用的utxos是gas的时候
      */
-    creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string, netfee?: Neo.Fixed8): void;
+    creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string, fee?: Neo.Fixed8): void;
     getTxid(): string;
 }
 declare const makeRpcPostBody: (method: any, params: any) => string;
@@ -645,6 +645,7 @@ interface InvokeArgs {
     scriptHash: string;
     operation: string;
     fee?: string;
+    sys_fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;

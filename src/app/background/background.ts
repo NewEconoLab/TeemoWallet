@@ -339,11 +339,19 @@ class Transaction extends ThinNeo.Transaction
     /**
      * setScript 往交易中塞入脚本 修改交易类型为 InvokeTransaction
      */
-    public setScript(script: Uint8Array) 
+    public setScript(script: Uint8Array,sys_fee?:Neo.Fixed8) 
     {
         this.type = ThinNeo.TransactionType.InvocationTransaction;
         this.extdata = new ThinNeo.InvokeTransData();
         (this.extdata as ThinNeo.InvokeTransData).script = script;
+
+        // 判断是否需要添加系统费
+        if(sys_fee && sys_fee.compareTo(Neo.Fixed8.Zero)>0)
+        {
+            (this.extdata as ThinNeo.InvokeTransData).gas = sys_fee;
+            this.version = 1;
+        }
+        
         this.attributes = new Array<ThinNeo.Attribute>(1);
         this.attributes[ 0 ] = new ThinNeo.Attribute();
         this.attributes[ 0 ].usage = ThinNeo.TransactionAttributeUsage.Script;
@@ -357,12 +365,12 @@ class Transaction extends ThinNeo.Transaction
      * @param target 对方地址
      * @param netfee 有手续费的时候使用，并且使用的utxos是gas的时候
      */
-    public creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string,netfee?:Neo.Fixed8)
+    public creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string,fee?:Neo.Fixed8)
     {
         let count = Neo.Fixed8.Zero;
         let scraddr = "";
         const assetId: Uint8Array = utxos[0].asset.hexToBytes().reverse();
-        const amount = netfee?sendcount.add(netfee):sendcount;  // 判断是否有添加网络费用如果有，则转账金额加上网络费用
+        const amount = sendcount.add(fee?fee:Neo.Fixed8.Zero);  // 判断是否有添加网络费用如果有，则转账金额加上网络费用
         // 循环utxo 塞入 input
         for (const utxo of utxos) 
         {
@@ -389,7 +397,7 @@ class Transaction extends ThinNeo.Transaction
                     output.assetId = assetId;
                     output.value = sendcount;
                     output.toAddress = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(target);
-                    this.outputs.push(output); 
+                    this.outputs.push(output);
                 }
             }
             const change = count.subtract(amount); // 应该找零的值
@@ -459,7 +467,7 @@ async function request(opts: IOpts) {
     }else if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
-        url = network=="TestNet"?testRpcUrl:mainRpcUrl;
+        url = network=="TestNet"?testRpcUrlList[3]:mainRpcUrl;
     }else{
         url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }
@@ -498,7 +506,6 @@ async function request(opts: IOpts) {
 }
 
 const Api = {
-
     getAssetState:(assetID:string)=>{
         return request({
             method:"getassetstate",
@@ -542,7 +549,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getnep5balanceofaddress : (address,assetId) => {
+    getnep5balanceofaddress:(address,assetId) => {
         const opts:IOpts = {
             method:'getnep5balanceofaddress',
             params:[
@@ -557,7 +564,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getallasset :  () => {
+    getallasset:() => {
         const opts:IOpts = {
             method:'getallasset',
             params:[],
@@ -569,7 +576,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getallnep5asset :  () => {
+    getallnep5asset:() => {
         const opts:IOpts = {
             method:'getallnep5asset',
             params:[],
@@ -581,7 +588,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getallnep5assetofaddress : (address) => {
+    getallnep5assetofaddress:(address) => {
         const opts:IOpts = {
             method:'getallnep5assetofaddress',
             params:[
@@ -595,7 +602,7 @@ const Api = {
     /**
      * 获取nep5的资产（CGAS）
      */
-    getUtxoBalance : (address,assetId) => {
+    getUtxoBalance:(address,assetId) => {
         const opts:IOpts = {
         method:'getnep5balanceofaddress',
         params:[
@@ -607,7 +614,7 @@ const Api = {
         return request(opts);
     },
 
-    getregisteraddressbalance : (address,register) => {
+    getregisteraddressbalance:(address,register) => {
         return request({
             method:'getregisteraddressbalance',
             params:[
@@ -617,7 +624,7 @@ const Api = {
         });
     },
 
-    sendrawtransaction : (data,network?:'TestNet'|'MainNet') => {
+    sendrawtransaction:(data,network?:'TestNet'|'MainNet') => {
         const opts:IOpts = {
             method:'sendrawtransaction',
             params:[data],
@@ -628,7 +635,7 @@ const Api = {
         return request(opts);
     },
 
-    getUtxo: (address)=>{
+    getUtxo:(address)=>{
         const opts:IOpts={
             method:"getutxo",
             params:[address],
@@ -637,7 +644,7 @@ const Api = {
         return request(opts);
     },
     
-    getDomainInfo : (domain)=>{
+    getDomainInfo:(domain)=>{
         return request({
             method:"getdomaininfo",
             params:[domain],
@@ -649,7 +656,7 @@ const Api = {
      * 判断交易是否入链
      * @param txid 交易id
      */
-    hasTx : (txid)=>{
+    hasTx:(txid)=>{
         const opts={
             method:"hastx",
             params:[txid]
@@ -657,7 +664,7 @@ const Api = {
         return request(opts);
     },
 
-    getrawtransaction : (txid,network?:'TestNet'|'MainNet')=>{
+    getrawtransaction:(txid,network?:'TestNet'|'MainNet')=>{
         const opts:IOpts={            
             method:"getrawtransaction",
             params:[txid,1],
@@ -670,7 +677,7 @@ const Api = {
     /**
      * 
      */
-    getrawtransaction_api : (txid)=>{
+    getrawtransaction_api:(txid)=>{
         return request(
             {
                 method:"getrawtransaction",
@@ -684,7 +691,7 @@ const Api = {
      * 判断合约调用是否抛出 notify
      * @param txid 交易id
      */
-    hasContract : (txid)=>{
+    hasContract:(txid)=>{
         const opts={
             method:"hascontract",
             params:[txid]
@@ -696,7 +703,7 @@ const Api = {
      * 判断双交易是否成功
      * @param txid 交易id
      */
-    getRehargeAndTransfer : (txid)=>{
+    getRehargeAndTransfer:(txid)=>{
         const opts={
             method:"getrechargeandtransfer",
             params:[txid]
@@ -704,7 +711,7 @@ const Api = {
         return request(opts);
     },
     
-    getBlockCount : (rpc?:string)=>{
+    getBlockCount:(rpc?:string)=>{
         const opts:IOpts={
             method:"getblockcount",
             params:[],
@@ -723,7 +730,7 @@ const Api = {
         return request(opts);
     },
 
-    rechargeAndTransfer : (data1,data2)=>{
+    rechargeAndTransfer:(data1,data2)=>{
         const opts={
             method:"rechargeandtransfer",
             params:[
@@ -738,7 +745,7 @@ const Api = {
      * @method 获得nep5资产信息
      * @param asset 资产id
      */
-    getnep5asset : (asset)=>{
+    getnep5asset:(asset)=>{
         const opts={
             method:"getnep5asset",
             params:[asset]
@@ -811,7 +818,7 @@ async function networkSort()
     
     for (let index = 0; index < mainNode.length; index++) {
         const node = mainNode[index].node;
-        try {            
+        try {
             const result = await Api.getBlockCount(node)
             const height = (parseInt(result)-1);
             mainNode[index]={node,height};
@@ -941,17 +948,16 @@ class ScriptBuild extends ThinNeo.ScriptBuilder
  * @param invoke invoke调用参数
  */
 var contractBuilder = async (invoke:InvokeArgs)=>{
-    let tran = new Transaction();    
-    const script = new ScriptBuild();
-    script.EmitInvokeArgs(invoke);
-    tran.setScript(script.ToArray());
     try 
     {
+        let tran = new Transaction();
         const script = new ScriptBuild();
         script.EmitInvokeArgs(invoke);
-        tran.setScript(script.ToArray());
+        const sysfee = invoke.sys_fee?Neo.Fixed8.parse(invoke.sys_fee):Neo.Fixed8.Zero;
+        const netfee = invoke.fee?Neo.Fixed8.parse(invoke.fee):Neo.Fixed8.Zero;
+        const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
+        tran.setScript(script.ToArray(),sysfee);    // 添加系统费
         const utxos = await MarkUtxo.getAllUtxo();
-        const fee = invoke.fee?Neo.Fixed8.parse(invoke.fee):Neo.Fixed8.Zero;
         if(invoke.attachedAssets){
             for (const asset in invoke.attachedAssets) {
                 if (invoke.attachedAssets.hasOwnProperty(asset)) {
@@ -981,7 +987,7 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
         TaskManager.addTask(new Task(ConfirmType.contract,result.txid));
         return result;
     } 
-    catch (error) 
+    catch (error)
     {
         throw error;                  
     }
@@ -3115,6 +3121,7 @@ interface InvokeArgs{
     scriptHash:string;
     operation:string;
     fee?:string;
+    sys_fee?:string;
     network:"TestNet"|"MainNet";
     arguments:Array<Argument>;
     attachedAssets?:AttachedAssets;

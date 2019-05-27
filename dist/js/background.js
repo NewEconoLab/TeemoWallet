@@ -260,10 +260,15 @@ class Transaction extends ThinNeo.Transaction {
     /**
      * setScript 往交易中塞入脚本 修改交易类型为 InvokeTransaction
      */
-    setScript(script) {
+    setScript(script, sys_fee) {
         this.type = ThinNeo.TransactionType.InvocationTransaction;
         this.extdata = new ThinNeo.InvokeTransData();
         this.extdata.script = script;
+        // 判断是否需要添加系统费
+        if (sys_fee && sys_fee.compareTo(Neo.Fixed8.Zero) > 0) {
+            this.extdata.gas = sys_fee;
+            this.version = 1;
+        }
         this.attributes = new Array(1);
         this.attributes[0] = new ThinNeo.Attribute();
         this.attributes[0].usage = ThinNeo.TransactionAttributeUsage.Script;
@@ -276,11 +281,11 @@ class Transaction extends ThinNeo.Transaction {
      * @param target 对方地址
      * @param netfee 有手续费的时候使用，并且使用的utxos是gas的时候
      */
-    creatInuptAndOutup(utxos, sendcount, target, netfee) {
+    creatInuptAndOutup(utxos, sendcount, target, fee) {
         let count = Neo.Fixed8.Zero;
         let scraddr = "";
         const assetId = utxos[0].asset.hexToBytes().reverse();
-        const amount = netfee ? sendcount.add(netfee) : sendcount; // 判断是否有添加网络费用如果有，则转账金额加上网络费用
+        const amount = sendcount.add(fee ? fee : Neo.Fixed8.Zero); // 判断是否有添加网络费用如果有，则转账金额加上网络费用
         // 循环utxo 塞入 input
         for (const utxo of utxos) {
             const input = new ThinNeo.TransactionInput();
@@ -355,7 +360,7 @@ function request(opts) {
             url = [baseCommonUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
         }
         else if (opts.baseUrl === 'rpc') {
-            url = network == "TestNet" ? testRpcUrl : mainRpcUrl;
+            url = network == "TestNet" ? testRpcUrlList[3] : mainRpcUrl;
         }
         else {
             url = [baseUrl, network == "TestNet" ? "testnet" : "mainnet"].join('/');
@@ -790,16 +795,15 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
  * @param invoke invoke调用参数
  */
 var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
-    let tran = new Transaction();
-    const script = new ScriptBuild();
-    script.EmitInvokeArgs(invoke);
-    tran.setScript(script.ToArray());
     try {
+        let tran = new Transaction();
         const script = new ScriptBuild();
         script.EmitInvokeArgs(invoke);
-        tran.setScript(script.ToArray());
+        const sysfee = invoke.sys_fee ? Neo.Fixed8.parse(invoke.sys_fee) : Neo.Fixed8.Zero;
+        const netfee = invoke.fee ? Neo.Fixed8.parse(invoke.fee) : Neo.Fixed8.Zero;
+        const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
+        tran.setScript(script.ToArray(), sysfee); // 添加系统费
         const utxos = yield MarkUtxo.getAllUtxo();
-        const fee = invoke.fee ? Neo.Fixed8.parse(invoke.fee) : Neo.Fixed8.Zero;
         if (invoke.attachedAssets) {
             for (const asset in invoke.attachedAssets) {
                 if (invoke.attachedAssets.hasOwnProperty(asset)) {
