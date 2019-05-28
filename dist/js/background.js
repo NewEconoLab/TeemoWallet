@@ -1205,10 +1205,10 @@ const invokeGroup = (header, params) => {
                 Storage_local.set('checkNetFee', false);
                 if (params.merge) {
                     let fee = Neo.Fixed8.Zero;
-                    params.group.map((invoke, index) => {
+                    for (const invoke of params.group) {
                         fee = fee.add(Neo.Fixed8.parse(invoke.fee ? invoke.fee : '0'));
-                    });
-                    if (fee.compareTo(Neo.Fixed8.Zero) < 0) {
+                    }
+                    if (fee.compareTo(Neo.Fixed8.Zero) === 0) {
                         params.group[0].fee = check ? '0.001' : '0';
                     }
                 }
