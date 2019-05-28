@@ -3014,7 +3014,7 @@ assetManager.initAllAseetInfo();
 
 
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.2.1';
 
 enum ArgumentDataType {
     STRING = 'String',
