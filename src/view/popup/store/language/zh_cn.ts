@@ -91,7 +91,8 @@ export default {
     presonalTransfer:"个人转账",    
     all:"全部",
     from:"来自",
-    to:"发往"
+    to:"发往",
+    none:"无"
   },
   exchange:{
     gasToCgas:"GAS换CGAS",

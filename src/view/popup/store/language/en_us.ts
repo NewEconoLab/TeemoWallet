@@ -89,7 +89,8 @@ export default {
     presonalTransfer:"Personal transfer",    
     all:"All",
     from:"From",
-    to:"To"
+    to:"To",
+    none:"none"
   },
   exchange:{
     gasToCgas:"Convert GAS to CGAS",

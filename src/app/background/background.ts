@@ -467,7 +467,7 @@ async function request(opts: IOpts) {
     }else if (opts.baseUrl === 'common') {
         url = [baseCommonUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }else if(opts.baseUrl==='rpc'){
-        url = network=="TestNet"?testRpcUrlList[3]:mainRpcUrl;
+        url = network=="TestNet"?testRpcUrl:mainRpcUrl;
     }else{
         url = [baseUrl,network=="TestNet"?"testnet":"mainnet"].join('/');
     }

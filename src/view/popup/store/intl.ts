@@ -132,6 +132,7 @@ export interface Language_History{
     from:string;
     to:string;
     all: string;
+    none: string;
 }
 
 export interface Language_exchange{
