@@ -10,7 +10,8 @@ export default {
     successfully:"操作成功",
     failed:"操作失败,请稍后再试。",
     copySuccess:"复制成功",
-    claimFailed:"提取失败，请稍后再试。"
+    claimFailed:"提取失败，请稍后再试。",
+    txFailed:"失败：交易体大小超过1024byte"
   },
   welcome:{
     start:'开始',

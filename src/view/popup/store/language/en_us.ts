@@ -10,7 +10,8 @@ export default {
     successfully:"Operation successful",
     failed:"Failed, try again later.",
     copySuccess:"Copied",
-    claimFailed:"Claim failed,try again later."
+    claimFailed:"Claim failed,try again later.",
+    txFailed:"Failed：TX size is over 1024byte"
   },
   welcome:{
     start:'Start',

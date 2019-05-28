@@ -1120,6 +1120,9 @@ const transactionSignAndSend = (tran, net) => __awaiter(this, void 0, void 0, fu
     try {
         // console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
         // console.log('交易体结构',tran);
+        if (data.length >= 1024) {
+            throw { type: "TRANSACTION_ERROR", description: 'TX size is over 1024byte' };
+        }
         const result = yield Api.sendrawtransaction(data.toHexString(), net);
         if (result['data']) {
             MarkUtxo.setMark(tran.marks);

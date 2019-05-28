@@ -294,7 +294,14 @@ export default class Transfer extends React.Component<IProps, IState>
 		})
 		.catch(error =>
 		{
-			Toast(intl.message.toast.failed, "error");
+			if(error.description == "TX size is over 1024byte")
+			{
+				Toast(intl.message.toast.txFailed, "error");
+			}
+			else
+			{
+				Toast(intl.message.toast.failed, "error");
+			}
 			// console.log(error);
 			this.onHide();
 		})

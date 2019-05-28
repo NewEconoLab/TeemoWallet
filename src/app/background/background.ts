@@ -1349,7 +1349,10 @@ const transactionSignAndSend = async (tran:Transaction,net?:'TestNet'|'MainNet')
     try {
         // console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
         // console.log('交易体结构',tran);
-        
+        if(data.length>=1024)
+        {
+            throw {type:"TRANSACTION_ERROR",description:'TX size is over 1024byte'}            
+        }
         const result =await Api.sendrawtransaction(data.toHexString(),net);
         if(result['data'])
         {

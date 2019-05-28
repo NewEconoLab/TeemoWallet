@@ -84,7 +84,8 @@ export interface Language_Toast
     successfully:string,
     failed:string,
     copySuccess:string,
-    claimFailed: string
+    claimFailed: string,
+    txFailed:string
 }
 
 export interface Language_Welcome{start:string,welcomeToUse:string,describe:string}
