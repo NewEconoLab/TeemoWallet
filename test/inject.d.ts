@@ -69,6 +69,7 @@ interface InvokeArgs {
     scriptHash: string;
     operation: string;
     fee?: string;
+    sys_fee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;

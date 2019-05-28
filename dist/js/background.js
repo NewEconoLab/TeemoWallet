@@ -1771,7 +1771,7 @@ const getApplicationLog = (data) => {
         Api.getApplicationLog(data.txid)
             .then(result => {
             if (result)
-                resolve(result);
+                resolve(Array.isArray(result) ? result[0] : result);
             else
                 reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
         })
