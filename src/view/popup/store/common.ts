@@ -42,7 +42,7 @@ class Common implements ICommonStore
         })
     }
 
-    @action public initAccountBalance=()=>{        
+    @action public initAccountBalance = () => {        
         const assetids = localStorage.getItem('Teemo-assetManager-'+this.network+this.account.address);
         if(assetids)
         {
@@ -65,13 +65,12 @@ class Common implements ICommonStore
                     address: this.account.address,   // 你要查询的地址
                     assets: arr,
                 }
-                const data:GetBalanceArgs=
-                {
+                const data:GetBalanceArgs = {
                     "network":this.network,
                     "params":params
                 }
                 bg.getBalance(data)
-                .then((result:BalanceResults)=>{
+                .then((result:BalanceResults) => {
                     this.balances=result[this.account.address];
                     
                 })
@@ -92,13 +91,13 @@ class Common implements ICommonStore
                 "params":params
             }
             bg.getBalance(data)
-            .then((result:BalanceResults)=>{
+            .then((result:BalanceResults) => {
                 this.balances=result[this.account.address];
             })
         }
     }
 
-    @action public initAccountInfo=()=>{
+    @action public initAccountInfo = () => {
         const acc = bg.AccountManager.getCurrentAccount();
         this.account.address=acc.address;
         this.account.lable=acc.walletName;
@@ -112,14 +111,12 @@ class Common implements ICommonStore
         })
     }
 
-    @action public getBalanceByAsset=async(assetid:string)=>{
-        const params: BalanceRequest = 
-        {
+    @action public getBalanceByAsset = async (assetid:string) => {
+        const params: BalanceRequest = {
             address: this.account.address,   // 你要查询的地址
             assets: [assetid],
         }
-        const data:GetBalanceArgs =
-        {
+        const data:GetBalanceArgs = {
             "network":this.network,
             "params":params
         }

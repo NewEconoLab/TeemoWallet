@@ -918,6 +918,9 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
                 const signdata = ThinNeo.Helper.Sign(message, storage.account.prikey);
                 tran.AddWitness(signdata, storage.account.pubkey, storage.account.address);
                 const data = tran.GetRawData();
+                if (data.length >= 1024) {
+                    throw { type: "TRANSACTION_ERROR", description: `The ${index + 1} transaction size exceeds 1024 bits` };
+                }
                 const nextTran = new TransferGroup();
                 nextTran.txhex = data.toHexString();
                 nextTran.txid = tran.getTxid();
