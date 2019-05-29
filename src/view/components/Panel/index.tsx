@@ -186,7 +186,9 @@ export default class Panel extends React.Component<IProps, IState>
 												this.props.task.sendHistory.toAddress==common.account.address && intl.message.assets.receiving}
 											{this.props.task.sendHistory.fromAddress==common.account.address && intl.message.history.amount}
 										</div>
-										<div className="value">{this.props.task.sendHistory.amount} {this.props.task.sendHistory.symbol}</div>
+										<div className="value">{
+											this.props.task.sendHistory.amount?`${this.props.task.sendHistory.amount} ${this.props.task.sendHistory.symbol}`:"0"
+										}</div>
 									</div>
 									<div className="group netfee">
 										<div className="key-title">{intl.message.history.fee}</div>
@@ -211,9 +213,14 @@ export default class Panel extends React.Component<IProps, IState>
 								<div className="group expense">
 									<div className="key-title">{intl.message.history.amount}</div>
 									<div className="value">
-									{this.props.task.invokeHistory.expenses.map((val,key)=>{
-										return val.amount+' '+val.symbol;
-									}).join(',')}
+									{ 
+										(this.props.task.invokeHistory.expenses && this.props.task.invokeHistory.expenses.length>0)
+										? 
+											this.props.task.invokeHistory.expenses.map((val,key)=>{
+												return val.amount+' '+val.symbol;
+											}).join(',')
+										:"0"
+									}
 									</div>
 								</div>
 								<div className="group netfee">

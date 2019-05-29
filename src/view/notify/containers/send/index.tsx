@@ -138,7 +138,7 @@ export default class SendRequest extends React.Component<IProps, IState>
                   <div className="line-left">{intl.message.history.amount}</div>
                   <div className="line-right">
                     <span>
-                    {this.state.amount+" "+this.state.assetSymbol}
+                    {this.state.amount?`${this.state.amount} ${this.state.assetSymbol}`:"0"}
                     </span>
                   </div>
                 </div>

@@ -139,7 +139,10 @@ export default class ContractRequest extends React.Component<IProps, IState>
                   <div className="line-left">{intl.message.history.amount}</div>
                   <div className="line-right">
                     <span>
-                    {this.state.expenses.map(val=> parseFloat(val.amount)+" "+val.symbol).join(',')}
+                    {(this.state.expenses && this.state.expenses.length>0)?
+                      this.state.expenses.map(val=> parseFloat(val.amount)+" "+val.symbol).join(','):
+                      "0"
+                    }
                     </span>
                   </div>
                 </div>

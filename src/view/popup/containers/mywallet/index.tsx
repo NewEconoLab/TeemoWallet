@@ -82,10 +82,10 @@ export default class MyWallet extends React.Component<AppProps, AppState> {
             // })
             this.props.history.push('/login')
         }
-        else if(label == "history")
+        else if((label == "history")||(label=="assets"))
         {
             this.setState({
-                label: "history",
+                label: label,
                 showPage:''
             })
         }

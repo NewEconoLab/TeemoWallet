@@ -266,6 +266,31 @@ export default class Transfer extends React.Component<IProps, IState>
 			this.props.lableChange("history");
 		}
 	}
+	public onCancel = () =>
+	{
+		this.setState({
+			infoShow: false,
+			address: "",
+			amount: "",
+			asset: "",
+			netfee: false,
+			errorAddr: false,
+			errorAmount: false,
+			verifyPass: false,
+			checkDisable: false,
+			addrMessage: '',
+			amountMessage: '',
+			currentOption: { id: '', name: '' },
+			toAddress: '',
+			domain: '',
+			confirmDisable: false
+		})
+		if (this.props.lableChange)
+		{
+			this.props.lableChange("assets");
+		}
+	}
+
 	public onCheck = (event: boolean) =>
 	{
 		this.setState({
@@ -347,7 +372,7 @@ export default class Transfer extends React.Component<IProps, IState>
 							</div>
 							<div className="btn-list">
 								<div className="cancel">
-									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onCancel} />
 								</div>
 								<div className="confrim">
 									<Button type="primary" text={intl.message.button.confirm} onClick={this.send} disabled={this.state.confirmDisable} />
@@ -390,7 +415,7 @@ export default class Transfer extends React.Component<IProps, IState>
 							</div>
 							<div className="btn-list">
 								<div className="cancel">
-									<Button type="warn" text={intl.message.button.cancel} onClick={this.onHide} />
+									<Button type="warn" text={intl.message.button.cancel} onClick={this.onCancel} />
 								</div>
 								<div className="confrim">
 									<Button type="primary" disabled={!this.state.verifyPass} text={intl.message.transfer.next} onClick={this.showInfo} />
