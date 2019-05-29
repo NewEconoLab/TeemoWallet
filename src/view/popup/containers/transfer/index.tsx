@@ -216,7 +216,7 @@ export default class Transfer extends React.Component<IProps, IState>
 		if (compare > 0)
 		{
 			errorAmount = true;
-			amountMessage = intl.message.exchange.noBalance + " " + this.state.currentOption.name + ' ' + balance.toString();
+			amountMessage = intl.message.exchange.noBalance;
 		}
 		else if (compare == 0)
 		{
@@ -394,7 +394,10 @@ export default class Transfer extends React.Component<IProps, IState>
 							/>
 							</div>
 							<div className="line">
-								<Input placeholder={intl.message.transfer.sendTo} value={this.state.address} onChange={this.onAddrChange} type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
+								<Input 
+								placeholder={intl.message.transfer.sendTo} 
+								value={this.state.address} onChange={this.onAddrChange} 
+								type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
 								{
 								!!this.state.resolverMessage &&
 								<p className="tip-check">
