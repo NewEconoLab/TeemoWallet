@@ -78,17 +78,19 @@ class Common implements ICommonStore
             }
         }
         else
-        {            
+        {
+            this.balances = [
+                {symbol:'NEO',assetID:HASH_CONFIG.ID_NEO,amount:'0'},
+                {symbol:'GAS',assetID:HASH_CONFIG.ID_GAS,amount:'0'}
+            ];
             const params: BalanceRequest = {
                 address: this.account.address,   // 你要查询的地址
                 assets: [HASH_CONFIG.ID_NEO,HASH_CONFIG.ID_GAS],
             }
-            const data:GetBalanceArgs=
-            {
+            const data:GetBalanceArgs = {
                 "network":this.network,
                 "params":params
             }
-            this.balances=[];
             bg.getBalance(data)
             .then((result:BalanceResults)=>{
                 this.balances=result[this.account.address];
