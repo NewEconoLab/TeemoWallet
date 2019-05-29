@@ -207,12 +207,12 @@ export default class Transfer extends React.Component<IProps, IState>
 	// 监控输入内容
 	public onAmountChange = (event) =>
 	{
-		const amount = asNumber(event, 8)
+		const amount = asNumber(event)
 		const balance = Neo.Fixed8.parse(common.balances.find(asset=>this.state.currentOption.id==asset.assetID).amount.toString())
 		let checkDisable = false;
 		let errorAmount = false;
 		let amountMessage = "";
-		const compare = Neo.Fixed8.parse(amount).compareTo(balance)
+		const compare = Neo.Fixed8.parse(event).compareTo(balance)
 		if (compare > 0)
 		{
 			errorAmount = true;
@@ -224,7 +224,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			amountMessage = '';
 			checkDisable = true;
 		}
-		this.setState({ amount, errorAmount, amountMessage, checkDisable }, () =>
+		this.setState({ amount:event, errorAmount, amountMessage, checkDisable }, () =>
 		{
 			this.onVerify()
 		})

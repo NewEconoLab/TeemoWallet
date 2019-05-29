@@ -53,7 +53,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		{
 			common.getBalanceByAsset(HASH_CONFIG.ID_GAS)
 			.then(result=>{
-				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
+				if (Neo.Fixed8.parse(event).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
 				{
 					this.setState({
 						inputError: true,
@@ -76,7 +76,7 @@ export default class Exchange extends React.Component<IProps, IState>
 		{
 			common.getBalanceByAsset(HASH_CONFIG.ID_CGAS.toString())
 			.then(result=>{
-				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
+				if (Neo.Fixed8.parse(event).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
 				{
 					this.setState({
 						inputError: true,
@@ -95,7 +95,7 @@ export default class Exchange extends React.Component<IProps, IState>
 				})
 			})
 		}
-		this.setState({ amount });
+		this.setState({ amount:event });
 	}
 
 	public onSelect = (event: IOption) =>
