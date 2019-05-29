@@ -6,15 +6,17 @@ import intl from './store/intl';
 
 if(chrome.tabs)
 {
-    intl.initLanguage();
-    chrome.tabs.query({ active: true, currentWindow: true }, tab => {        
-        //初始化鼠标随机方法
-        Neo.Cryptography.RandomNumberGenerator.startCollectors();
-        var port = chrome.runtime.connect();
-        ReactDOM.render(
-            <App/>, document.getElementById('popup')
-        );
-    });
+    window.onload=()=>{
+        chrome.tabs.query({ active: true, currentWindow: true }, tab => {     
+            intl.initLanguage();
+            //初始化鼠标随机方法
+            Neo.Cryptography.RandomNumberGenerator.startCollectors();
+            var port = chrome.runtime.connect();
+            ReactDOM.render(
+                <App/>, document.getElementById('popup')
+            );
+        });
+    }
 }
 else
 {
@@ -27,7 +29,7 @@ else
         document.body.style.background="#b2b2b2";
         popup.style.background="#fff";
         ReactDOM.render(
-            <App/>, popup
+            <App/>, document.getElementById('popup')
         );
     }
 }

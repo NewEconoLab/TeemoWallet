@@ -25,6 +25,10 @@ const storage:BackStore=
     accountWaitTaskCount:{}
 }
 
+var getBlockHeight = ()=>{
+    return storage.height;
+}
+
 const netstr = localStorage.getItem('Teemo-NetWork');
 storage.network = netstr?((netstr=='TestNet'||netstr=='MainNet')?netstr:"MainNet"):"MainNet";
 
@@ -489,7 +493,7 @@ async function request(opts: IOpts) {
                 return result;
             }
         }
-        else if(json.error["code"]===-1)
+        else if(json.error["code"]===-1 || json.error['code']===-100)
         {
             return null;
         }
@@ -798,7 +802,6 @@ const Api = {
     }
 
 }
-
 
 async function networkSort()
 {    

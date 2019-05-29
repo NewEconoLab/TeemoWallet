@@ -34,7 +34,8 @@ interface BackStore {
     account: AccountInfo;
 }
 declare interface Background extends Window{
-    getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>
+    getBlockHeight: () => number;
+    getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
     mytest:(data:Uint8Array)=>void;
     contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
     storage: BackStore;

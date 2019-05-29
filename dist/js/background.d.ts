@@ -15,6 +15,7 @@ interface BackStore {
     };
 }
 declare const storage: BackStore;
+declare var getBlockHeight: () => number;
 declare const netstr: string;
 declare const HASH_CONFIG: {
     ID_CGAS: Neo.Uint160;

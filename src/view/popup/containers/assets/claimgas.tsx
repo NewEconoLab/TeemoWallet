@@ -31,20 +31,28 @@ export default class ClaimGAS extends React.Component
     {
       this.setState({claimStatus:2});
     }
+    let height = bg.getBlockHeight();
+    common.initClaimGasAmount();
     setInterval(()=>{
       const status = localStorage.getItem('Teemo-claimgasState-'+common.network);
+      const newHeight = bg.getBlockHeight();      
+      if(newHeight-height != 0)
+      {
+        height = newHeight;
+        common.initClaimGasAmount();
+        
+      }
       if(this.state.claimStatus==2)
       {
         if(status !='wait')
         {
-          common.initClaimGasAmount();
           this.setState({claimStatus:0});
         }
-      }else
+      }
+      else
       {
         if(status =='wait')
         {
-          common.initClaimGasAmount();
           this.setState({claimStatus:2});
         }
       }

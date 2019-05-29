@@ -17,6 +17,9 @@ const storage = {
     allAssetInfo: [],
     accountWaitTaskCount: {}
 };
+var getBlockHeight = () => {
+    return storage.height;
+};
 const netstr = localStorage.getItem('Teemo-NetWork');
 storage.network = netstr ? ((netstr == 'TestNet' || netstr == 'MainNet') ? netstr : "MainNet") : "MainNet";
 const HASH_CONFIG = {
@@ -379,7 +382,7 @@ function request(opts) {
                     return result;
                 }
             }
-            else if (json.error["code"] === -1) {
+            else if (json.error["code"] === -1 || json.error['code'] === -100) {
                 return null;
             }
             else {
