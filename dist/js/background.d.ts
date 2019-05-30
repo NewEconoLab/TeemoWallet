@@ -42,6 +42,12 @@ declare let mainNode: Array<{
     node: string;
     height: number;
 }>;
+interface Number {
+    add(...arg: any[]): number;
+    sub(...arg: any[]): number;
+    mul(...arg: any[]): number;
+    div(...arg: any[]): number;
+}
 /**
  * -------------------------以下是账户所使用到的实体类
  */

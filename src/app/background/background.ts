@@ -87,6 +87,68 @@ let mainNode:Array<{node:string,height:number}>=[
     {node:'http://node2.sgp1.bridgeprotocol.io:10332',height:0},
 ];     
 
+//除法函数，用来得到精确的除法结果
+//说明：javascript的除法结果会有误差，在两个浮点数相除的时候会比较明显。这个函数返回较为精确的除法结果。
+//调用：accDiv(arg1,arg2)
+//返回值：arg1除以arg2的精确结果
+
+interface Number
+{
+    add(...arg):number;
+    sub(...arg):number;
+    mul(...arg):number;
+    div(...arg):number;
+}
+
+// 加
+Number.prototype.add = function (...arg) {
+    var r1, r2, m, result = this;
+    arg.forEach(value => {
+        try { r1 = result.toString().split(".")[1].length } catch (e) { r1 = 0 }
+        try { r2 = value.toString().split(".")[1].length } catch (e) { r2 = 0 }
+        m = Math.pow(10, Math.max(r1, r2));
+        result = Math.round(result * m + value * m) / m;
+    });
+    return result;
+};
+// 减
+Number.prototype.sub = function (...arg) {
+    var r1, r2, m, result = this;
+    arg.forEach(value => {
+        try { r1 = result.toString().split(".")[1].length } catch (e) { r1 = 0 }
+        try { r2 = value.toString().split(".")[1].length } catch (e) { r2 = 0 }
+        m = Math.pow(10, Math.max(r1, r2));
+        var n = (r1 >= r2) ? r1 : r2;
+        result = (Math.round(result * m - value * m) / m).toFixed(n);
+    });
+    return result;
+};
+// 乘
+Number.prototype.mul = function (...arg) {
+    var result = this;
+    arg.forEach(value => {
+        var m = 0, s1 = result.toString(), s2 = value.toString();
+        try { m += s1.split(".")[1].length } catch (e) { }
+        try { m += s2.split(".")[1].length } catch (e) { }
+        result = Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
+    });
+    return result;
+};
+// 除
+Number.prototype.div = function (...arg) {
+    var result = this;
+    arg.forEach(value => {
+        var t1 = 0, t2 = 0, r1, r2;
+        try { t1 = result.toString().split(".")[1].length } catch (e) { }
+        try { t2 = value.toString().split(".")[1].length } catch (e) { }
+        r1 = Number(result.toString().replace(".", ""));
+        r2 = Number(value.toString().replace(".", ""));
+        result = (r1 / r2) * Math.pow(10, t2 - t1);
+    });
+    return result;
+};
+
+
 
 /**
  * -------------------------以下是账户所使用到的实体类
@@ -986,10 +1048,15 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
                 throw {type:'INSUFFICIENT_FUNDS',description:'The user does not have a sufficient balance to perform the requested action'};
             }
         }
-        let result = await transactionSignAndSend(tran);        
+        console.log((tran.GetMessage().length.div(100000)+0.001));
+        
+        // if((tran.GetMessage().length.div(100000)+0.001)){
+            
+        // }
+        let result = await transactionSignAndSend(tran);
         TaskManager.addTask(new Task(ConfirmType.contract,result.txid));
         return result;
-    } 
+    }
     catch (error)
     {
         throw error;                  
@@ -1348,6 +1415,8 @@ var makeRefundTransaction_tranGas = async (utxo:Utxo, transcount:number,netfee:n
 
 const transactionSignAndSend = async (tran:Transaction,net?:'TestNet'|'MainNet')=>
 {
+    console.log(tran.GetMessage().length.div(100000).add(0.001));
+    
     const message  = tran.GetMessage().clone();
     const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
     tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
