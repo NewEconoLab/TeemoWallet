@@ -1155,11 +1155,11 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
                 tran.setScript(script.ToArray());
                 if(invoke.fee && invoke.fee!='0')
                     tran.creatInuptAndOutup(utxos,Neo.Fixed8.parse(invoke.fee));
-                const message  = tran.GetMessage().clone();
+                const message  = tran.GetMessage().clone(); 
                 const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);
                 tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
                 const data:Uint8Array = tran.GetRawData();
-                if(data.length >= 1024)
+                if(data.length >= 1024) 
                 {
                     throw {type:"TRANSACTION_ERROR",description:`The ${index+1} transaction size exceeds 1024 bits`}            
                 }
@@ -1475,7 +1475,7 @@ const openNotify=(notifyData:NotifyMessage):Promise<boolean>=> {
         return new Promise((resolve,reject)=>{            
             chrome.storage.local.set({notifyData},()=>
             {
-                var notify = window.open ('notify.html', 'notify', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
+                var notify = window.open ('notify.html', '_blank', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no')        
                 
                 //获得关闭事件
                 var loop = setInterval(() => {

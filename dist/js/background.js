@@ -1239,7 +1239,7 @@ const openNotify = (notifyData) => {
     if (notifyData) {
         return new Promise((resolve, reject) => {
             chrome.storage.local.set({ notifyData }, () => {
-                var notify = window.open('notify.html', 'notify', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
+                var notify = window.open('notify.html', '_blank', 'height=636px, width=391px, top=150, left=100, toolbar=no, menubar=no, scrollbars=no,resizable=no,location=no, status=no');
                 //获得关闭事件
                 var loop = setInterval(() => {
                     if (notify.closed) {
