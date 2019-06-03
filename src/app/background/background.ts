@@ -94,10 +94,10 @@ let mainNode:Array<{node:string,height:number}>=[
 
 interface Number
 {
-    add(...arg):number;
-    sub(...arg):number;
-    mul(...arg):number;
-    div(...arg):number;
+    add(...arg:number[]):number;
+    sub(...arg:number[]):number;
+    mul(...arg:number[]):number;
+    div(...arg:number[]):number;
 }
 
 // 加

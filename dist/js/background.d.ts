@@ -43,10 +43,10 @@ declare let mainNode: Array<{
     height: number;
 }>;
 interface Number {
-    add(...arg: any[]): number;
-    sub(...arg: any[]): number;
-    mul(...arg: any[]): number;
-    div(...arg: any[]): number;
+    add(...arg: number[]): number;
+    sub(...arg: number[]): number;
+    mul(...arg: number[]): number;
+    div(...arg: number[]): number;
 }
 /**
  * -------------------------以下是账户所使用到的实体类
