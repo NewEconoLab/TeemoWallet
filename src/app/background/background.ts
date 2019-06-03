@@ -1051,8 +1051,8 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
         // console.log((tran.GetMessage().length+103).div(100000).add(0.001));
         const txsize = (tran.GetMessage().length+103)
         const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
-        if( txsize>1024 && netfee.compareTo(calFee)<0){
-            console.log('当前交易超gas 应交费用',calFee.toString());
+        if( txsize>1024 && netfee.compareTo(calFee)<0)
+        {
             const newInvoke = invoke;
             newInvoke.fee=calFee.toString();
             return await contractBuilder(newInvoke)
@@ -1763,9 +1763,8 @@ var getBalance = async (data:GetBalanceArgs)=>{
 var transfer= async(data:SendArgs):Promise<SendOutput>=>{
     if(data.asset.hexToBytes().length==20)
     {
-        let amount;
         try {
-            
+            let amount='0';            
             const result = await invokeRead(
                 {
                     "scriptHash": data.asset,
@@ -1814,7 +1813,8 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
             const utxos = await MarkUtxo.getAllUtxo();
             const fee = Neo.Fixed8.parse(data.fee);
             const gass = utxos[HASH_CONFIG.ID_GAS];
-            if(data.fee && data.fee!='0'){
+            if(data.fee && data.fee!='0')
+            {
                 if(data.asset==HASH_CONFIG.ID_GAS)
                 {
                     const sum =fee.add(Neo.Fixed8.parse(data.amount));
@@ -1827,16 +1827,17 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                     tran.creatInuptAndOutup(asset,Neo.Fixed8.parse(data.amount),data.toAddress);
                     tran.creatInuptAndOutup(gass,fee);
                 }
-            }else{                
+            }
+            else
+            {                
                 const asset = utxos[data.asset];
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset,amount,data.toAddress);
             }
             const txsize = (tran.GetMessage().length+103)
             const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
-            if( txsize>1024 && fee.compareTo(calFee)<0){
-                console.log('当前交易超gas 应交费用',calFee.toString());
-                
+            if( txsize>1024 && fee.compareTo(calFee)<0)
+            {
                 const newSendData = data;
                 newSendData.fee = calFee.toString();
                 return await transfer(newSendData);

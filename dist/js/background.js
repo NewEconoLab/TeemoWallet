@@ -912,7 +912,6 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
         const txsize = (tran.GetMessage().length + 103);
         const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001)); // 足够的网络费用
         if (txsize > 1024 && netfee.compareTo(calFee) < 0) {
-            console.log('当前交易超gas 应交费用', calFee.toString());
             const newInvoke = invoke;
             newInvoke.fee = calFee.toString();
             return yield contractBuilder(newInvoke);
@@ -1505,8 +1504,8 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
 });
 var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
     if (data.asset.hexToBytes().length == 20) {
-        let amount;
         try {
+            let amount = '0';
             const result = yield invokeRead({
                 "scriptHash": data.asset,
                 "operation": "decimals",
@@ -1567,7 +1566,6 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
             const txsize = (tran.GetMessage().length + 103);
             const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001)); // 足够的网络费用
             if (txsize > 1024 && fee.compareTo(calFee) < 0) {
-                console.log('当前交易超gas 应交费用', calFee.toString());
                 const newSendData = data;
                 newSendData.fee = calFee.toString();
                 return yield transfer(newSendData);
