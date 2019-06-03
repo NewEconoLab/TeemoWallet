@@ -1498,7 +1498,7 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
             r(balances);
         }
         catch (error) {
-            j({ type: "NETWORK_ERROR", description: "余额查询失败", data: error });
+            j({ type: "NETWORK_ERROR", description: "Balance inquiry failed", data: error });
         }
     }));
 });
