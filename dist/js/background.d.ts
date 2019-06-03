@@ -228,7 +228,7 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
  * 构造合约调用交易
  * @param invoke invoke调用参数
  */
-declare var contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
+declare var contractBuilder: (invoke: InvokeArgs) => any;
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
@@ -245,7 +245,7 @@ declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput
  * @param netfee 交易费用
  */
 declare var exchangeCgas: (transcount: number, netfee: number) => Promise<InvokeOutput[]>;
-declare var exchangeGas: (transcount: number, netfee: number) => Promise<InvokeOutput>;
+declare var exchangeGas: (transcount: number, netfee: number) => Promise<any>;
 interface AssetInfo {
     assetid: string;
     type: 'nep5' | 'utxo';

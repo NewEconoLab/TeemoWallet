@@ -1048,14 +1048,21 @@ var contractBuilder = async (invoke:InvokeArgs)=>{
                 throw {type:'INSUFFICIENT_FUNDS',description:'The user does not have a sufficient balance to perform the requested action'};
             }
         }
-        console.log((tran.GetMessage().length.div(100000)+0.001));
-        
-        // if((tran.GetMessage().length.div(100000)+0.001)){
-            
-        // }
-        let result = await transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.contract,result.txid));
-        return result;
+        // console.log((tran.GetMessage().length+103).div(100000).add(0.001));
+        const txsize = (tran.GetMessage().length+103)
+        const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
+        if( txsize>1024 && netfee.compareTo(calFee)<0){
+            console.log('当前交易超gas 应交费用',calFee.toString());
+            const newInvoke = invoke;
+            newInvoke.fee=calFee.toString();
+            return await contractBuilder(newInvoke)
+        }
+        else
+        {
+            let result = await transactionSignAndSend(tran);
+            TaskManager.addTask(new Task(ConfirmType.contract,result.txid));
+            return result;
+        }
     }
     catch (error)
     {
@@ -1418,17 +1425,22 @@ const transactionSignAndSend = async (tran:Transaction,net?:'TestNet'|'MainNet')
     console.log(tran.GetMessage().length.div(100000).add(0.001));
     
     const message  = tran.GetMessage().clone();
+    console.log('签名前交易大小',message.length);
+    
     const signdata = ThinNeo.Helper.Sign(message,storage.account.prikey);        
     tran.AddWitness(signdata,storage.account.pubkey,storage.account.address);
     const data:Uint8Array = tran.GetRawData();
     const txid=tran.getTxid();
+    console.log('签名后交易大小',data.length);
+    // 签名的大小是103字节
+    
     try {
         // console.log(`Time:${new Date().getTime()} Txid ${txid}`,data.toHexString());
         // console.log('交易体结构',tran);
-        if(data.length>=1024)
-        {
-            throw {type:"TRANSACTION_ERROR",description:'TX size is over 1024byte'}            
-        }
+        // if(data.length>=1024)
+        // {
+        //     throw {type:"TRANSACTION_ERROR",description:'TX size is over 1024byte'}            
+        // }
         const result =await Api.sendrawtransaction(data.toHexString(),net);
         if(result['data'])
         {
@@ -1492,7 +1504,7 @@ const openNotify=(notifyData:NotifyMessage):Promise<boolean>=> {
                             }
                         })
                             clearInterval(loop);
-                       }    
+                       }
                     }, 1000
                 );
             })
@@ -1800,9 +1812,9 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
         {
             let tran = new Transaction();
             const utxos = await MarkUtxo.getAllUtxo();
+            const fee = Neo.Fixed8.parse(data.fee);
+            const gass = utxos[HASH_CONFIG.ID_GAS];
             if(data.fee && data.fee!='0'){
-                const fee = Neo.Fixed8.parse(data.fee);
-                const gass = utxos[HASH_CONFIG.ID_GAS];
                 if(data.asset==HASH_CONFIG.ID_GAS)
                 {
                     const sum =fee.add(Neo.Fixed8.parse(data.amount));
@@ -1820,10 +1832,22 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                 const amount = Neo.Fixed8.parse(data.amount);
                 tran.creatInuptAndOutup(asset,amount,data.toAddress);
             }
-            const outupt = await transactionSignAndSend(tran);
-            TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid));            
-            TaskManager.addSendData(outupt.txid,data);
-            return outupt
+            const txsize = (tran.GetMessage().length+103)
+            const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
+            if( txsize>1024 && fee.compareTo(calFee)<0){
+                console.log('当前交易超gas 应交费用',calFee.toString());
+                
+                const newSendData = data;
+                newSendData.fee = calFee.toString();
+                return await transfer(newSendData);
+            }
+            else
+            {
+                const outupt = await transactionSignAndSend(tran);
+                TaskManager.addTask(new Task(ConfirmType.tranfer,outupt.txid));            
+                TaskManager.addSendData(outupt.txid,data);
+                return outupt
+            }
         } 
         catch (error) 
         {
