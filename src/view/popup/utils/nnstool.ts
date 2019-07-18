@@ -27,7 +27,7 @@ export class NNSTool
             .then(res=>{
                 var state = res['state'] as string;
                 let addr = "";
-                if (state.includes("HALT, BREAK"))
+                if (state.includes("HALT"))
                 {
                     // info2.textContent += "Succ\n";
                     var stack = res['stack'] as any[];

@@ -1081,11 +1081,9 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
     if (data.merge) 
     {
         let netfee:Neo.Fixed8 = Neo.Fixed8.Zero;
+        let sysfee:Neo.Fixed8 = Neo.Fixed8.Zero;
         let tran = new Transaction();
         // let script = groupScriptBuild(data.group);
-        const script = new ScriptBuild();
-        script.EmitInvokeArgs(data.group)
-        tran.setScript(script.ToArray());
         // let transfer:{[asset: string]:{}}=null // 用来存放 将要转账的合约地址 资产id 数额
         let utxos = await MarkUtxo.getUtxoByAsset(HASH_CONFIG.ID_GAS);
         // let assets:{[asset:string]:string};
@@ -1094,30 +1092,19 @@ const invokeGroupBuild = async(data:InvokeGroup)=>
             const invoke = data.group[index];
             if(invoke.fee)  // 判断是否有手续费
                 netfee = netfee.add(Neo.Fixed8.parse(invoke.fee)) // 计算总共耗费多少手续费;
-            // if(invoke.attachedAssets)  // 判断是否有合约转账
-            // {
-            //     transfer=transfer?transfer:{};
-            //     const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(invoke.scriptHash));         // 将scripthash 转地址 
-            //     if(transfer[toaddr])   
-            //     {
-            //         for (const id in invoke.attachedAssets) {
-            //             if (invoke.attachedAssets.hasOwnProperty(id)) {
-            //                 if(transfer[toaddr][id])
-            //                 {
-            //                     transfer[toaddr][id]=Neo.Fixed8.parse(transfer[toaddr][id]).add(Neo.Fixed8.parse(invoke.attachedAssets[id])).toString();
-            //                 }
-            //                 else
-            //                 {
-            //                     transfer[toaddr][id]=invoke.attachedAssets[id];    
-            //                 }
-            //             }
-            //         }
-            //     }
-            //     else
-            //     {                    
-            //         transfer[toaddr] = invoke.attachedAssets;
-            //     }
-            // }
+            if(invoke.sys_fee)
+                sysfee = sysfee.add(Neo.Fixed8.parse(invoke.sys_fee))
+        }
+        const script = new ScriptBuild();
+        script.EmitInvokeArgs(data.group)
+        if(sysfee.compareTo(Neo.Fixed8.Zero)>0)
+        {
+            tran.setScript(script.ToArray(),sysfee);
+            netfee = netfee.add(sysfee);
+        }
+        else
+        {
+            tran.setScript(script.ToArray());
         }
         if(netfee.compareTo(Neo.Fixed8.Zero)>0)
         {
@@ -1773,7 +1760,7 @@ var transfer= async(data:SendArgs):Promise<SendOutput>=>{
                     "network": "TestNet"
                 }
             );
-            if(result['state']=='HALT, BREAK')
+            if(result['state'].includes('HALT'))
             {
                 let stack = result['stack']
                 let dicelams = stack[0]['value'];
@@ -3565,7 +3552,7 @@ class NNSTool
         var state = res['state'] as string;
         let addr = "";
         let ttl="";
-        if (state.includes("HALT, BREAK"))
+        if (state.includes("HALT"))
         {
             var stackarr = res[ "stack" ] as any[];
             let stack = ResultItem.FromJson(DataType.Array, stackarr);

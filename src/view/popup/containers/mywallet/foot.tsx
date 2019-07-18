@@ -82,7 +82,7 @@ export default class WalletFoot extends React.Component<any, {}> {
 			<div className="foot">
 				<div className="content">
 					<Select currentOption={current} options={options} onCallback={this.onSelect} text={intl.message.mywallet.currentnet} up={true} />
-				</div>				
+				</div>
 				<div className="language-toggle" id="language">
 					<label onClick={this.toggleLanguage}>
 						<div className="language-content">
