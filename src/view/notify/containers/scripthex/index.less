@@ -1,0 +1,120 @@
+.ncontract-wrap{  
+  color: #333333;
+  padding: 0 15px 100px 15px;
+  .first-line{
+    text-align: center;
+    font-family: NotoSansHans-Medium;
+    font-size: 14px;    
+    padding-top: 30px;
+  }
+  .second-line{
+    text-align: center;
+    font-family: NotoSansHans-Medium;
+    font-size: 16px;
+    margin-top: 15px;
+  }
+  .contract-title{
+    font-family: NotoSansHans-Medium;
+    font-size: 14px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+  }  
+  .white-wrap{
+    background: #FFFFFF;
+    box-shadow: 0 1px 4px 0 rgba(184,184,184,0.50);
+    border-radius: 3px;
+  }
+  .transaction-wrap{
+    background: #FFFFFF;
+    box-shadow: 0 1px 4px 0 rgba(184,184,184,0.50);
+    border-radius: 3px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 14px;
+    .line-wrap{
+      padding: 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #E5E5E5;      
+      .line-left{
+        // width: 65px;
+        flex: 1;
+        line-height: 14px;
+        font-family: NotoSansHans-Regular;
+        color: #B2B2B2;        
+        .first-p,.second-p{
+          width: 65px;
+        } 
+        .first-p{
+          margin-bottom: 20px;
+        }
+      }
+      .line-right{
+        text-align: right;
+        line-height: 14px;
+        a{
+          font-family: NotoSansHans-Regular;
+          color: #5F8DFB;
+        }
+        .first-p{
+          margin-bottom: 20px;
+        }
+        .second-p{
+          margin-bottom: 20px;
+          font-size: 12px;
+          word-break: break-word;
+        }
+        &.address{
+          width: 200px;
+          font-size: 12px;
+          word-break: break-all;          
+          line-height: 14px;
+        }
+      }
+      &:last-child{
+        border-bottom: none;
+      }
+    }
+    .line-method{
+      display: block;
+      .one-line{
+        display: flex;
+        justify-content: space-between;        
+      }
+    }
+  }
+  .transaction-content{
+    background: #FFFFFF;
+    box-shadow: 0 1px 4px 0 rgba(184,184,184,0.50);
+    border-radius: 3px;
+    font-family: NotoSansHans-Regular;
+    font-size: 14px;
+    padding: 20px 10px;
+  }
+  .check-fee{
+    padding-left: 5px;
+  }
+  .remark-content{
+    padding: 20px 10px;
+    min-height: 90px;
+    box-sizing: border-box;
+  }
+  .previous-img{
+    width: 30px;
+    height: 30px;
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    z-index: 2;
+    margin-left: -15px;
+    border-radius: 50%;
+    box-shadow: 0 1px 6px 0 rgba(184,184,184,0.50);
+    img{
+      width: 100%;
+    }
+  }
+}
+.hex{
+  word-wrap: break-word;
+  word-break: normal;
+}

@@ -33,10 +33,10 @@ interface BackStore {
     height: number;
     account: AccountInfo;
 }
-declare interface Background extends Window{
+declare interface Background extends Window {
     getBlockHeight: () => number;
     getBalance: (data: GetBalanceArgs) => Promise<BalanceResults>;
-    mytest:(data:Uint8Array)=>void;
+    mytest: (data: Uint8Array) => void;
     contractBuilder: (invoke: InvokeArgs) => Promise<InvokeOutput>;
     storage: BackStore;
     AccountManager: AccountManager;
@@ -99,9 +99,9 @@ declare class AssetManager {
     getMyAsset(): AssetInfo[];
 }
 
-interface AddressArgs{
-    address:string;
-    network:'MainNet'|'TestNet'
+interface AddressArgs {
+    address: string;
+    network: 'MainNet' | 'TestNet'
 }
 
 interface SendArgs {
@@ -111,12 +111,20 @@ interface SendArgs {
     amount: string;
     remark?: string;
     fee?: string;
-    network: "TestNet"|"MainNet";
+    network: "TestNet" | "MainNet";
 }
-  
+
 interface SendOutput {
     txid: string;
     nodeUrl: string;
+}
+
+interface SendScriptArgs {
+    script: string;
+    fee?: string;
+    sysfee?: string;
+    description?: string;
+    network?: "TestNet" | "MainNet";
 }
 
 interface BalanceRequest {
@@ -124,14 +132,14 @@ interface BalanceRequest {
     assets?: string[]; // Asset symbol or script hash to check balance
     fetchUTXO?: boolean;
 }
-  
+
 interface GetBalanceArgs {
-    params: BalanceRequest|BalanceRequest[];
+    params: BalanceRequest | BalanceRequest[];
     network?: string;
 }
 
 interface BalanceResults {
-    [address: string]: Balance[];
+    [ address: string ]: Balance[];
 }
 
 interface Balance {
@@ -139,7 +147,7 @@ interface Balance {
     symbol: string;
     amount: string;
 }
-  
+
 /**
  * invoke 请求参数
  * @param {scriptHash} 合约hash
@@ -147,20 +155,20 @@ interface Balance {
  * @param {stgring} 网络费
  * 
  */
-declare interface InvokeArgs{
-    scriptHash:string;
-    operation:string;
-    fee?:string;
-    network:"TestNet"|"MainNet";
-    arguments:Array<Argument>;
-    attachedAssets?:AttachedAssets;
+declare interface InvokeArgs {
+    scriptHash: string;
+    operation: string;
+    fee?: string;
+    network: "TestNet" | "MainNet";
+    arguments: Array<Argument>;
+    attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
-    description?:string;
+    description?: string;
 }
 
 declare interface AttachedAssets {
-    [asset: string]: string;
+    [ asset: string ]: string;
 }
 
 declare interface AssetIntentOverrides {
@@ -184,28 +192,28 @@ declare interface InvokeOutput {
     nodeUrl: string;
 }
 
-declare interface Argument{
-    type:"String"|"Boolean"|"Hash160"|"Hash256"|"Integer"|"ByteArray"|"Array"|"Address"|"Hook_Txid";
-    value:string|number|boolean|Array<Argument>
+declare interface Argument {
+    type: "String" | "Boolean" | "Hash160" | "Hash256" | "Integer" | "ByteArray" | "Array" | "Address" | "Hook_Txid";
+    value: string | number | boolean | Array<Argument>
 }
 
-declare interface Asset{
-    NEO:string;
-    GAS:string;
+declare interface Asset {
+    NEO: string;
+    GAS: string;
 }
 
-declare interface InvokeGroup{
-    merge:boolean;
-    group:InvokeArgs[];
+declare interface InvokeGroup {
+    merge: boolean;
+    group: InvokeArgs[];
 }
 
 declare interface InvokeReadInput {
     scriptHash: string;
     operation: string;
     arguments?: Argument[];
-    network: "TestNet"|"MainNet";
+    network: "TestNet" | "MainNet";
 }
-declare interface InvokeReadGroup{
-    group:InvokeReadInput[];
+declare interface InvokeReadGroup {
+    group: InvokeReadInput[];
 }
 

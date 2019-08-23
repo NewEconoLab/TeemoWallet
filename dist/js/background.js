@@ -1,3 +1,4 @@
+///<reference path="../../lib/neo-thinsdk.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -925,6 +926,47 @@ var contractBuilder = (invoke) => __awaiter(this, void 0, void 0, function* () {
         throw error;
     }
 });
+const deploy = (params) => __awaiter(this, void 0, void 0, function* () {
+    const amount = (params.call ? 500 : 0) + (params.storage ? 400 : 0) + 90;
+    const num = (params.storage ? 1 : 0) | (params.call ? 2 : 0) | (params.payment ? 4 : 0);
+    const sb = new ThinNeo.ScriptBuilder();
+    sb.EmitPushString(params.description);
+    sb.EmitPushString(params.email);
+    sb.EmitPushString(params.author);
+    sb.EmitPushString(params.version);
+    sb.EmitPushString(name);
+    sb.EmitPushNumber(new Neo.BigInteger(num));
+    sb.EmitPushBytes("05".hexToBytes());
+    sb.EmitPushBytes("0710".hexToBytes());
+    sb.EmitPushBytes(params.avmhex.hexToBytes());
+    sb.EmitSysCall("Neo.Contract.Create");
+    const utxos = yield MarkUtxo.getAllUtxo();
+    const gass = utxos[HASH_CONFIG.ID_GAS];
+    const consume = Neo.Fixed8.fromNumber(amount);
+    const newFee = consume.add(Neo.Fixed8.fromNumber(11)); //在原有的基础上加11个gas
+    const tran = new Transaction();
+    tran.setScript(sb.ToArray(), consume);
+    try {
+        tran.creatInuptAndOutup(gass, newFee);
+    }
+    catch (error) {
+        throw "You don't have enough utxo;";
+    }
+    tran.version = 1;
+    try {
+        let result = yield transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.deploy, result.txid));
+        return result;
+    }
+    catch (error) {
+        throw error;
+    }
+    // if (data.length > 102400)
+    // {
+    //     throw new Error("TRANSACTION_LARGE");
+    // }
+    // const result = await tools.wwwtool.api_postRawTransaction(data);
+});
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
@@ -1364,6 +1406,66 @@ const invoke = (header, params) => {
     });
 };
 /**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
+const deployContract = (header, params) => {
+    return new Promise((resolve, reject) => {
+        const data = {
+            lable: Command.deployContract,
+            data: params,
+            header
+        };
+        openNotify(data)
+            .then(() => {
+            Storage_local.get('checkNetFee')
+                .then(checkNetFee => {
+                Storage_local.set('checkNetFee', false);
+                deploy(params)
+                    .then(result => {
+                    TaskManager.addDeployData(result.txid, header.domain, params);
+                    resolve(result);
+                    // TaskManager.addInvokeData(result.txid, header.domain, { scriptHash: params.contractHash, operation: "创建合约", network: params.network, arguments: [] });
+                })
+                    .catch(error => {
+                    reject(error);
+                });
+            });
+        })
+            .catch(error => {
+            reject(error);
+        });
+    });
+};
+const sendScript = (header, params) => {
+    return new Promise((resolve, reject) => {
+        const data = {
+            lable: Command.sendScript,
+            data: params,
+            header
+        };
+        openNotify(data)
+            .then(() => {
+            Storage_local.get('checkNetFee')
+                .then(checkNetFee => {
+                Storage_local.set('checkNetFee', false);
+                sendInvoke(header, params)
+                    .then(result => {
+                    resolve(result);
+                    // TaskManager.addInvokeData(result.txid, header.domain, { scriptHash: params.contractHash, operation: "创建合约", network: params.network, arguments: [] });
+                })
+                    .catch(error => {
+                    reject(error);
+                });
+            });
+        })
+            .catch(error => {
+            reject(error);
+        });
+    });
+};
+/**
  * 获得网络状态信息
  */
 const getNetworks = () => {
@@ -1590,6 +1692,38 @@ var send = (header, params) => {
         }
     });
 };
+const sendInvoke = (header, data) => __awaiter(this, void 0, void 0, function* () {
+    const tran = new Transaction(ThinNeo.TransactionType.ContractTransaction);
+    const sysfee = data.sysfee ? Neo.Fixed8.parse(data.sysfee) : Neo.Fixed8.Zero;
+    const netfee = data.fee ? Neo.Fixed8.parse(data.fee) : Neo.Fixed8.Zero;
+    const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
+    tran.setScript(data.script.hexToBytes(), sysfee);
+    const utxos = yield MarkUtxo.getAllUtxo();
+    if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
+        if (utxos && utxos[HASH_CONFIG.ID_GAS]) {
+            const utxo = utxos[HASH_CONFIG.ID_GAS];
+            tran.creatInuptAndOutup(utxo, fee);
+        }
+        else {
+            throw { type: 'INSUFFICIENT_FUNDS', description: 'The user does not have a sufficient balance to perform the requested action' };
+        }
+    }
+    const txsize = (tran.GetMessage().length + 103);
+    const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001)); // 足够的网络费用
+    if (txsize > 1024 && fee.compareTo(calFee) < 0) {
+        const newSendData = data;
+        newSendData.fee = calFee.toString();
+        return yield sendInvoke(header, newSendData);
+    }
+    else {
+        const outupt = yield transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.contract, outupt.txid));
+        // TaskManager.addSendData(outupt.txid, data);
+        const invokeargs = { operation: "", arguments: [], description: data.description, scriptHash: "", network: storage.network };
+        TaskManager.addInvokeData(outupt.txid, header.domain, invokeargs);
+        return outupt;
+    }
+});
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
@@ -1682,8 +1816,8 @@ var invokeArgsAnalyse = (...invokes) => __awaiter(this, void 0, void 0, function
                 utxoassets[asset] = utxoassets[asset].add(amount);
             }
         }
-        if (HASH_CONFIG.ID_CGAS.compareTo(Neo.Uint160.parse(invoke.scriptHash)) === 0 && invoke.operation == "refund") {
-        }
+        // if (HASH_CONFIG.ID_CGAS.compareTo(Neo.Uint160.parse(invoke.scriptHash)) === 0 && invoke.operation == "refund") {
+        // }
     }
     for (const key in utxoassets) {
         const amount = utxoassets[key];
@@ -2167,6 +2301,12 @@ const responseMessage = (sender, request) => {
             case Command.NNS_getNamehashFromDomain:
                 sendResponse(getNamehashFromDomain(params));
                 break;
+            case Command.deployContract:
+                sendResponse(deployContract(header, params));
+                break;
+            case Command.sendScript:
+                sendResponse(sendScript(header, params));
+                break;
             default:
                 sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
                 break;
@@ -2202,6 +2342,7 @@ var ConfirmType;
     ConfirmType[ConfirmType["contract"] = 1] = "contract";
     ConfirmType[ConfirmType["toClaimgas"] = 2] = "toClaimgas";
     ConfirmType[ConfirmType["claimgas"] = 3] = "claimgas";
+    ConfirmType[ConfirmType["deploy"] = 4] = "deploy";
 })(ConfirmType || (ConfirmType = {}));
 var TaskState;
 (function (TaskState) {
@@ -2255,11 +2396,12 @@ class TransferGroup {
 }
 class TaskManager {
     static start() {
-        chrome.storage.local.get([this.table, 'invoke-data', 'send-data', 'white_list'], item => {
+        chrome.storage.local.get([this.table, 'invoke-data', 'send-data', 'white_list', 'deploy-data'], item => {
             this.shed = item[this.table] ? item[this.table] : {};
             this.invokeHistory = item['invoke-data'] ? item['invoke-data'] : {};
             this.sendHistory = item['send-data'] ? item['send-data'] : {};
             this.dappsMessage = item['white_list'] ? item['white_list'] : {};
+            this.deployHistory = item['deploy-data'] ? item['deploy-data'] : {};
         });
         // this.updateBlock();
         this.socket.socketInit();
@@ -2293,6 +2435,24 @@ class TaskManager {
             this.invokeHistory[txid] = message;
             Storage_local.set('invoke-data', this.invokeHistory);
         });
+    }
+    static addDeployData(txid, domain, info) {
+        const amount = (info.call ? 500 : 0) + (info.storage ? 400 : 0) + 90 + 11;
+        const message = {
+            contractHash: info.contractHash,
+            name: info.name,
+            author: info.author,
+            description: info.description,
+            email: info.email,
+            version: info.version,
+            storage: info.storage,
+            call: info.call,
+            payment: info.payment,
+            domain: domain,
+            sysfee: amount
+        };
+        this.deployHistory[txid] = message;
+        Storage_local.set('deploy-data', this.deployHistory);
     }
     static InvokeDataUpdate() {
         Storage_local.set('invoke-data', this.invokeHistory);
@@ -2404,6 +2564,7 @@ class TaskManager {
 }
 TaskManager.shed = {};
 TaskManager.invokeHistory = {};
+TaskManager.deployHistory = {};
 TaskManager.sendHistory = {};
 TaskManager.dappsMessage = {};
 TaskManager.table = "Task-Manager-shed";
@@ -2651,7 +2812,7 @@ class AssetManager {
 var assetManager = new AssetManager();
 assetManager.initAllAseetInfo();
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1.2.3';
+const VERSION = 'v1.2.1';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";
@@ -2680,6 +2841,8 @@ var Command;
     Command["invokeGroup"] = "invokeGroup";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
+    Command["deployContract"] = "deployContract";
+    Command["sendScript"] = "sendScript";
     Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
     Command["getBlock"] = "getBlock";
     Command["getTransaction"] = "getTransaction";
@@ -2816,6 +2979,15 @@ var getHistoryList = () => {
                 }
                 else if (task.type == ConfirmType.claimgas) {
                     task['sendHistory'] = sendHistory;
+                    list.push(task);
+                }
+                else if (task.type == ConfirmType.deploy) {
+                    const deployhis = TaskManager.deployHistory[txid];
+                    dappMessage = TaskManager.dappsMessage[deployhis.domain];
+                    console.log('dappmsg', dappMessage);
+                    console.log('deploy history', deployhis);
+                    task['deployHistory'] = deployhis;
+                    task['dappMessage'] = dappMessage;
                     list.push(task);
                 }
             }

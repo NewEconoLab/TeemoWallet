@@ -26,6 +26,8 @@ var Command;
     Command["send"] = "send";
     Command["invoke"] = "invoke";
     Command["invokeGroup"] = "invokeGroup";
+    Command["deployContract"] = "deployContract";
+    Command["sendScript"] = "sendScript";
     Command["event"] = "event";
     Command["disconnect"] = "disconnect";
     Command["getAddressFromScriptHash"] = "getAddressFromScriptHash";
@@ -135,6 +137,13 @@ var Teemo;
             return sendMessage(Command.send, params);
         }
         /**
+         * 转账并调用合约
+         * @param params
+         */
+        static sendScript(params) {
+            return sendMessage(Command.sendScript, params);
+        }
+        /**
          * invoke交易发送
          * @param {InvokeArgs} params invoke 参数
          * @returns {InvokeOutput} invoke执行结果返回
@@ -150,6 +159,13 @@ var Teemo;
         }
         static invokeReadGroup(params) {
             return sendMessage(Command.invokeReadGroup, params);
+        }
+        /**
+         * 发布合约
+         * @param params
+         */
+        static deployContract(params) {
+            return sendMessage(Command.deployContract, params);
         }
         /**
          * 查询区块信息

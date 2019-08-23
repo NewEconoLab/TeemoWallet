@@ -24,6 +24,8 @@ declare enum Command {
     send = "send",
     invoke = "invoke",
     invokeGroup = "invokeGroup",
+    deployContract = "deployContract",
+    sendScript = "sendScript",
     event = "event",
     disconnect = "disconnect",
     getAddressFromScriptHash = "getAddressFromScriptHash",
@@ -178,6 +180,13 @@ interface SendOutput {
     txid: string;
     nodeUrl: string;
 }
+interface SendScriptArgs {
+    script: string;
+    fee?: string;
+    sysfee?: string;
+    description?: string;
+    network?: "TestNet" | "MainNet";
+}
 interface Provider {
     name: string;
     version: string;
@@ -211,6 +220,20 @@ interface DomainArgs {
 interface AddressArgs {
     address: string;
     network: 'MainNet' | 'TestNet';
+}
+interface DeployContractArgs {
+    contractHash: string;
+    description: string;
+    email: string;
+    author: string;
+    version: string;
+    name: string;
+    avmhex: string;
+    call: boolean;
+    storage: boolean;
+    payment: boolean;
+    fee?: string;
+    network?: 'MainNet' | 'TestNet';
 }
 declare const ids: any[];
 /**
@@ -254,6 +277,11 @@ declare namespace Teemo {
          */
         static send(params: SendArgs): Promise<SendOutput>;
         /**
+         * 转账并调用合约
+         * @param params
+         */
+        static sendScript(params: SendScriptArgs): Promise<SendOutput>;
+        /**
          * invoke交易发送
          * @param {InvokeArgs} params invoke 参数
          * @returns {InvokeOutput} invoke执行结果返回
@@ -262,6 +290,11 @@ declare namespace Teemo {
         static invokeGroup(params: InvokeGroup): Promise<InvokeOutput[]>;
         static invokeRead(params: InvokeReadInput): Promise<any>;
         static invokeReadGroup(params: InvokeReadGroup): Promise<any>;
+        /**
+         * 发布合约
+         * @param params
+         */
+        static deployContract(params: DeployContractArgs): Promise<InvokeOutput>;
         /**
          * 查询区块信息
          * @param params

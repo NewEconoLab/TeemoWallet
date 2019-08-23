@@ -229,6 +229,7 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
  * @param invoke invoke调用参数
  */
 declare var contractBuilder: (invoke: InvokeArgs) => any;
+declare const deploy: (params: DeployContractArgs) => Promise<InvokeOutput>;
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
@@ -321,6 +322,13 @@ declare const invokeGroup: (header: any, params: InvokeGroup) => Promise<{}>;
  */
 declare const invoke: (header: any, params: InvokeArgs) => Promise<{}>;
 /**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
+declare const deployContract: (header: any, params: DeployContractArgs) => Promise<{}>;
+declare const sendScript: (header: any, params: SendScriptArgs) => Promise<{}>;
+/**
  * 获得网络状态信息
  */
 declare const getNetworks: () => Promise<GetNetworksOutput>;
@@ -331,6 +339,7 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
 declare var getBalance: (data: GetBalanceArgs) => Promise<{}>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
 declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
+declare const sendInvoke: (header: any, data: SendScriptArgs) => any;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
@@ -436,7 +445,8 @@ declare enum ConfirmType {
     tranfer = 0,
     contract = 1,
     toClaimgas = 2,
-    claimgas = 3
+    claimgas = 3,
+    deploy = 4
 }
 declare enum TaskState {
     watting = 0,
@@ -479,12 +489,28 @@ interface InvokeHistory {
     }[];
     netfee: string;
 }
+interface DeployHistory {
+    domain: string;
+    contractHash: string;
+    description: string;
+    email: string;
+    author: string;
+    version: string;
+    name: string;
+    call: boolean;
+    storage: boolean;
+    payment: boolean;
+    sysfee: number;
+}
 declare class TaskManager {
     static shed: {
         [txid: string]: Task;
     };
     static invokeHistory: {
         [txid: string]: InvokeHistory;
+    };
+    static deployHistory: {
+        [txid: string]: DeployHistory;
     };
     static sendHistory: {
         [txid: string]: SendArgs;
@@ -507,6 +533,7 @@ declare class TaskManager {
     static readonly webSocketURL: "wss://testws.nel.group/ws/mainnet" | "wss://testws.nel.group/ws/testnet";
     static addSendData(txid: string, data: SendArgs): void;
     static addInvokeData(txid: string, domain: string, data: InvokeArgs | InvokeArgs[]): void;
+    static addDeployData(txid: string, domain: string, info: DeployContractArgs): void;
     static InvokeDataUpdate(): void;
     static addTask(task: Task): void;
     static initShed(): Promise<{}>;
@@ -558,7 +585,7 @@ declare class AssetManager {
 }
 declare var assetManager: AssetManager;
 declare const BLOCKCHAIN = "NEO";
-declare const VERSION = "v1.2.3";
+declare const VERSION = "v1.2.1";
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -585,6 +612,8 @@ declare enum Command {
     invokeGroup = "invokeGroup",
     event = "event",
     disconnect = "disconnect",
+    deployContract = "deployContract",
+    sendScript = "sendScript",
     getAddressFromScriptHash = "getAddressFromScriptHash",
     getBlock = "getBlock",
     getTransaction = "getTransaction",
@@ -659,6 +688,13 @@ interface InvokeArgs {
     assetIntentOverrides?: AssetIntentOverrides;
     triggerContractVerification?: boolean;
     description?: string;
+}
+interface SendScriptArgs {
+    script: string;
+    fee?: string;
+    sysfee?: string;
+    description?: string;
+    network?: "TestNet" | "MainNet";
 }
 interface AttachedAssets {
     [asset: string]: string;
@@ -741,6 +777,20 @@ interface SendOutput {
     txid: string;
     nodeUrl: string;
 }
+interface DeployContractArgs {
+    contractHash: string;
+    description: string;
+    email: string;
+    author: string;
+    version: string;
+    name: string;
+    avmhex: string;
+    call: boolean;
+    storage: boolean;
+    payment: boolean;
+    fee?: string;
+    network?: 'MainNet' | 'TestNet';
+}
 interface Provider {
     name: string;
     version: string;
@@ -792,6 +842,7 @@ interface TaskHistory extends Task {
     };
     invokeHistory?: InvokeHistory;
     sendHistory?: SendArgs;
+    deployHistory?: DeployHistory;
 }
 declare class NNSTool {
     static readonly baseContract: Neo.Uint160;

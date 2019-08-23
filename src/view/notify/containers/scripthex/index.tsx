@@ -6,8 +6,7 @@ import * as React from 'react';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Storage_local } from '../../../../common/util';
-import { Background, SendArgs } from '../../../../lib/background';
-import { bg } from '../../../popup/utils/storagetools';
+import { Background, SendScriptArgs } from '../../../../lib/background';
 import intl from '../../../popup/store/intl';
 // import { observer } from 'mobx-react';
 
@@ -20,30 +19,28 @@ interface IProps {
 interface IState {
   pageNumber: number,
   data: any,
-  toAddress: string,
-  amount: string,
-  fee: string,
-  assetSymbol: string,
-  assetID: string,
-  remark: string,
-  network: 'TestNet' | 'MainNet';
+  script: string;
+  fee?: string;
+  sysfee?: string;
+  description?: string;
+  network?: 'TestNet' | 'MainNet';
 }
 // @observer
-export default class SendRequest extends React.Component<IProps, IState>
+export default class SendScriptRequest extends React.Component<IProps, IState>
 {
   public bg: Background = chrome.extension.getBackgroundPage() as Background;
   public state: IState = {
     pageNumber: 0, // 0为上一页，1为下一页
     data: null,
-    toAddress: "",
-    amount: "0",
+    script: "",
     fee: '0',
-    assetID: "",
-    assetSymbol: "",
-    remark: "",
+    sysfee: "0",
+    description: "",
     network: 'TestNet'
   }
   public componentWillReceiveProps(nextProps) {
+    console.log("nextProps", nextProps);
+
     this.setState({
       data: nextProps.data
     }, () => {
@@ -54,7 +51,7 @@ export default class SendRequest extends React.Component<IProps, IState>
   public getRenderState = () => {
     console.log(this.props.data);
     console.log(JSON.stringify(this.state.data))
-    let sendData: SendArgs;
+    let sendData: SendScriptArgs;
     if (this.state.data) {
       sendData = this.props.data;
       this.initData(sendData);
@@ -62,24 +59,17 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
 
   // 初始化state
-  public initData = (sendData: SendArgs) => {
+  public initData = (sendData: SendScriptArgs) => {
 
-    if (sendData.asset) {
-      this.setState({
-        assetID: sendData.asset,
-        toAddress: sendData.toAddress,
-        fee: sendData.fee ? sendData.fee : '0',
-        amount: sendData.amount,
-        remark: sendData.remark ? sendData.remark : '',
-        network: sendData.network ? sendData.network : 'TestNet'
-      })
-      bg.queryAssetSymbol(sendData.asset, sendData.network)
-        .then(result => {
-          this.setState({
-            assetSymbol: result.symbol
-          })
-        })
-    }
+    console.log(sendData);
+
+    this.setState({
+      sysfee: sendData.sysfee ? sendData.sysfee : '0',
+      fee: sendData.fee ? sendData.fee : '0',
+      description: sendData.description ? sendData.description : '',
+      // network: sendData.network ? sendData.network : 'TestNet',
+      script: sendData.script
+    })
   }
 
   public netfeeChange = (check: boolean) => {
@@ -97,7 +87,6 @@ export default class SendRequest extends React.Component<IProps, IState>
     })
   }
   public render() {
-    const assetHref = `https://scan.nel.group/${this.state.network == 'TestNet' ? 'test' : 'main'}/asset/`;
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
@@ -115,18 +104,10 @@ export default class SendRequest extends React.Component<IProps, IState>
               <div className="contract-title">{intl.message.notify.tranInfo}</div>
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
-                  <div className="line-left">{intl.message.notify.toAddress}</div>
-                  <div className="line-right address">
-                    {
-                      this.state.toAddress
-                    }
-                  </div>
-                </div>
-                <div className="line-wrap">
-                  <div className="line-left">{intl.message.history.amount}</div>
+                  <div className="line-left">系统费</div>
                   <div className="line-right">
                     <span>
-                      {this.state.amount ? `${this.state.amount} ${this.state.assetSymbol}` : "0"}
+                      {this.state.sysfee ? `${this.state.sysfee} GAS` : "0"}
                     </span>
                   </div>
                 </div>
@@ -151,7 +132,7 @@ export default class SendRequest extends React.Component<IProps, IState>
               <div className="contract-title">{intl.message.notify.dappNote}</div>
               <div className="remark-content white-wrap">
                 {
-                  this.state.remark
+                  this.state.description
                 }
               </div>
               <div className="previous-img" onClick={this.nextPage}>
@@ -163,17 +144,12 @@ export default class SendRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 1 && (
             <>
-              <div className="contract-title">{intl.message.notify.tranData}</div>
+              <div className="contract-title">Script Hex</div>
 
-              <div className="transaction-wrap white-wrap">
-                <div className="line-wrap">
-                  <div className="line-left">{intl.message.notify.AssetsID}</div>
-                  <div className="line-right">
-                    <a href={assetHref + this.state.assetID} target="_blank">
-                      {this.state.assetID.substr(0, 4) + "..." + this.state.assetID.substr(this.state.assetID.length - 4, 4)}
-                    </a>
-                  </div>
-                </div>
+              <div className="remark-content white-wrap hex">
+                {
+                  this.state.script
+                }
               </div>
               {/* <div className="transaction-content">
                 <span>内容</span>
