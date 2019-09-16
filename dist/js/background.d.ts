@@ -217,9 +217,11 @@ declare const setContractMessage: (txid: string, domain: string, data: any) => v
 declare const getWeakRandomValues: (array: number | Uint8Array) => Uint8Array;
 declare class ScriptBuild extends ThinNeo.ScriptBuilder {
     constructor();
+    EmitParam(param: Argument, hookTxid?: string): this;
     /**
      *
-     * @param argument
+     * @param argument 参数数组
+     * @param hookTxid 关联交易id
      */
     EmitArguments(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
     EmitInvokeArgs(data: InvokeArgs | InvokeArgs[], hookTxid?: string): Uint8Array;
@@ -690,11 +692,17 @@ interface InvokeArgs {
     description?: string;
 }
 interface SendScriptArgs {
-    script: string;
+    scriptHash: string;
+    scriptArguments: Argument[];
+    attachedAssets?: AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
     fee?: string;
     sysfee?: string;
     description?: string;
     network?: "TestNet" | "MainNet";
+}
+interface AttachedGas {
+    [addr: string]: string;
 }
 interface AttachedAssets {
     [asset: string]: string;

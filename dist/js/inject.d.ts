@@ -91,6 +91,9 @@ interface InvokeReadGroup {
 interface AttachedAssets {
     [asset: string]: string;
 }
+interface AttachedGas {
+    [addr: string]: string;
+}
 interface AssetIntentOverrides {
     inputs: AssetInput[];
     outputs: AssetOutput[];
@@ -181,7 +184,10 @@ interface SendOutput {
     nodeUrl: string;
 }
 interface SendScriptArgs {
-    script: string;
+    scriptHash: string;
+    scriptArguments: Argument[];
+    attachedAssets?: AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
     fee?: string;
     sysfee?: string;
     description?: string;

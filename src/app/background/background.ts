@@ -887,9 +887,56 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
         super();
     }
 
+    EmitParam(param: Argument, hookTxid?: string) {
+        let hex: Uint8Array;
+        switch (param.type) {
+            case ArgumentDataType.STRING:
+                this.EmitPushString(param.value as string);
+                break;
+            case ArgumentDataType.INTEGER:
+                const num = new Neo.BigInteger(param.value as string);
+                this.EmitPushNumber(num);
+                break;
+            case ArgumentDataType.HASH160:
+                hex = (param.value as string).hexToBytes();
+                if (hex.length !== 20) {
+                    throw new Error("not a hex160");
+                }
+                this.EmitPushBytes(hex.reverse());
+                break;
+            case ArgumentDataType.HASH256:
+                hex = (param.value as string).hexToBytes();
+                if (hex.length !== 32) {
+                    throw new Error("not a hex256");
+                }
+                this.EmitPushBytes(hex.reverse());
+                break;
+            case ArgumentDataType.BYTEARRAY:
+                hex = (param.value as string).hexToBytes();
+                this.EmitPushBytes(hex);
+                break;
+            case ArgumentDataType.ADDRESS:
+                hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value as string);
+                this.EmitPushBytes(hex);
+                break;
+            case ArgumentDataType.ARRAY:
+                const argument = param.value as Argument[];
+                for (let i = argument.length - 1; i >= 0; i--) {
+                    this.EmitParam(argument[ i ]);
+                }
+                this.EmitPushNumber(new Neo.BigInteger(argument.length));
+                this.Emit(ThinNeo.OpCode.PACK);
+                break;
+            default:
+                throw new Error("No parameter of this type");
+        }
+        return this;
+    }
+
     /**
      * 
-     * @param argument 
+     * @param argument 参数数组 
+     * @param hookTxid 关联交易id
      */
     EmitArguments(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder {
         for (let i = argument.length - 1; i >= 0; i--) {
@@ -1872,13 +1919,38 @@ var send = (header, params: SendArgs) => {
 
 const sendInvoke = async (header, data: SendScriptArgs) => {
     const tran = new Transaction(ThinNeo.TransactionType.ContractTransaction)
-
     const sysfee = data.sysfee ? Neo.Fixed8.parse(data.sysfee) : Neo.Fixed8.Zero;
     const netfee = data.fee ? Neo.Fixed8.parse(data.fee) : Neo.Fixed8.Zero;
     const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
-    tran.setScript(data.script.hexToBytes(), sysfee)
+    const sb = new ScriptBuild();
+    const RANDOM_UINT8: Uint8Array = getWeakRandomValues(32);
+    const RANDOM_INT: Neo.BigInteger = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+    // 塞入随机数
+    sb.EmitPushNumber(RANDOM_INT);  // 将随机数推入栈顶
+    sb.Emit(ThinNeo.OpCode.DROP);   // 打包
+    for (let i = data.scriptArguments.length - 1; i >= 0; i--) {
+        sb.EmitParam(data.scriptArguments[ i ]);
+    }
+    const appcall = Neo.Uint160.parse(data.scriptHash);
+    // let appcall = this.currentContract.scripthash.hexToBytes();
+    sb.EmitAppCall(appcall);
+    tran.setScript(sb.ToArray(), sysfee)
+
     const utxos = await MarkUtxo.getAllUtxo();
-    if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
+    if (data.attachedAssets) {
+        for (const asset in data.attachedAssets) {
+            if (data.attachedAssets.hasOwnProperty(asset)) {
+                const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(data.scriptHash));
+                const amount = Neo.Fixed8.parse(data.attachedAssets[ asset ]);
+                const utxo = utxos[ asset ];
+                if (asset.includes(HASH_CONFIG.ID_GAS))
+                    tran.creatInuptAndOutup(utxo, amount, toaddr, fee)
+                else
+                    tran.creatInuptAndOutup(utxo, amount, toaddr)
+            }
+        }
+    }
+    else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
         if (utxos && utxos[ HASH_CONFIG.ID_GAS ]) {
             const utxo = utxos[ HASH_CONFIG.ID_GAS ]
             tran.creatInuptAndOutup(utxo, fee);
@@ -1887,21 +1959,72 @@ const sendInvoke = async (header, data: SendScriptArgs) => {
             throw { type: 'INSUFFICIENT_FUNDS', description: 'The user does not have a sufficient balance to perform the requested action' };
         }
     }
+    // console.log((tran.GetMessage().length+103).div(100000).add(0.001));
     const txsize = (tran.GetMessage().length + 103)
     const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
-    if (txsize > 1024 && fee.compareTo(calFee) < 0) {
-        const newSendData = data;
-        newSendData.fee = calFee.toString();
-        return await sendInvoke(header, newSendData)
+    if (txsize > 1024 && netfee.compareTo(calFee) < 0) {
+        const newInvoke = data;
+        newInvoke.fee = calFee.toString();
+        return await sendInvoke(header, newInvoke)
     }
     else {
-        const outupt = await transactionSignAndSend(tran);
-        TaskManager.addTask(new Task(ConfirmType.contract, outupt.txid));
+        let result = await transactionSignAndSend(tran);
+        TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
         // TaskManager.addSendData(outupt.txid, data);
-        const invokeargs: InvokeArgs = { operation: "", arguments: [], description: data.description, scriptHash: "", network: storage.network }
-        TaskManager.addInvokeData(outupt.txid, header.domain, invokeargs)
-        return outupt
+        const invokeargs: InvokeArgs = { operation: "", arguments: [], description: data.description, scriptHash: data.scriptHash, network: storage.network }
+        TaskManager.addInvokeData(result.txid, header.domain, invokeargs)
+        return result;
     }
+
+    // let utxoassets: { [ asset: string ]: Neo.Fixed8 } = {};
+    // const utxos = await MarkUtxo.getAllUtxo();
+
+    // for (const asset in data.attachedAssets) {
+    //     const amount = Neo.Fixed8.parse(data.attachedAssets[ asset ].toString());
+    //     if (!utxoassets[ asset ])
+    //         utxoassets[ asset ] = Neo.Fixed8.Zero;
+    //     utxoassets[ asset ] = utxoassets[ asset ].add(amount);
+    // }
+
+    // if (data.attachedAssets) {
+    //     let index = 0;
+    //     for (const addr in data.attachedAssets) {
+    //         const toaddr = addr
+    //         const amount = Neo.Fixed8.parse(data.attachedAssets[ addr ]);
+    //         const utxo = utxos[ HASH_CONFIG.ID_GAS ];
+    //         if (index === 0 && fee.compareTo(Neo.Fixed8.Zero) > 0) {
+    //             tran.creatInuptAndOutup(utxo, amount, toaddr, fee)
+    //         }
+    //         else {
+    //             tran.creatInuptAndOutup(utxo, amount, toaddr)
+    //         }
+    //         index = index + 1;
+    //     }
+    // }
+    // else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
+    //     if (utxos && utxos[ HASH_CONFIG.ID_GAS ]) {
+    //         const utxo = utxos[ HASH_CONFIG.ID_GAS ]
+    //         tran.creatInuptAndOutup(utxo, fee);
+    //     }
+    //     else {
+    //         throw { type: 'INSUFFICIENT_FUNDS', description: 'The user does not have a sufficient balance to perform the requested action' };
+    //     }
+    // }
+    // const txsize = (tran.GetMessage().length + 103)
+    // const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
+    // if (txsize > 1024 && fee.compareTo(calFee) < 0) {
+    //     const newSendData = data;
+    //     newSendData.fee = calFee.toString();
+    //     return await sendInvoke(header, newSendData)
+    // }
+    // else {
+    //     const outupt = await transactionSignAndSend(tran);
+    //     TaskManager.addTask(new Task(ConfirmType.contract, outupt.txid));
+    //     // TaskManager.addSendData(outupt.txid, data);
+    //     const invokeargs: InvokeArgs = { operation: "", arguments: [], description: data.description, scriptHash: "", network: storage.network }
+    //     TaskManager.addInvokeData(outupt.txid, header.domain, invokeargs)
+    //     return outupt
+    // }
 }
 
 /**
@@ -3230,11 +3353,18 @@ interface InvokeArgs {
 }
 
 interface SendScriptArgs {
-    script: string;
+    scriptHash: string;
+    scriptArguments: Argument[];
+    attachedAssets?: AttachedAssets;
+    assetIntentOverrides?: AssetIntentOverrides;
     fee?: string;
     sysfee?: string;
     description?: string;
     network?: "TestNet" | "MainNet";
+}
+
+interface AttachedGas {
+    [ addr: string ]: string;
 }
 
 interface AttachedAssets {
