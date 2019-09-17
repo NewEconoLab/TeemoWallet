@@ -6,7 +6,7 @@ import * as React from 'react';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Storage_local } from '../../../../common/util';
-import { Background, SendScriptArgs } from '../../../../lib/background';
+import { Background, SendScriptArgs, Argument } from '../../../../lib/background';
 import intl from '../../../popup/store/intl';
 // import { observer } from 'mobx-react';
 
@@ -19,11 +19,12 @@ interface IProps {
 interface IState {
   pageNumber: number,
   data: any,
-  script: string;
+  scriptHash: string;
   fee?: string;
   sysfee?: string;
   description?: string;
   network?: 'TestNet' | 'MainNet';
+  arguments: Argument[];
 }
 // @observer
 export default class SendScriptRequest extends React.Component<IProps, IState>
@@ -32,11 +33,12 @@ export default class SendScriptRequest extends React.Component<IProps, IState>
   public state: IState = {
     pageNumber: 0, // 0为上一页，1为下一页
     data: null,
-    script: "",
+    scriptHash: "",
     fee: '0',
     sysfee: "0",
     description: "",
-    network: 'TestNet'
+    network: 'TestNet',
+    arguments: []
   }
   public componentWillReceiveProps(nextProps) {
     console.log("nextProps", nextProps);
@@ -68,7 +70,8 @@ export default class SendScriptRequest extends React.Component<IProps, IState>
       fee: sendData.fee ? sendData.fee : '0',
       description: sendData.description ? sendData.description : '',
       // network: sendData.network ? sendData.network : 'TestNet',
-      script: sendData.script
+      scriptHash: sendData.scriptHash,
+      arguments: sendData.scriptArguments,
     })
   }
 
@@ -93,7 +96,7 @@ export default class SendScriptRequest extends React.Component<IProps, IState>
           {intl.message.history.from + " " + this.props.domain}
         </div>
         <div className="second-line">
-          {intl.message.assets.transfer}
+          {intl.message.history.contract}
         </div>
         {/* <div className="second-line">
           请求签名 
@@ -144,12 +147,25 @@ export default class SendScriptRequest extends React.Component<IProps, IState>
         {
           this.state.pageNumber === 1 && (
             <>
-              <div className="contract-title">Script Hex</div>
+              {/* <div className="contract-title">交易数据</div> */}
+              <div className="contract-title">{intl.message.notify.tranData}</div>
 
-              <div className="remark-content white-wrap hex">
-                {
-                  this.state.script
-                }
+              <div className="transaction-wrap white-wrap">
+                <div className="line-wrap">
+                  <div className="line-left">{intl.message.notify.scriptHash}</div>
+                  <div className="line-right">
+                    {
+                      this.state.scriptHash.length !== 0 &&
+                      <a href="#">{this.state.scriptHash.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}</a>
+                    }
+                  </div>
+                </div>
+                <div className="line-wrap line-method">
+                  {
+                    this.state.arguments.length !== 0 &&
+                    <pre className="second-p">{JSON.stringify(this.state.arguments, null, 3)}</pre>
+                  }
+                </div>
               </div>
               {/* <div className="transaction-content">
                 <span>内容</span>
