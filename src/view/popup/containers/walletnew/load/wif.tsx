@@ -67,8 +67,6 @@ export default class WifImport extends React.Component<IPorps, IState> {
 
     loadWallet = () => {
         if (!this.state.wif) {
-            console.log('wif为空');
-
             this.setState({ wif_error: true })
         }
         else if (!this.state.password) {
@@ -79,10 +77,7 @@ export default class WifImport extends React.Component<IPorps, IState> {
         }
         else {
             try {
-                console.log('进入私钥转换环节');
-
                 let prikey = ThinNeo.Helper.GetPrivateKeyFromWIF(this.state.wif)
-                console.log('成功获得私钥', prikey);
 
                 NepAccount.encryption(this.state.password, prikey)
                     .then(account => {
