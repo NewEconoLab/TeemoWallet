@@ -64,15 +64,15 @@ export class NepAccount {
 
         return new Promise<AccountInfo>((resolve, reject) => {
             var array = new Uint8Array(32);
-            var key = Neo.Cryptography.RandomNumberGenerator.getRandomValues<Uint8Array>(array);
+            // var key = Neo.Cryptography.RandomNumberGenerator.getRandomValues<Uint8Array>(array);
             // spanPri.textContent = key.toHexString();
-            const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(key);
+            const pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
             const address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
             const scrypt = new ThinNeo.nep6ScryptParameters();
             scrypt.N = 16384;
             scrypt.r = 8;
             scrypt.p = 8;
-            ThinNeo.Helper.GetNep2FromPrivateKey(key, password, scrypt.N, scrypt.r, scrypt.p, (info, result) => {
+            ThinNeo.Helper.GetNep2FromPrivateKey(prikey, password, scrypt.N, scrypt.r, scrypt.p, (info, result) => {
                 if (info == "finish") {
                     resolve(new AccountInfo(
                         new NepAccount("", address, result, scrypt),
