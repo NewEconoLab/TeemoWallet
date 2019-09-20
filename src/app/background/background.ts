@@ -2894,6 +2894,7 @@ class TaskManager {
                                 TaskNotify(task);
                                 const count = storage.accountWaitTaskCount[ task.currentAddr ] ? storage.accountWaitTaskCount[ task.currentAddr ] : 0;
                                 storage.accountWaitTaskCount[ task.currentAddr ] = count - 1;
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result[ "blockTime" ] });
                                 if (task.next) {
                                     TransferGroup.update(task.next, task.network);
                                 }
@@ -2939,6 +2940,7 @@ class TaskManager {
                                 this.shed[ key ] = task;
                                 Storage_local.set(this.table, this.shed);
                                 localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result[ "blockTime" ] });
                             }
                         })
                         .catch(error => {
@@ -2955,6 +2957,7 @@ class TaskManager {
                                 task.state = TaskState.success;
                                 this.shed[ key ] = task;
                                 Storage_local.set(this.table, this.shed);
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result[ "blockTime" ] });
                                 if (task.next) {
                                     TransferGroup.update(task.next, task.network);
                                 }
