@@ -1,50 +1,45 @@
 import { observable, action } from "mobx";
 import { en_US, zh_CN } from "./language";
 
-class Intl
-{
-    @observable public currentLang:Language;
+class Intl {
+    @observable public currentLang: Language;
 
-    @observable public message:{
-        button:Language_Button;
-        toast:Language_Toast;
-        welcome:Language_Welcome;
-        walletnew:any;
-        login:Language_Login;
-        mywallet:Language_MyWallet;
-        history:Language_History;
-        exchange:Language_exchange;
-        transfer:Language_Transfer;
-        assets:Language_Assets;
+    @observable public message: {
+        button: Language_Button;
+        toast: Language_Toast;
+        welcome: Language_Welcome;
+        walletnew: any;
+        login: Language_Login;
+        mywallet: Language_MyWallet;
+        history: Language_History;
+        exchange: Language_exchange;
+        transfer: Language_Transfer;
+        assets: Language_Assets;
         notify: Language_Notify;
         setting: Language_Setting;
-        editwallet:Language_EditWallet;
-        about:Language_About;
+        editwallet: Language_EditWallet;
+        about: Language_About;
     };
 
-    @action public initLanguage=()=>{
+    @action public initLanguage = () => {
         const lang = localStorage.getItem('language');
-        if(lang)
-        {
-            this.currentLang = lang=='zh'?Language.CN:Language.EN;            
+        if (lang) {
+            this.currentLang = lang == 'zh' ? Language.CN : Language.EN;
         }
-        else
-        {
+        else {
             this.currentLang = Language.CN;
         }
         this.changeLanguage(this.currentLang);
     }
 
-    @action public changeLanguage=(language:Language)=>
-    {
-        if(language==Language.CN)
-        {
+    @action public changeLanguage = (language: Language) => {
+        if (language == Language.CN) {
             this.currentLang = Language.CN;
             this.message = zh_CN;
             // console.log(language);
-            
+
             localStorage.setItem('language', 'zh');
-        }else{
+        } else {
             this.currentLang = Language.EN;
             this.message = en_US;
             // console.log(language);
@@ -53,61 +48,57 @@ class Intl
     }
 }
 
-export interface Message_lang
-{
-    button:Language_Button;
-    toast:Language_Toast;
-    welcome:Language_Welcome;
-    walletnew:any;
-    login:Language_Login;
-    mywallet:Language_MyWallet;
-    history:Language_History;
-    exchange:Language_exchange;
-    transfer:Language_Transfer;
-    assets:Language_Assets;
+export interface Message_lang {
+    button: Language_Button;
+    toast: Language_Toast;
+    welcome: Language_Welcome;
+    walletnew: any;
+    login: Language_Login;
+    mywallet: Language_MyWallet;
+    history: Language_History;
+    exchange: Language_exchange;
+    transfer: Language_Transfer;
+    assets: Language_Assets;
     notify: Language_Notify;
     setting: Language_Setting;
-    editwallet:Language_EditWallet;
+    editwallet: Language_EditWallet;
 };
 
-export interface Language_Button
-{
-    confirm:string,
-    cancel:string,
+export interface Language_Button {
+    confirm: string,
+    cancel: string,
     refuse: string;
     next: string;
     delete: string;
 }
 
-export interface Language_Toast
-{
-    successfully:string,
-    failed:string,
-    copySuccess:string,
+export interface Language_Toast {
+    successfully: string,
+    failed: string,
+    copySuccess: string,
     claimFailed: string,
-    txFailed:string
+    txFailed: string
 }
 
-export interface Language_Welcome{start:string,welcomeToUse:string,describe:string}
+export interface Language_Welcome { start: string, welcomeToUse: string, describe: string }
 
-export interface Language_Login{welcome:string,goCreate:string,placeholder1:string,button:string,error:string}
+export interface Language_Login { welcome: string, goCreate: string, placeholder1: string, button: string, error: string }
 
-export interface Language_Notify
-{
-    message1:string,
-    message2:string,
-    from:string,
-    dappNote:string,
-    tranData:string,
-    Info:string,
-    tranInfo:string,
-    method:string,
-    scriptHash:string,
-    toAddress:string,
-    AssetsID:string
+export interface Language_Notify {
+    message1: string,
+    message2: string,
+    from: string,
+    dappNote: string,
+    tranData: string,
+    Info: string,
+    tranInfo: string,
+    method: string,
+    scriptHash: string,
+    toAddress: string,
+    AssetsID: string
 }
 
-export interface Language_MyWallet{
+export interface Language_MyWallet {
     records: string;
     assets: string;
     mainnet: string;
@@ -115,10 +106,10 @@ export interface Language_MyWallet{
     currentnet: string;
     cgasExchange: string;
     explorer: string;
-    copy:string;
+    copy: string;
 }
 
-export interface Language_History{
+export interface Language_History {
     wait: string;
     tranHistory: string;
     contract: string;
@@ -130,13 +121,15 @@ export interface Language_History{
     amount: string;
     fee: string;
     presonalTransfer: string;
-    from:string;
-    to:string;
+    from: string;
+    to: string;
     all: string;
     none: string;
+    deploy: string;
+    sysfee: string;
 }
 
-export interface Language_exchange{
+export interface Language_exchange {
     gasToCgas: string;
     cgasToGas: string;
     operationType: string;
@@ -145,22 +138,22 @@ export interface Language_exchange{
     noBalance: string;
 }
 
-export interface Language_Transfer{    
+export interface Language_Transfer {
     sendTo: string;
     amount: string;
     payfee: string;
-    available:string;
+    available: string;
     title: string;
     title1: string;
     title2: string;
     title3: string;
     title4: string;
-    next:string;
-    error1:string;
-    error2:string;
+    next: string;
+    error1: string;
+    error2: string;
 }
 
-export interface Language_Assets{
+export interface Language_Assets {
     receiving: string;
     transfer: string;
     assetlist: string;
@@ -168,16 +161,16 @@ export interface Language_Assets{
     manager: string;
     GasClaimable: string;
     claim: string;
-    claimGas:string;
+    claimGas: string;
     claiming: string;
-    message : string;
-    message1:string;
-    message2:string;
+    message: string;
+    message1: string;
+    message2: string;
     message3: string;
-    save:string;
+    save: string;
 }
 
-export interface Language_Setting{
+export interface Language_Setting {
     successful: string;
     message: string;
     clearAuthorization: string;
@@ -187,10 +180,10 @@ export interface Language_Setting{
     off: string;
     second: string;
     minute: string;
-    wallet:string;
+    wallet: string;
 }
 
-export interface Language_EditWallet{
+export interface Language_EditWallet {
     display: string;
     create: string;
     import: string;
@@ -222,7 +215,7 @@ export interface Language_EditWallet{
     msg18: string;
 }
 
-export interface Language_About{
+export interface Language_About {
     aboutas: string;
     version: string;
     website: string;
@@ -230,16 +223,15 @@ export interface Language_About{
     policy: string;
     and: string;
     disclaimer: string;
-    url1:string;
-    url2:string;
-    url3:string;
-    url4:string;
+    url1: string;
+    url2: string;
+    url3: string;
+    url4: string;
 }
 
-export enum Language
-{
-    CN='中',
-    EN='En'
+export enum Language {
+    CN = '中',
+    EN = 'En'
 }
 
 export default new Intl();

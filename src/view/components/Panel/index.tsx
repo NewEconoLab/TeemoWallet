@@ -100,7 +100,7 @@ export default class Panel extends React.Component<IProps, IState>
 						<div className="transfer-type">
 							<div className="icon"><img src={this.props.task.dappMessage.icon} /></div>
 							<div className="message">
-								<div className="type">{"部署合约"}</div>
+								<div className="type">{intl.message.history.deploy}</div>
 								<div className="time">{format("MM-dd hh:mm:ss", this.props.task.startTime.toString(), 'cn')}</div>
 							</div>
 						</div>
