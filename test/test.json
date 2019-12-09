@@ -1,0 +1,22 @@
+{
+    "scriptHash": "0xa1760976db5fcdfab2a9930e8f6ce875b2d18225",
+    "operation": "transfer",
+    "arguments": [
+        {
+            "type": "Address",
+            "value": "AdyoCmmAvg8tQcC4KbM4G8FpfW5ANHWpvN"
+        },
+        {
+            "type": "Address",
+            "value": "AbU7BUQHW9sa69pTac7pPR3cq4gQHYC1DH"
+        },
+        {
+            "type": "Integer",
+            "value": "100000"
+        }
+    ],
+    "description": "Gas转账",
+    "systemFee": "0.001",
+    "networkFee": "0.001",
+    "network": "TestNet"
+}
