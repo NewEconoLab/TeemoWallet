@@ -1,179 +1,3 @@
-declare module nid {
-    class BitTreeDecoder {
-        probs: Uint16Array;
-        private numBits;
-        constructor(numBits: any);
-        init(): void;
-        decode(rc: RangeDecoder): number;
-        reverseDecode(rc: RangeDecoder): number;
-        static constructArray(numBits: number, len: number): Array<BitTreeDecoder>;
-    }
-}
-declare module nid {
-    class LZMA {
-        static LZMA_DIC_MIN: number;
-        static LZMA_RES_ERROR: number;
-        static LZMA_RES_FINISHED_WITH_MARKER: number;
-        static LZMA_RES_FINISHED_WITHOUT_MARKER: number;
-        static kNumBitModelTotalBits: number;
-        static kNumMoveBits: number;
-        static PROB_INIT_VAL: number;
-        static kNumPosBitsMax: number;
-        static kNumStates: number;
-        static kNumLenToPosStates: number;
-        static kNumAlignBits: number;
-        static kStartPosModelIndex: number;
-        static kEndPosModelIndex: number;
-        static kNumFullDistances: number;
-        static kMatchMinLen: number;
-        decoder: LzmaDecoder;
-        data: Uint8Array;
-        static INIT_PROBS(p: Uint16Array): void;
-        static BitTreeReverseDecode(probs: any, numBits: number, rc: RangeDecoder, offset?: number): number;
-        constructor();
-        decode(data: Uint8Array): Uint8Array;
-    }
-}
-declare module nid.utils {
-    import LZMA = nid.LZMA;
-    class LZMAHelper {
-        static decoder: LZMA;
-        static decoderAsync: Worker;
-        static callback: Function;
-        static ENCODE: number;
-        static DECODE: number;
-        static init(): void;
-        static encode(data: ArrayBuffer): ArrayBuffer;
-        static decode(data: ArrayBuffer): ArrayBuffer;
-        static encodeAsync(data: ArrayBuffer, _callback: Function): void;
-        static decodeAsync(data: ArrayBuffer, _callback: Function): void;
-    }
-}
-declare module nid {
-    class LZMAWorker {
-        static ENCODE: number;
-        static DECODE: number;
-        private decoder;
-        private command;
-        private time;
-        constructor();
-        private decode;
-    }
-}
-declare module nid {
-    class LenDecoder {
-        private choice;
-        private lowCoder;
-        private midCoder;
-        private highCoder;
-        constructor();
-        init(): void;
-        decode(rc: RangeDecoder, posState: number): number;
-    }
-}
-declare module nid {
-    class RangeDecoder {
-        static kTopValue: number;
-        inStream: Uint8Array;
-        corrupted: boolean;
-        in_pos: number;
-        private range;
-        private code;
-        private rangeI;
-        private codeI;
-        private loc1;
-        private loc2;
-        private U32;
-        private U16;
-        constructor();
-        isFinishedOK(): boolean;
-        init(): void;
-        normalize(): void;
-        decodeDirectBits(numBits: number): number;
-        decodeBit(prob: Uint16Array, index: number): number;
-    }
-}
-declare module nid {
-    class OutWindow {
-        totalPos: number;
-        outStream: Uint8Array;
-        private buf;
-        private pos;
-        out_pos: number;
-        private size;
-        private isFull;
-        constructor();
-        create(dictSize: number): void;
-        putByte(b: any): void;
-        getByte(dist: number): number;
-        copyMatch(dist: any, len: any): void;
-        checkDistance(dist: any): boolean;
-        isEmpty(): boolean;
-    }
-}
-declare module nid {
-    class LzmaDecoder {
-        markerIsMandatory: boolean;
-        rangeDec: RangeDecoder;
-        outWindow: OutWindow;
-        lc: number;
-        pb: number;
-        lp: number;
-        dictSize: number;
-        dictSizeInProperties: number;
-        private litProbs;
-        private posSlotDecoder;
-        private alignDecoder;
-        private posDecoders;
-        private isMatch;
-        private isRep;
-        private isRepG0;
-        private isRepG1;
-        private isRepG2;
-        private isRep0Long;
-        private lenDecoder;
-        private repLenDecoder;
-        private loc1;
-        private loc2;
-        private matchBitI;
-        private matchByteI;
-        private bitI;
-        private symbolI;
-        private prevByteI;
-        private litStateI;
-        constructor();
-        init(): void;
-        create(): void;
-        private createLiterals;
-        private initLiterals;
-        private decodeLiteral;
-        private decodeDistance;
-        private initDist;
-        decodeProperties(properties: Uint8Array): void;
-        private updateState_Literal;
-        private updateState_ShortRep;
-        private updateState_Rep;
-        private updateState_Match;
-        decode(unpackSizeDefined: boolean, unpackSize: number): number;
-    }
-}
-declare module nid.utils {
-    class MEMORY {
-        static u8Index: number;
-        static u16Index: number;
-        static u32Index: number;
-        static u8: Uint32Array;
-        static u16: Uint32Array;
-        static u32: Uint32Array;
-        static reset(): void;
-        static allocateUint8(len: number): void;
-        static allocateUint16(len: number): void;
-        static allocateUint32(len: number): void;
-        static getUint8(): number;
-        static getUint16(): number;
-        static getUint32(): number;
-    }
-}
 declare namespace Neo {
     abstract class UintVariable {
         protected _bits: Uint32Array;
@@ -270,7 +94,29 @@ declare namespace Neo {
         toString(radix?: number): string;
         toUint8Array(littleEndian?: boolean, length?: number): Uint8Array;
         toUint8ArrayWithSign(littleEndian?: boolean, length?: number): Uint8Array;
+        toUint64(): Uint64;
     }
+}
+declare namespace Neo {
+    class Cosigner implements IO.ISerializable {
+        account: Neo.Uint160;
+        scopes: WitnessScope;
+        allowedContracts: Neo.Uint160[];
+        allowedGroups: Cryptography.ECPoint[];
+        maxSubitems: number;
+        constructor();
+        deserialize(reader: IO.BinaryReader): void;
+        serialize(writer: IO.BinaryWriter): void;
+    }
+}
+interface String {
+    endsWith(str: string): boolean;
+}
+interface Number {
+    endsWith(num: number): boolean;
+}
+interface Object {
+    getVarSize<T>(): number;
 }
 declare namespace Neo {
     class Fixed8 implements IO.ISerializable {
@@ -312,9 +158,111 @@ interface Uint8Array {
     toHexString(): string;
     clone(): Uint8Array;
     concat(data: Uint8Array): Uint8Array;
+    isSignatureContract(): boolean;
 }
 interface Uint8ArrayConstructor {
     fromArrayBuffer(buffer: ArrayBuffer | ArrayBufferView): Uint8Array;
+}
+declare namespace Neo {
+    class Long {
+        low: number;
+        high: number;
+        unsigned: boolean;
+        private static __isLong__;
+        constructor(low: number, high: number, unsigned: boolean);
+        static isLong(obj: any): boolean;
+        private static INT_CACHE;
+        private static UINT_CACHE;
+        static fromInt(value: number, unsigned?: boolean): Long;
+        static fromNumber(value: number, unsigned?: boolean): Long;
+        static fromBits(lowBits: any, highBits: any, unsigned: any): Long;
+        static fromString(str: string, unsigned?: number | boolean, radix?: number): Long;
+        static fromValue(val: string | number | Long | {
+            low: number;
+            high: number;
+            unsigned: boolean;
+        }, unsigned?: boolean): Long;
+        private static TWO_PWR_16_DBL;
+        private static TWO_PWR_24_DBL;
+        private static TWO_PWR_32_DBL;
+        private static TWO_PWR_64_DBL;
+        private static TWO_PWR_63_DBL;
+        private static TWO_PWR_24;
+        static ZERO: Long;
+        static UZERO: Long;
+        static ONE: Long;
+        static UONE: Long;
+        static NEG_ONE: Long;
+        static MAX_VALUE: Long;
+        static MAX_UNSIGNED_VALUE: Long;
+        static MIN_VALUE: Long;
+        toInt: () => number;
+        toNumber: () => number;
+        toString(radix?: number): string;
+        getHighBits(): number;
+        getHighBitsUnsigned(): number;
+        getLowBits(): number;
+        getLowBitsUnsigned(): number;
+        getNumBitsAbs(): number;
+        isZero: () => boolean;
+        eqz: () => boolean;
+        isNegative: () => boolean;
+        isPositive: () => any;
+        isOdd: () => boolean;
+        isEven: () => boolean;
+        equals: (other: any) => boolean;
+        eq: (other: any) => boolean;
+        notEquals: (other: any) => boolean;
+        neq: (other: any) => boolean;
+        ne: (other: any) => boolean;
+        lessThan: (other: any) => boolean;
+        lt: (other: any) => boolean;
+        lessThanOrEqual: (other: any) => boolean;
+        lte: (other: any) => boolean;
+        le: (other: any) => boolean;
+        greaterThan: (other: any) => boolean;
+        gt: (other: any) => boolean;
+        greaterThanOrEqual: (other: any) => boolean;
+        gte: (other: any) => boolean;
+        ge: (other: any) => boolean;
+        compare: (other: any) => 1 | 0 | -1;
+        comp: (other: any) => 1 | 0 | -1;
+        negate: () => any;
+        neg: () => any;
+        add(addend: any): Long;
+        subtract(subtrahend: any): Long;
+        sub: (subtrahend: any) => Long;
+        multiply(multiplier: any): Long;
+        mul: (multiplier: any) => Long;
+        divide(divisor: string | number | Long): Long;
+        div: (divisor: string | number | Long) => Long;
+        modulo(divisor: any): Long;
+        mod: (divisor: any) => Long;
+        rem: (divisor: any) => Long;
+        not(): Long;
+        and(other: any): Long;
+        or(other: any): Long;
+        xor(other: any): Long;
+        shiftLeft(numBits: any): Long;
+        shl: (numBits: any) => Long;
+        shiftRight(numBits: any): Long;
+        shr: (numBits: any) => Long;
+        shiftRightUnsigned(numBits: any): Long;
+        shru: (numBits: any) => Long;
+        shr_u: (numBits: any) => Long;
+        rotateLeft(numBits: any): Long;
+        rotl: (numBits: any) => Long;
+        rotateRight(numBits: any): Long;
+        rotr: (numBits: any) => Long;
+        toSigned(): Long;
+        toUnsigned(): Long;
+        toBytes(le?: boolean): Uint8Array;
+        toBytesLE(): Uint8Array;
+        toBytesBE(): Uint8Array;
+        static fromBytes(bytes: number[] | Uint8Array, unsigned?: boolean, le?: boolean): Long;
+        static fromBytesLE(bytes: number[] | Uint8Array, unsigned?: boolean): Long;
+        static fromBytesBE(bytes: number[] | Uint8Array, unsigned?: boolean): Long;
+    }
 }
 declare class NeoMap<TKey, TValue> {
     private _map;
@@ -353,10 +301,13 @@ declare class NeoPromise<T> implements PromiseLike<T> {
     then<TResult1 = T, TResult2 = never>(onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onRejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): PromiseLike<TResult1 | TResult2>;
 }
 declare namespace Neo {
-    class Uint160 extends UintVariable {
+    class Uint160 extends UintVariable implements Neo.IO.ISerializable {
         static readonly Zero: Uint160;
+        static Length: number;
         constructor(value?: ArrayBuffer);
         static parse(str: string): Uint160;
+        serialize(writer: Neo.IO.BinaryWriter): void;
+        deserialize(reader: Neo.IO.BinaryReader): void;
     }
 }
 declare namespace Neo {
@@ -364,6 +315,14 @@ declare namespace Neo {
         static readonly Zero: Uint256;
         constructor(value?: ArrayBuffer);
         static parse(str: string): Uint256;
+    }
+}
+declare namespace Neo {
+    enum WitnessScope {
+        Global = 0,
+        CalledByEntry = 1,
+        CustomContracts = 16,
+        CustomGroups = 32
     }
 }
 declare namespace Neo.Cryptography {
@@ -469,7 +428,7 @@ declare namespace Neo.Cryptography {
     }
 }
 declare namespace Neo.Cryptography {
-    class ECPoint {
+    class ECPoint implements Neo.IO.ISerializable {
         x: ECFieldElement;
         y: ECFieldElement;
         curve: ECCurve;
@@ -490,6 +449,8 @@ declare namespace Neo.Cryptography {
         toString(): string;
         twice(): ECPoint;
         private static windowNaf;
+        serialize(writer: Neo.IO.BinaryWriter): void;
+        deserialize(reader: Neo.IO.BinaryReader): void;
     }
 }
 declare namespace Neo.Cryptography {
@@ -582,7 +543,7 @@ declare namespace Neo.IO {
         readInt32(): number;
         readSByte(): number;
         readSerializable(T: Function): ISerializable;
-        readSerializableArray(T: Function): ISerializable[];
+        readSerializableArray(T: Function, max?: number): ISerializable[];
         readSingle(): number;
         readUint16(): number;
         readUint160(): Uint160;
@@ -615,6 +576,7 @@ declare namespace Neo.IO {
         writeDouble(value: number): void;
         writeInt16(value: number): void;
         writeInt32(value: number): void;
+        writeInt64(value: Neo.Long): void;
         writeSByte(value: number): void;
         writeSerializableArray(array: ISerializable[]): void;
         writeSingle(value: number): void;
@@ -632,6 +594,13 @@ interface Uint8Array {
 }
 interface Uint8ArrayConstructor {
     fromSerializable(obj: Neo.IO.ISerializable): Uint8Array;
+}
+declare namespace Neo.IO {
+    class Helper {
+        static getVarSize(value: number): number;
+        static getVarSize(value: string): number;
+        static getVarSize(value: object): number;
+    }
 }
 declare namespace Neo.IO {
     interface ISerializable {
@@ -743,6 +712,369 @@ declare namespace ThinNeo {
         toJson(): any;
     }
 }
+declare module ThinNeo {
+    enum OpCode {
+        PUSH0 = 0,
+        PUSHF = 0,
+        PUSHBYTES1 = 1,
+        PUSHBYTES2 = 2,
+        PUSHBYTES3 = 3,
+        PUSHBYTES4 = 4,
+        PUSHBYTES5 = 5,
+        PUSHBYTES6 = 6,
+        PUSHBYTES7 = 7,
+        PUSHBYTES8 = 8,
+        PUSHBYTES9 = 9,
+        PUSHBYTES10 = 10,
+        PUSHBYTES11 = 11,
+        PUSHBYTES12 = 12,
+        PUSHBYTES13 = 13,
+        PUSHBYTES14 = 14,
+        PUSHBYTES15 = 15,
+        PUSHBYTES16 = 16,
+        PUSHBYTES17 = 17,
+        PUSHBYTES18 = 18,
+        PUSHBYTES19 = 19,
+        PUSHBYTES20 = 20,
+        PUSHBYTES21 = 21,
+        PUSHBYTES22 = 22,
+        PUSHBYTES23 = 23,
+        PUSHBYTES24 = 24,
+        PUSHBYTES25 = 25,
+        PUSHBYTES26 = 26,
+        PUSHBYTES27 = 27,
+        PUSHBYTES28 = 28,
+        PUSHBYTES29 = 29,
+        PUSHBYTES30 = 30,
+        PUSHBYTES31 = 31,
+        PUSHBYTES32 = 32,
+        PUSHBYTES33 = 33,
+        PUSHBYTES34 = 34,
+        PUSHBYTES35 = 35,
+        PUSHBYTES36 = 36,
+        PUSHBYTES37 = 37,
+        PUSHBYTES38 = 38,
+        PUSHBYTES39 = 39,
+        PUSHBYTES40 = 40,
+        PUSHBYTES41 = 41,
+        PUSHBYTES42 = 42,
+        PUSHBYTES43 = 43,
+        PUSHBYTES44 = 44,
+        PUSHBYTES45 = 45,
+        PUSHBYTES46 = 46,
+        PUSHBYTES47 = 47,
+        PUSHBYTES48 = 48,
+        PUSHBYTES49 = 49,
+        PUSHBYTES50 = 50,
+        PUSHBYTES51 = 51,
+        PUSHBYTES52 = 52,
+        PUSHBYTES53 = 53,
+        PUSHBYTES54 = 54,
+        PUSHBYTES55 = 55,
+        PUSHBYTES56 = 56,
+        PUSHBYTES57 = 57,
+        PUSHBYTES58 = 58,
+        PUSHBYTES59 = 59,
+        PUSHBYTES60 = 60,
+        PUSHBYTES61 = 61,
+        PUSHBYTES62 = 62,
+        PUSHBYTES63 = 63,
+        PUSHBYTES64 = 64,
+        PUSHBYTES65 = 65,
+        PUSHBYTES66 = 66,
+        PUSHBYTES67 = 67,
+        PUSHBYTES68 = 68,
+        PUSHBYTES69 = 69,
+        PUSHBYTES70 = 70,
+        PUSHBYTES71 = 71,
+        PUSHBYTES72 = 72,
+        PUSHBYTES73 = 73,
+        PUSHBYTES74 = 74,
+        PUSHBYTES75 = 75,
+        PUSHDATA1 = 76,
+        PUSHDATA2 = 77,
+        PUSHDATA4 = 78,
+        PUSHM1 = 79,
+        PUSH1 = 81,
+        PUSHT = 81,
+        PUSH2 = 82,
+        PUSH3 = 83,
+        PUSH4 = 84,
+        PUSH5 = 85,
+        PUSH6 = 86,
+        PUSH7 = 87,
+        PUSH8 = 88,
+        PUSH9 = 89,
+        PUSH10 = 90,
+        PUSH11 = 91,
+        PUSH12 = 92,
+        PUSH13 = 93,
+        PUSH14 = 94,
+        PUSH15 = 95,
+        PUSH16 = 96,
+        NOP = 97,
+        JMP = 98,
+        JMPIF = 99,
+        JMPIFNOT = 100,
+        CALL = 101,
+        RET = 102,
+        APPCALL = 103,
+        SYSCALL = 104,
+        TAILCALL = 105,
+        DUPFROMALTSTACK = 106,
+        TOALTSTACK = 107,
+        FROMALTSTACK = 108,
+        XDROP = 109,
+        DUPFROMALTSTACKBOTTOM = 110,
+        XSWAP = 114,
+        XTUCK = 115,
+        DEPTH = 116,
+        DROP = 117,
+        DUP = 118,
+        NIP = 119,
+        OVER = 120,
+        PICK = 121,
+        ROLL = 122,
+        ROT = 123,
+        SWAP = 124,
+        TUCK = 125,
+        CAT = 126,
+        SUBSTR = 127,
+        LEFT = 128,
+        RIGHT = 129,
+        SIZE = 130,
+        INVERT = 131,
+        AND = 132,
+        OR = 133,
+        XOR = 134,
+        EQUAL = 135,
+        INC = 139,
+        DEC = 140,
+        SIGN = 141,
+        NEGATE = 143,
+        ABS = 144,
+        NOT = 145,
+        NZ = 146,
+        ADD = 147,
+        SUB = 148,
+        MUL = 149,
+        DIV = 150,
+        MOD = 151,
+        SHL = 152,
+        SHR = 153,
+        BOOLAND = 154,
+        BOOLOR = 155,
+        NUMEQUAL = 156,
+        NUMNOTEQUAL = 158,
+        LT = 159,
+        GT = 160,
+        LTE = 161,
+        GTE = 162,
+        MIN = 163,
+        MAX = 164,
+        WITHIN = 165,
+        SHA1 = 167,
+        SHA256 = 168,
+        HASH160 = 169,
+        HASH256 = 170,
+        CSHARPSTRHASH32 = 171,
+        JAVAHASH32 = 173,
+        CHECKSIG = 172,
+        CHECKMULTISIG = 174,
+        ARRAYSIZE = 192,
+        PACK = 193,
+        UNPACK = 194,
+        PICKITEM = 195,
+        SETITEM = 196,
+        NEWARRAY = 197,
+        NEWSTRUCT = 198,
+        NEWMAP = 199,
+        APPEND = 200,
+        REVERSE = 201,
+        REMOVE = 202,
+        HASKEY = 203,
+        KEYS = 204,
+        VALUES = 205,
+        SWITCH = 208,
+        THROW = 240,
+        THROWIFNOT = 241
+    }
+}
+declare namespace ThinSdk {
+    const ApplicationEngine: {
+        [ ThinNeo.OpCode.PUSH0 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES1 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES2 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES3 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES4 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES5 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES6 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES7 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES8 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES9 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES10 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES11 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES12 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES13 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES14 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES15 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES16 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES17 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES18 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES19 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES20 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES21 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES22 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES23 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES24 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES25 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES26 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES27 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES28 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES29 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES30 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES31 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES32 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES33 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES34 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES35 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES36 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES37 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES38 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES39 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES40 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES41 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES42 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES43 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES44 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES45 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES46 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES47 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES48 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES49 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES50 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES51 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES52 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES53 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES54 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES55 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES56 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES57 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES58 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES59 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES60 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES61 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES62 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES63 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES64 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES65 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES66 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES67 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES68 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES69 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES70 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES71 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES72 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES73 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES74 ]: number;
+        [ ThinNeo.OpCode.PUSHBYTES75 ]: number;
+        [ ThinNeo.OpCode.PUSHDATA1 ]: number;
+        [ ThinNeo.OpCode.PUSHDATA2 ]: number;
+        [ ThinNeo.OpCode.PUSHDATA4 ]: number;
+        [ ThinNeo.OpCode.PUSHM1 ]: number;
+        [ ThinNeo.OpCode.PUSH1 ]: number;
+        [ ThinNeo.OpCode.PUSH2 ]: number;
+        [ ThinNeo.OpCode.PUSH3 ]: number;
+        [ ThinNeo.OpCode.PUSH4 ]: number;
+        [ ThinNeo.OpCode.PUSH5 ]: number;
+        [ ThinNeo.OpCode.PUSH6 ]: number;
+        [ ThinNeo.OpCode.PUSH7 ]: number;
+        [ ThinNeo.OpCode.PUSH8 ]: number;
+        [ ThinNeo.OpCode.PUSH9 ]: number;
+        [ ThinNeo.OpCode.PUSH10 ]: number;
+        [ ThinNeo.OpCode.PUSH11 ]: number;
+        [ ThinNeo.OpCode.PUSH12 ]: number;
+        [ ThinNeo.OpCode.PUSH13 ]: number;
+        [ ThinNeo.OpCode.PUSH14 ]: number;
+        [ ThinNeo.OpCode.PUSH15 ]: number;
+        [ ThinNeo.OpCode.PUSH16 ]: number;
+        [ ThinNeo.OpCode.NOP ]: number;
+        [ ThinNeo.OpCode.JMP ]: number;
+        [ ThinNeo.OpCode.JMPIF ]: number;
+        [ ThinNeo.OpCode.JMPIFNOT ]: number;
+        [ ThinNeo.OpCode.CALL ]: number;
+        [ ThinNeo.OpCode.RET ]: number;
+        [ ThinNeo.OpCode.SYSCALL ]: number;
+        [ ThinNeo.OpCode.DUPFROMALTSTACKBOTTOM ]: number;
+        [ ThinNeo.OpCode.DUPFROMALTSTACK ]: number;
+        [ ThinNeo.OpCode.TOALTSTACK ]: number;
+        [ ThinNeo.OpCode.FROMALTSTACK ]: number;
+        [ ThinNeo.OpCode.XDROP ]: number;
+        [ ThinNeo.OpCode.XSWAP ]: number;
+        [ ThinNeo.OpCode.XTUCK ]: number;
+        [ ThinNeo.OpCode.DEPTH ]: number;
+        [ ThinNeo.OpCode.DROP ]: number;
+        [ ThinNeo.OpCode.DUP ]: number;
+        [ ThinNeo.OpCode.NIP ]: number;
+        [ ThinNeo.OpCode.OVER ]: number;
+        [ ThinNeo.OpCode.PICK ]: number;
+        [ ThinNeo.OpCode.ROLL ]: number;
+        [ ThinNeo.OpCode.ROT ]: number;
+        [ ThinNeo.OpCode.SWAP ]: number;
+        [ ThinNeo.OpCode.TUCK ]: number;
+        [ ThinNeo.OpCode.CAT ]: number;
+        [ ThinNeo.OpCode.SUBSTR ]: number;
+        [ ThinNeo.OpCode.LEFT ]: number;
+        [ ThinNeo.OpCode.RIGHT ]: number;
+        [ ThinNeo.OpCode.SIZE ]: number;
+        [ ThinNeo.OpCode.INVERT ]: number;
+        [ ThinNeo.OpCode.AND ]: number;
+        [ ThinNeo.OpCode.OR ]: number;
+        [ ThinNeo.OpCode.XOR ]: number;
+        [ ThinNeo.OpCode.EQUAL ]: number;
+        [ ThinNeo.OpCode.INC ]: number;
+        [ ThinNeo.OpCode.DEC ]: number;
+        [ ThinNeo.OpCode.SIGN ]: number;
+        [ ThinNeo.OpCode.NEGATE ]: number;
+        [ ThinNeo.OpCode.ABS ]: number;
+        [ ThinNeo.OpCode.NOT ]: number;
+        [ ThinNeo.OpCode.NZ ]: number;
+        [ ThinNeo.OpCode.ADD ]: number;
+        [ ThinNeo.OpCode.SUB ]: number;
+        [ ThinNeo.OpCode.MUL ]: number;
+        [ ThinNeo.OpCode.DIV ]: number;
+        [ ThinNeo.OpCode.MOD ]: number;
+        [ ThinNeo.OpCode.SHL ]: number;
+        [ ThinNeo.OpCode.SHR ]: number;
+        [ ThinNeo.OpCode.BOOLAND ]: number;
+        [ ThinNeo.OpCode.BOOLOR ]: number;
+        [ ThinNeo.OpCode.NUMEQUAL ]: number;
+        [ ThinNeo.OpCode.NUMNOTEQUAL ]: number;
+        [ ThinNeo.OpCode.LT ]: number;
+        [ ThinNeo.OpCode.GT ]: number;
+        [ ThinNeo.OpCode.LTE ]: number;
+        [ ThinNeo.OpCode.GTE ]: number;
+        [ ThinNeo.OpCode.MIN ]: number;
+        [ ThinNeo.OpCode.MAX ]: number;
+        [ ThinNeo.OpCode.WITHIN ]: number;
+        [ ThinNeo.OpCode.ARRAYSIZE ]: number;
+        [ ThinNeo.OpCode.PACK ]: number;
+        [ ThinNeo.OpCode.UNPACK ]: number;
+        [ ThinNeo.OpCode.PICKITEM ]: number;
+        [ ThinNeo.OpCode.SETITEM ]: number;
+        [ ThinNeo.OpCode.NEWARRAY ]: number;
+        [ ThinNeo.OpCode.NEWSTRUCT ]: number;
+        [ ThinNeo.OpCode.NEWMAP ]: number;
+        [ ThinNeo.OpCode.APPEND ]: number;
+        [ ThinNeo.OpCode.REVERSE ]: number;
+        [ ThinNeo.OpCode.REMOVE ]: number;
+        [ ThinNeo.OpCode.HASKEY ]: number;
+        [ ThinNeo.OpCode.KEYS ]: number;
+        [ ThinNeo.OpCode.VALUES ]: number;
+        [ ThinNeo.OpCode.THROW ]: number;
+        [ ThinNeo.OpCode.THROWIFNOT ]: number;
+    };
+}
 declare namespace ThinNeo {
     class Base64 {
         static lookup: any[];
@@ -756,6 +1088,29 @@ declare namespace ThinNeo {
         static tripletToBase64(num: any): any;
         static encodeChunk(uint8: any, start: any, end: any): string;
         static fromByteArray(uint8: Uint8Array): string;
+    }
+}
+declare namespace ThinSdk {
+    class Contract {
+        contractHash: Neo.Uint160;
+        scriptBuilder: ThinNeo.ScriptBuilder;
+        constructor(_contractHash: Neo.Uint160, _scriptBuild: ThinNeo.ScriptBuilder);
+        Call(method: string, ...args: any[]): void;
+        static emitAppCall(sb: ThinNeo.ScriptBuilder, scriptHash: Neo.Uint160, operation: string, ...args: any[]): ThinNeo.ScriptBuilder;
+    }
+}
+declare namespace ThinSdk {
+    class NeoTransaction {
+        scriptBuilder: ThinNeo.ScriptBuilder;
+        tran: ThinNeo.Transaction;
+        contract: Contract;
+        gas: Token.GAS;
+        neo: Token.NEO;
+        constructor(sender: Neo.Uint160, currentBlockIndex: number);
+        signAndPack(prikey: Uint8Array, sysFee: number): Uint8Array;
+        getTranMessage(): string;
+        getTranData(): string;
+        getWeakRandomValues(array: number | Uint8Array): Uint8Array;
     }
 }
 declare namespace ThinNeo {
@@ -858,6 +1213,12 @@ declare namespace ThinNeo {
         usage: TransactionAttributeUsage;
         data: Uint8Array;
     }
+    class TransactionAttribute implements Neo.IO.ISerializable {
+        usage: TransactionAttributeUsage;
+        data: Uint8Array;
+        deserialize(ms: Neo.IO.BinaryReader): void;
+        serialize(writer: Neo.IO.BinaryWriter): void;
+    }
     class TransactionOutput {
         assetId: Uint8Array;
         value: Neo.Fixed8;
@@ -866,11 +1227,11 @@ declare namespace ThinNeo {
     class TransactionInput {
         hash: Uint8Array;
         index: number;
-        addr:string;
     }
     class Witness {
         InvocationScript: Uint8Array;
         VerificationScript: Uint8Array;
+        scriptHash: Uint8Array;
         readonly Address: string;
     }
     interface IExtData {
@@ -894,12 +1255,20 @@ declare namespace ThinNeo {
         Deserialize(trans: Transaction, reader: Neo.IO.BinaryReader): void;
     }
     class Transaction {
-        type: TransactionType;
         version: number;
-        attributes: Attribute[];
-        inputs: TransactionInput[];
-        outputs: TransactionOutput[];
+        nonce: number;
+        sender: Neo.Uint160;
+        systemFee: Neo.Long;
+        networkFee: Neo.Long;
+        validUntilBlock: number;
+        attributes: TransactionAttribute[];
         witnesses: Witness[];
+        cosigners: Neo.Cosigner[];
+        script: Uint8Array;
+        static MaxTransactionSize: number;
+        static MaxValidUntilBlockIncrement: number;
+        private static MaxTransactionAttributes;
+        private static MaxCosigners;
         SerializeUnsigned(writer: Neo.IO.BinaryWriter): void;
         Serialize(writer: Neo.IO.BinaryWriter): void;
         extdata: IExtData;
@@ -910,113 +1279,7 @@ declare namespace ThinNeo {
         AddWitness(signdata: Uint8Array, pubkey: Uint8Array, addrs: string): void;
         AddWitnessScript(vscript: Uint8Array, iscript: Uint8Array, scripthash?: Uint8Array): void;
         GetHash(): Uint8Array;
-    }
-}
-declare module ThinNeo {
-    enum OpCode {
-        PUSH0 = 0,
-        PUSHF = 0,
-        PUSHBYTES1 = 1,
-        PUSHBYTES75 = 75,
-        PUSHDATA1 = 76,
-        PUSHDATA2 = 77,
-        PUSHDATA4 = 78,
-        PUSHM1 = 79,
-        PUSH1 = 81,
-        PUSHT = 81,
-        PUSH2 = 82,
-        PUSH3 = 83,
-        PUSH4 = 84,
-        PUSH5 = 85,
-        PUSH6 = 86,
-        PUSH7 = 87,
-        PUSH8 = 88,
-        PUSH9 = 89,
-        PUSH10 = 90,
-        PUSH11 = 91,
-        PUSH12 = 92,
-        PUSH13 = 93,
-        PUSH14 = 94,
-        PUSH15 = 95,
-        PUSH16 = 96,
-        NOP = 97,
-        JMP = 98,
-        JMPIF = 99,
-        JMPIFNOT = 100,
-        CALL = 101,
-        RET = 102,
-        APPCALL = 103,
-        SYSCALL = 104,
-        TAILCALL = 105,
-        DUPFROMALTSTACK = 106,
-        TOALTSTACK = 107,
-        FROMALTSTACK = 108,
-        XDROP = 109,
-        XSWAP = 114,
-        XTUCK = 115,
-        DEPTH = 116,
-        DROP = 117,
-        DUP = 118,
-        NIP = 119,
-        OVER = 120,
-        PICK = 121,
-        ROLL = 122,
-        ROT = 123,
-        SWAP = 124,
-        TUCK = 125,
-        CAT = 126,
-        SUBSTR = 127,
-        LEFT = 128,
-        RIGHT = 129,
-        SIZE = 130,
-        INVERT = 131,
-        AND = 132,
-        OR = 133,
-        XOR = 134,
-        EQUAL = 135,
-        INC = 139,
-        DEC = 140,
-        SIGN = 141,
-        NEGATE = 143,
-        ABS = 144,
-        NOT = 145,
-        NZ = 146,
-        ADD = 147,
-        SUB = 148,
-        MUL = 149,
-        DIV = 150,
-        MOD = 151,
-        SHL = 152,
-        SHR = 153,
-        BOOLAND = 154,
-        BOOLOR = 155,
-        NUMEQUAL = 156,
-        NUMNOTEQUAL = 158,
-        LT = 159,
-        GT = 160,
-        LTE = 161,
-        GTE = 162,
-        MIN = 163,
-        MAX = 164,
-        WITHIN = 165,
-        SHA1 = 167,
-        SHA256 = 168,
-        HASH160 = 169,
-        HASH256 = 170,
-        CSHARPSTRHASH32 = 171,
-        JAVAHASH32 = 173,
-        CHECKSIG = 172,
-        CHECKMULTISIG = 174,
-        ARRAYSIZE = 192,
-        PACK = 193,
-        UNPACK = 194,
-        PICKITEM = 195,
-        SETITEM = 196,
-        NEWARRAY = 197,
-        NEWSTRUCT = 198,
-        SWITCH = 208,
-        THROW = 240,
-        THROWIFNOT = 241
+        GetTxid(): string;
     }
 }
 declare namespace ThinNeo.VM {
@@ -1076,157 +1339,23 @@ declare module ThinNeo.Compiler {
         getCodeName(): string;
     }
 }
-declare namespace ThinNeo.Debug.Helper {
-    class MethodInfo {
-        name: string;
-        startAddr: number;
-        Add(line: number, addr: number): void;
-        Sort(): void;
-        addr2line: {
-            [id: number]: number;
-        };
-        line2addr: {
-            [id: number]: number;
-        };
-        addr_count: number;
-        line2addr_minkey: number;
-        line2addr_maxkey: number;
-        addr2line_minkey: number;
-        addr2line_maxkey: number;
-        lines: Array<number>;
-        addrs: Array<number>;
-        GetAddr(line: number): number;
-        GetAddrBack(line: number): number;
-        GetLineDirect(addr: number): number;
-        GetLine(addr: number): number;
-        GetLineBack(addr: number): number;
-    }
-    class AddrMap {
-        methods: Array<MethodInfo>;
-        GetAddr(line: number): number;
-        GetAddrBack(line: number): number;
-        GetLine(addr: number): number;
-        GetLineDirect(addr: number): number;
-        GetLineBack(addr: number): number;
-        static FromJson(json: {
-            [id: string]: any;
-        }): AddrMap;
+declare namespace ThinSdk.Token {
+    class BaseToken extends Contract {
+        constructor(_contractHash: Neo.Uint160, _scriptBuilder: ThinNeo.ScriptBuilder);
+        transfer(from: string, to: string, amount: number): void;
+        balanceOf(...accounts: Neo.Uint160[]): void;
+        balanceOf_Unite(...accounts: Neo.Uint160[]): void;
+        decimals(): void;
+        symbol(): void;
     }
 }
-declare namespace ThinNeo.Debug {
-    class DebugScript {
-        srcfile: string;
-        codes: ThinNeo.Compiler.Op[];
-        maps: ThinNeo.Debug.Helper.AddrMap;
-    }
-    class DebugTool {
-        scripts: {
-            [id: string]: DebugScript;
-        };
-        dumpInfo: SmartContract.Debug.DumpInfo;
+declare namespace ThinSdk.Token {
+    class GAS extends BaseToken {
+        constructor(sb: ThinNeo.ScriptBuilder);
     }
 }
-declare module ThinNeo.SmartContract.Debug {
-    enum VMState {
-        NONE = 0,
-        HALT = 1,
-        FAULT = 2,
-        BREAK = 4
-    }
-    enum OpType {
-        Non = 0,
-        Clear = 1,
-        Insert = 2,
-        Peek = 3,
-        Pop = 4,
-        Push = 5,
-        Remove = 6,
-        Set = 7
-    }
-    class Op {
-        constructor(type: OpType, ind?: number);
-        type: OpType;
-        ind: number;
-        Clone(): Op;
-    }
-    class StackItem {
-        type: string;
-        strvalue: string;
-        subItems: Array<StackItem>;
-        Clone(): StackItem;
-        AsInt(): number;
-        AsBigInteger(): Neo.BigInteger;
-        asBytes(): Uint8Array;
-        ToString(): string;
-        ToShortString(): string;
-        static FromJson(json: {}): StackItem;
-    }
-    class LogScript {
-        constructor(hash: string);
-        GetAllScriptName(names: Array<string>): number;
-        parent: LogScript;
-        hash: string;
-        ops: Array<LogOp>;
-        static FromJson(json: {}): LogScript;
-        Clone(): LogScript;
-    }
-    class LogOp {
-        private static __guid;
-        private thisguid;
-        readonly guid: number;
-        constructor(addr: number, op: ThinNeo.OpCode);
-        addr: number;
-        op: ThinNeo.OpCode;
-        error: boolean;
-        stack: Op[];
-        param: Uint8Array;
-        opresult: StackItem;
-        GetHeader(): string;
-        subScript: LogScript;
-        static FromJson(json: {}): LogOp;
-        Clone(): LogOp;
-    }
-    class DumpInfo {
-        script: LogScript;
-        error: string;
-        states: VMState[];
-        curScript: LogScript;
-        curOp: LogOp;
-        static FromJson(json: {}): DumpInfo;
-    }
-}
-declare namespace ThinNeo.Debug {
-    class State {
-        private _StateID;
-        readonly StateID: number;
-        SetId(id: number): void;
-        ExeStack: ThinNeo.VM.RandomAccessStack<string>;
-        CalcStack: VM.RandomAccessStack<SmartContract.Debug.StackItem>;
-        AltStack: VM.RandomAccessStack<SmartContract.Debug.StackItem>;
-        PushExe(hash: string): void;
-        PopExe(): void;
-        CalcCalcStack(op: ThinNeo.OpCode): boolean;
-        CalcCalcStack2(stackop: ThinNeo.SmartContract.Debug.Op, item: ThinNeo.SmartContract.Debug.StackItem): void;
-        DoSysCall(): void;
-        Clone(): State;
-    }
-    class CareItem {
-        constructor(name: string, state: State);
-        name: string;
-        item: ThinNeo.SmartContract.Debug.StackItem;
-        ToString(): string;
-    }
-    class SimVM {
-        Execute(DumpInfo: SmartContract.Debug.DumpInfo): void;
-        lastScript: SmartContract.Debug.LogScript;
-        regenScript: SmartContract.Debug.LogScript;
-        stateClone: {
-            [id: number]: State;
-        };
-        mapState: {
-            [id: number]: number;
-        };
-        careinfo: Array<CareItem>;
-        ExecuteScript(runstate: State, script: SmartContract.Debug.LogScript): void;
+declare namespace ThinSdk.Token {
+    class NEO extends BaseToken {
+        constructor(sb: ThinNeo.ScriptBuilder);
     }
 }

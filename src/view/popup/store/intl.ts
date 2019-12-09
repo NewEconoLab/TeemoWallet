@@ -127,6 +127,7 @@ export interface Language_History {
     none: string;
     deploy: string;
     sysfee: string;
+    netfee: string;
 }
 
 export interface Language_exchange {

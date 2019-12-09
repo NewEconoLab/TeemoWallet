@@ -1,8 +1,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -61,9 +62,9 @@ class SocketManager {
     }
     get webSocketURL() {
         if (storage.network == 'MainNet')
-            return 'wss://testws.nel.group/ws/mainnet';
+            return 'wss://testwss.nel.group/ws/mainnet';
         else
-            return 'wss://testws.nel.group/ws/testnet';
+            return 'wss://testwss.nel.group/ws/testnet';
     }
     socketInit() {
         console.log("socketInit", storage.network);
@@ -89,10 +90,11 @@ class SocketManager {
         };
         this.socket.onmessage = (event) => {
             // console.log(event);
-            // console.log(event.data);
+            // console.log("event", event.data);
             this.lastWSmsgTime = new Date().getTime();
             this.time = new Date().getTime();
             var data = JSON.parse(event.data).data;
+            console.log("event.data", data);
             if (data.blockHeight != null) {
                 storage.height = data.blockHeight;
                 console.log('Current block height', storage.height);
@@ -104,7 +106,7 @@ class SocketManager {
                 for (const key in TaskManager.shed) {
                     const task = TaskManager.shed[key];
                     if (task.network == storage.network && task.state == TaskState.watting) {
-                        if (data.tx.findIndex(txid => txid.txid.replace('0x', '') == task.txid) > 0) {
+                        if (data.tx.findIndex(tx => { console.log(tx); return tx.hash.replace('0x', '') == task.txid; }) > 0) {
                             task.state = TaskState.success;
                             TaskManager.shed[key] = task;
                             Storage_local.set(TaskManager.table, TaskManager.shed);
@@ -112,19 +114,18 @@ class SocketManager {
                             const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
                             storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                             EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: data.blockHeight, blockTime: data.blockTime });
-                            if (task.type == ConfirmType.toClaimgas) {
-                                if (storage.account && storage.account.address == task.message) {
-                                    try {
-                                        claimGas(task.network);
-                                    }
-                                    catch (error) {
-                                        localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                                    }
-                                }
-                                else {
-                                    localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                                }
-                            }
+                            // if (task.type == ConfirmType.toClaimgas) {
+                            //     if (storage.account && storage.account.address == task.message) {
+                            //         try {
+                            //             // claimGas(task.network);
+                            //         } catch (error) {
+                            //             localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                            //         }
+                            //     }
+                            //     else {
+                            //         localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                            //     }
+                            // }
                             if (task.type == ConfirmType.claimgas) {
                                 localStorage.setItem('Teemo-claimgasState-' + task.network, '');
                             }
@@ -140,19 +141,18 @@ class SocketManager {
                                     TaskManager.shed[key] = task;
                                     Storage_local.set(TaskManager.table, TaskManager.shed);
                                     TaskNotify(task);
-                                    if (task.type == ConfirmType.toClaimgas) {
-                                        if (storage.account && storage.account.address == task.message) {
-                                            try {
-                                                claimGas(task.network);
-                                            }
-                                            catch (error) {
-                                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                                            }
-                                        }
-                                        else {
-                                            localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                                        }
-                                    }
+                                    // if (task.type == ConfirmType.toClaimgas) {
+                                    //     if (storage.account && storage.account.address == task.message) {
+                                    //         try {
+                                    //             claimGas(task.network);
+                                    //         } catch (error) {
+                                    //             localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                    //         }
+                                    //     }
+                                    //     else {
+                                    //         localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                    //     }
+                                    // }
                                     const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
                                     storage.accountWaitTaskCount[task.currentAddr] = count - 1;
                                     if (task.next) {

@@ -1,8 +1,89 @@
 .notify-page{
-    .notify-content{
-        height: 443px;
-        background: #F9F9F9;
-        overflow-y: auto;
+    height: 600px;
+    width: 375px;
+    .notify-box{
+        height: 522px;    
         position: relative;
+        .notify-content{
+            height: 433px;
+            background: #F9F9F9;
+            overflow-y: auto;
+            position: relative;
+        }
+        .loading-model{
+            height: 100%;
+            width: 100%;
+            background: rgba(255,255,255,0.5);
+            z-index: 3;
+            position: absolute;
+            bottom: 0;
+            img {
+              width: 15px;
+              height: 15px;
+              vertical-align: middle;
+            }
+            .loading-box{
+                top: 28.5%;
+                left: 32.5%;
+                position: absolute;
+                background: #FFFFFF;
+                box-shadow: 0 2px 8px 0 rgba(95,95,95,0.50);
+                border-radius: 6px;
+                border-radius: 6px;
+                height: 110px;
+                width: 130px;
+                .loading-icon{
+                    position: relative;
+                    top: 41px;
+                    left: 58px;
+                    /*动画效果*/
+                    img{
+                        /*animation (动画) :绑定选择器, 4s完成动画 linear(匀速) infinite(循环) */
+                        animation: que 1s linear infinite;
+                    }
+                    /*通过@keyframes规则,能够创建动画 , que 定义动画的名称 可自己定义*/
+                    @keyframes que {
+                        /*以百分比来规定改变发生的时间 也可以通过"from"和"to",等价于0% 和 100%*/
+                        0%{
+                            /*rotate(2D旋转) scale(放大或者缩小) translate(移动) skew(翻转)*/
+                            transform: rotate(0deg);
+                        }
+                        100%{
+                            transform: rotate(360deg);
+                        }
+                    }
+                }
+                .loading-text{
+                    font-size: 12px;
+                    color: #B2B2B2;
+                    text-align: center;
+                    line-height: 16px;
+                }
+            }
+        }
+    }
+}
+.error-message {
+  min-height: 32px;
+  border: 1px solid #d0021b;
+  color: #d0021b;
+  background: #fff1f2;
+  border-radius: 4px;
+  font-size: 12px;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+          align-items: center;
+  padding: 0px 16px; 
+  .error-message-icon {
+    width: 20px;
+    margin-right: 8px;
+    -webkit-box-flex: 0;
+    flex: 0 0 auto; 
+  }
+  .error-message-text {
+    overflow: auto;
     }
 }

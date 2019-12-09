@@ -94,6 +94,7 @@ export default {
     none: "none",
     deploy: "Deployment contract",
     sysfee: "System fee",
+    netfee: "Network fee",
   },
   exchange: {
     gasToCgas: "Convert GAS to CGAS",

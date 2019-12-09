@@ -28,9 +28,9 @@ declare const HASH_CONFIG: {
     ID_NNC: Neo.Uint160;
     ID_NNK: Neo.Uint160;
 };
-declare const baseCommonUrl = "https://api.nel.group/api";
-declare const baseUrl = "https://apiwallet.nel.group/api";
-declare const testRpcUrl = "http://test.nel.group:20332";
+declare const baseCommonUrl = "https://apiblockneo3.nel.group/api";
+declare const baseUrl = "https://apiscanneo3.nel.group/api";
+declare const testRpcUrl = "http://localhost:20332";
 declare const mainRpcUrl = "http://seed.nel.group:10332";
 declare const testRpcUrlList: string[];
 declare const mainRpcUrlList: string[];
@@ -49,7 +49,7 @@ interface Number {
     div(...arg: number[]): number;
 }
 /**
- * -------------------------以下是账户所使用到的实体类
+ * 以下是账户所使用到的实体类
  */
 declare class NepAccount {
     index?: number;
@@ -75,54 +75,23 @@ interface LoginInfo {
     prikey: Uint8Array;
     address: string;
 }
-declare class MarkUtxo {
-    txid: string;
-    n: number;
-    constructor(txid: string, n: number);
-    /**
-     * 塞入标记
-     * @param utxos 标记
-     */
-    static setMark(utxos: MarkUtxo[]): void;
-    static getAllUtxo(): Promise<{
-        [id: string]: Utxo[];
-    }>;
-    static getUtxoByAsset(assetId: string): Promise<Array<Utxo>>;
-}
-interface ICoinStore {
-    assets: {
-        [id: string]: Utxo[];
-    };
-    initUtxos: () => Promise<boolean>;
-}
-declare class Utxo {
-    addr: string;
-    txid: string;
-    n: number;
-    asset: string;
-    count: Neo.Fixed8;
-}
 declare class Storage_local {
     static setAccount(account: NepAccount): NepAccount;
     static getAccount(): NepAccount[];
-    static set(key: string, value: any): Promise<{}>;
+    static set(key: string, value: any): Promise<unknown>;
     static get<T>(key: string): Promise<T>;
 }
 declare class Transaction extends ThinNeo.Transaction {
-    marks: MarkUtxo[];
-    constructor(type?: ThinNeo.TransactionType);
-    /**
-     * setScript 往交易中塞入脚本 修改交易类型为 InvokeTransaction
-     */
-    setScript(script: Uint8Array, sys_fee?: Neo.Fixed8): void;
-    /**
-     * 创建一个交易中的输入和输出 将使用过的utxo 放入 marks
-     * @param utxos 资产的utxo
-     * @param sendcount 输出总数
-     * @param target 对方地址
-     * @param netfee 有手续费的时候使用，并且使用的utxos是gas的时候
-     */
-    creatInuptAndOutup(utxos: Utxo[], sendcount: Neo.Fixed8, target?: string, fee?: Neo.Fixed8): void;
+    scriptBuilder: ScriptBuild;
+    contract: ThinSdk.Contract;
+    constructor(sender?: string, currentBlockIndex?: number);
+    calculateNetworkFee(): Neo.Long;
+    getSystemFee(): Promise<Neo.Long>;
+    pack(sysFee: number, netFee: number): {
+        networkFee: Neo.Long;
+        systemFee: Neo.Long;
+    };
+    signAndPack(prikey: Uint8Array): Uint8Array;
     getTxid(): string;
 }
 declare const makeRpcPostBody: (method: any, params: any) => string;
@@ -147,7 +116,7 @@ declare const Api: {
     getStorage: (scriptHash: string, key: string) => Promise<any>;
     getcontractstate: (scriptaddr: string) => Promise<any>;
     getavailableutxos: (address: string, count: number) => Promise<any>;
-    getInvokeRead: (scriptHash: string) => Promise<any>;
+    getInvokeRead: (scriptHash: string, network?: "TestNet" | "MainNet") => Promise<any>;
     /**
      * 获取nep5的资产（CGAS）
      */
@@ -224,31 +193,29 @@ declare class ScriptBuild extends ThinNeo.ScriptBuilder {
      * @param hookTxid 关联交易id
      */
     EmitArguments(argument: Argument[], hookTxid?: string): ThinNeo.ScriptBuilder;
-    EmitInvokeArgs(data: InvokeArgs | InvokeArgs[], hookTxid?: string): Uint8Array;
+    EmitInvokeArgs(data: InvokeInput | InvokeInput[], hookTxid?: string): Uint8Array;
 }
 /**
  * 构造合约调用交易
  * @param invoke invoke调用参数
  */
-declare var contractBuilder: (invoke: InvokeArgs) => any;
-declare const deploy: (params: DeployContractArgs) => Promise<InvokeOutput>;
+declare var contractBuilder: (invokeArgs: InvokeArgs) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}>;
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
  */
-declare const invokeGroupBuild: (data: InvokeGroup) => Promise<InvokeOutput[]>;
+declare const invokeGroupBuild: (data: InvokeGroup) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}[]>;
 /**
  * 发送
  * @param trans
  */
 declare const sendGroupTranstion: (trans: Transaction[]) => Promise<InvokeOutput[]>;
-/**
- *
- * @param transcount 转换金额
- * @param netfee 交易费用
- */
-declare var exchangeCgas: (transcount: number, netfee: number) => Promise<InvokeOutput[]>;
-declare var exchangeGas: (transcount: number, netfee: number) => Promise<any>;
 interface AssetInfo {
     assetid: string;
     type: 'nep5' | 'utxo';
@@ -280,16 +247,9 @@ interface UtxoAssetInfo {
     expiration: number;
     frozen: boolean;
 }
-declare var makeRefundTransaction: (transcount: number, netfee: number) => Promise<InvokeOutput>;
-/**
- *
- * @param utxo 兑换gas的utxo
- * @param transcount 兑换的数量
- */
-declare var makeRefundTransaction_tranGas: (utxo: Utxo, transcount: number, netfee: number) => Promise<TransferGroup>;
 declare const transactionSignAndSend: (tran: Transaction, net?: "TestNet" | "MainNet") => Promise<InvokeOutput>;
 interface NotifyMessage {
-    header?: {
+    header: {
         title: string;
         domain: string;
         icon?: string;
@@ -306,30 +266,32 @@ interface NotifyMessage {
  * @param call 回调方法
  * @param data 通知信息
  */
-declare const openNotify: (notifyData: NotifyMessage) => Promise<boolean>;
+declare const openNotify: (notifyData: NotifyMessage, getData?: Promise<any>) => Promise<any>;
+declare const getMessageID: () => string;
 /**
  * 请求账户信息
  */
-declare const getAccount: () => Promise<{}>;
+declare const getAccount: () => Promise<unknown>;
+declare const calculateInvokeGroup: (params: InvokeGroup) => Promise<InvokeGroup>;
 /**
  * invokeGroup 合约调用
  * @param title 请求的网页信息
  * @param data 传递的数据
  */
-declare const invokeGroup: (header: any, params: InvokeGroup) => Promise<{}>;
+declare const invokeGroup: (header: any, params: InvokeGroup) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}[]>;
+declare const createInvokeTran: (params: InvokeArgs) => Promise<InvokeArgs>;
 /**
  * invoke 合约调用
  * @param title dapp请求方的信息
  * @param data 请求的参数
  */
-declare const invoke: (header: any, params: InvokeArgs) => Promise<{}>;
-/**
- * invoke 合约调用
- * @param title dapp请求方的信息
- * @param data 请求的参数
- */
-declare const deployContract: (header: any, params: DeployContractArgs) => Promise<{}>;
-declare const sendScript: (header: any, params: SendScriptArgs) => Promise<{}>;
+declare const invoke: (header: any, params: InvokeArgs) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}>;
 /**
  * 获得网络状态信息
  */
@@ -338,17 +300,16 @@ declare const getNetworks: () => Promise<GetNetworksOutput>;
  * 余额获取
  * @param data 请求的参数
  */
-declare var getBalance: (data: GetBalanceArgs) => Promise<{}>;
+declare var getBalance: (data: GetBalanceArgs) => Promise<unknown>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
+declare const createTranData: (data: SendArgs) => Promise<SendArgs>;
 declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
-declare const sendInvoke: (header: any, data: SendScriptArgs) => any;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
  */
-declare var invokeRead: (data: InvokeReadInput) => Promise<any>;
-declare var invokeReadTest: () => void;
-declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<{}>;
+declare var invokeRead: (data: InvokeInput) => Promise<any>;
+declare var invokeReadGroup: (data: InvokeReadGroup) => Promise<unknown>;
 declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
     scriptHashs: string[];
     descriptions: string[];
@@ -360,15 +321,17 @@ declare var invokeArgsAnalyse: (...invokes: InvokeArgs[]) => Promise<{
         assetid: string;
     }[];
     fee: string;
+    networkFee: string;
+    systemFee: string;
 }>;
 declare var queryAssetSymbol: (assetID: string, network: "TestNet" | "MainNet") => Promise<{
     symbol: string;
     decimals: number;
 }>;
-declare const getProvider: () => Promise<{}>;
+declare const getProvider: () => Promise<unknown>;
 declare const getStorage: (data: GetStorageArgs) => Promise<GetStorageOutput>;
 declare const getPublicKey: () => Promise<GetPublickeyOutput>;
-declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<{}>;
+declare const notifyInit: (title: string, domain: string, favIconUrl: string) => Promise<unknown>;
 declare const showNotify: (title: string, msg: string, call?: (notificationIds: string) => void) => void;
 /**
  * 通过正则获得url中的域名
@@ -379,42 +342,42 @@ declare const getURLDomain: (Url: string) => string;
  * 查询区块高度
  * @param data 查询区块信息的参数，blockHeight,network
  */
-declare const getBlock: (data: GetBlockArgs) => Promise<{}>;
+declare const getBlock: (data: GetBlockArgs) => Promise<unknown>;
 /**
  * 查询Application Log
  * @param data
  */
-declare const getApplicationLog: (data: GetApplicationLogArgs) => Promise<{}>;
+declare const getApplicationLog: (data: GetApplicationLogArgs) => Promise<unknown>;
 /**
  * 查询交易信息
  * @param data
  */
-declare const getTransaction: (data: GetTransactionArgs) => Promise<{}>;
+declare const getTransaction: (data: GetTransactionArgs) => Promise<unknown>;
 /**
  * 验证地址是否正确
  * @param address
  */
-declare const validateAddress: (address: string) => Promise<{}>;
+declare const validateAddress: (address: string) => Promise<unknown>;
 /**
  * 将ScriptHash转换成Address
  * @param scriptHash
  */
-declare const getAddressFromScriptHash: (scriptHash: string) => Promise<{}>;
+declare const getAddressFromScriptHash: (scriptHash: string) => Promise<unknown>;
 /**
  * 将hexstr转换成字符串
  * @param hexStr
  */
-declare const getStringFromHexstr: (hexStr: string) => Promise<{}>;
+declare const getStringFromHexstr: (hexStr: string) => Promise<unknown>;
 /**
  * 将hex转换成BigIngteger
  * @param hexStr
  */
-declare const getBigIntegerFromHexstr: (hexStr: string) => Promise<{}>;
+declare const getBigIntegerFromHexstr: (hexStr: string) => Promise<unknown>;
 /**
  * 反转 HexStr
  * @param hexStr
  */
-declare const reverseHexstr: (hexStr: string) => Promise<{}>;
+declare const reverseHexstr: (hexStr: string) => Promise<unknown>;
 /**
  * 将资产精度转换到大整数
  * @param amount
@@ -490,6 +453,8 @@ interface InvokeHistory {
         amount: string;
     }[];
     netfee: string;
+    systemFee?: string;
+    networkFee?: string;
 }
 interface DeployHistory {
     domain: string;
@@ -538,15 +503,11 @@ declare class TaskManager {
     static addDeployData(txid: string, domain: string, info: DeployContractArgs): void;
     static InvokeDataUpdate(): void;
     static addTask(task: Task): void;
-    static initShed(): Promise<{}>;
+    static initShed(): Promise<unknown>;
     static update(): void;
 }
 declare var cleanHistory: () => void;
 declare var cleanTaskForAddr: (address: string) => void;
-declare var getClaimGasAmount: () => Promise<string>;
-declare var getClaimGasState: () => string;
-declare var doClaimGas: () => Promise<void>;
-declare const claimGas: (network: "TestNet" | "MainNet") => Promise<InvokeOutput>;
 interface Claim {
     addr: string;
     asset: string;
@@ -679,11 +640,11 @@ interface GetStorageOutput {
  * @param {stgring} 网络费
  *
  */
-interface InvokeArgs {
+interface InvokeArgs extends InvokeInput {
     scriptHash: string;
     operation: string;
-    fee?: string;
-    sys_fee?: string;
+    networkFee?: string;
+    systemFee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;
@@ -736,14 +697,14 @@ interface InvokeGroup {
     merge: boolean;
     group: InvokeArgs[];
 }
-interface InvokeReadInput {
+interface InvokeInput {
     scriptHash: string;
     operation: string;
     arguments?: Argument[];
     network: string;
 }
 interface InvokeReadGroup {
-    group: InvokeReadInput[];
+    group: InvokeInput[];
 }
 interface InvokeGroupOutup {
 }
@@ -778,7 +739,8 @@ interface SendArgs {
     asset: string;
     amount: string;
     remark?: string;
-    fee?: string;
+    networkFee?: string;
+    systemFee?: string;
     network: "TestNet" | "MainNet";
 }
 interface SendOutput {

@@ -9,6 +9,7 @@ import { Storage_local } from '../../../../common/util';
 import { Background, SendArgs } from '../../../../lib/background';
 import { bg } from '../../../popup/utils/storagetools';
 import intl from '../../../popup/store/intl';
+import { ICON } from '../../../image';
 // import { observer } from 'mobx-react';
 
 interface IProps {
@@ -16,17 +17,20 @@ interface IProps {
   domain: string,
   data: any,
   address: string,
+  toError: () => void
 }
 interface IState {
   pageNumber: number,
   data: any,
   toAddress: string,
   amount: string,
-  fee: string,
+  systemFee: string,
+  networkFee: string,
   assetSymbol: string,
   assetID: string,
   remark: string,
   network: 'TestNet' | 'MainNet';
+  err: boolean;
 }
 // @observer
 export default class SendRequest extends React.Component<IProps, IState>
@@ -37,11 +41,13 @@ export default class SendRequest extends React.Component<IProps, IState>
     data: null,
     toAddress: "",
     amount: "0",
-    fee: '0',
+    systemFee: '0',
+    networkFee: '0',
     assetID: "",
     assetSymbol: "",
     remark: "",
-    network: 'TestNet'
+    network: 'TestNet',
+    err: false
   }
   public componentWillReceiveProps(nextProps) {
     this.setState({
@@ -68,7 +74,8 @@ export default class SendRequest extends React.Component<IProps, IState>
       this.setState({
         assetID: sendData.asset,
         toAddress: sendData.toAddress,
-        fee: sendData.fee ? sendData.fee : '0',
+        networkFee: sendData.networkFee ? sendData.networkFee : '0',
+        systemFee: sendData.systemFee ? sendData.systemFee : '0',
         amount: sendData.amount,
         remark: sendData.remark ? sendData.remark : '',
         network: sendData.network ? sendData.network : 'TestNet'
@@ -97,7 +104,7 @@ export default class SendRequest extends React.Component<IProps, IState>
     })
   }
   public render() {
-    const assetHref = `https://scan.nel.group/${this.state.network == 'TestNet' ? 'test' : 'main'}/asset/`;
+    const assetHref = `https://scan.nel.group/${this.state.network == 'TestNet' ? 'neo3' : 'main'}/asset/`;
     return (
       <div className="ncontract-wrap">
         <div className="first-line">
@@ -130,24 +137,19 @@ export default class SendRequest extends React.Component<IProps, IState>
                     </span>
                   </div>
                 </div>
-                {
-                  parseFloat(this.state.fee) !== 0 && (
-                    <div className="line-wrap">
-                      <div className="line-left">{intl.message.history.fee}</div>
-                      <div className="line-right">
-                        <span>{this.state.fee} GAS</span>
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
-              {
-                parseFloat(this.state.fee) === 0 && (
-                  <div className="check-fee">
-                    <Checkbox text={intl.message.transfer.payfee} onClick={this.netfeeChange}></Checkbox>
+                <div className="line-wrap">
+                  <div className="line-left">{intl.message.history.sysfee}</div>
+                  <div className="line-right">
+                    <span>{this.state.systemFee} GAS</span>
                   </div>
-                )
-              }
+                </div>
+                <div className="line-wrap">
+                  <div className="line-left">{intl.message.history.netfee}</div>
+                  <div className="line-right">
+                    <span>{this.state.networkFee} GAS</span>
+                  </div>
+                </div>
+              </div>
               <div className="contract-title">{intl.message.notify.dappNote}</div>
               <div className="remark-content white-wrap">
                 {
@@ -183,6 +185,13 @@ export default class SendRequest extends React.Component<IProps, IState>
               </div>
             </>
           )
+        }
+        {
+          this.state.err &&
+          <div className="error-message">
+            <img src={ICON.attention} className="error-message-icon" />
+            <div className="error-message-text">余额不足</div>
+          </div>
         }
       </div>
     );

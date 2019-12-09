@@ -88,14 +88,15 @@ export default {
     scriptHash: "合约hash",
     note: "备注",
     amount: "花费",
-    fee: "网络费",
+    fee: "手续费",
     presonalTransfer: "个人转账",
     all: "全部",
     from: "来自",
     to: "发往",
     none: "无",
     deploy: "部署合约",
-    sysfee: "网络费",
+    sysfee: "系统费",
+    netfee: "网络费"
   },
   exchange: {
     gasToCgas: "GAS换CGAS",

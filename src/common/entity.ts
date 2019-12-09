@@ -313,6 +313,8 @@ export interface InvokeArgs {
     scriptHash: string;
     operation: string;
     fee?: string;
+    systemFee?: string;
+    networkFee?: string;
     network: "TestNet" | "MainNet";
     arguments: Array<Argument>;
     attachedAssets?: AttachedAssets;

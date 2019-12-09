@@ -6,27 +6,27 @@ import * as React from 'react';
 import './index.less';
 import Select, { IOption } from '../../../components/Select';
 import Input from '../../../components/Input';
-import Checkbox from '../../../components/Checkbox';
+// import Checkbox from '../../../components/Checkbox';
 import Button from '../../../components/Button';
 import { bg } from '../../utils/storagetools';
 import common from '../../store/common';
 import { NNSTool } from '../../utils/nnstool';
 import { neotools } from '../../../notify/utils/neotools';
 import { asNumber } from '../../utils/numberTool';
-import { HASH_CONFIG } from '../../../config';
+// import { HASH_CONFIG } from '../../../config';
 import Toast from '../../../components/Toast';
 import { observer } from 'mobx-react';
 import intl from '../../store/intl';
 import manageStore from '../manage/store/manage.store';
+import { HASH_CONFIG } from '../../../config';
+// import Radio from '../../../components/Radio';
 
-interface IProps
-{
+interface IProps {
 	lableChange: (table: string) => void
 	asset: string,
 }
 
-interface IState
-{
+interface IState {
 	infoShow: boolean,
 	address: string,
 	amount: string,
@@ -37,23 +37,26 @@ interface IState
 	verifyPass: boolean,
 	checkDisable: boolean,
 	addrMessage: string,
-	resolverMessage:string;
+	resolverMessage: string;
 	amountMessage: string,
 	currentOption: IOption,
 	toAddress: string,
 	domain: string,
 	confirmDisable: boolean,
-	available:string;
+	available: string;
+	balance: number;
+	gas: number;
+	radioKey: string;
+	currentasset: AssetInfo;
 }
 
 @observer
 export default class Transfer extends React.Component<IProps, IState>
 {
-	constructor(props: IProps)
-	{
+	constructor(props: IProps) {
 		super(props);
 	}
-	public state:IState = {
+	public state: IState = {
 		infoShow: false,
 		address: "",
 		amount: "",
@@ -66,104 +69,116 @@ export default class Transfer extends React.Component<IProps, IState>
 		confirmDisable: false,
 		addrMessage: '',
 		amountMessage: '',
-		resolverMessage:'',
+		resolverMessage: '',
 		currentOption: undefined,
 		// options:[],
 		toAddress: '',
 		domain: '',
-		available:''
+		available: '',
+		radioKey: 'normal',
+		balance: 0,
+		gas: 0,
+		currentasset: { "assetid": "", "name": "", "decimals": 0, "symbol": "", "type": "nep5" },
 	}
 
-	componentDidMount()
-	{
-		if (this.props.asset != '')
-		{
-			const currentasset =  manageStore.myAssets.find(option => option.assetid == this.props.asset)
-
-			// currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol}
-			this.setState({
-				currentOption: {id:currentasset.assetid,name:currentasset.symbol},
-				available:`${common.balances.find(asset=>asset.assetID===currentasset.assetid).amount} ${currentasset.symbol}`
+	componentDidMount() {
+		if (this.props.asset != '') {
+			const currentasset = manageStore.myAssets.find(option => option.assetid == this.props.asset)
+			let balance = common.balances.find(asset => asset.assetID === currentasset.assetid).amount;
+			common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+				this.setState({ gas: parseFloat(value.amount) })
+			}).catch(err => {
+				this.setState({ gas: 0 })
 			})
-			
-		}
-		else
-		{
-			
+			// let gas = common.balances.find(asset => asset.assetID === HASH_CONFIG.ID_GAS).amount;
 			this.setState({
-				currentOption:{id:manageStore.myAssets[0].assetid,name:manageStore.myAssets[0].symbol},
-				available:`${common.balances.find(asset=>asset.assetID===manageStore.myAssets[0].assetid).amount} ${manageStore.myAssets[0].symbol}`
-			},()=>{
+				currentOption: { id: currentasset.assetid, name: currentasset.symbol },
+				available: `${balance} ${currentasset.symbol}`,
+				balance: parseFloat(balance),
+				currentasset,
+				// gas: parseFloat(gas)
+			})
+		}
+		else {
+			const balance = common.balances.find(asset => asset.assetID === manageStore.myAssets[ 0 ].assetid).amount;
+			// let gas = common.balances.find(asset => asset.assetID === HASH_CONFIG.ID_GAS).amount;
+			this.setState({
+				currentOption: { id: manageStore.myAssets[ 0 ].assetid, name: manageStore.myAssets[ 0 ].symbol },
+				available: `${balance} ${manageStore.myAssets[ 0 ].symbol}`,
+				balance: parseFloat(balance),
+				currentasset: manageStore.myAssets[ 0 ],
+				// gas: parseFloat(gas)
+			})
+			common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+				this.setState({ gas: parseFloat(value.amount) })
+			}).catch(err => {
+				this.setState({ gas: 0 })
 			})
 		}
 	}
-	public onSelect = (currentOption: IOption) =>
-	{
-		const available = `${common.balances.find(asset=>asset.assetID===currentOption.id).amount} ${currentOption.name}`
+	public onSelect = (currentOption: IOption) => {
+		const balance = parseFloat(common.balances.find(asset => asset.assetID === currentOption.id).amount);
+		// let gas = parseFloat(common.balances.find(asset => asset.assetID === HASH_CONFIG.ID_GAS).amount);
+		const currentasset = manageStore.myAssets.find(option => option.assetid == currentOption.id);
+		const available = `${common.balances.find(asset => asset.assetID === currentOption.id).amount} ${currentOption.name}`
 		this.setState(
 			{
-				currentOption,available
-			}, () =>
-			{
+				currentOption, available, balance, currentasset
+			}, () => {
 				this.onAmountChange(this.state.amount)
 			}
 		)
+		common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+			this.setState({ gas: parseFloat(value.amount) })
+		})
+			.catch(err => {
+				this.setState({ gas: 0 })
+			})
 	}
 	// 监控输入内容
-	public onAddrChange = async (event) =>
-	{
+	public onAddrChange = async (event) => {
 		let errorAddr = false;
-		let resolverMessage,addrMessage, toAddress, domain = "";
+		let resolverMessage, addrMessage, toAddress, domain = "";
 		let address = event;
 		this.setState({ address })
-		if(event=='')
-		{
-			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage })
+		if (event == '') {
+			this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage })
 		}
-		else if (NNSTool.verifyDomain(event))
-		{
-			try
-			{
+		else if (NNSTool.verifyDomain(event)) {
+			try {
 				const addr = await NNSTool.resolveData(event)
-				if (!addr)
-				{
+				if (!addr) {
 					errorAddr = true;
 					addrMessage = intl.message.transfer.error2
-				} 
-				else
-				{
+				}
+				else {
 					errorAddr = false;
 					// addrMessage = toAddress = addr;
 					resolverMessage = toAddress = addr;
 					domain = event;
 				}
-				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-				{
+				this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 					this.onVerify();
 				})
-			} 
-			catch (error)
-			{
+			}
+			catch (error) {
 				errorAddr = true;
 				addrMessage = intl.message.transfer.error2
-				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-				{
+				this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 					this.onVerify();
 				})
 			}
 		}
-		else if (neotools.verifyAddress(event))
-		{
-			
+		else if (neotools.verifyAddress(event)) {
+
 			errorAddr = false;
 			toAddress = event;
-			console.log('状态0',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
-			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-			{
+			console.log('状态0', { errorAddr, addrMessage, domain, toAddress, resolverMessage });
+			this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 				this.onVerify();
 			})
 			try {
-				const domainInfo = await bg.getDomainFromAddress({address:event,network:common.network});
+				const domainInfo = await bg.getDomainFromAddress({ address: event, network: common.network });
 				// const currenttime = new Neo.BigInteger(new Date().getTime()).divide(1000);
 				// console.log(domainInfo);
 				// console.log(new Date().getTime());
@@ -172,78 +187,85 @@ export default class Transfer extends React.Component<IProps, IState>
 				// {
 				// 	resolverMessage=domainInfo.fullDomainName;
 				// }
-				
-				if(domainInfo.fullDomainName!='')
-				{
-					resolverMessage=domainInfo.fullDomainName;
+
+				if (domainInfo.fullDomainName != '') {
+					resolverMessage = domainInfo.fullDomainName;
 				}
 				// console.log('状态1',{ errorAddr, addrMessage, domain, toAddress,resolverMessage });
-				this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-				{
+				this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 					this.onVerify();
 				})
 			} catch (error) {
-				
+
 			}
 		}
-		else
-		{
+		else {
 			errorAddr = true;
 			addrMessage = intl.message.transfer.error1
-			this.setState({ errorAddr, addrMessage, domain, toAddress,resolverMessage }, () =>
-			{
+			this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 				this.onVerify();
 			})
 		}
 	}
 
-	public onVerify = () =>
-	{
+	public onVerify = () => {
 		this.setState({
 			verifyPass: (!this.state.errorAddr) && (!this.state.errorAmount) && (!!this.state.amount) && (!!this.state.address)
 		})
 	}
 
 	// 监控输入内容
-	public onAmountChange = (event) =>
-	{
+	public onAmountChange = (event) => {
 		const amount = asNumber(event, 8)
-		const balance = Neo.Fixed8.parse(common.balances.find(asset=>this.state.currentOption.id==asset.assetID).amount.toString())
 		let checkDisable = false;
 		let errorAmount = false;
 		let amountMessage = "";
-		const compare = Neo.Fixed8.parse(amount).compareTo(balance)
-		if (compare > 0)
-		{
-			errorAmount = true;
-			amountMessage = intl.message.exchange.noBalance;
+		if (this.state.currentasset.assetid === HASH_CONFIG.ID_GAS) {
+			const balance = Neo.Fixed8.parse(common.balances.find(asset => this.state.currentOption.id == asset.assetID).amount.toString())
+			const compare = Neo.Fixed8.parse(amount).compareTo(balance.subtract(Neo.Fixed8.parse(this.state.radioKey === "normal" ? "1.0127" : "1.0137")))
+			if (compare > 0) {
+				errorAmount = true;
+				amountMessage = intl.message.exchange.noBalance;
+			}
+			else if (compare == 0) {
+				errorAmount = false;
+				amountMessage = '';
+				checkDisable = true;
+			}
 		}
-		else if (compare == 0)
-		{
-			errorAmount = false;
-			amountMessage = '';
-			checkDisable = true;
+		else {
+			const gasbalance = Neo.Fixed8.fromNumber(this.state.gas);
+			console.log(gasbalance);
+
+			const balance = Neo.Fixed8.parse(common.balances.find(asset => this.state.currentOption.id == asset.assetID).amount.toString())
+			const compare = Neo.Fixed8.parse(amount).compareTo(balance)
+			const compareGas = Neo.Fixed8.parse(this.state.radioKey === "normal" ? "1.0127" : "1.0137").compareTo(gasbalance);
+			if (compare > 0 || compareGas > 0) {
+				errorAmount = true;
+				amountMessage = intl.message.exchange.noBalance;
+			}
+			else if (compare == 0) {
+				errorAmount = false;
+				amountMessage = '';
+				checkDisable = true;
+			}
 		}
-		this.setState({ amount, errorAmount, amountMessage, checkDisable }, () =>
-		{
+		this.setState({ amount, errorAmount, amountMessage, checkDisable }, () => {
 			this.onVerify()
 		})
 	}
-	public showInfo = () =>
-	{
+	public showInfo = () => {
 		// this.props.onHide();
 		this.setState({
 			infoShow: true
 		})
 	}
-	public closeInfo = () =>
-	{
+	public closeInfo = () => {
 		this.setState({
 			infoShow: false
 		})
 	}
-	public onHide = () =>
-	{
+	public onHide = () => {
 		this.setState({
 			infoShow: false,
 			address: "",
@@ -261,13 +283,11 @@ export default class Transfer extends React.Component<IProps, IState>
 			domain: '',
 			confirmDisable: false
 		})
-		if (this.props.lableChange)
-		{
+		if (this.props.lableChange) {
 			this.props.lableChange("history");
 		}
 	}
-	public onCancel = () =>
-	{
+	public onCancel = () => {
 		this.setState({
 			infoShow: false,
 			address: "",
@@ -285,20 +305,17 @@ export default class Transfer extends React.Component<IProps, IState>
 			domain: '',
 			confirmDisable: false
 		})
-		if (this.props.lableChange)
-		{
+		if (this.props.lableChange) {
 			this.props.lableChange("assets");
 		}
 	}
 
-	public onCheck = (event: boolean) =>
-	{
+	public onCheck = (event: boolean) => {
 		this.setState({
 			netfee: event
 		})
 	}
-	public send = () =>
-	{
+	public send = () => {
 		// console.log(this.state.currentOption.id);
 		this.setState({
 			confirmDisable: true
@@ -308,32 +325,34 @@ export default class Transfer extends React.Component<IProps, IState>
 			"asset": this.state.currentOption.id,
 			"fromAddress": common.account.address,
 			"toAddress": this.state.toAddress,
-			"fee": this.state.netfee ? "0.001" : "0",
+			"networkFee": this.state.radioKey === "normal" ? "0.0127" : "0.0137",
+			"systemFee": "1",
 			"network": "TestNet"
 		})
-		.then(result =>
-		{
-			Toast(intl.message.toast.successfully);
-			// console.log(result);
-			this.onHide();
-		})
-		.catch(error =>
-		{
-			if(error.description == "TX size is over 1024byte")
-			{
-				Toast(intl.message.toast.txFailed, "error");
-			}
-			else
-			{
-				Toast(intl.message.toast.failed, "error");
-			}
-			// console.log(error);
-			this.onHide();
-		})
+			.then(result => {
+				Toast(intl.message.toast.successfully);
+				// console.log(result);
+				this.onHide();
+			})
+			.catch(error => {
+				if (error.description == "TX size is over 1024byte") {
+					Toast(intl.message.toast.txFailed, "error");
+				}
+				else {
+					Toast(intl.message.toast.failed, "error");
+				}
+				// console.log(error);
+				this.onHide();
+			})
 	}
 
-	public render()
-	{
+	public radioChange = (key: string) => {
+		console.log(key);
+
+		this.setState({ radioKey: key });
+	}
+
+	public render() {
 		return (
 			<div className="transfer-wrapper">
 				{
@@ -357,17 +376,17 @@ export default class Transfer extends React.Component<IProps, IState>
 									<div className="content">
 										{
 											this.state.domain ?
-											<>
-												<div className="double">{this.state.domain}</div>
-												<div className="double address">{this.state.toAddress}</div>
-											</> :
-											<div className="single address">{this.state.toAddress}</div>
+												<>
+													<div className="double">{this.state.domain}</div>
+													<div className="double address">{this.state.toAddress}</div>
+												</> :
+												<div className="single address">{this.state.toAddress}</div>
 										}
 									</div>
 								</div>
 								<div className="info-line">
 									<div className="title">{intl.message.transfer.title4}</div>
-									<div className="content">{this.state.netfee ? '0.001 GAS' : '0 GAS'}</div>
+									<div className="content">{this.state.radioKey === "normal" ? "1.0127 GAS" : "1.0137 GAS"}</div>
 								</div>
 							</div>
 							<div className="btn-list">
@@ -383,38 +402,51 @@ export default class Transfer extends React.Component<IProps, IState>
 						<>
 							<div className="line">
 								<Select
-								currentOption={this.state.currentOption} 
-								defaultValue={this.props.asset} 
-								options={
-									manageStore.myAssets? manageStore.myAssets.map(asset=> { return{id:asset.assetid,name:asset.symbol}}):
-									[]
-								} 
-								onCallback={this.onSelect} 
-								text={intl.message.mywallet.assets} 
-							/>
+									currentOption={this.state.currentOption}
+									defaultValue={this.props.asset}
+									options={
+										manageStore.myAssets ? manageStore.myAssets.map(asset => { return { id: asset.assetid, name: asset.symbol } }) :
+											[]
+									}
+									onCallback={this.onSelect}
+									text={intl.message.mywallet.assets}
+								/>
 							</div>
 							<div className="line">
-								<Input 
-								placeholder={intl.message.transfer.sendTo} 
-								value={this.state.address} onChange={this.onAddrChange} 
-								type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
+								<Input
+									placeholder={intl.message.transfer.sendTo}
+									value={this.state.address} onChange={this.onAddrChange}
+									type="text" error={this.state.errorAddr} message={this.state.addrMessage} />
 								{
-								!!this.state.resolverMessage &&
-								<p className="tip-check">
-									<img className="trans-icon" src={require("../../../image/transfer.png")} alt=""/>
-									<span className="trans-text">{this.state.resolverMessage}</span>
-								</p>
+									!!this.state.resolverMessage &&
+									<p className="tip-check">
+										<img className="trans-icon" src={require("../../../image/transfer.png")} alt="" />
+										<span className="trans-text">{this.state.resolverMessage}</span>
+									</p>
 								}
 							</div>
 							<div className="line line-big">
-								<Input 
-								placeholder={`${intl.message.transfer.amount} （${this.state.available}） ${intl.message.transfer.available}`} 
-								value={this.state.amount} 
-								onChange={this.onAmountChange} type="text" 
-								error={this.state.errorAmount} message={this.state.amountMessage} />
+								<Input
+									placeholder={`${intl.message.transfer.amount} （${
+										this.state.currentasset.assetid === HASH_CONFIG.ID_GAS ?
+											`${this.state.balance - (this.state.radioKey === 'normal' ? 1.0127 : 1.0137)} ${this.state.currentasset.name}` :
+											`${this.state.balance} ${this.state.currentasset.name}, ${this.state.gas} GAS`
+										}） ${intl.message.transfer.available}`}
+									value={this.state.amount}
+									onChange={this.onAmountChange} type="text"
+									error={this.state.errorAmount} message={this.state.amountMessage} />
 							</div>
 							<div className="line">
-								<Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} />
+								{/* <Checkbox text={intl.message.transfer.payfee} onClick={this.onCheck} disabled={this.state.checkDisable} /> */}
+								{/* <Radio options={[ { label: '普通', value: '1' }, { label: '快', value: '2' } ]} /> */}
+								<div className="radio-group">
+									<div className={`radio button ${this.state.radioKey === 'normal' ? 'active' : ''}`} onClick={this.radioChange.bind(this, 'normal')}>
+										<div className="title">普通</div><div className="value">1.0127 GAS</div>
+									</div>
+									<div className={`radio button ${this.state.radioKey === 'fast' ? 'active' : ''}`} onClick={this.radioChange.bind(this, 'fast')}>
+										<div className="title">快</div><div className="value">1.0137 GAS</div>
+									</div>
+								</div>
 							</div>
 							<div className="btn-list">
 								<div className="cancel">

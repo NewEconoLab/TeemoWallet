@@ -17,14 +17,13 @@ import Toast from '../../../components/Toast';
 import historyStore from '../history/store/history.store';
 import intl from '../../store/intl';
 import { HASH_CONFIG } from '../../../config';
+import Radio from '../../../components/Radio';
 
-interface IProps
-{
+interface IProps {
 	lableChange: (table: string) => void
 }
 
-interface IState
-{
+interface IState {
 	amount: string,
 	netfee: boolean,
 	inputError: boolean,
@@ -34,8 +33,7 @@ interface IState
 @observer
 export default class Exchange extends React.Component<IProps, IState>
 {
-	constructor(props: IProps)
-	{
+	constructor(props: IProps) {
 		super(props);
 	}
 	public state = {
@@ -46,70 +44,60 @@ export default class Exchange extends React.Component<IProps, IState>
 		currentOption: { id: 'cgasexchange', name: intl.message.exchange.gasToCgas }
 	}
 	// 监控输入内容
-	public onChange = (event) =>
-	{
+	public onChange = (event) => {
 		const amount = asNumber(event, 8);
-		if (this.state.currentOption.id == 'cgasexchange')
-		{
+		if (this.state.currentOption.id == 'cgasexchange') {
 			common.getBalanceByAsset(HASH_CONFIG.ID_GAS)
-			.then(result=>{
-				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
-				{
+				.then(result => {
+					if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0) {
+						this.setState({
+							inputError: true,
+							errorMessage: intl.message.exchange.noBalance
+						})
+					}
+					else {
+						this.setState({ inputError: false, errorMessage: "" });
+					}
+				})
+				.catch(() => {
 					this.setState({
 						inputError: true,
 						errorMessage: intl.message.exchange.noBalance
 					})
-				} 
-				else
-				{
-					this.setState({ inputError: false, errorMessage: "" });
-				}
-			})
-			.catch(()=>{
-				this.setState({
-					inputError: true,
-					errorMessage: intl.message.exchange.noBalance
 				})
-			})
 		}
-		else
-		{
+		else {
 			common.getBalanceByAsset(HASH_CONFIG.ID_CGAS.toString())
-			.then(result=>{
-				if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0)
-				{
+				.then(result => {
+					if (Neo.Fixed8.parse(amount).compareTo(Neo.Fixed8.parse(result.amount.toString())) > 0) {
+						this.setState({
+							inputError: true,
+							errorMessage: intl.message.exchange.noBalance
+						})
+					}
+					else {
+						this.setState({ inputError: false, errorMessage: "" });
+					}
+				})
+				.catch(() => {
 					this.setState({
 						inputError: true,
 						errorMessage: intl.message.exchange.noBalance
 					})
-				} 
-				else
-				{
-					this.setState({ inputError: false, errorMessage: "" });
-				}
-			})
-			.catch(()=>{
-				this.setState({
-					inputError: true,
-					errorMessage: intl.message.exchange.noBalance
 				})
-			})
 		}
 		this.setState({ amount });
 	}
 
-	public onSelect = (event: IOption) =>
-	{
+	public onSelect = (event: IOption) => {
 		this.setState({ currentOption: event })
 	}
 
-	public onCheck = (netfee: boolean) =>
-	{
+	public onCheck = (netfee: boolean) => {
 		this.setState({ netfee })
 	}
 
-	public onHide = () =>
-	{
+	public onHide = () => {
 		this.setState({
 			amount: '',
 			netfee: false,
@@ -117,50 +105,41 @@ export default class Exchange extends React.Component<IProps, IState>
 			errorMessage: '',
 			currentOption: { id: 'cgasexchange', name: intl.message.exchange.gasToCgas }
 		})
-		if (this.props.lableChange)
-		{
+		if (this.props.lableChange) {
 			this.props.lableChange("history");
 		}
 	}
 
-	public send = () =>
-	{
-		if (this.state.currentOption.id == "cgasexchange")
-		{
+	public send = () => {
+		if (this.state.currentOption.id == "cgasexchange") {
 			bg.exchangeGas(parseFloat(this.state.amount), this.state.netfee ? 0.001 : 0)
-				.then(result =>
-				{
+				.then(result => {
 					Toast(intl.message.toast.successfully)
 					// console.log(result);
 					historyStore.initHistoryList()
-					this.onHide();			
+					this.onHide();
 				})
-				.catch(error =>
-				{
+				.catch(error => {
 					// console.log(error);
 					Toast(intl.message.toast.failed, "error")
 				})
 		}
-		else
-		{
+		else {
 			bg.exchangeCgas(parseFloat(this.state.amount), this.state.netfee ? 0.001 : 0)
-				.then(result =>
-				{
+				.then(result => {
 					Toast(intl.message.toast.successfully)
 					historyStore.initHistoryList()
 					// console.log(result);
-					this.onHide();	
+					this.onHide();
 				})
-				.catch(error =>
-				{
+				.catch(error => {
 					// console.log(error);
 					Toast(intl.message.toast.failed, "error")
 				})
-		}                                                                    
+		}
 	}
 
-	public render()
-	{
+	public render() {
 		const options: IOption[] = [
 			{ id: 'cgasexchange', name: intl.message.exchange.gasToCgas },
 			{ id: 'gasexchange', name: intl.message.exchange.cgasToGas }
@@ -174,6 +153,7 @@ export default class Exchange extends React.Component<IProps, IState>
 					<Input placeholder={intl.message.exchange.amount} value={this.state.amount + ""} onChange={this.onChange} type="text" error={this.state.inputError} message={this.state.errorMessage} />
 				</div>
 				<div className="line-checkbox">
+					<Radio options={[ { label: "", value: "" } ]} />
 					<Checkbox text={this.state.currentOption.id == 'cgasexchange' ? intl.message.transfer.payfee : intl.message.exchange.payfee} onClick={this.onCheck} />
 				</div>
 				<div className="btn-list">

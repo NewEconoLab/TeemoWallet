@@ -57,6 +57,7 @@ declare interface Background extends Window {
         expenses: {
             symbol: string;
             amount: string;
+            assetid: string;
         }[];
         fee: string;
     }>;
@@ -110,6 +111,8 @@ interface SendArgs {
     asset: string;
     amount: string;
     remark?: string;
+    networkFee?: string;
+    systemFee?: string;
     fee?: string;
     network: "TestNet" | "MainNet";
 }

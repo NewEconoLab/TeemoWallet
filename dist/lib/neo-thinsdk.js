@@ -7,35 +7,105 @@ code.google.com/p/crypto-js
 (c) 2009-2013 by Jeff Mott. All rights reserved.
 code.google.com/p/crypto-js/wiki/License
 */
-var CryptoJS=CryptoJS||function(u,p){var d={},l=d.lib={},s=function(){},t=l.Base={extend:function(a){s.prototype=this;var c=new s;a&&c.mixIn(a);c.hasOwnProperty("init")||(c.init=function(){c.$super.init.apply(this,arguments)});c.init.prototype=c;c.$super=this;return c},create:function(){var a=this.extend();a.init.apply(a,arguments);return a},init:function(){},mixIn:function(a){for(var c in a)a.hasOwnProperty(c)&&(this[c]=a[c]);a.hasOwnProperty("toString")&&(this.toString=a.toString)},clone:function(){return this.init.prototype.extend(this)}},
-r=l.WordArray=t.extend({init:function(a,c){a=this.words=a||[];this.sigBytes=c!=p?c:4*a.length},toString:function(a){return(a||v).stringify(this)},concat:function(a){var c=this.words,e=a.words,j=this.sigBytes;a=a.sigBytes;this.clamp();if(j%4)for(var k=0;k<a;k++)c[j+k>>>2]|=(e[k>>>2]>>>24-8*(k%4)&255)<<24-8*((j+k)%4);else if(65535<e.length)for(k=0;k<a;k+=4)c[j+k>>>2]=e[k>>>2];else c.push.apply(c,e);this.sigBytes+=a;return this},clamp:function(){var a=this.words,c=this.sigBytes;a[c>>>2]&=4294967295<<
-32-8*(c%4);a.length=u.ceil(c/4)},clone:function(){var a=t.clone.call(this);a.words=this.words.slice(0);return a},random:function(a){for(var c=[],e=0;e<a;e+=4)c.push(4294967296*u.random()|0);return new r.init(c,a)}}),w=d.enc={},v=w.Hex={stringify:function(a){var c=a.words;a=a.sigBytes;for(var e=[],j=0;j<a;j++){var k=c[j>>>2]>>>24-8*(j%4)&255;e.push((k>>>4).toString(16));e.push((k&15).toString(16))}return e.join("")},parse:function(a){for(var c=a.length,e=[],j=0;j<c;j+=2)e[j>>>3]|=parseInt(a.substr(j,
-2),16)<<24-4*(j%8);return new r.init(e,c/2)}},b=w.Latin1={stringify:function(a){var c=a.words;a=a.sigBytes;for(var e=[],j=0;j<a;j++)e.push(String.fromCharCode(c[j>>>2]>>>24-8*(j%4)&255));return e.join("")},parse:function(a){for(var c=a.length,e=[],j=0;j<c;j++)e[j>>>2]|=(a.charCodeAt(j)&255)<<24-8*(j%4);return new r.init(e,c)}},x=w.Utf8={stringify:function(a){try{return decodeURIComponent(escape(b.stringify(a)))}catch(c){throw Error("Malformed UTF-8 data");}},parse:function(a){return b.parse(unescape(encodeURIComponent(a)))}},
-q=l.BufferedBlockAlgorithm=t.extend({reset:function(){this._data=new r.init;this._nDataBytes=0},_append:function(a){"string"==typeof a&&(a=x.parse(a));this._data.concat(a);this._nDataBytes+=a.sigBytes},_process:function(a){var c=this._data,e=c.words,j=c.sigBytes,k=this.blockSize,b=j/(4*k),b=a?u.ceil(b):u.max((b|0)-this._minBufferSize,0);a=b*k;j=u.min(4*a,j);if(a){for(var q=0;q<a;q+=k)this._doProcessBlock(e,q);q=e.splice(0,a);c.sigBytes-=j}return new r.init(q,j)},clone:function(){var a=t.clone.call(this);
-a._data=this._data.clone();return a},_minBufferSize:0});l.Hasher=q.extend({cfg:t.extend(),init:function(a){this.cfg=this.cfg.extend(a);this.reset()},reset:function(){q.reset.call(this);this._doReset()},update:function(a){this._append(a);this._process();return this},finalize:function(a){a&&this._append(a);return this._doFinalize()},blockSize:16,_createHelper:function(a){return function(b,e){return(new a.init(e)).finalize(b)}},_createHmacHelper:function(a){return function(b,e){return(new n.HMAC.init(a,
-e)).finalize(b)}}});var n=d.algo={};return d}(Math);
-(function(){var u=CryptoJS,p=u.lib.WordArray;u.enc.Base64={stringify:function(d){var l=d.words,p=d.sigBytes,t=this._map;d.clamp();d=[];for(var r=0;r<p;r+=3)for(var w=(l[r>>>2]>>>24-8*(r%4)&255)<<16|(l[r+1>>>2]>>>24-8*((r+1)%4)&255)<<8|l[r+2>>>2]>>>24-8*((r+2)%4)&255,v=0;4>v&&r+0.75*v<p;v++)d.push(t.charAt(w>>>6*(3-v)&63));if(l=t.charAt(64))for(;d.length%4;)d.push(l);return d.join("")},parse:function(d){var l=d.length,s=this._map,t=s.charAt(64);t&&(t=d.indexOf(t),-1!=t&&(l=t));for(var t=[],r=0,w=0;w<
-l;w++)if(w%4){var v=s.indexOf(d.charAt(w-1))<<2*(w%4),b=s.indexOf(d.charAt(w))>>>6-2*(w%4);t[r>>>2]|=(v|b)<<24-8*(r%4);r++}return p.create(t,r)},_map:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="}})();
-(function(u){function p(b,n,a,c,e,j,k){b=b+(n&a|~n&c)+e+k;return(b<<j|b>>>32-j)+n}function d(b,n,a,c,e,j,k){b=b+(n&c|a&~c)+e+k;return(b<<j|b>>>32-j)+n}function l(b,n,a,c,e,j,k){b=b+(n^a^c)+e+k;return(b<<j|b>>>32-j)+n}function s(b,n,a,c,e,j,k){b=b+(a^(n|~c))+e+k;return(b<<j|b>>>32-j)+n}for(var t=CryptoJS,r=t.lib,w=r.WordArray,v=r.Hasher,r=t.algo,b=[],x=0;64>x;x++)b[x]=4294967296*u.abs(u.sin(x+1))|0;r=r.MD5=v.extend({_doReset:function(){this._hash=new w.init([1732584193,4023233417,2562383102,271733878])},
-_doProcessBlock:function(q,n){for(var a=0;16>a;a++){var c=n+a,e=q[c];q[c]=(e<<8|e>>>24)&16711935|(e<<24|e>>>8)&4278255360}var a=this._hash.words,c=q[n+0],e=q[n+1],j=q[n+2],k=q[n+3],z=q[n+4],r=q[n+5],t=q[n+6],w=q[n+7],v=q[n+8],A=q[n+9],B=q[n+10],C=q[n+11],u=q[n+12],D=q[n+13],E=q[n+14],x=q[n+15],f=a[0],m=a[1],g=a[2],h=a[3],f=p(f,m,g,h,c,7,b[0]),h=p(h,f,m,g,e,12,b[1]),g=p(g,h,f,m,j,17,b[2]),m=p(m,g,h,f,k,22,b[3]),f=p(f,m,g,h,z,7,b[4]),h=p(h,f,m,g,r,12,b[5]),g=p(g,h,f,m,t,17,b[6]),m=p(m,g,h,f,w,22,b[7]),
-f=p(f,m,g,h,v,7,b[8]),h=p(h,f,m,g,A,12,b[9]),g=p(g,h,f,m,B,17,b[10]),m=p(m,g,h,f,C,22,b[11]),f=p(f,m,g,h,u,7,b[12]),h=p(h,f,m,g,D,12,b[13]),g=p(g,h,f,m,E,17,b[14]),m=p(m,g,h,f,x,22,b[15]),f=d(f,m,g,h,e,5,b[16]),h=d(h,f,m,g,t,9,b[17]),g=d(g,h,f,m,C,14,b[18]),m=d(m,g,h,f,c,20,b[19]),f=d(f,m,g,h,r,5,b[20]),h=d(h,f,m,g,B,9,b[21]),g=d(g,h,f,m,x,14,b[22]),m=d(m,g,h,f,z,20,b[23]),f=d(f,m,g,h,A,5,b[24]),h=d(h,f,m,g,E,9,b[25]),g=d(g,h,f,m,k,14,b[26]),m=d(m,g,h,f,v,20,b[27]),f=d(f,m,g,h,D,5,b[28]),h=d(h,f,
-m,g,j,9,b[29]),g=d(g,h,f,m,w,14,b[30]),m=d(m,g,h,f,u,20,b[31]),f=l(f,m,g,h,r,4,b[32]),h=l(h,f,m,g,v,11,b[33]),g=l(g,h,f,m,C,16,b[34]),m=l(m,g,h,f,E,23,b[35]),f=l(f,m,g,h,e,4,b[36]),h=l(h,f,m,g,z,11,b[37]),g=l(g,h,f,m,w,16,b[38]),m=l(m,g,h,f,B,23,b[39]),f=l(f,m,g,h,D,4,b[40]),h=l(h,f,m,g,c,11,b[41]),g=l(g,h,f,m,k,16,b[42]),m=l(m,g,h,f,t,23,b[43]),f=l(f,m,g,h,A,4,b[44]),h=l(h,f,m,g,u,11,b[45]),g=l(g,h,f,m,x,16,b[46]),m=l(m,g,h,f,j,23,b[47]),f=s(f,m,g,h,c,6,b[48]),h=s(h,f,m,g,w,10,b[49]),g=s(g,h,f,m,
-E,15,b[50]),m=s(m,g,h,f,r,21,b[51]),f=s(f,m,g,h,u,6,b[52]),h=s(h,f,m,g,k,10,b[53]),g=s(g,h,f,m,B,15,b[54]),m=s(m,g,h,f,e,21,b[55]),f=s(f,m,g,h,v,6,b[56]),h=s(h,f,m,g,x,10,b[57]),g=s(g,h,f,m,t,15,b[58]),m=s(m,g,h,f,D,21,b[59]),f=s(f,m,g,h,z,6,b[60]),h=s(h,f,m,g,C,10,b[61]),g=s(g,h,f,m,j,15,b[62]),m=s(m,g,h,f,A,21,b[63]);a[0]=a[0]+f|0;a[1]=a[1]+m|0;a[2]=a[2]+g|0;a[3]=a[3]+h|0},_doFinalize:function(){var b=this._data,n=b.words,a=8*this._nDataBytes,c=8*b.sigBytes;n[c>>>5]|=128<<24-c%32;var e=u.floor(a/
-4294967296);n[(c+64>>>9<<4)+15]=(e<<8|e>>>24)&16711935|(e<<24|e>>>8)&4278255360;n[(c+64>>>9<<4)+14]=(a<<8|a>>>24)&16711935|(a<<24|a>>>8)&4278255360;b.sigBytes=4*(n.length+1);this._process();b=this._hash;n=b.words;for(a=0;4>a;a++)c=n[a],n[a]=(c<<8|c>>>24)&16711935|(c<<24|c>>>8)&4278255360;return b},clone:function(){var b=v.clone.call(this);b._hash=this._hash.clone();return b}});t.MD5=v._createHelper(r);t.HmacMD5=v._createHmacHelper(r)})(Math);
-(function(){var u=CryptoJS,p=u.lib,d=p.Base,l=p.WordArray,p=u.algo,s=p.EvpKDF=d.extend({cfg:d.extend({keySize:4,hasher:p.MD5,iterations:1}),init:function(d){this.cfg=this.cfg.extend(d)},compute:function(d,r){for(var p=this.cfg,s=p.hasher.create(),b=l.create(),u=b.words,q=p.keySize,p=p.iterations;u.length<q;){n&&s.update(n);var n=s.update(d).finalize(r);s.reset();for(var a=1;a<p;a++)n=s.finalize(n),s.reset();b.concat(n)}b.sigBytes=4*q;return b}});u.EvpKDF=function(d,l,p){return s.create(p).compute(d,
-l)}})();
-CryptoJS.lib.Cipher||function(u){var p=CryptoJS,d=p.lib,l=d.Base,s=d.WordArray,t=d.BufferedBlockAlgorithm,r=p.enc.Base64,w=p.algo.EvpKDF,v=d.Cipher=t.extend({cfg:l.extend(),createEncryptor:function(e,a){return this.create(this._ENC_XFORM_MODE,e,a)},createDecryptor:function(e,a){return this.create(this._DEC_XFORM_MODE,e,a)},init:function(e,a,b){this.cfg=this.cfg.extend(b);this._xformMode=e;this._key=a;this.reset()},reset:function(){t.reset.call(this);this._doReset()},process:function(e){this._append(e);return this._process()},
-finalize:function(e){e&&this._append(e);return this._doFinalize()},keySize:4,ivSize:4,_ENC_XFORM_MODE:1,_DEC_XFORM_MODE:2,_createHelper:function(e){return{encrypt:function(b,k,d){return("string"==typeof k?c:a).encrypt(e,b,k,d)},decrypt:function(b,k,d){return("string"==typeof k?c:a).decrypt(e,b,k,d)}}}});d.StreamCipher=v.extend({_doFinalize:function(){return this._process(!0)},blockSize:1});var b=p.mode={},x=function(e,a,b){var c=this._iv;c?this._iv=u:c=this._prevBlock;for(var d=0;d<b;d++)e[a+d]^=
-c[d]},q=(d.BlockCipherMode=l.extend({createEncryptor:function(e,a){return this.Encryptor.create(e,a)},createDecryptor:function(e,a){return this.Decryptor.create(e,a)},init:function(e,a){this._cipher=e;this._iv=a}})).extend();q.Encryptor=q.extend({processBlock:function(e,a){var b=this._cipher,c=b.blockSize;x.call(this,e,a,c);b.encryptBlock(e,a);this._prevBlock=e.slice(a,a+c)}});q.Decryptor=q.extend({processBlock:function(e,a){var b=this._cipher,c=b.blockSize,d=e.slice(a,a+c);b.decryptBlock(e,a);x.call(this,
-e,a,c);this._prevBlock=d}});b=b.CBC=q;q=(p.pad={}).Pkcs7={pad:function(a,b){for(var c=4*b,c=c-a.sigBytes%c,d=c<<24|c<<16|c<<8|c,l=[],n=0;n<c;n+=4)l.push(d);c=s.create(l,c);a.concat(c)},unpad:function(a){a.sigBytes-=a.words[a.sigBytes-1>>>2]&255}};d.BlockCipher=v.extend({cfg:v.cfg.extend({mode:b,padding:q}),reset:function(){v.reset.call(this);var a=this.cfg,b=a.iv,a=a.mode;if(this._xformMode==this._ENC_XFORM_MODE)var c=a.createEncryptor;else c=a.createDecryptor,this._minBufferSize=1;this._mode=c.call(a,
-this,b&&b.words)},_doProcessBlock:function(a,b){this._mode.processBlock(a,b)},_doFinalize:function(){var a=this.cfg.padding;if(this._xformMode==this._ENC_XFORM_MODE){a.pad(this._data,this.blockSize);var b=this._process(!0)}else b=this._process(!0),a.unpad(b);return b},blockSize:4});var n=d.CipherParams=l.extend({init:function(a){this.mixIn(a)},toString:function(a){return(a||this.formatter).stringify(this)}}),b=(p.format={}).OpenSSL={stringify:function(a){var b=a.ciphertext;a=a.salt;return(a?s.create([1398893684,
-1701076831]).concat(a).concat(b):b).toString(r)},parse:function(a){a=r.parse(a);var b=a.words;if(1398893684==b[0]&&1701076831==b[1]){var c=s.create(b.slice(2,4));b.splice(0,4);a.sigBytes-=16}return n.create({ciphertext:a,salt:c})}},a=d.SerializableCipher=l.extend({cfg:l.extend({format:b}),encrypt:function(a,b,c,d){d=this.cfg.extend(d);var l=a.createEncryptor(c,d);b=l.finalize(b);l=l.cfg;return n.create({ciphertext:b,key:c,iv:l.iv,algorithm:a,mode:l.mode,padding:l.padding,blockSize:a.blockSize,formatter:d.format})},
-decrypt:function(a,b,c,d){d=this.cfg.extend(d);b=this._parse(b,d.format);return a.createDecryptor(c,d).finalize(b.ciphertext)},_parse:function(a,b){return"string"==typeof a?b.parse(a,this):a}}),p=(p.kdf={}).OpenSSL={execute:function(a,b,c,d){d||(d=s.random(8));a=w.create({keySize:b+c}).compute(a,d);c=s.create(a.words.slice(b),4*c);a.sigBytes=4*b;return n.create({key:a,iv:c,salt:d})}},c=d.PasswordBasedCipher=a.extend({cfg:a.cfg.extend({kdf:p}),encrypt:function(b,c,d,l){l=this.cfg.extend(l);d=l.kdf.execute(d,
-b.keySize,b.ivSize);l.iv=d.iv;b=a.encrypt.call(this,b,c,d.key,l);b.mixIn(d);return b},decrypt:function(b,c,d,l){l=this.cfg.extend(l);c=this._parse(c,l.format);d=l.kdf.execute(d,b.keySize,b.ivSize,c.salt);l.iv=d.iv;return a.decrypt.call(this,b,c,d.key,l)}})}();
-(function(){for(var u=CryptoJS,p=u.lib.BlockCipher,d=u.algo,l=[],s=[],t=[],r=[],w=[],v=[],b=[],x=[],q=[],n=[],a=[],c=0;256>c;c++)a[c]=128>c?c<<1:c<<1^283;for(var e=0,j=0,c=0;256>c;c++){var k=j^j<<1^j<<2^j<<3^j<<4,k=k>>>8^k&255^99;l[e]=k;s[k]=e;var z=a[e],F=a[z],G=a[F],y=257*a[k]^16843008*k;t[e]=y<<24|y>>>8;r[e]=y<<16|y>>>16;w[e]=y<<8|y>>>24;v[e]=y;y=16843009*G^65537*F^257*z^16843008*e;b[k]=y<<24|y>>>8;x[k]=y<<16|y>>>16;q[k]=y<<8|y>>>24;n[k]=y;e?(e=z^a[a[a[G^z]]],j^=a[a[j]]):e=j=1}var H=[0,1,2,4,8,
-16,32,64,128,27,54],d=d.AES=p.extend({_doReset:function(){for(var a=this._key,c=a.words,d=a.sigBytes/4,a=4*((this._nRounds=d+6)+1),e=this._keySchedule=[],j=0;j<a;j++)if(j<d)e[j]=c[j];else{var k=e[j-1];j%d?6<d&&4==j%d&&(k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>>>8&255]<<8|l[k&255]):(k=k<<8|k>>>24,k=l[k>>>24]<<24|l[k>>>16&255]<<16|l[k>>>8&255]<<8|l[k&255],k^=H[j/d|0]<<24);e[j]=e[j-d]^k}c=this._invKeySchedule=[];for(d=0;d<a;d++)j=a-d,k=d%4?e[j]:e[j-4],c[d]=4>d||4>=j?k:b[l[k>>>24]]^x[l[k>>>16&255]]^q[l[k>>>
-8&255]]^n[l[k&255]]},encryptBlock:function(a,b){this._doCryptBlock(a,b,this._keySchedule,t,r,w,v,l)},decryptBlock:function(a,c){var d=a[c+1];a[c+1]=a[c+3];a[c+3]=d;this._doCryptBlock(a,c,this._invKeySchedule,b,x,q,n,s);d=a[c+1];a[c+1]=a[c+3];a[c+3]=d},_doCryptBlock:function(a,b,c,d,e,j,l,f){for(var m=this._nRounds,g=a[b]^c[0],h=a[b+1]^c[1],k=a[b+2]^c[2],n=a[b+3]^c[3],p=4,r=1;r<m;r++)var q=d[g>>>24]^e[h>>>16&255]^j[k>>>8&255]^l[n&255]^c[p++],s=d[h>>>24]^e[k>>>16&255]^j[n>>>8&255]^l[g&255]^c[p++],t=
-d[k>>>24]^e[n>>>16&255]^j[g>>>8&255]^l[h&255]^c[p++],n=d[n>>>24]^e[g>>>16&255]^j[h>>>8&255]^l[k&255]^c[p++],g=q,h=s,k=t;q=(f[g>>>24]<<24|f[h>>>16&255]<<16|f[k>>>8&255]<<8|f[n&255])^c[p++];s=(f[h>>>24]<<24|f[k>>>16&255]<<16|f[n>>>8&255]<<8|f[g&255])^c[p++];t=(f[k>>>24]<<24|f[n>>>16&255]<<16|f[g>>>8&255]<<8|f[h&255])^c[p++];n=(f[n>>>24]<<24|f[g>>>16&255]<<16|f[h>>>8&255]<<8|f[k&255])^c[p++];a[b]=q;a[b+1]=s;a[b+2]=t;a[b+3]=n},keySize:8});u.AES=p._createHelper(d)})();
+var CryptoJS = CryptoJS || function (u, p) {
+    var d = {}, l = d.lib = {}, s = function () { }, t = l.Base = { extend: function (a) { s.prototype = this; var c = new s; a && c.mixIn(a); c.hasOwnProperty("init") || (c.init = function () { c.$super.init.apply(this, arguments) }); c.init.prototype = c; c.$super = this; return c }, create: function () { var a = this.extend(); a.init.apply(a, arguments); return a }, init: function () { }, mixIn: function (a) { for (var c in a) a.hasOwnProperty(c) && (this[c] = a[c]); a.hasOwnProperty("toString") && (this.toString = a.toString) }, clone: function () { return this.init.prototype.extend(this) } },
+        r = l.WordArray = t.extend({
+            init: function (a, c) { a = this.words = a || []; this.sigBytes = c != p ? c : 4 * a.length }, toString: function (a) { return (a || v).stringify(this) }, concat: function (a) { var c = this.words, e = a.words, j = this.sigBytes; a = a.sigBytes; this.clamp(); if (j % 4) for (var k = 0; k < a; k++)c[j + k >>> 2] |= (e[k >>> 2] >>> 24 - 8 * (k % 4) & 255) << 24 - 8 * ((j + k) % 4); else if (65535 < e.length) for (k = 0; k < a; k += 4)c[j + k >>> 2] = e[k >>> 2]; else c.push.apply(c, e); this.sigBytes += a; return this }, clamp: function () {
+                var a = this.words, c = this.sigBytes; a[c >>> 2] &= 4294967295 <<
+                    32 - 8 * (c % 4); a.length = u.ceil(c / 4)
+            }, clone: function () { var a = t.clone.call(this); a.words = this.words.slice(0); return a }, random: function (a) { for (var c = [], e = 0; e < a; e += 4)c.push(4294967296 * u.random() | 0); return new r.init(c, a) }
+        }), w = d.enc = {}, v = w.Hex = {
+            stringify: function (a) { var c = a.words; a = a.sigBytes; for (var e = [], j = 0; j < a; j++) { var k = c[j >>> 2] >>> 24 - 8 * (j % 4) & 255; e.push((k >>> 4).toString(16)); e.push((k & 15).toString(16)) } return e.join("") }, parse: function (a) {
+                for (var c = a.length, e = [], j = 0; j < c; j += 2)e[j >>> 3] |= parseInt(a.substr(j,
+                    2), 16) << 24 - 4 * (j % 8); return new r.init(e, c / 2)
+            }
+        }, b = w.Latin1 = { stringify: function (a) { var c = a.words; a = a.sigBytes; for (var e = [], j = 0; j < a; j++)e.push(String.fromCharCode(c[j >>> 2] >>> 24 - 8 * (j % 4) & 255)); return e.join("") }, parse: function (a) { for (var c = a.length, e = [], j = 0; j < c; j++)e[j >>> 2] |= (a.charCodeAt(j) & 255) << 24 - 8 * (j % 4); return new r.init(e, c) } }, x = w.Utf8 = { stringify: function (a) { try { return decodeURIComponent(escape(b.stringify(a))) } catch (c) { throw Error("Malformed UTF-8 data"); } }, parse: function (a) { return b.parse(unescape(encodeURIComponent(a))) } },
+        q = l.BufferedBlockAlgorithm = t.extend({
+            reset: function () { this._data = new r.init; this._nDataBytes = 0 }, _append: function (a) { "string" == typeof a && (a = x.parse(a)); this._data.concat(a); this._nDataBytes += a.sigBytes }, _process: function (a) { var c = this._data, e = c.words, j = c.sigBytes, k = this.blockSize, b = j / (4 * k), b = a ? u.ceil(b) : u.max((b | 0) - this._minBufferSize, 0); a = b * k; j = u.min(4 * a, j); if (a) { for (var q = 0; q < a; q += k)this._doProcessBlock(e, q); q = e.splice(0, a); c.sigBytes -= j } return new r.init(q, j) }, clone: function () {
+                var a = t.clone.call(this);
+                a._data = this._data.clone(); return a
+            }, _minBufferSize: 0
+        }); l.Hasher = q.extend({
+            cfg: t.extend(), init: function (a) { this.cfg = this.cfg.extend(a); this.reset() }, reset: function () { q.reset.call(this); this._doReset() }, update: function (a) { this._append(a); this._process(); return this }, finalize: function (a) { a && this._append(a); return this._doFinalize() }, blockSize: 16, _createHelper: function (a) { return function (b, e) { return (new a.init(e)).finalize(b) } }, _createHmacHelper: function (a) {
+                return function (b, e) {
+                    return (new n.HMAC.init(a,
+                        e)).finalize(b)
+                }
+            }
+        }); var n = d.algo = {}; return d
+}(Math);
+(function () {
+    var u = CryptoJS, p = u.lib.WordArray; u.enc.Base64 = {
+        stringify: function (d) { var l = d.words, p = d.sigBytes, t = this._map; d.clamp(); d = []; for (var r = 0; r < p; r += 3)for (var w = (l[r >>> 2] >>> 24 - 8 * (r % 4) & 255) << 16 | (l[r + 1 >>> 2] >>> 24 - 8 * ((r + 1) % 4) & 255) << 8 | l[r + 2 >>> 2] >>> 24 - 8 * ((r + 2) % 4) & 255, v = 0; 4 > v && r + 0.75 * v < p; v++)d.push(t.charAt(w >>> 6 * (3 - v) & 63)); if (l = t.charAt(64)) for (; d.length % 4;)d.push(l); return d.join("") }, parse: function (d) {
+            var l = d.length, s = this._map, t = s.charAt(64); t && (t = d.indexOf(t), -1 != t && (l = t)); for (var t = [], r = 0, w = 0; w <
+                l; w++)if (w % 4) { var v = s.indexOf(d.charAt(w - 1)) << 2 * (w % 4), b = s.indexOf(d.charAt(w)) >>> 6 - 2 * (w % 4); t[r >>> 2] |= (v | b) << 24 - 8 * (r % 4); r++ } return p.create(t, r)
+        }, _map: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+    }
+})();
+(function (u) {
+    function p(b, n, a, c, e, j, k) { b = b + (n & a | ~n & c) + e + k; return (b << j | b >>> 32 - j) + n } function d(b, n, a, c, e, j, k) { b = b + (n & c | a & ~c) + e + k; return (b << j | b >>> 32 - j) + n } function l(b, n, a, c, e, j, k) { b = b + (n ^ a ^ c) + e + k; return (b << j | b >>> 32 - j) + n } function s(b, n, a, c, e, j, k) { b = b + (a ^ (n | ~c)) + e + k; return (b << j | b >>> 32 - j) + n } for (var t = CryptoJS, r = t.lib, w = r.WordArray, v = r.Hasher, r = t.algo, b = [], x = 0; 64 > x; x++)b[x] = 4294967296 * u.abs(u.sin(x + 1)) | 0; r = r.MD5 = v.extend({
+        _doReset: function () { this._hash = new w.init([1732584193, 4023233417, 2562383102, 271733878]) },
+        _doProcessBlock: function (q, n) {
+            for (var a = 0; 16 > a; a++) { var c = n + a, e = q[c]; q[c] = (e << 8 | e >>> 24) & 16711935 | (e << 24 | e >>> 8) & 4278255360 } var a = this._hash.words, c = q[n + 0], e = q[n + 1], j = q[n + 2], k = q[n + 3], z = q[n + 4], r = q[n + 5], t = q[n + 6], w = q[n + 7], v = q[n + 8], A = q[n + 9], B = q[n + 10], C = q[n + 11], u = q[n + 12], D = q[n + 13], E = q[n + 14], x = q[n + 15], f = a[0], m = a[1], g = a[2], h = a[3], f = p(f, m, g, h, c, 7, b[0]), h = p(h, f, m, g, e, 12, b[1]), g = p(g, h, f, m, j, 17, b[2]), m = p(m, g, h, f, k, 22, b[3]), f = p(f, m, g, h, z, 7, b[4]), h = p(h, f, m, g, r, 12, b[5]), g = p(g, h, f, m, t, 17, b[6]), m = p(m, g, h, f, w, 22, b[7]),
+                f = p(f, m, g, h, v, 7, b[8]), h = p(h, f, m, g, A, 12, b[9]), g = p(g, h, f, m, B, 17, b[10]), m = p(m, g, h, f, C, 22, b[11]), f = p(f, m, g, h, u, 7, b[12]), h = p(h, f, m, g, D, 12, b[13]), g = p(g, h, f, m, E, 17, b[14]), m = p(m, g, h, f, x, 22, b[15]), f = d(f, m, g, h, e, 5, b[16]), h = d(h, f, m, g, t, 9, b[17]), g = d(g, h, f, m, C, 14, b[18]), m = d(m, g, h, f, c, 20, b[19]), f = d(f, m, g, h, r, 5, b[20]), h = d(h, f, m, g, B, 9, b[21]), g = d(g, h, f, m, x, 14, b[22]), m = d(m, g, h, f, z, 20, b[23]), f = d(f, m, g, h, A, 5, b[24]), h = d(h, f, m, g, E, 9, b[25]), g = d(g, h, f, m, k, 14, b[26]), m = d(m, g, h, f, v, 20, b[27]), f = d(f, m, g, h, D, 5, b[28]), h = d(h, f,
+                    m, g, j, 9, b[29]), g = d(g, h, f, m, w, 14, b[30]), m = d(m, g, h, f, u, 20, b[31]), f = l(f, m, g, h, r, 4, b[32]), h = l(h, f, m, g, v, 11, b[33]), g = l(g, h, f, m, C, 16, b[34]), m = l(m, g, h, f, E, 23, b[35]), f = l(f, m, g, h, e, 4, b[36]), h = l(h, f, m, g, z, 11, b[37]), g = l(g, h, f, m, w, 16, b[38]), m = l(m, g, h, f, B, 23, b[39]), f = l(f, m, g, h, D, 4, b[40]), h = l(h, f, m, g, c, 11, b[41]), g = l(g, h, f, m, k, 16, b[42]), m = l(m, g, h, f, t, 23, b[43]), f = l(f, m, g, h, A, 4, b[44]), h = l(h, f, m, g, u, 11, b[45]), g = l(g, h, f, m, x, 16, b[46]), m = l(m, g, h, f, j, 23, b[47]), f = s(f, m, g, h, c, 6, b[48]), h = s(h, f, m, g, w, 10, b[49]), g = s(g, h, f, m,
+                        E, 15, b[50]), m = s(m, g, h, f, r, 21, b[51]), f = s(f, m, g, h, u, 6, b[52]), h = s(h, f, m, g, k, 10, b[53]), g = s(g, h, f, m, B, 15, b[54]), m = s(m, g, h, f, e, 21, b[55]), f = s(f, m, g, h, v, 6, b[56]), h = s(h, f, m, g, x, 10, b[57]), g = s(g, h, f, m, t, 15, b[58]), m = s(m, g, h, f, D, 21, b[59]), f = s(f, m, g, h, z, 6, b[60]), h = s(h, f, m, g, C, 10, b[61]), g = s(g, h, f, m, j, 15, b[62]), m = s(m, g, h, f, A, 21, b[63]); a[0] = a[0] + f | 0; a[1] = a[1] + m | 0; a[2] = a[2] + g | 0; a[3] = a[3] + h | 0
+        }, _doFinalize: function () {
+            var b = this._data, n = b.words, a = 8 * this._nDataBytes, c = 8 * b.sigBytes; n[c >>> 5] |= 128 << 24 - c % 32; var e = u.floor(a /
+                4294967296); n[(c + 64 >>> 9 << 4) + 15] = (e << 8 | e >>> 24) & 16711935 | (e << 24 | e >>> 8) & 4278255360; n[(c + 64 >>> 9 << 4) + 14] = (a << 8 | a >>> 24) & 16711935 | (a << 24 | a >>> 8) & 4278255360; b.sigBytes = 4 * (n.length + 1); this._process(); b = this._hash; n = b.words; for (a = 0; 4 > a; a++)c = n[a], n[a] = (c << 8 | c >>> 24) & 16711935 | (c << 24 | c >>> 8) & 4278255360; return b
+        }, clone: function () { var b = v.clone.call(this); b._hash = this._hash.clone(); return b }
+    }); t.MD5 = v._createHelper(r); t.HmacMD5 = v._createHmacHelper(r)
+})(Math);
+(function () {
+    var u = CryptoJS, p = u.lib, d = p.Base, l = p.WordArray, p = u.algo, s = p.EvpKDF = d.extend({ cfg: d.extend({ keySize: 4, hasher: p.MD5, iterations: 1 }), init: function (d) { this.cfg = this.cfg.extend(d) }, compute: function (d, r) { for (var p = this.cfg, s = p.hasher.create(), b = l.create(), u = b.words, q = p.keySize, p = p.iterations; u.length < q;) { n && s.update(n); var n = s.update(d).finalize(r); s.reset(); for (var a = 1; a < p; a++)n = s.finalize(n), s.reset(); b.concat(n) } b.sigBytes = 4 * q; return b } }); u.EvpKDF = function (d, l, p) {
+        return s.create(p).compute(d,
+            l)
+    }
+})();
+CryptoJS.lib.Cipher || function (u) {
+    var p = CryptoJS, d = p.lib, l = d.Base, s = d.WordArray, t = d.BufferedBlockAlgorithm, r = p.enc.Base64, w = p.algo.EvpKDF, v = d.Cipher = t.extend({
+        cfg: l.extend(), createEncryptor: function (e, a) { return this.create(this._ENC_XFORM_MODE, e, a) }, createDecryptor: function (e, a) { return this.create(this._DEC_XFORM_MODE, e, a) }, init: function (e, a, b) { this.cfg = this.cfg.extend(b); this._xformMode = e; this._key = a; this.reset() }, reset: function () { t.reset.call(this); this._doReset() }, process: function (e) { this._append(e); return this._process() },
+        finalize: function (e) { e && this._append(e); return this._doFinalize() }, keySize: 4, ivSize: 4, _ENC_XFORM_MODE: 1, _DEC_XFORM_MODE: 2, _createHelper: function (e) { return { encrypt: function (b, k, d) { return ("string" == typeof k ? c : a).encrypt(e, b, k, d) }, decrypt: function (b, k, d) { return ("string" == typeof k ? c : a).decrypt(e, b, k, d) } } }
+    }); d.StreamCipher = v.extend({ _doFinalize: function () { return this._process(!0) }, blockSize: 1 }); var b = p.mode = {}, x = function (e, a, b) {
+        var c = this._iv; c ? this._iv = u : c = this._prevBlock; for (var d = 0; d < b; d++)e[a + d] ^=
+            c[d]
+    }, q = (d.BlockCipherMode = l.extend({ createEncryptor: function (e, a) { return this.Encryptor.create(e, a) }, createDecryptor: function (e, a) { return this.Decryptor.create(e, a) }, init: function (e, a) { this._cipher = e; this._iv = a } })).extend(); q.Encryptor = q.extend({ processBlock: function (e, a) { var b = this._cipher, c = b.blockSize; x.call(this, e, a, c); b.encryptBlock(e, a); this._prevBlock = e.slice(a, a + c) } }); q.Decryptor = q.extend({
+        processBlock: function (e, a) {
+            var b = this._cipher, c = b.blockSize, d = e.slice(a, a + c); b.decryptBlock(e, a); x.call(this,
+                e, a, c); this._prevBlock = d
+        }
+    }); b = b.CBC = q; q = (p.pad = {}).Pkcs7 = { pad: function (a, b) { for (var c = 4 * b, c = c - a.sigBytes % c, d = c << 24 | c << 16 | c << 8 | c, l = [], n = 0; n < c; n += 4)l.push(d); c = s.create(l, c); a.concat(c) }, unpad: function (a) { a.sigBytes -= a.words[a.sigBytes - 1 >>> 2] & 255 } }; d.BlockCipher = v.extend({
+        cfg: v.cfg.extend({ mode: b, padding: q }), reset: function () {
+            v.reset.call(this); var a = this.cfg, b = a.iv, a = a.mode; if (this._xformMode == this._ENC_XFORM_MODE) var c = a.createEncryptor; else c = a.createDecryptor, this._minBufferSize = 1; this._mode = c.call(a,
+                this, b && b.words)
+        }, _doProcessBlock: function (a, b) { this._mode.processBlock(a, b) }, _doFinalize: function () { var a = this.cfg.padding; if (this._xformMode == this._ENC_XFORM_MODE) { a.pad(this._data, this.blockSize); var b = this._process(!0) } else b = this._process(!0), a.unpad(b); return b }, blockSize: 4
+    }); var n = d.CipherParams = l.extend({ init: function (a) { this.mixIn(a) }, toString: function (a) { return (a || this.formatter).stringify(this) } }), b = (p.format = {}).OpenSSL = {
+        stringify: function (a) {
+            var b = a.ciphertext; a = a.salt; return (a ? s.create([1398893684,
+                1701076831]).concat(a).concat(b) : b).toString(r)
+        }, parse: function (a) { a = r.parse(a); var b = a.words; if (1398893684 == b[0] && 1701076831 == b[1]) { var c = s.create(b.slice(2, 4)); b.splice(0, 4); a.sigBytes -= 16 } return n.create({ ciphertext: a, salt: c }) }
+    }, a = d.SerializableCipher = l.extend({
+        cfg: l.extend({ format: b }), encrypt: function (a, b, c, d) { d = this.cfg.extend(d); var l = a.createEncryptor(c, d); b = l.finalize(b); l = l.cfg; return n.create({ ciphertext: b, key: c, iv: l.iv, algorithm: a, mode: l.mode, padding: l.padding, blockSize: a.blockSize, formatter: d.format }) },
+        decrypt: function (a, b, c, d) { d = this.cfg.extend(d); b = this._parse(b, d.format); return a.createDecryptor(c, d).finalize(b.ciphertext) }, _parse: function (a, b) { return "string" == typeof a ? b.parse(a, this) : a }
+    }), p = (p.kdf = {}).OpenSSL = { execute: function (a, b, c, d) { d || (d = s.random(8)); a = w.create({ keySize: b + c }).compute(a, d); c = s.create(a.words.slice(b), 4 * c); a.sigBytes = 4 * b; return n.create({ key: a, iv: c, salt: d }) } }, c = d.PasswordBasedCipher = a.extend({
+        cfg: a.cfg.extend({ kdf: p }), encrypt: function (b, c, d, l) {
+            l = this.cfg.extend(l); d = l.kdf.execute(d,
+                b.keySize, b.ivSize); l.iv = d.iv; b = a.encrypt.call(this, b, c, d.key, l); b.mixIn(d); return b
+        }, decrypt: function (b, c, d, l) { l = this.cfg.extend(l); c = this._parse(c, l.format); d = l.kdf.execute(d, b.keySize, b.ivSize, c.salt); l.iv = d.iv; return a.decrypt.call(this, b, c, d.key, l) }
+    })
+}();
+(function () {
+    for (var u = CryptoJS, p = u.lib.BlockCipher, d = u.algo, l = [], s = [], t = [], r = [], w = [], v = [], b = [], x = [], q = [], n = [], a = [], c = 0; 256 > c; c++)a[c] = 128 > c ? c << 1 : c << 1 ^ 283; for (var e = 0, j = 0, c = 0; 256 > c; c++) { var k = j ^ j << 1 ^ j << 2 ^ j << 3 ^ j << 4, k = k >>> 8 ^ k & 255 ^ 99; l[e] = k; s[k] = e; var z = a[e], F = a[z], G = a[F], y = 257 * a[k] ^ 16843008 * k; t[e] = y << 24 | y >>> 8; r[e] = y << 16 | y >>> 16; w[e] = y << 8 | y >>> 24; v[e] = y; y = 16843009 * G ^ 65537 * F ^ 257 * z ^ 16843008 * e; b[k] = y << 24 | y >>> 8; x[k] = y << 16 | y >>> 16; q[k] = y << 8 | y >>> 24; n[k] = y; e ? (e = z ^ a[a[a[G ^ z]]], j ^= a[a[j]]) : e = j = 1 } var H = [0, 1, 2, 4, 8,
+        16, 32, 64, 128, 27, 54], d = d.AES = p.extend({
+            _doReset: function () {
+                for (var a = this._key, c = a.words, d = a.sigBytes / 4, a = 4 * ((this._nRounds = d + 6) + 1), e = this._keySchedule = [], j = 0; j < a; j++)if (j < d) e[j] = c[j]; else { var k = e[j - 1]; j % d ? 6 < d && 4 == j % d && (k = l[k >>> 24] << 24 | l[k >>> 16 & 255] << 16 | l[k >>> 8 & 255] << 8 | l[k & 255]) : (k = k << 8 | k >>> 24, k = l[k >>> 24] << 24 | l[k >>> 16 & 255] << 16 | l[k >>> 8 & 255] << 8 | l[k & 255], k ^= H[j / d | 0] << 24); e[j] = e[j - d] ^ k } c = this._invKeySchedule = []; for (d = 0; d < a; d++)j = a - d, k = d % 4 ? e[j] : e[j - 4], c[d] = 4 > d || 4 >= j ? k : b[l[k >>> 24]] ^ x[l[k >>> 16 & 255]] ^ q[l[k >>>
+                    8 & 255]] ^ n[l[k & 255]]
+            }, encryptBlock: function (a, b) { this._doCryptBlock(a, b, this._keySchedule, t, r, w, v, l) }, decryptBlock: function (a, c) { var d = a[c + 1]; a[c + 1] = a[c + 3]; a[c + 3] = d; this._doCryptBlock(a, c, this._invKeySchedule, b, x, q, n, s); d = a[c + 1]; a[c + 1] = a[c + 3]; a[c + 3] = d }, _doCryptBlock: function (a, b, c, d, e, j, l, f) {
+                for (var m = this._nRounds, g = a[b] ^ c[0], h = a[b + 1] ^ c[1], k = a[b + 2] ^ c[2], n = a[b + 3] ^ c[3], p = 4, r = 1; r < m; r++)var q = d[g >>> 24] ^ e[h >>> 16 & 255] ^ j[k >>> 8 & 255] ^ l[n & 255] ^ c[p++], s = d[h >>> 24] ^ e[k >>> 16 & 255] ^ j[n >>> 8 & 255] ^ l[g & 255] ^ c[p++], t =
+                    d[k >>> 24] ^ e[n >>> 16 & 255] ^ j[g >>> 8 & 255] ^ l[h & 255] ^ c[p++], n = d[n >>> 24] ^ e[g >>> 16 & 255] ^ j[h >>> 8 & 255] ^ l[k & 255] ^ c[p++], g = q, h = s, k = t; q = (f[g >>> 24] << 24 | f[h >>> 16 & 255] << 16 | f[k >>> 8 & 255] << 8 | f[n & 255]) ^ c[p++]; s = (f[h >>> 24] << 24 | f[k >>> 16 & 255] << 16 | f[n >>> 8 & 255] << 8 | f[g & 255]) ^ c[p++]; t = (f[k >>> 24] << 24 | f[n >>> 16 & 255] << 16 | f[g >>> 8 & 255] << 8 | f[h & 255]) ^ c[p++]; n = (f[n >>> 24] << 24 | f[g >>> 16 & 255] << 16 | f[h >>> 8 & 255] << 8 | f[k & 255]) ^ c[p++]; a[b] = q; a[b + 1] = s; a[b + 2] = t; a[b + 3] = n
+            }, keySize: 8
+        }); u.AES = p._createHelper(d)
+})();
 
 /**
  * component/aes.js
@@ -96,14 +166,14 @@ code.google.com/p/crypto-js/wiki/License
             var t = (d[sx] * 0x101) ^ (sx * 0x1010100);
             SUB_MIX_0[x] = (t << 24) | (t >>> 8);
             SUB_MIX_1[x] = (t << 16) | (t >>> 16);
-            SUB_MIX_2[x] = (t << 8)  | (t >>> 24);
+            SUB_MIX_2[x] = (t << 8) | (t >>> 24);
             SUB_MIX_3[x] = t;
 
             // Compute inv sub bytes, inv mix columns tables
             var t = (x8 * 0x1010101) ^ (x4 * 0x10001) ^ (x2 * 0x101) ^ (x * 0x1010100);
             INV_SUB_MIX_0[sx] = (t << 24) | (t >>> 8);
             INV_SUB_MIX_1[sx] = (t << 16) | (t >>> 16);
-            INV_SUB_MIX_2[sx] = (t << 8)  | (t >>> 24);
+            INV_SUB_MIX_2[sx] = (t << 8) | (t >>> 24);
             INV_SUB_MIX_3[sx] = t;
 
             // Compute next counter
@@ -176,7 +246,7 @@ code.google.com/p/crypto-js/wiki/License
                     invKeySchedule[invKsRow] = t;
                 } else {
                     invKeySchedule[invKsRow] = INV_SUB_MIX_0[SBOX[t >>> 24]] ^ INV_SUB_MIX_1[SBOX[(t >>> 16) & 0xff]] ^
-                                               INV_SUB_MIX_2[SBOX[(t >>> 8) & 0xff]] ^ INV_SUB_MIX_3[SBOX[t & 0xff]];
+                        INV_SUB_MIX_2[SBOX[(t >>> 8) & 0xff]] ^ INV_SUB_MIX_3[SBOX[t & 0xff]];
                 }
             }
         },
@@ -204,7 +274,7 @@ code.google.com/p/crypto-js/wiki/License
             var nRounds = this._nRounds;
 
             // Get input, add round key
-            var s0 = M[offset]     ^ keySchedule[0];
+            var s0 = M[offset] ^ keySchedule[0];
             var s1 = M[offset + 1] ^ keySchedule[1];
             var s2 = M[offset + 2] ^ keySchedule[2];
             var s3 = M[offset + 3] ^ keySchedule[3];
@@ -234,13 +304,13 @@ code.google.com/p/crypto-js/wiki/License
             var t3 = ((SBOX[s3 >>> 24] << 24) | (SBOX[(s0 >>> 16) & 0xff] << 16) | (SBOX[(s1 >>> 8) & 0xff] << 8) | SBOX[s2 & 0xff]) ^ keySchedule[ksRow++];
 
             // Set output
-            M[offset]     = t0;
+            M[offset] = t0;
             M[offset + 1] = t1;
             M[offset + 2] = t2;
             M[offset + 3] = t3;
         },
 
-        keySize: 256/32
+        keySize: 256 / 32
     });
 
     /**
@@ -507,17 +577,26 @@ CryptoJS.pad.NoPadding = {
     }(t || (t = {}))
 }();
 //# sourceMappingURL=sourcemap/scrypt.js.map
-
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++ , k++)
+            r[k] = a[j];
+    return r;
+};
 var Neo;
 (function (Neo) {
     var UintVariable = (function () {
@@ -577,7 +656,9 @@ var Neo;
             return s;
         };
         UintVariable.prototype.toArray = function () {
-            return new Uint8Array(this._bits.buffer).reverse();
+            var bits = this._bits.buffer;
+            var arr = new Uint8Array(bits).clone();
+            return arr.reverse();
         };
         return UintVariable;
     }());
@@ -1426,10 +1507,49 @@ var Neo;
                 return array;
             }
         };
+        BigInteger.prototype.toUint64 = function () {
+            var array = new Uint32Array(this.toUint8Array(true, 8).buffer);
+            return new Neo.Uint64(array[0], array[1]);
+        };
         return BigInteger;
     }());
     Neo.BigInteger = BigInteger;
 })(Neo || (Neo = {}));
+var Neo;
+(function (Neo) {
+    var Cosigner = (function () {
+        function Cosigner() {
+            this.maxSubitems = 16;
+            this.scopes = Neo.WitnessScope.Global;
+        }
+        Cosigner.prototype.deserialize = function (reader) {
+            this.account = reader.readUint160();
+            this.scopes = reader.readByte();
+            this.allowedContracts = (this.scopes.endsWith(Neo.WitnessScope.CustomContracts) ? reader.readSerializableArray(Neo.Uint160, this.maxSubitems) : []);
+            this.allowedGroups = (this.scopes.endsWith(Neo.WitnessScope.CustomGroups) ? reader.readSerializableArray(Neo.Cryptography.ECPoint, this.maxSubitems) : []);
+        };
+        Cosigner.prototype.serialize = function (writer) {
+            writer.write(this.account.toArray(), 0, 20);
+            writer.writeByte(this.scopes);
+            if (this.scopes.endsWith(Neo.WitnessScope.CustomContracts))
+                writer.writeSerializableArray(this.allowedContracts);
+            if (this.scopes.endsWith(Neo.WitnessScope.CustomGroups))
+                writer.writeSerializableArray(this.allowedGroups);
+        };
+        return Cosigner;
+    }());
+    Neo.Cosigner = Cosigner;
+})(Neo || (Neo = {}));
+String.prototype.endsWith = function (suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+Number.prototype.endsWith = function (suffix) {
+    return this.toString(2).endsWith(suffix.toString(2));
+};
+// Object.prototype.getVarSize = function () {
+//     var obj = this;
+//     return Object.keys(obj).length;
+// };
 var Neo;
 (function (Neo) {
     var D = 100000000;
@@ -1631,6 +1751,16 @@ Uint8Array.prototype.concat = function (data) {
     }
     return newarr;
 };
+Uint8Array.prototype.isSignatureContract = function () {
+    if (this.Length != 39) {
+        return false;
+    }
+    if (this[0] != ThinNeo.OpCode.PUSHBYTES33
+        || this[34] != ThinNeo.OpCode.SYSCALL) {
+        return false;
+    }
+    return true;
+};
 void function () {
     function fillArray(value, start, end) {
         if (start === void 0) { start = 0; }
@@ -1659,6 +1789,611 @@ void function () {
     Uint16Array.prototype.fill = Uint16Array.prototype.fill || fillArray;
     Uint32Array.prototype.fill = Uint32Array.prototype.fill || fillArray;
 }();
+var Neo;
+(function (Neo) {
+    var wasm = null;
+    try {
+        wasm = new WebAssembly.Instance(new WebAssembly.Module(new Uint8Array([
+            0, 97, 115, 109, 1, 0, 0, 0, 1, 13, 2, 96, 0, 1, 127, 96, 4, 127, 127, 127, 127, 1, 127, 3, 7, 6, 0, 1, 1, 1, 1, 1, 6, 6, 1, 127, 1, 65, 0, 11, 7, 50, 6, 3, 109, 117, 108, 0, 1, 5, 100, 105, 118, 95, 115, 0, 2, 5, 100, 105, 118, 95, 117, 0, 3, 5, 114, 101, 109, 95, 115, 0, 4, 5, 114, 101, 109, 95, 117, 0, 5, 8, 103, 101, 116, 95, 104, 105, 103, 104, 0, 0, 10, 191, 1, 6, 4, 0, 35, 0, 11, 36, 1, 1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 126, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 127, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 128, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 129, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11, 36, 1, 1, 126, 32, 0, 173, 32, 1, 173, 66, 32, 134, 132, 32, 2, 173, 32, 3, 173, 66, 32, 134, 132, 130, 34, 4, 66, 32, 135, 167, 36, 0, 32, 4, 167, 11
+        ])), {}).exports;
+    }
+    catch (e) {
+    }
+    var Long = (function () {
+        function Long(low, high, unsigned) {
+            var _this = this;
+            this.toInt = function () {
+                return _this.unsigned ? _this.low >>> 0 : _this.low;
+            };
+            this.toNumber = function () {
+                if (_this.unsigned)
+                    return ((_this.high >>> 0) * Long.TWO_PWR_32_DBL) + (_this.low >>> 0);
+                return _this.high * Long.TWO_PWR_32_DBL + (_this.low >>> 0);
+            };
+            this.isZero = function isZero() {
+                return this.high === 0 && this.low === 0;
+            };
+            this.eqz = this.isZero;
+            this.isNegative = function isNegative() {
+                return !this.unsigned && this.high < 0;
+            };
+            this.isPositive = function isPositive() {
+                return this.unsigned || this.high >= 0;
+            };
+            this.isOdd = function isOdd() {
+                return (this.low & 1) === 1;
+            };
+            this.isEven = function isEven() {
+                return (this.low & 1) === 0;
+            };
+            this.equals = function equals(other) {
+                if (!Long.isLong(other))
+                    other = Long.fromValue(other);
+                if (this.unsigned !== other.unsigned && (this.high >>> 31) === 1 && (other.high >>> 31) === 1)
+                    return false;
+                return this.high === other.high && this.low === other.low;
+            };
+            this.eq = this.equals;
+            this.notEquals = function notEquals(other) {
+                return !this.eq(other);
+            };
+            this.neq = this.notEquals;
+            this.ne = this.notEquals;
+            this.lessThan = function lessThan(other) {
+                return this.comp(other) < 0;
+            };
+            this.lt = this.lessThan;
+            this.lessThanOrEqual = function lessThanOrEqual(other) {
+                return this.comp(other) <= 0;
+            };
+            this.lte = this.lessThanOrEqual;
+            this.le = this.lessThanOrEqual;
+            this.greaterThan = function greaterThan(other) {
+                return this.comp(other) > 0;
+            };
+            this.gt = this.greaterThan;
+            this.greaterThanOrEqual = function greaterThanOrEqual(other) {
+                return this.comp(other) >= 0;
+            };
+            this.gte = this.greaterThanOrEqual;
+            this.ge = this.greaterThanOrEqual;
+            this.compare = function compare(other) {
+                if (!Long.isLong(other))
+                    other = Long.fromValue(other);
+                if (this.eq(other))
+                    return 0;
+                var thisNeg = this.isNegative(), otherNeg = other.isNegative();
+                if (thisNeg && !otherNeg)
+                    return -1;
+                if (!thisNeg && otherNeg)
+                    return 1;
+                if (!this.unsigned)
+                    return this.sub(other).isNegative() ? -1 : 1;
+                return (other.high >>> 0) > (this.high >>> 0) || (other.high === this.high && (other.low >>> 0) > (this.low >>> 0)) ? -1 : 1;
+            };
+            this.comp = this.compare;
+            this.negate = function negate() {
+                if (!this.unsigned && this.eq(Long.MIN_VALUE))
+                    return Long.MIN_VALUE;
+                return this.not().add(Long.ONE);
+            };
+            this.neg = this.negate;
+            this.sub = this.subtract;
+            this.mul = this.multiply;
+            this.div = this.divide;
+            this.mod = this.modulo;
+            this.rem = this.modulo;
+            this.shl = this.shiftLeft;
+            this.shr = this.shiftRight;
+            this.shru = this.shiftRightUnsigned;
+            this.shr_u = this.shiftRightUnsigned;
+            this.rotl = this.rotateLeft;
+            this.rotr = this.rotateRight;
+            this.low = low | 0;
+            this.high = high | 0;
+            this.unsigned = !!unsigned;
+        }
+        Long.isLong = function (obj) {
+            return (obj && obj["__isLong__"]) === true;
+        };
+        Long.fromInt = function (value, unsigned) {
+            var obj, cachedObj, cache;
+            if (unsigned) {
+                value >>>= 0;
+                if (cache = (0 <= value && value < 256)) {
+                    cachedObj = this.UINT_CACHE[value];
+                    if (cachedObj)
+                        return cachedObj;
+                }
+                obj = this.fromBits(value, (value | 0) < 0 ? -1 : 0, true);
+                if (cache)
+                    this.UINT_CACHE[value] = obj;
+                return obj;
+            }
+            else {
+                value |= 0;
+                if (cache = (-128 <= value && value < 128)) {
+                    cachedObj = this.INT_CACHE[value];
+                    if (cachedObj)
+                        return cachedObj;
+                }
+                obj = this.fromBits(value, value < 0 ? -1 : 0, false);
+                if (cache)
+                    this.INT_CACHE[value] = obj;
+                return obj;
+            }
+        };
+        Long.fromNumber = function (value, unsigned) {
+            if (isNaN(value))
+                return unsigned ? Long.UZERO : Long.ZERO;
+            if (unsigned) {
+                if (value < 0)
+                    return Long.UZERO;
+                if (value >= Long.TWO_PWR_64_DBL)
+                    return Long.MAX_UNSIGNED_VALUE;
+            }
+            else {
+                if (value <= -Long.TWO_PWR_63_DBL)
+                    return Long.MIN_VALUE;
+                if (value + 1 >= Long.TWO_PWR_63_DBL)
+                    return Long.MAX_VALUE;
+            }
+            if (value < 0)
+                return this.fromNumber(-value, unsigned).neg();
+            return this.fromBits((value % Long.TWO_PWR_32_DBL) | 0, (value / Long.TWO_PWR_32_DBL) | 0, unsigned);
+        };
+        Long.fromBits = function (lowBits, highBits, unsigned) {
+            return new Long(lowBits, highBits, unsigned);
+        };
+        Long.fromString = function (str, unsigned, radix) {
+            if (str.length === 0)
+                throw Error('empty string');
+            if (str === "NaN" || str === "Infinity" || str === "+Infinity" || str === "-Infinity")
+                return Long.ZERO;
+            if (typeof unsigned === 'number') {
+                radix = unsigned,
+                    unsigned = false;
+            }
+            else {
+                unsigned = !!unsigned;
+            }
+            radix = radix || 10;
+            if (radix < 2 || 36 < radix)
+                throw RangeError('radix');
+            var p;
+            if ((p = str.indexOf('-')) > 0)
+                throw Error('interior hyphen');
+            else if (p === 0) {
+                return this.fromString(str.substring(1), unsigned, radix).neg();
+            }
+            var radixToPower = this.fromNumber(Math.pow(radix, 8));
+            var result = Long.ZERO;
+            for (var i = 0; i < str.length; i += 8) {
+                var size = Math.min(8, str.length - i), value = parseInt(str.substring(i, i + size), radix);
+                if (size < 8) {
+                    var power = this.fromNumber(Math.pow(radix, size));
+                    result = result.mul(power).add(this.fromNumber(value));
+                }
+                else {
+                    result = result.mul(radixToPower);
+                    result = result.add(this.fromNumber(value));
+                }
+            }
+            result.unsigned = unsigned;
+            return result;
+        };
+        Long.fromValue = function (val, unsigned) {
+            if (typeof val === 'number')
+                return this.fromNumber(val, unsigned);
+            if (typeof val === 'string')
+                return this.fromString(val, unsigned);
+            return this.fromBits(val.low, val.high, typeof unsigned === 'boolean' ? unsigned : val.unsigned);
+        };
+        Long.prototype.toString = function (radix) {
+            radix = radix || 10;
+            if (radix < 2 || 36 < radix)
+                throw RangeError('radix');
+            if (this.isZero())
+                return '0';
+            if (this.isNegative()) {
+                if (this.eq(Long.MIN_VALUE)) {
+                    var radixLong = Long.fromNumber(radix), div = this.div(radixLong), rem1 = div.mul(radixLong).sub(this);
+                    return div.toString(radix) + rem1.toInt().toString(radix);
+                }
+                else
+                    return '-' + this.neg().toString(radix);
+            }
+            var radixToPower = Long.fromNumber(Math.pow(radix, 6), this.unsigned), rem = this;
+            var result = '';
+            while (true) {
+                var remDiv = rem.div(radixToPower), intval = rem.sub(remDiv.mul(radixToPower)).toInt() >>> 0, digits = intval.toString(radix);
+                rem = remDiv;
+                if (rem.isZero())
+                    return digits + result;
+                else {
+                    while (digits.length < 6)
+                        digits = '0' + digits;
+                    result = '' + digits + result;
+                }
+            }
+        };
+        ;
+        Long.prototype.getHighBits = function () {
+            return this.high;
+        };
+        ;
+        Long.prototype.getHighBitsUnsigned = function () {
+            return this.high >>> 0;
+        };
+        ;
+        Long.prototype.getLowBits = function () {
+            return this.low;
+        };
+        ;
+        Long.prototype.getLowBitsUnsigned = function () {
+            return this.low >>> 0;
+        };
+        ;
+        Long.prototype.getNumBitsAbs = function () {
+            if (this.isNegative())
+                return this.eq(Long.MIN_VALUE) ? 64 : this.neg().getNumBitsAbs();
+            var val = this.high != 0 ? this.high : this.low;
+            for (var bit = 31; bit > 0; bit--)
+                if ((val & (1 << bit)) != 0)
+                    break;
+            return this.high != 0 ? bit + 33 : bit + 1;
+        };
+        ;
+        Long.prototype.add = function (addend) {
+            if (!Long.isLong(addend))
+                addend = Long.fromValue(addend);
+            var a48 = this.high >>> 16;
+            var a32 = this.high & 0xFFFF;
+            var a16 = this.low >>> 16;
+            var a00 = this.low & 0xFFFF;
+            var b48 = addend.high >>> 16;
+            var b32 = addend.high & 0xFFFF;
+            var b16 = addend.low >>> 16;
+            var b00 = addend.low & 0xFFFF;
+            var c48 = 0, c32 = 0, c16 = 0, c00 = 0;
+            c00 += a00 + b00;
+            c16 += c00 >>> 16;
+            c00 &= 0xFFFF;
+            c16 += a16 + b16;
+            c32 += c16 >>> 16;
+            c16 &= 0xFFFF;
+            c32 += a32 + b32;
+            c48 += c32 >>> 16;
+            c32 &= 0xFFFF;
+            c48 += a48 + b48;
+            c48 &= 0xFFFF;
+            return Long.fromBits((c16 << 16) | c00, (c48 << 16) | c32, this.unsigned);
+        };
+        ;
+        Long.prototype.subtract = function (subtrahend) {
+            if (!Long.isLong(subtrahend))
+                subtrahend = Long.fromValue(subtrahend);
+            return this.add(subtrahend.neg());
+        };
+        ;
+        Long.prototype.multiply = function (multiplier) {
+            if (this.isZero())
+                return Long.ZERO;
+            if (!Long.isLong(multiplier))
+                multiplier = Long.fromValue(multiplier);
+            if (wasm) {
+                var low = wasm["mul"](this.low, this.high, multiplier.low, multiplier.high);
+                return Long.fromBits(low, wasm["get_high"](), this.unsigned);
+            }
+            if (multiplier.isZero())
+                return Long.ZERO;
+            if (this.eq(Long.MIN_VALUE))
+                return multiplier.isOdd() ? Long.MIN_VALUE : Long.ZERO;
+            if (multiplier.eq(Long.MIN_VALUE))
+                return this.isOdd() ? Long.MIN_VALUE : Long.ZERO;
+            if (this.isNegative()) {
+                if (multiplier.isNegative())
+                    return this.neg().mul(multiplier.neg());
+                else
+                    return this.neg().mul(multiplier).neg();
+            }
+            else if (multiplier.isNegative())
+                return this.mul(multiplier.neg()).neg();
+            if (this.lt(Long.TWO_PWR_24) && multiplier.lt(Long.TWO_PWR_24))
+                return Long.fromNumber(this.toNumber() * multiplier.toNumber(), this.unsigned);
+            var a48 = this.high >>> 16;
+            var a32 = this.high & 0xFFFF;
+            var a16 = this.low >>> 16;
+            var a00 = this.low & 0xFFFF;
+            var b48 = multiplier.high >>> 16;
+            var b32 = multiplier.high & 0xFFFF;
+            var b16 = multiplier.low >>> 16;
+            var b00 = multiplier.low & 0xFFFF;
+            var c48 = 0, c32 = 0, c16 = 0, c00 = 0;
+            c00 += a00 * b00;
+            c16 += c00 >>> 16;
+            c00 &= 0xFFFF;
+            c16 += a16 * b00;
+            c32 += c16 >>> 16;
+            c16 &= 0xFFFF;
+            c16 += a00 * b16;
+            c32 += c16 >>> 16;
+            c16 &= 0xFFFF;
+            c32 += a32 * b00;
+            c48 += c32 >>> 16;
+            c32 &= 0xFFFF;
+            c32 += a16 * b16;
+            c48 += c32 >>> 16;
+            c32 &= 0xFFFF;
+            c32 += a00 * b32;
+            c48 += c32 >>> 16;
+            c32 &= 0xFFFF;
+            c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
+            c48 &= 0xFFFF;
+            return Long.fromBits((c16 << 16) | c00, (c48 << 16) | c32, this.unsigned);
+        };
+        ;
+        Long.prototype.divide = function (divisor) {
+            if (!Long.isLong(divisor))
+                divisor = Long.fromValue(divisor);
+            if (divisor.isZero())
+                throw Error('division by zero');
+            divisor = divisor;
+            if (wasm) {
+                if (!this.unsigned &&
+                    this.high === -0x80000000 &&
+                    divisor.low === -1 && divisor.high === -1) {
+                    return this;
+                }
+                var low = (this.unsigned ? wasm["div_u"] : wasm["div_s"])(this.low, this.high, divisor.low, divisor.high);
+                return Long.fromBits(low, wasm["get_high"](), this.unsigned);
+            }
+            if (this.isZero())
+                return this.unsigned ? Long.UZERO : Long.ZERO;
+            var approx, rem, res;
+            if (!this.unsigned) {
+                if (this.eq(Long.MIN_VALUE)) {
+                    if (divisor.eq(Long.ONE) || divisor.eq(Long.NEG_ONE))
+                        return Long.MIN_VALUE;
+                    else if (divisor.eq(Long.MIN_VALUE))
+                        return Long.ONE;
+                    else {
+                        var halfThis = this.shr(1);
+                        approx = halfThis.div(divisor).shl(1);
+                        if (approx.eq(Long.ZERO)) {
+                            return divisor.isNegative() ? Long.ONE : Long.NEG_ONE;
+                        }
+                        else {
+                            rem = this.sub(divisor.mul(approx));
+                            res = approx.add(rem.div(divisor));
+                            return res;
+                        }
+                    }
+                }
+                else if (divisor.eq(Long.MIN_VALUE))
+                    return this.unsigned ? Long.UZERO : Long.ZERO;
+                if (this.isNegative()) {
+                    if (divisor.isNegative())
+                        return this.neg().div(divisor.neg());
+                    return this.neg().div(divisor).neg();
+                }
+                else if (divisor.isNegative())
+                    return this.div(divisor.neg()).neg();
+                res = Long.ZERO;
+            }
+            else {
+                if (!divisor.unsigned)
+                    divisor = divisor.toUnsigned();
+                if (divisor.gt(this))
+                    return Long.UZERO;
+                if (divisor.gt(this.shru(1)))
+                    return Long.UONE;
+                res = Long.UZERO;
+            }
+            rem = this;
+            while (rem.gte(divisor)) {
+                approx = Math.max(1, Math.floor(rem.toNumber() / divisor.toNumber()));
+                var log2 = Math.ceil(Math.log(approx) / Math.LN2), delta = (log2 <= 48) ? 1 : Math.pow(2, log2 - 48), approxRes = Long.fromNumber(approx), approxRem = approxRes.mul(divisor);
+                while (approxRem.isNegative() || approxRem.gt(rem)) {
+                    approx -= delta;
+                    approxRes = Long.fromNumber(approx, this.unsigned);
+                    approxRem = approxRes.mul(divisor);
+                }
+                if (approxRes.isZero())
+                    approxRes = Long.ONE;
+                res = res.add(approxRes);
+                rem = rem.sub(approxRem);
+            }
+            return res;
+        };
+        ;
+        Long.prototype.modulo = function (divisor) {
+            if (!Long.isLong(divisor))
+                divisor = Long.fromValue(divisor);
+            if (wasm) {
+                var low = (this.unsigned ? wasm["rem_u"] : wasm["rem_s"])(this.low, this.high, divisor.low, divisor.high);
+                return Long.fromBits(low, wasm["get_high"](), this.unsigned);
+            }
+            return this.sub(this.div(divisor).mul(divisor));
+        };
+        ;
+        Long.prototype.not = function () {
+            return Long.fromBits(~this.low, ~this.high, this.unsigned);
+        };
+        ;
+        Long.prototype.and = function (other) {
+            if (!Long.isLong(other))
+                other = Long.fromValue(other);
+            return Long.fromBits(this.low & other.low, this.high & other.high, this.unsigned);
+        };
+        ;
+        Long.prototype.or = function (other) {
+            if (!Long.isLong(other))
+                other = Long.fromValue(other);
+            return Long.fromBits(this.low | other.low, this.high | other.high, this.unsigned);
+        };
+        ;
+        Long.prototype.xor = function (other) {
+            if (!Long.isLong(other))
+                other = Long.fromValue(other);
+            return Long.fromBits(this.low ^ other.low, this.high ^ other.high, this.unsigned);
+        };
+        ;
+        Long.prototype.shiftLeft = function (numBits) {
+            if (Long.isLong(numBits))
+                numBits = numBits.toInt();
+            if ((numBits &= 63) === 0)
+                return this;
+            else if (numBits < 32)
+                return Long.fromBits(this.low << numBits, (this.high << numBits) | (this.low >>> (32 - numBits)), this.unsigned);
+            else
+                return Long.fromBits(0, this.low << (numBits - 32), this.unsigned);
+        };
+        ;
+        Long.prototype.shiftRight = function (numBits) {
+            if (Long.isLong(numBits))
+                numBits = numBits.toInt();
+            if ((numBits &= 63) === 0)
+                return this;
+            else if (numBits < 32)
+                return Long.fromBits((this.low >>> numBits) | (this.high << (32 - numBits)), this.high >> numBits, this.unsigned);
+            else
+                return Long.fromBits(this.high >> (numBits - 32), this.high >= 0 ? 0 : -1, this.unsigned);
+        };
+        ;
+        Long.prototype.shiftRightUnsigned = function (numBits) {
+            if (Long.isLong(numBits))
+                numBits = numBits.toInt();
+            if ((numBits &= 63) === 0)
+                return this;
+            if (numBits < 32)
+                return Long.fromBits((this.low >>> numBits) | (this.high << (32 - numBits)), this.high >>> numBits, this.unsigned);
+            if (numBits === 32)
+                return Long.fromBits(this.high, 0, this.unsigned);
+            return Long.fromBits(this.high >>> (numBits - 32), 0, this.unsigned);
+        };
+        ;
+        Long.prototype.rotateLeft = function (numBits) {
+            var b;
+            if (Long.isLong(numBits))
+                numBits = numBits.toInt();
+            if ((numBits &= 63) === 0)
+                return this;
+            if (numBits === 32)
+                return Long.fromBits(this.high, this.low, this.unsigned);
+            if (numBits < 32) {
+                b = (32 - numBits);
+                return Long.fromBits(((this.low << numBits) | (this.high >>> b)), ((this.high << numBits) | (this.low >>> b)), this.unsigned);
+            }
+            numBits -= 32;
+            b = (32 - numBits);
+            return Long.fromBits(((this.high << numBits) | (this.low >>> b)), ((this.low << numBits) | (this.high >>> b)), this.unsigned);
+        };
+        Long.prototype.rotateRight = function (numBits) {
+            var b;
+            if (Long.isLong(numBits))
+                numBits = numBits.toInt();
+            if ((numBits &= 63) === 0)
+                return this;
+            if (numBits === 32)
+                return Long.fromBits(this.high, this.low, this.unsigned);
+            if (numBits < 32) {
+                b = (32 - numBits);
+                return Long.fromBits(((this.high << b) | (this.low >>> numBits)), ((this.low << b) | (this.high >>> numBits)), this.unsigned);
+            }
+            numBits -= 32;
+            b = (32 - numBits);
+            return Long.fromBits(((this.low << b) | (this.high >>> numBits)), ((this.high << b) | (this.low >>> numBits)), this.unsigned);
+        };
+        Long.prototype.toSigned = function () {
+            if (!this.unsigned)
+                return this;
+            return Long.fromBits(this.low, this.high, false);
+        };
+        ;
+        Long.prototype.toUnsigned = function () {
+            if (this.unsigned)
+                return this;
+            return Long.fromBits(this.low, this.high, true);
+        };
+        ;
+        Long.prototype.toBytes = function (le) {
+            return le ? this.toBytesLE() : this.toBytesBE();
+        };
+        ;
+        Long.prototype.toBytesLE = function () {
+            var hi = this.high, lo = this.low;
+            return new Uint8Array([
+                lo & 0xff,
+                lo >>> 8 & 0xff,
+                lo >>> 16 & 0xff,
+                lo >>> 24,
+                hi & 0xff,
+                hi >>> 8 & 0xff,
+                hi >>> 16 & 0xff,
+                hi >>> 24
+            ]);
+        };
+        ;
+        Long.prototype.toBytesBE = function () {
+            var hi = this.high, lo = this.low;
+            return new Uint8Array([
+                hi >>> 24,
+                hi >>> 16 & 0xff,
+                hi >>> 8 & 0xff,
+                hi & 0xff,
+                lo >>> 24,
+                lo >>> 16 & 0xff,
+                lo >>> 8 & 0xff,
+                lo & 0xff
+            ]);
+        };
+        ;
+        Long.fromBytes = function (bytes, unsigned, le) {
+            return le ? this.fromBytesLE(bytes, unsigned) : this.fromBytesBE(bytes, unsigned);
+        };
+        ;
+        Long.fromBytesLE = function (bytes, unsigned) {
+            return new Long(bytes[0] |
+                bytes[1] << 8 |
+                bytes[2] << 16 |
+                bytes[3] << 24, bytes[4] |
+                bytes[5] << 8 |
+                bytes[6] << 16 |
+            bytes[7] << 24, unsigned);
+        };
+        ;
+        Long.fromBytesBE = function (bytes, unsigned) {
+            return new Long(bytes[4] << 24 |
+                bytes[5] << 16 |
+                bytes[6] << 8 |
+                bytes[7], bytes[0] << 24 |
+                bytes[1] << 16 |
+                bytes[2] << 8 |
+            bytes[3], unsigned);
+        };
+        ;
+        Long.INT_CACHE = {};
+        Long.UINT_CACHE = {};
+        Long.TWO_PWR_16_DBL = 1 << 16;
+        Long.TWO_PWR_24_DBL = 1 << 24;
+        Long.TWO_PWR_32_DBL = Long.TWO_PWR_16_DBL * Long.TWO_PWR_16_DBL;
+        Long.TWO_PWR_64_DBL = Long.TWO_PWR_32_DBL * Long.TWO_PWR_32_DBL;
+        Long.TWO_PWR_63_DBL = Long.TWO_PWR_64_DBL / 2;
+        Long.TWO_PWR_24 = Long.fromInt(Long.TWO_PWR_24_DBL);
+        Long.ZERO = Long.fromInt(0);
+        Long.UZERO = Long.fromInt(0, true);
+        Long.ONE = Long.fromInt(1);
+        Long.UONE = Long.fromInt(1, true);
+        Long.NEG_ONE = Long.fromInt(-1);
+        Long.MAX_VALUE = Long.fromBits(0xFFFFFFFF | 0, 0x7FFFFFFF | 0, false);
+        Long.MAX_UNSIGNED_VALUE = Long.fromBits(0xFFFFFFFF | 0, 0xFFFFFFFF | 0, true);
+        Long.MIN_VALUE = Long.fromBits(0, 0x80000000 | 0, false);
+        return Long;
+    }());
+    Neo.Long = Long;
+    Object.defineProperty(Long.prototype, "__isLong__", { value: true });
+})(Neo || (Neo = {}));
 var NeoMap = (function () {
     function NeoMap() {
         this._map = new Object();
@@ -1737,8 +2472,8 @@ var NeoPromise = (function () {
             }
         });
     };
-    NeoPromise.prototype.catch = function (onRejected) {
-        return this.then(null, onRejected);
+    NeoPromise.prototype.catch = function (onrejected) {
+        return this.then(null, onrejected);
     };
     NeoPromise.prototype.checkState = function () {
         if (this._state != PromiseState.pending && this._callback_attached) {
@@ -1821,6 +2556,8 @@ var Neo;
             configurable: true
         });
         Uint160.parse = function (str) {
+            if (str.length == 42)
+                str = str.replace("0x", "");
             if (str.length != 40)
                 throw new RangeError();
             var x = str.hexToBytes();
@@ -1829,6 +2566,15 @@ var Neo;
                 y[i] = x[x.length - i - 1];
             return new Uint160(y.buffer);
         };
+        Uint160.prototype.serialize = function (writer) {
+            writer.writeVarBytes(this.toArray().buffer);
+        };
+        Uint160.prototype.deserialize = function (reader) {
+            if (reader.read(this.toArray().buffer, 0, this.toArray().buffer.byteLength) != this.toArray().buffer.byteLength) {
+                throw new Error("FormatException");
+            }
+        };
+        Uint160.Length = 20;
         return Uint160;
     }(Neo.UintVariable));
     Neo.Uint160 = Uint160;
@@ -1864,6 +2610,16 @@ var Neo;
         return Uint256;
     }(Neo.UintVariable));
     Neo.Uint256 = Uint256;
+})(Neo || (Neo = {}));
+var Neo;
+(function (Neo) {
+    var WitnessScope;
+    (function (WitnessScope) {
+        WitnessScope[WitnessScope["Global"] = 0] = "Global";
+        WitnessScope[WitnessScope["CalledByEntry"] = 1] = "CalledByEntry";
+        WitnessScope[WitnessScope["CustomContracts"] = 16] = "CustomContracts";
+        WitnessScope[WitnessScope["CustomGroups"] = 32] = "CustomGroups";
+    })(WitnessScope = Neo.WitnessScope || (Neo.WitnessScope = {}));
 })(Neo || (Neo = {}));
 var Neo;
 (function (Neo) {
@@ -2559,12 +3315,7 @@ var Neo;
                 return this.x == null && this.y == null;
             };
             ECPoint.multiply = function (p, n) {
-                console.log(n);                
                 var k = n instanceof Uint8Array ? Neo.BigInteger.fromUint8Array(n, 1, false) : n;
-                console.log(k);
-                console.log(k.isZero());
-                
-                
                 if (p.isInfinity())
                     return p;
                 if (k.isZero())
@@ -2679,6 +3430,14 @@ var Neo;
                 }
                 wnaf.length = length + 1;
                 return wnaf;
+            };
+            ECPoint.prototype.serialize = function (writer) {
+                writer.writeVarBytes(this.encodePoint(true));
+            };
+            ECPoint.prototype.deserialize = function (reader) {
+                var p = ECPoint.deserializeFrom(reader, this.curve);
+                this.x = p.x;
+                this.y = p.y;
             };
             return ECPoint;
         }());
@@ -3397,8 +4156,9 @@ var Neo;
                 obj.deserialize(this);
                 return obj;
             };
-            BinaryReader.prototype.readSerializableArray = function (T) {
-                var array = new Array(this.readVarInt(0x10000000));
+            BinaryReader.prototype.readSerializableArray = function (T, max) {
+                if (max === void 0) { max = 0x10000000; }
+                var array = new Array(this.readVarInt(max));
                 for (var i = 0; i < array.length; i++)
                     array[i] = this.readSerializable(T);
                 return array;
@@ -3507,6 +4267,9 @@ var Neo;
                 this.array_int32[0] = value;
                 this.output.write(this._buffer, 0, 4);
             };
+            BinaryWriter.prototype.writeInt64 = function (value) {
+                this.output.write(value.toBytes(true), 0, 8);
+            };
             BinaryWriter.prototype.writeSByte = function (value) {
                 if (this.array_int8 == null)
                     this.array_int8 = new Int8Array(this._buffer, 0, 1);
@@ -3589,6 +4352,39 @@ Uint8Array.fromSerializable = function (obj) {
     obj.serialize(writer);
     return new Uint8Array(ms.toArray());
 };
+var Neo;
+(function (Neo) {
+    var IO;
+    (function (IO) {
+        var Helper = (function () {
+            function Helper() {
+            }
+            Helper.getVarSize = function (value) {
+                if (typeof value == "number") {
+                    if (value < 0xFD) {
+                        return 1;
+                    }
+                    else if (value <= 0xFFFF) {
+                        return 1 + 2;
+                    }
+                    else {
+                        return 1 + 4;
+                    }
+                }
+                else if (typeof value == "string") {
+                    var size = ThinNeo.Helper.String2Bytes(value).byteLength;
+                    return this.getVarSize(size) + size;
+                }
+                else {
+                    if (value instanceof Enumerator) {
+                    }
+                }
+            };
+            return Helper;
+        }());
+        IO.Helper = Helper;
+    })(IO = Neo.IO || (Neo.IO = {}));
+})(Neo || (Neo = {}));
 var Neo;
 (function (Neo) {
     var IO;
@@ -3945,16 +4741,21 @@ var ThinNeo;
                 localacc.nep2key = acc.key;
                 localacc.contract = acc.contract;
                 if (localacc.contract == null || localacc.contract.script == null) {
+                    console.log("localacc.contract == null || localacc.contract.script == null");
                     localacc.nep2key = null;
                 }
                 else {
                     var ss = localacc.contract.script.hexToBytes();
                     if (ss.length != 35 || ss[0] != 33 || ss[34] != 172) {
-                        localacc.nep2key = null;
+                        console.log("ss.length != 35 || ss[0] != 33 || ss[34] != 172");
+                        // localacc.nep2key = null;
                     }
                 }
-                if (acc.key == undefined)
+                if (acc.key == undefined) {
+                    console.log("acc.key == undefin");
                     localacc.nep2key = null;
+                }
+                ;
                 this.accounts.push(localacc);
             }
         };
@@ -3988,6 +4789,373 @@ var ThinNeo;
     }());
     ThinNeo.nep6wallet = nep6wallet;
 })(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var OpCode;
+    (function (OpCode) {
+        OpCode[OpCode["PUSH0"] = 0] = "PUSH0";
+        OpCode[OpCode["PUSHF"] = 0] = "PUSHF";
+        OpCode[OpCode["PUSHBYTES1"] = 1] = "PUSHBYTES1";
+        OpCode[OpCode["PUSHBYTES2"] = 2] = "PUSHBYTES2";
+        OpCode[OpCode["PUSHBYTES3"] = 3] = "PUSHBYTES3";
+        OpCode[OpCode["PUSHBYTES4"] = 4] = "PUSHBYTES4";
+        OpCode[OpCode["PUSHBYTES5"] = 5] = "PUSHBYTES5";
+        OpCode[OpCode["PUSHBYTES6"] = 6] = "PUSHBYTES6";
+        OpCode[OpCode["PUSHBYTES7"] = 7] = "PUSHBYTES7";
+        OpCode[OpCode["PUSHBYTES8"] = 8] = "PUSHBYTES8";
+        OpCode[OpCode["PUSHBYTES9"] = 9] = "PUSHBYTES9";
+        OpCode[OpCode["PUSHBYTES10"] = 10] = "PUSHBYTES10";
+        OpCode[OpCode["PUSHBYTES11"] = 11] = "PUSHBYTES11";
+        OpCode[OpCode["PUSHBYTES12"] = 12] = "PUSHBYTES12";
+        OpCode[OpCode["PUSHBYTES13"] = 13] = "PUSHBYTES13";
+        OpCode[OpCode["PUSHBYTES14"] = 14] = "PUSHBYTES14";
+        OpCode[OpCode["PUSHBYTES15"] = 15] = "PUSHBYTES15";
+        OpCode[OpCode["PUSHBYTES16"] = 16] = "PUSHBYTES16";
+        OpCode[OpCode["PUSHBYTES17"] = 17] = "PUSHBYTES17";
+        OpCode[OpCode["PUSHBYTES18"] = 18] = "PUSHBYTES18";
+        OpCode[OpCode["PUSHBYTES19"] = 19] = "PUSHBYTES19";
+        OpCode[OpCode["PUSHBYTES20"] = 20] = "PUSHBYTES20";
+        OpCode[OpCode["PUSHBYTES21"] = 21] = "PUSHBYTES21";
+        OpCode[OpCode["PUSHBYTES22"] = 22] = "PUSHBYTES22";
+        OpCode[OpCode["PUSHBYTES23"] = 23] = "PUSHBYTES23";
+        OpCode[OpCode["PUSHBYTES24"] = 24] = "PUSHBYTES24";
+        OpCode[OpCode["PUSHBYTES25"] = 25] = "PUSHBYTES25";
+        OpCode[OpCode["PUSHBYTES26"] = 26] = "PUSHBYTES26";
+        OpCode[OpCode["PUSHBYTES27"] = 27] = "PUSHBYTES27";
+        OpCode[OpCode["PUSHBYTES28"] = 28] = "PUSHBYTES28";
+        OpCode[OpCode["PUSHBYTES29"] = 29] = "PUSHBYTES29";
+        OpCode[OpCode["PUSHBYTES30"] = 30] = "PUSHBYTES30";
+        OpCode[OpCode["PUSHBYTES31"] = 31] = "PUSHBYTES31";
+        OpCode[OpCode["PUSHBYTES32"] = 32] = "PUSHBYTES32";
+        OpCode[OpCode["PUSHBYTES33"] = 33] = "PUSHBYTES33";
+        OpCode[OpCode["PUSHBYTES34"] = 34] = "PUSHBYTES34";
+        OpCode[OpCode["PUSHBYTES35"] = 35] = "PUSHBYTES35";
+        OpCode[OpCode["PUSHBYTES36"] = 36] = "PUSHBYTES36";
+        OpCode[OpCode["PUSHBYTES37"] = 37] = "PUSHBYTES37";
+        OpCode[OpCode["PUSHBYTES38"] = 38] = "PUSHBYTES38";
+        OpCode[OpCode["PUSHBYTES39"] = 39] = "PUSHBYTES39";
+        OpCode[OpCode["PUSHBYTES40"] = 40] = "PUSHBYTES40";
+        OpCode[OpCode["PUSHBYTES41"] = 41] = "PUSHBYTES41";
+        OpCode[OpCode["PUSHBYTES42"] = 42] = "PUSHBYTES42";
+        OpCode[OpCode["PUSHBYTES43"] = 43] = "PUSHBYTES43";
+        OpCode[OpCode["PUSHBYTES44"] = 44] = "PUSHBYTES44";
+        OpCode[OpCode["PUSHBYTES45"] = 45] = "PUSHBYTES45";
+        OpCode[OpCode["PUSHBYTES46"] = 46] = "PUSHBYTES46";
+        OpCode[OpCode["PUSHBYTES47"] = 47] = "PUSHBYTES47";
+        OpCode[OpCode["PUSHBYTES48"] = 48] = "PUSHBYTES48";
+        OpCode[OpCode["PUSHBYTES49"] = 49] = "PUSHBYTES49";
+        OpCode[OpCode["PUSHBYTES50"] = 50] = "PUSHBYTES50";
+        OpCode[OpCode["PUSHBYTES51"] = 51] = "PUSHBYTES51";
+        OpCode[OpCode["PUSHBYTES52"] = 52] = "PUSHBYTES52";
+        OpCode[OpCode["PUSHBYTES53"] = 53] = "PUSHBYTES53";
+        OpCode[OpCode["PUSHBYTES54"] = 54] = "PUSHBYTES54";
+        OpCode[OpCode["PUSHBYTES55"] = 55] = "PUSHBYTES55";
+        OpCode[OpCode["PUSHBYTES56"] = 56] = "PUSHBYTES56";
+        OpCode[OpCode["PUSHBYTES57"] = 57] = "PUSHBYTES57";
+        OpCode[OpCode["PUSHBYTES58"] = 58] = "PUSHBYTES58";
+        OpCode[OpCode["PUSHBYTES59"] = 59] = "PUSHBYTES59";
+        OpCode[OpCode["PUSHBYTES60"] = 60] = "PUSHBYTES60";
+        OpCode[OpCode["PUSHBYTES61"] = 61] = "PUSHBYTES61";
+        OpCode[OpCode["PUSHBYTES62"] = 62] = "PUSHBYTES62";
+        OpCode[OpCode["PUSHBYTES63"] = 63] = "PUSHBYTES63";
+        OpCode[OpCode["PUSHBYTES64"] = 64] = "PUSHBYTES64";
+        OpCode[OpCode["PUSHBYTES65"] = 65] = "PUSHBYTES65";
+        OpCode[OpCode["PUSHBYTES66"] = 66] = "PUSHBYTES66";
+        OpCode[OpCode["PUSHBYTES67"] = 67] = "PUSHBYTES67";
+        OpCode[OpCode["PUSHBYTES68"] = 68] = "PUSHBYTES68";
+        OpCode[OpCode["PUSHBYTES69"] = 69] = "PUSHBYTES69";
+        OpCode[OpCode["PUSHBYTES70"] = 70] = "PUSHBYTES70";
+        OpCode[OpCode["PUSHBYTES71"] = 71] = "PUSHBYTES71";
+        OpCode[OpCode["PUSHBYTES72"] = 72] = "PUSHBYTES72";
+        OpCode[OpCode["PUSHBYTES73"] = 73] = "PUSHBYTES73";
+        OpCode[OpCode["PUSHBYTES74"] = 74] = "PUSHBYTES74";
+        OpCode[OpCode["PUSHBYTES75"] = 75] = "PUSHBYTES75";
+        OpCode[OpCode["PUSHDATA1"] = 76] = "PUSHDATA1";
+        OpCode[OpCode["PUSHDATA2"] = 77] = "PUSHDATA2";
+        OpCode[OpCode["PUSHDATA4"] = 78] = "PUSHDATA4";
+        OpCode[OpCode["PUSHM1"] = 79] = "PUSHM1";
+        OpCode[OpCode["PUSH1"] = 81] = "PUSH1";
+        OpCode[OpCode["PUSHT"] = 81] = "PUSHT";
+        OpCode[OpCode["PUSH2"] = 82] = "PUSH2";
+        OpCode[OpCode["PUSH3"] = 83] = "PUSH3";
+        OpCode[OpCode["PUSH4"] = 84] = "PUSH4";
+        OpCode[OpCode["PUSH5"] = 85] = "PUSH5";
+        OpCode[OpCode["PUSH6"] = 86] = "PUSH6";
+        OpCode[OpCode["PUSH7"] = 87] = "PUSH7";
+        OpCode[OpCode["PUSH8"] = 88] = "PUSH8";
+        OpCode[OpCode["PUSH9"] = 89] = "PUSH9";
+        OpCode[OpCode["PUSH10"] = 90] = "PUSH10";
+        OpCode[OpCode["PUSH11"] = 91] = "PUSH11";
+        OpCode[OpCode["PUSH12"] = 92] = "PUSH12";
+        OpCode[OpCode["PUSH13"] = 93] = "PUSH13";
+        OpCode[OpCode["PUSH14"] = 94] = "PUSH14";
+        OpCode[OpCode["PUSH15"] = 95] = "PUSH15";
+        OpCode[OpCode["PUSH16"] = 96] = "PUSH16";
+        OpCode[OpCode["NOP"] = 97] = "NOP";
+        OpCode[OpCode["JMP"] = 98] = "JMP";
+        OpCode[OpCode["JMPIF"] = 99] = "JMPIF";
+        OpCode[OpCode["JMPIFNOT"] = 100] = "JMPIFNOT";
+        OpCode[OpCode["CALL"] = 101] = "CALL";
+        OpCode[OpCode["RET"] = 102] = "RET";
+        OpCode[OpCode["APPCALL"] = 103] = "APPCALL";
+        OpCode[OpCode["SYSCALL"] = 104] = "SYSCALL";
+        OpCode[OpCode["TAILCALL"] = 105] = "TAILCALL";
+        OpCode[OpCode["DUPFROMALTSTACK"] = 106] = "DUPFROMALTSTACK";
+        OpCode[OpCode["TOALTSTACK"] = 107] = "TOALTSTACK";
+        OpCode[OpCode["FROMALTSTACK"] = 108] = "FROMALTSTACK";
+        OpCode[OpCode["XDROP"] = 109] = "XDROP";
+        OpCode[OpCode["DUPFROMALTSTACKBOTTOM"] = 110] = "DUPFROMALTSTACKBOTTOM";
+        OpCode[OpCode["XSWAP"] = 114] = "XSWAP";
+        OpCode[OpCode["XTUCK"] = 115] = "XTUCK";
+        OpCode[OpCode["DEPTH"] = 116] = "DEPTH";
+        OpCode[OpCode["DROP"] = 117] = "DROP";
+        OpCode[OpCode["DUP"] = 118] = "DUP";
+        OpCode[OpCode["NIP"] = 119] = "NIP";
+        OpCode[OpCode["OVER"] = 120] = "OVER";
+        OpCode[OpCode["PICK"] = 121] = "PICK";
+        OpCode[OpCode["ROLL"] = 122] = "ROLL";
+        OpCode[OpCode["ROT"] = 123] = "ROT";
+        OpCode[OpCode["SWAP"] = 124] = "SWAP";
+        OpCode[OpCode["TUCK"] = 125] = "TUCK";
+        OpCode[OpCode["CAT"] = 126] = "CAT";
+        OpCode[OpCode["SUBSTR"] = 127] = "SUBSTR";
+        OpCode[OpCode["LEFT"] = 128] = "LEFT";
+        OpCode[OpCode["RIGHT"] = 129] = "RIGHT";
+        OpCode[OpCode["SIZE"] = 130] = "SIZE";
+        OpCode[OpCode["INVERT"] = 131] = "INVERT";
+        OpCode[OpCode["AND"] = 132] = "AND";
+        OpCode[OpCode["OR"] = 133] = "OR";
+        OpCode[OpCode["XOR"] = 134] = "XOR";
+        OpCode[OpCode["EQUAL"] = 135] = "EQUAL";
+        OpCode[OpCode["INC"] = 139] = "INC";
+        OpCode[OpCode["DEC"] = 140] = "DEC";
+        OpCode[OpCode["SIGN"] = 141] = "SIGN";
+        OpCode[OpCode["NEGATE"] = 143] = "NEGATE";
+        OpCode[OpCode["ABS"] = 144] = "ABS";
+        OpCode[OpCode["NOT"] = 145] = "NOT";
+        OpCode[OpCode["NZ"] = 146] = "NZ";
+        OpCode[OpCode["ADD"] = 147] = "ADD";
+        OpCode[OpCode["SUB"] = 148] = "SUB";
+        OpCode[OpCode["MUL"] = 149] = "MUL";
+        OpCode[OpCode["DIV"] = 150] = "DIV";
+        OpCode[OpCode["MOD"] = 151] = "MOD";
+        OpCode[OpCode["SHL"] = 152] = "SHL";
+        OpCode[OpCode["SHR"] = 153] = "SHR";
+        OpCode[OpCode["BOOLAND"] = 154] = "BOOLAND";
+        OpCode[OpCode["BOOLOR"] = 155] = "BOOLOR";
+        OpCode[OpCode["NUMEQUAL"] = 156] = "NUMEQUAL";
+        OpCode[OpCode["NUMNOTEQUAL"] = 158] = "NUMNOTEQUAL";
+        OpCode[OpCode["LT"] = 159] = "LT";
+        OpCode[OpCode["GT"] = 160] = "GT";
+        OpCode[OpCode["LTE"] = 161] = "LTE";
+        OpCode[OpCode["GTE"] = 162] = "GTE";
+        OpCode[OpCode["MIN"] = 163] = "MIN";
+        OpCode[OpCode["MAX"] = 164] = "MAX";
+        OpCode[OpCode["WITHIN"] = 165] = "WITHIN";
+        OpCode[OpCode["SHA1"] = 167] = "SHA1";
+        OpCode[OpCode["SHA256"] = 168] = "SHA256";
+        OpCode[OpCode["HASH160"] = 169] = "HASH160";
+        OpCode[OpCode["HASH256"] = 170] = "HASH256";
+        OpCode[OpCode["CSHARPSTRHASH32"] = 171] = "CSHARPSTRHASH32";
+        OpCode[OpCode["JAVAHASH32"] = 173] = "JAVAHASH32";
+        OpCode[OpCode["CHECKSIG"] = 172] = "CHECKSIG";
+        OpCode[OpCode["CHECKMULTISIG"] = 174] = "CHECKMULTISIG";
+        OpCode[OpCode["ARRAYSIZE"] = 192] = "ARRAYSIZE";
+        OpCode[OpCode["PACK"] = 193] = "PACK";
+        OpCode[OpCode["UNPACK"] = 194] = "UNPACK";
+        OpCode[OpCode["PICKITEM"] = 195] = "PICKITEM";
+        OpCode[OpCode["SETITEM"] = 196] = "SETITEM";
+        OpCode[OpCode["NEWARRAY"] = 197] = "NEWARRAY";
+        OpCode[OpCode["NEWSTRUCT"] = 198] = "NEWSTRUCT";
+        OpCode[OpCode["NEWMAP"] = 199] = "NEWMAP";
+        OpCode[OpCode["APPEND"] = 200] = "APPEND";
+        OpCode[OpCode["REVERSE"] = 201] = "REVERSE";
+        OpCode[OpCode["REMOVE"] = 202] = "REMOVE";
+        OpCode[OpCode["HASKEY"] = 203] = "HASKEY";
+        OpCode[OpCode["KEYS"] = 204] = "KEYS";
+        OpCode[OpCode["VALUES"] = 205] = "VALUES";
+        OpCode[OpCode["SWITCH"] = 208] = "SWITCH";
+        OpCode[OpCode["THROW"] = 240] = "THROW";
+        OpCode[OpCode["THROWIFNOT"] = 241] = "THROWIFNOT";
+    })(OpCode = ThinNeo.OpCode || (ThinNeo.OpCode = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var _a;
+    ThinSdk.ApplicationEngine = (_a = {},
+        _a[ThinNeo.OpCode.PUSH0] = 30,
+        _a[ThinNeo.OpCode.PUSHBYTES1] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES2] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES3] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES4] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES5] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES6] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES7] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES8] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES9] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES10] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES11] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES12] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES13] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES14] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES15] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES16] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES17] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES18] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES19] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES20] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES21] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES22] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES23] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES24] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES25] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES26] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES27] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES28] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES29] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES30] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES31] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES32] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES33] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES34] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES35] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES36] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES37] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES38] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES39] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES40] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES41] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES42] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES43] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES44] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES45] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES46] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES47] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES48] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES49] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES50] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES51] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES52] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES53] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES54] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES55] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES56] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES57] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES58] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES59] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES60] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES61] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES62] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES63] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES64] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES65] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES66] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES67] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES68] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES69] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES70] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES71] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES72] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES73] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES74] = 120,
+        _a[ThinNeo.OpCode.PUSHBYTES75] = 120,
+        _a[ThinNeo.OpCode.PUSHDATA1] = 180,
+        _a[ThinNeo.OpCode.PUSHDATA2] = 13000,
+        _a[ThinNeo.OpCode.PUSHDATA4] = 110000,
+        _a[ThinNeo.OpCode.PUSHM1] = 30,
+        _a[ThinNeo.OpCode.PUSH1] = 30,
+        _a[ThinNeo.OpCode.PUSH2] = 30,
+        _a[ThinNeo.OpCode.PUSH3] = 30,
+        _a[ThinNeo.OpCode.PUSH4] = 30,
+        _a[ThinNeo.OpCode.PUSH5] = 30,
+        _a[ThinNeo.OpCode.PUSH6] = 30,
+        _a[ThinNeo.OpCode.PUSH7] = 30,
+        _a[ThinNeo.OpCode.PUSH8] = 30,
+        _a[ThinNeo.OpCode.PUSH9] = 30,
+        _a[ThinNeo.OpCode.PUSH10] = 30,
+        _a[ThinNeo.OpCode.PUSH11] = 30,
+        _a[ThinNeo.OpCode.PUSH12] = 30,
+        _a[ThinNeo.OpCode.PUSH13] = 30,
+        _a[ThinNeo.OpCode.PUSH14] = 30,
+        _a[ThinNeo.OpCode.PUSH15] = 30,
+        _a[ThinNeo.OpCode.PUSH16] = 30,
+        _a[ThinNeo.OpCode.NOP] = 30,
+        _a[ThinNeo.OpCode.JMP] = 70,
+        _a[ThinNeo.OpCode.JMPIF] = 70,
+        _a[ThinNeo.OpCode.JMPIFNOT] = 70,
+        _a[ThinNeo.OpCode.CALL] = 22000,
+        _a[ThinNeo.OpCode.RET] = 40,
+        _a[ThinNeo.OpCode.SYSCALL] = 0,
+        _a[ThinNeo.OpCode.DUPFROMALTSTACKBOTTOM] = 60,
+        _a[ThinNeo.OpCode.DUPFROMALTSTACK] = 60,
+        _a[ThinNeo.OpCode.TOALTSTACK] = 60,
+        _a[ThinNeo.OpCode.FROMALTSTACK] = 60,
+        _a[ThinNeo.OpCode.XDROP] = 400,
+        _a[ThinNeo.OpCode.XSWAP] = 60,
+        _a[ThinNeo.OpCode.XTUCK] = 400,
+        _a[ThinNeo.OpCode.DEPTH] = 60,
+        _a[ThinNeo.OpCode.DROP] = 60,
+        _a[ThinNeo.OpCode.DUP] = 60,
+        _a[ThinNeo.OpCode.NIP] = 60,
+        _a[ThinNeo.OpCode.OVER] = 60,
+        _a[ThinNeo.OpCode.PICK] = 60,
+        _a[ThinNeo.OpCode.ROLL] = 400,
+        _a[ThinNeo.OpCode.ROT] = 60,
+        _a[ThinNeo.OpCode.SWAP] = 60,
+        _a[ThinNeo.OpCode.TUCK] = 60,
+        _a[ThinNeo.OpCode.CAT] = 80000,
+        _a[ThinNeo.OpCode.SUBSTR] = 80000,
+        _a[ThinNeo.OpCode.LEFT] = 80000,
+        _a[ThinNeo.OpCode.RIGHT] = 80000,
+        _a[ThinNeo.OpCode.SIZE] = 60,
+        _a[ThinNeo.OpCode.INVERT] = 100,
+        _a[ThinNeo.OpCode.AND] = 200,
+        _a[ThinNeo.OpCode.OR] = 200,
+        _a[ThinNeo.OpCode.XOR] = 200,
+        _a[ThinNeo.OpCode.EQUAL] = 200,
+        _a[ThinNeo.OpCode.INC] = 100,
+        _a[ThinNeo.OpCode.DEC] = 100,
+        _a[ThinNeo.OpCode.SIGN] = 100,
+        _a[ThinNeo.OpCode.NEGATE] = 100,
+        _a[ThinNeo.OpCode.ABS] = 100,
+        _a[ThinNeo.OpCode.NOT] = 100,
+        _a[ThinNeo.OpCode.NZ] = 100,
+        _a[ThinNeo.OpCode.ADD] = 200,
+        _a[ThinNeo.OpCode.SUB] = 200,
+        _a[ThinNeo.OpCode.MUL] = 300,
+        _a[ThinNeo.OpCode.DIV] = 300,
+        _a[ThinNeo.OpCode.MOD] = 300,
+        _a[ThinNeo.OpCode.SHL] = 300,
+        _a[ThinNeo.OpCode.SHR] = 300,
+        _a[ThinNeo.OpCode.BOOLAND] = 200,
+        _a[ThinNeo.OpCode.BOOLOR] = 200,
+        _a[ThinNeo.OpCode.NUMEQUAL] = 200,
+        _a[ThinNeo.OpCode.NUMNOTEQUAL] = 200,
+        _a[ThinNeo.OpCode.LT] = 200,
+        _a[ThinNeo.OpCode.GT] = 200,
+        _a[ThinNeo.OpCode.LTE] = 200,
+        _a[ThinNeo.OpCode.GTE] = 200,
+        _a[ThinNeo.OpCode.MIN] = 200,
+        _a[ThinNeo.OpCode.MAX] = 200,
+        _a[ThinNeo.OpCode.WITHIN] = 200,
+        _a[ThinNeo.OpCode.ARRAYSIZE] = 150,
+        _a[ThinNeo.OpCode.PACK] = 7000,
+        _a[ThinNeo.OpCode.UNPACK] = 7000,
+        _a[ThinNeo.OpCode.PICKITEM] = 270000,
+        _a[ThinNeo.OpCode.SETITEM] = 270000,
+        _a[ThinNeo.OpCode.NEWARRAY] = 15000,
+        _a[ThinNeo.OpCode.NEWSTRUCT] = 15000,
+        _a[ThinNeo.OpCode.NEWMAP] = 200,
+        _a[ThinNeo.OpCode.APPEND] = 15000,
+        _a[ThinNeo.OpCode.REVERSE] = 500,
+        _a[ThinNeo.OpCode.REMOVE] = 500,
+        _a[ThinNeo.OpCode.HASKEY] = 270000,
+        _a[ThinNeo.OpCode.KEYS] = 500,
+        _a[ThinNeo.OpCode.VALUES] = 7000,
+        _a[ThinNeo.OpCode.THROW] = 30,
+        _a[ThinNeo.OpCode.THROWIFNOT] = 30,
+        _a);
+})(ThinSdk || (ThinSdk = {}));
 var ThinNeo;
 (function (ThinNeo) {
     var Base64 = (function () {
@@ -4088,6 +5256,105 @@ var ThinNeo;
     }());
     ThinNeo.Base64 = Base64;
 })(ThinNeo || (ThinNeo = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var Contract = (function () {
+        function Contract(_contractHash, _scriptBuild) {
+            this.contractHash = _contractHash;
+            this.scriptBuilder = _scriptBuild;
+        }
+        Contract.prototype.Call = function (method) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            Contract.emitAppCall.apply(Contract, __spreadArrays([this.scriptBuilder, this.contractHash, method], args));
+        };
+        Contract.emitAppCall = function (sb, scriptHash, operation) {
+            var args = [];
+            for (var _i = 3; _i < arguments.length; _i++) {
+                args[_i - 3] = arguments[_i];
+            }
+            if (args && args.length > 0) {
+                sb.EmitParamJson(args);
+            }
+            else {
+                sb.EmitPushNumber(Neo.BigInteger.Zero);
+                sb.Emit(ThinNeo.OpCode.NEWARRAY);
+            }
+            sb.EmitPushString(operation);
+            sb.EmitPushBytes(new Uint8Array(scriptHash.bits.buffer));
+            sb.EmitSysCall("System.Contract.Call");
+            return sb;
+        };
+        return Contract;
+    }());
+    ThinSdk.Contract = Contract;
+})(ThinSdk || (ThinSdk = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var NeoTransaction = (function () {
+        function NeoTransaction(sender, currentBlockIndex) {
+            this.scriptBuilder = new ThinNeo.ScriptBuilder();
+            this.gas = new ThinSdk.Token.GAS(this.scriptBuilder);
+            this.neo = new ThinSdk.Token.NEO(this.scriptBuilder);
+            this.tran = new ThinNeo.Transaction();
+            this.tran.version = 0;
+            var RANDOM_UINT8 = this.getWeakRandomValues(32);
+            var RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
+            this.tran.nonce = RANDOM_INT.toInt32();
+            this.tran.sender = sender;
+            this.tran.validUntilBlock = currentBlockIndex + ThinNeo.Transaction.MaxValidUntilBlockIncrement;
+            var cosigner = new Neo.Cosigner();
+            cosigner.scopes = Neo.WitnessScope.CalledByEntry;
+            cosigner.account = sender;
+            this.tran.cosigners = [cosigner];
+            this.tran.attributes = [];
+            this.tran.systemFee = Neo.Long.ZERO;
+            this.tran.networkFee = Neo.Long.ZERO;
+        }
+        NeoTransaction.prototype.signAndPack = function (prikey, sysFee) {
+            this.tran.script = this.scriptBuilder.ToArray();
+            console.log(this.tran.script.toHexString());
+            var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
+            var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
+            var witness_script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(pubkey);
+            if (witness_script.isSignatureContract() || true) {
+                var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES64] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES33] + 1000000;
+            }
+            else { }
+            this.tran.networkFee = this.tran.networkFee.add(this.tran.GetMessage().length).add(107).mul(1000).add(networkFee);
+            this.tran.systemFee = Neo.Long.fromNumber(Math.ceil(sysFee / 100000000) * 100000000);
+            console.log("Transaction Message ", this.tran.GetMessage().toHexString());
+            console.log("Transaction Message ", this.tran.GetMessage().toHexString());
+            var data = this.tran.GetMessage();
+            var signtest = ThinNeo.Helper.Sign(Neo.Long.fromNumber(10000).toBytes(true), prikey);
+            console.log("test sign", signtest.toHexString());
+            var signData = ThinNeo.Helper.Sign(data, prikey);
+            console.log("sign data", signData.toHexString());
+            var b = ThinNeo.Helper.VerifySignature(data, signData, pubkey);
+            if (!b)
+                throw new Error("sign error");
+            this.tran.AddWitness(signData, pubkey, address);
+            var rawData = this.tran.GetRawData();
+            return rawData;
+        };
+        NeoTransaction.prototype.getTranMessage = function () {
+            return this.tran.GetMessage().toHexString();
+        };
+        NeoTransaction.prototype.getTranData = function () {
+            return this.tran.GetRawData().toHexString();
+        };
+        NeoTransaction.prototype.getWeakRandomValues = function (array) {
+            var buffer = typeof array === "number" ? new Uint8Array(array) : array;
+            for (var i = 0; i < buffer.length; i++)
+                buffer[i] = Math.random() * 256;
+            return buffer;
+        };
+        return NeoTransaction;
+    }());
+    ThinSdk.NeoTransaction = NeoTransaction;
+})(ThinSdk || (ThinSdk = {}));
 var ThinNeo;
 (function (ThinNeo) {
     var ScriptBuilder = (function () {
@@ -4197,13 +5464,7 @@ var ThinNeo;
             if (api == null)
                 throw new Error("ArgumentNullException");
             var api_bytes = ThinNeo.Helper.String2Bytes(api);
-            if (api_bytes.length == 0 || api_bytes.length > 252)
-                throw new Error("ArgumentException");
-            var arg = new Uint8Array(api_bytes.length + 1);
-            arg[0] = api_bytes.length;
-            for (var i = 0; i < api_bytes.length; i++) {
-                arg[i + 1] = api_bytes[i];
-            }
+            var arg = new Neo.BigInteger(Neo.BigInteger.fromUint8Array(Uint8Array.fromArrayBuffer(Neo.Cryptography.Sha256.computeHash(api_bytes.buffer))).toUint64().toUint32()).toUint8Array();
             return this.Emit(ThinNeo.OpCode.SYSCALL, arg);
         };
         ScriptBuilder.prototype.ToArray = function () {
@@ -4350,14 +5611,10 @@ var ThinNeo;
             return new Uint8Array(hash2);
         };
         Helper.GetAddressCheckScriptFromPublicKey = function (publicKey) {
-            var script = new Uint8Array(publicKey.length + 2);
-            script[0] = publicKey.length;
-            for (var i = 0; i < publicKey.length; i++) {
-                script[i + 1] = publicKey[i];
-            }
-            ;
-            script[script.length - 1] = 172;
-            return script;
+            var sb = new ThinNeo.ScriptBuilder();
+            sb.EmitPushBytes(publicKey);
+            sb.EmitSysCall("Neo.Crypto.CheckSig");
+            return sb.ToArray();
         };
         Helper.GetPublicKeyScriptHashFromPublicKey = function (publicKey) {
             var script = Helper.GetAddressCheckScriptFromPublicKey(publicKey);
@@ -4419,6 +5676,8 @@ var ThinNeo;
         Helper.Sign = function (message, privateKey) {
             var PublicKey = Neo.Cryptography.ECPoint.multiply(Neo.Cryptography.ECCurve.secp256r1.G, privateKey);
             var pubkey = PublicKey.encodePoint(false).subarray(1, 64);
+            console.log("prikey", privateKey.toHexString());
+            console.log("pubkey", pubkey.toHexString());
             var key = new Neo.Cryptography.ECDsaCryptoKey(PublicKey, privateKey);
             var ecdsa = new Neo.Cryptography.ECDsa(key);
             {
@@ -4609,7 +5868,7 @@ var ThinNeo;
                 scrypt.hash(passbin, addresshash, 64);
             };
             if (scrypt_loaded == false) {
-                scrypt.load('asmjs');
+                scrypt.load("asmjs");
             }
             else {
                 ready();
@@ -4706,7 +5965,7 @@ var ThinNeo;
                 scrypt.hash(passbin, addresshash, 64);
             };
             if (scrypt_loaded == false) {
-                scrypt.load('asmjs');
+                scrypt.load("asmjs");
             }
             else {
                 ready();
@@ -4776,6 +6035,23 @@ var ThinNeo;
         return Attribute;
     }());
     ThinNeo.Attribute = Attribute;
+    var TransactionAttribute = (function () {
+        function TransactionAttribute() {
+        }
+        TransactionAttribute.prototype.deserialize = function (ms) {
+            this.usage = ms.readByte();
+            if (this.usage) {
+                var buf = ms.readVarBytes(256);
+                this.data = new Uint8Array(buf, 0, buf.byteLength);
+            }
+        };
+        TransactionAttribute.prototype.serialize = function (writer) {
+            writer.writeByte(this.usage);
+            writer.writeVarBytes(this.data.buffer);
+        };
+        return TransactionAttribute;
+    }());
+    ThinNeo.TransactionAttribute = TransactionAttribute;
     var TransactionOutput = (function () {
         function TransactionOutput() {
         }
@@ -4793,8 +6069,12 @@ var ThinNeo;
         }
         Object.defineProperty(Witness.prototype, "Address", {
             get: function () {
-                var hash = ThinNeo.Helper.GetScriptHashFromScript(this.VerificationScript);
-                return ThinNeo.Helper.GetAddressFromScriptHash(hash);
+                if (this.scriptHash)
+                    return ThinNeo.Helper.GetAddressFromScriptHash(this.scriptHash);
+                else {
+                    var hash = ThinNeo.Helper.GetScriptHashFromScript(this.VerificationScript);
+                    return ThinNeo.Helper.GetAddressFromScriptHash(hash);
+                }
             },
             enumerable: true,
             configurable: true
@@ -4860,65 +6140,16 @@ var ThinNeo;
         function Transaction() {
         }
         Transaction.prototype.SerializeUnsigned = function (writer) {
-            writer.writeByte(this.type);
             writer.writeByte(this.version);
-            if (this.type == TransactionType.ContractTransaction ||
-                this.type == TransactionType.IssueTransaction) {
-            }
-            else if (this.type == TransactionType.InvocationTransaction) {
-                this.extdata.Serialize(this, writer);
-            }
-            else if (this.type == TransactionType.ClaimTransaction) {
-                this.extdata.Serialize(this, writer);
-            }
-            else if (this.type == TransactionType.MinerTransaction) {
-                this.extdata.Serialize(this, writer);
-            }
-            else {
-                throw new Error("未编写针对这个交易类型的代码");
-            }
-            var countAttributes = this.attributes.length;
-            writer.writeVarInt(countAttributes);
-            for (var i = 0; i < countAttributes; i++) {
-                var attributeData = this.attributes[i].data;
-                var Usage = this.attributes[i].usage;
-                writer.writeByte(Usage);
-                if (Usage == TransactionAttributeUsage.ContractHash || Usage == TransactionAttributeUsage.Vote || (Usage >= TransactionAttributeUsage.Hash1 && Usage <= TransactionAttributeUsage.Hash15)) {
-                    writer.write(attributeData.buffer, 0, 32);
-                }
-                else if (Usage == TransactionAttributeUsage.ECDH02 || Usage == TransactionAttributeUsage.ECDH03) {
-                    writer.write(attributeData.buffer, 1, 32);
-                }
-                else if (Usage == TransactionAttributeUsage.Script) {
-                    writer.write(attributeData.buffer, 0, 20);
-                }
-                else if (Usage == TransactionAttributeUsage.DescriptionUrl) {
-                    var len = attributeData.length;
-                    writer.writeByte(len);
-                    writer.write(attributeData.buffer, 0, len);
-                }
-                else if (Usage == TransactionAttributeUsage.Description || Usage >= TransactionAttributeUsage.Remark) {
-                    var len = attributeData.length;
-                    writer.writeVarInt(len);
-                    writer.write(attributeData.buffer, 0, len);
-                }
-                else
-                    throw new Error();
-            }
-            var countInputs = this.inputs.length;
-            writer.writeVarInt(countInputs);
-            for (var i = 0; i < countInputs; i++) {
-                writer.write(this.inputs[i].hash, 0, 32);
-                writer.writeUint16(this.inputs[i].index);
-            }
-            var countOutputs = this.outputs.length;
-            writer.writeVarInt(countOutputs);
-            for (var i = 0; i < countOutputs; i++) {
-                var item = this.outputs[i];
-                writer.write(item.assetId.buffer, 0, 32);
-                writer.writeUint64(item.value.getData());
-                writer.write(item.toAddress.buffer, 0, 20);
-            }
+            writer.writeUint32(this.nonce);
+            writer.write(this.sender.toArray(), 0, 20);
+            writer.writeInt64(this.systemFee);
+            writer.writeInt64(this.networkFee);
+            console.log("netfee", this.networkFee.toNumber());
+            writer.writeUint32(this.validUntilBlock);
+            writer.writeSerializableArray(this.attributes);
+            writer.writeSerializableArray(this.cosigners);
+            writer.writeVarBytes(this.script);
         };
         Transaction.prototype.Serialize = function (writer) {
             this.SerializeUnsigned(writer);
@@ -4931,89 +6162,23 @@ var ThinNeo;
             }
         };
         Transaction.prototype.DeserializeUnsigned = function (ms) {
-            this.type = ms.readByte();
             this.version = ms.readByte();
-            if (this.type == TransactionType.ContractTransaction
-                || this.type == TransactionType.IssueTransaction) {
-                this.extdata = null;
-            }
-            else if (this.type == TransactionType.InvocationTransaction) {
-                this.extdata = new InvokeTransData();
-            }
-            else if (this.type == TransactionType.ClaimTransaction) {
-                this.extdata = new ClaimTransData();
-            }
-            else if (this.type == TransactionType.MinerTransaction) {
-                this.extdata = new MinerTransData();
-            }
-            else {
-                throw new Error("未编写针对这个交易类型的代码");
-            }
-            if (this.extdata != null) {
-                this.extdata.Deserialize(this, ms);
-            }
-            var countAttributes = ms.readVarInt();
-            this.attributes = [];
-            for (var i = 0; i < countAttributes; i++) {
-                var attributeData = null;
-                var Usage = ms.readByte();
-                if (Usage == TransactionAttributeUsage.ContractHash || Usage == TransactionAttributeUsage.Vote || (Usage >= TransactionAttributeUsage.Hash1 && Usage <= TransactionAttributeUsage.Hash15)) {
-                    var arr = ms.readBytes(32);
-                    attributeData = new Uint8Array(arr, 0, arr.byteLength);
-                }
-                else if (Usage == TransactionAttributeUsage.ECDH02 || Usage == TransactionAttributeUsage.ECDH03) {
-                    var arr = ms.readBytes(32);
-                    var data = new Uint8Array(arr, 0, arr.byteLength);
-                    attributeData = new Uint8Array(33);
-                    attributeData[0] = Usage;
-                    for (var i = 0; i < 32; i++) {
-                        attributeData[i + 1] = data[i];
-                    }
-                }
-                else if (Usage == TransactionAttributeUsage.Script) {
-                    var arr = ms.readBytes(20);
-                    attributeData = new Uint8Array(arr, 0, arr.byteLength);
-                }
-                else if (Usage == TransactionAttributeUsage.DescriptionUrl) {
-                    var len = ms.readByte();
-                    var arr = ms.readBytes(len);
-                    attributeData = new Uint8Array(arr, 0, arr.byteLength);
-                }
-                else if (Usage == TransactionAttributeUsage.Description || Usage >= TransactionAttributeUsage.Remark) {
-                    var len = ms.readVarInt(65535);
-                    var arr = ms.readBytes(len);
-                    attributeData = new Uint8Array(arr, 0, arr.byteLength);
-                }
-                else
-                    throw new Error();
-                var attr = new Attribute();
-                attr.usage = Usage;
-                attr.data = attributeData;
-                this.attributes.push(attr);
-            }
-            var countInputs = ms.readVarInt();
-            this.inputs = [];
-            for (var i = 0; i < countInputs; i++) {
-                this.inputs.push(new TransactionInput());
-                var arr = ms.readBytes(32);
-                this.inputs[i].hash = new Uint8Array(arr, 0, arr.byteLength);
-                this.inputs[i].index = ms.readUint16();
-            }
-            var countOutputs = ms.readVarInt();
-            this.outputs = [];
-            for (var i = 0; i < countOutputs; i++) {
-                this.outputs.push(new TransactionOutput());
-                var outp = this.outputs[i];
-                var arr = ms.readBytes(32);
-                var assetid = new Uint8Array(arr, 0, arr.byteLength);
-                var value = new Neo.Fixed8(ms.readUint64());
-                var arr = ms.readBytes(20);
-                var scripthash = new Uint8Array(arr, 0, arr.byteLength);
-                outp.assetId = assetid;
-                outp.value = value;
-                outp.toAddress = scripthash;
-                this.outputs[i] = outp;
-            }
+            if (this.version > 0)
+                throw new Error("Transaction Format Exception");
+            this.nonce = ms.readUint32();
+            this.sender = ms.readSerializable(Neo.Uint160);
+            this.systemFee = Neo.Long.fromBytes(Uint8Array.fromArrayBuffer(ms.readBytes(8)));
+            if (this.systemFee.comp(Neo.Long.ZERO) < 0)
+                throw new Error("Transaction Format Exception");
+            this.networkFee = Neo.Long.fromBytes(Uint8Array.fromArrayBuffer(ms.readBytes(8)));
+            if (this.networkFee.comp(Neo.Long.ZERO) < 0)
+                throw new Error("Transaction Format Exception");
+            if (this.systemFee.add(this.networkFee).comp(this.systemFee) < 0)
+                throw new Error("Transaction Format Exception");
+            this.validUntilBlock = ms.readUint32();
+            this.attributes = ms.readSerializableArray(TransactionAttribute, Transaction.MaxTransactionAttributes);
+            this.cosigners = ms.readSerializableArray(Neo.Cosigner, Transaction.MaxCosigners);
+            this.script = Uint8Array.fromArrayBuffer(ms.readVarBytes(0xffff));
         };
         Transaction.prototype.Deserialize = function (ms) {
             this.DeserializeUnsigned(ms);
@@ -5046,14 +6211,17 @@ var ThinNeo;
         Transaction.prototype.AddWitness = function (signdata, pubkey, addrs) {
             {
                 var msg = this.GetMessage();
+                console.log(msg.toHexString());
+                console.log("sign data", signdata.toHexString());
                 var bsign = ThinNeo.Helper.VerifySignature(msg, signdata, pubkey);
-                if (bsign == false)
+                if (!bsign)
                     throw new Error("wrong sign");
                 var addr = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
                 if (addr != addrs)
                     throw new Error("wrong script");
             }
             var vscript = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(pubkey);
+            console.log("vscript hex", vscript.toHexString());
             var sb = new ThinNeo.ScriptBuilder();
             sb.EmitPushBytes(signdata);
             var iscript = sb.ToArray();
@@ -5100,118 +6268,72 @@ var ThinNeo;
             data = Neo.Cryptography.Sha256.computeHash(data);
             return new Uint8Array(data, 0, data.byteLength);
         };
+        Transaction.prototype.GetTxid = function () {
+            var tranhash = this.GetHash().clone().reverse().toHexString();
+            return tranhash;
+        };
+        Transaction.MaxTransactionSize = 102400;
+        Transaction.MaxValidUntilBlockIncrement = 2102400;
+        Transaction.MaxTransactionAttributes = 16;
+        Transaction.MaxCosigners = 16;
         return Transaction;
     }());
     ThinNeo.Transaction = Transaction;
 })(ThinNeo || (ThinNeo = {}));
 var ThinNeo;
 (function (ThinNeo) {
-    var OpCode;
-    (function (OpCode) {
-        OpCode[OpCode["PUSH0"] = 0] = "PUSH0";
-        OpCode[OpCode["PUSHF"] = 0] = "PUSHF";
-        OpCode[OpCode["PUSHBYTES1"] = 1] = "PUSHBYTES1";
-        OpCode[OpCode["PUSHBYTES75"] = 75] = "PUSHBYTES75";
-        OpCode[OpCode["PUSHDATA1"] = 76] = "PUSHDATA1";
-        OpCode[OpCode["PUSHDATA2"] = 77] = "PUSHDATA2";
-        OpCode[OpCode["PUSHDATA4"] = 78] = "PUSHDATA4";
-        OpCode[OpCode["PUSHM1"] = 79] = "PUSHM1";
-        OpCode[OpCode["PUSH1"] = 81] = "PUSH1";
-        OpCode[OpCode["PUSHT"] = 81] = "PUSHT";
-        OpCode[OpCode["PUSH2"] = 82] = "PUSH2";
-        OpCode[OpCode["PUSH3"] = 83] = "PUSH3";
-        OpCode[OpCode["PUSH4"] = 84] = "PUSH4";
-        OpCode[OpCode["PUSH5"] = 85] = "PUSH5";
-        OpCode[OpCode["PUSH6"] = 86] = "PUSH6";
-        OpCode[OpCode["PUSH7"] = 87] = "PUSH7";
-        OpCode[OpCode["PUSH8"] = 88] = "PUSH8";
-        OpCode[OpCode["PUSH9"] = 89] = "PUSH9";
-        OpCode[OpCode["PUSH10"] = 90] = "PUSH10";
-        OpCode[OpCode["PUSH11"] = 91] = "PUSH11";
-        OpCode[OpCode["PUSH12"] = 92] = "PUSH12";
-        OpCode[OpCode["PUSH13"] = 93] = "PUSH13";
-        OpCode[OpCode["PUSH14"] = 94] = "PUSH14";
-        OpCode[OpCode["PUSH15"] = 95] = "PUSH15";
-        OpCode[OpCode["PUSH16"] = 96] = "PUSH16";
-        OpCode[OpCode["NOP"] = 97] = "NOP";
-        OpCode[OpCode["JMP"] = 98] = "JMP";
-        OpCode[OpCode["JMPIF"] = 99] = "JMPIF";
-        OpCode[OpCode["JMPIFNOT"] = 100] = "JMPIFNOT";
-        OpCode[OpCode["CALL"] = 101] = "CALL";
-        OpCode[OpCode["RET"] = 102] = "RET";
-        OpCode[OpCode["APPCALL"] = 103] = "APPCALL";
-        OpCode[OpCode["SYSCALL"] = 104] = "SYSCALL";
-        OpCode[OpCode["TAILCALL"] = 105] = "TAILCALL";
-        OpCode[OpCode["DUPFROMALTSTACK"] = 106] = "DUPFROMALTSTACK";
-        OpCode[OpCode["TOALTSTACK"] = 107] = "TOALTSTACK";
-        OpCode[OpCode["FROMALTSTACK"] = 108] = "FROMALTSTACK";
-        OpCode[OpCode["XDROP"] = 109] = "XDROP";
-        OpCode[OpCode["XSWAP"] = 114] = "XSWAP";
-        OpCode[OpCode["XTUCK"] = 115] = "XTUCK";
-        OpCode[OpCode["DEPTH"] = 116] = "DEPTH";
-        OpCode[OpCode["DROP"] = 117] = "DROP";
-        OpCode[OpCode["DUP"] = 118] = "DUP";
-        OpCode[OpCode["NIP"] = 119] = "NIP";
-        OpCode[OpCode["OVER"] = 120] = "OVER";
-        OpCode[OpCode["PICK"] = 121] = "PICK";
-        OpCode[OpCode["ROLL"] = 122] = "ROLL";
-        OpCode[OpCode["ROT"] = 123] = "ROT";
-        OpCode[OpCode["SWAP"] = 124] = "SWAP";
-        OpCode[OpCode["TUCK"] = 125] = "TUCK";
-        OpCode[OpCode["CAT"] = 126] = "CAT";
-        OpCode[OpCode["SUBSTR"] = 127] = "SUBSTR";
-        OpCode[OpCode["LEFT"] = 128] = "LEFT";
-        OpCode[OpCode["RIGHT"] = 129] = "RIGHT";
-        OpCode[OpCode["SIZE"] = 130] = "SIZE";
-        OpCode[OpCode["INVERT"] = 131] = "INVERT";
-        OpCode[OpCode["AND"] = 132] = "AND";
-        OpCode[OpCode["OR"] = 133] = "OR";
-        OpCode[OpCode["XOR"] = 134] = "XOR";
-        OpCode[OpCode["EQUAL"] = 135] = "EQUAL";
-        OpCode[OpCode["INC"] = 139] = "INC";
-        OpCode[OpCode["DEC"] = 140] = "DEC";
-        OpCode[OpCode["SIGN"] = 141] = "SIGN";
-        OpCode[OpCode["NEGATE"] = 143] = "NEGATE";
-        OpCode[OpCode["ABS"] = 144] = "ABS";
-        OpCode[OpCode["NOT"] = 145] = "NOT";
-        OpCode[OpCode["NZ"] = 146] = "NZ";
-        OpCode[OpCode["ADD"] = 147] = "ADD";
-        OpCode[OpCode["SUB"] = 148] = "SUB";
-        OpCode[OpCode["MUL"] = 149] = "MUL";
-        OpCode[OpCode["DIV"] = 150] = "DIV";
-        OpCode[OpCode["MOD"] = 151] = "MOD";
-        OpCode[OpCode["SHL"] = 152] = "SHL";
-        OpCode[OpCode["SHR"] = 153] = "SHR";
-        OpCode[OpCode["BOOLAND"] = 154] = "BOOLAND";
-        OpCode[OpCode["BOOLOR"] = 155] = "BOOLOR";
-        OpCode[OpCode["NUMEQUAL"] = 156] = "NUMEQUAL";
-        OpCode[OpCode["NUMNOTEQUAL"] = 158] = "NUMNOTEQUAL";
-        OpCode[OpCode["LT"] = 159] = "LT";
-        OpCode[OpCode["GT"] = 160] = "GT";
-        OpCode[OpCode["LTE"] = 161] = "LTE";
-        OpCode[OpCode["GTE"] = 162] = "GTE";
-        OpCode[OpCode["MIN"] = 163] = "MIN";
-        OpCode[OpCode["MAX"] = 164] = "MAX";
-        OpCode[OpCode["WITHIN"] = 165] = "WITHIN";
-        OpCode[OpCode["SHA1"] = 167] = "SHA1";
-        OpCode[OpCode["SHA256"] = 168] = "SHA256";
-        OpCode[OpCode["HASH160"] = 169] = "HASH160";
-        OpCode[OpCode["HASH256"] = 170] = "HASH256";
-        OpCode[OpCode["CSHARPSTRHASH32"] = 171] = "CSHARPSTRHASH32";
-        OpCode[OpCode["JAVAHASH32"] = 173] = "JAVAHASH32";
-        OpCode[OpCode["CHECKSIG"] = 172] = "CHECKSIG";
-        OpCode[OpCode["CHECKMULTISIG"] = 174] = "CHECKMULTISIG";
-        OpCode[OpCode["ARRAYSIZE"] = 192] = "ARRAYSIZE";
-        OpCode[OpCode["PACK"] = 193] = "PACK";
-        OpCode[OpCode["UNPACK"] = 194] = "UNPACK";
-        OpCode[OpCode["PICKITEM"] = 195] = "PICKITEM";
-        OpCode[OpCode["SETITEM"] = 196] = "SETITEM";
-        OpCode[OpCode["NEWARRAY"] = 197] = "NEWARRAY";
-        OpCode[OpCode["NEWSTRUCT"] = 198] = "NEWSTRUCT";
-        OpCode[OpCode["SWITCH"] = 208] = "SWITCH";
-        OpCode[OpCode["THROW"] = 240] = "THROW";
-        OpCode[OpCode["THROWIFNOT"] = 241] = "THROWIFNOT";
-    })(OpCode = ThinNeo.OpCode || (ThinNeo.OpCode = {}));
+    var VM;
+    (function (VM) {
+        var RandomAccessStack = (function () {
+            function RandomAccessStack() {
+                this.list = new Array();
+            }
+            Object.defineProperty(RandomAccessStack.prototype, "Count", {
+                get: function () {
+                    return this.list.length;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            RandomAccessStack.prototype.Clear = function () {
+                this.list.splice(0, this.list.length);
+            };
+            RandomAccessStack.prototype.GetItem = function (index) {
+                return this.list[index];
+            };
+            RandomAccessStack.prototype.Insert = function (index, item) {
+                if (index > this.list.length)
+                    throw new Error("InvalidOperationException");
+                this.list.splice(this.list.length - index, 0, item);
+            };
+            RandomAccessStack.prototype.Peek = function (index) {
+                if (index === void 0) { index = 0; }
+                if (index >= this.list.length)
+                    throw new Error("InvalidOperationException");
+                return this.list[this.list.length - 1 - index];
+            };
+            RandomAccessStack.prototype.Pop = function () {
+                return this.Remove(0);
+            };
+            RandomAccessStack.prototype.Push = function (item) {
+                this.list.push(item);
+            };
+            RandomAccessStack.prototype.Remove = function (index) {
+                if (index >= this.list.length)
+                    throw new Error("InvalidOperationException");
+                var item = this.list[this.list.length - index - 1];
+                this.list.splice(this.list.length - index - 1, 1);
+                return item;
+            };
+            RandomAccessStack.prototype.Set = function (index, item) {
+                if (index >= this.list.length)
+                    throw new Error("InvalidOperationException");
+                this.list[this.list.length - index - 1] = item;
+            };
+            return RandomAccessStack;
+        }());
+        VM.RandomAccessStack = RandomAccessStack;
+    })(VM = ThinNeo.VM || (ThinNeo.VM = {}));
 })(ThinNeo || (ThinNeo = {}));
 var ThinNeo;
 (function (ThinNeo) {
@@ -5554,4 +6676,78 @@ var ThinNeo;
         Compiler.Op = Op;
     })(Compiler = ThinNeo.Compiler || (ThinNeo.Compiler = {}));
 })(ThinNeo || (ThinNeo = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var Token;
+    (function (Token) {
+        var BaseToken = (function (_super) {
+            __extends(BaseToken, _super);
+            function BaseToken(_contractHash, _scriptBuilder) {
+                return _super.call(this, _contractHash, _scriptBuilder) || this;
+            }
+            BaseToken.prototype.transfer = function (from, to, amount) {
+                this.Call("transfer", "(addr)" + from, "(addr)" + to, "(integer)" + amount);
+                this.scriptBuilder.Emit(ThinNeo.OpCode.THROWIFNOT);
+            };
+            BaseToken.prototype.balanceOf = function () {
+                var accounts = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    accounts[_i] = arguments[_i];
+                }
+                for (var _a = 0, accounts_1 = accounts; _a < accounts_1.length; _a++) {
+                    var account = accounts_1[_a];
+                    this.Call("balanceOf", account);
+                }
+            };
+            BaseToken.prototype.balanceOf_Unite = function () {
+                var accounts = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    accounts[_i] = arguments[_i];
+                }
+                this.scriptBuilder.EmitPushNumber(Neo.BigInteger.Zero);
+                for (var _a = 0, accounts_2 = accounts; _a < accounts_2.length; _a++) {
+                    var account = accounts_2[_a];
+                    this.Call("balanceOf", account);
+                    this.scriptBuilder.Emit(ThinNeo.OpCode.ADD);
+                }
+            };
+            BaseToken.prototype.decimals = function () {
+                this.Call("decimals");
+            };
+            BaseToken.prototype.symbol = function () {
+                this.Call("symbol");
+            };
+            return BaseToken;
+        }(ThinSdk.Contract));
+        Token.BaseToken = BaseToken;
+    })(Token = ThinSdk.Token || (ThinSdk.Token = {}));
+})(ThinSdk || (ThinSdk = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var Token;
+    (function (Token) {
+        var GAS = (function (_super) {
+            __extends(GAS, _super);
+            function GAS(sb) {
+                return _super.call(this, Neo.Uint160.parse("0xa1760976db5fcdfab2a9930e8f6ce875b2d18225"), sb) || this;
+            }
+            return GAS;
+        }(Token.BaseToken));
+        Token.GAS = GAS;
+    })(Token = ThinSdk.Token || (ThinSdk.Token = {}));
+})(ThinSdk || (ThinSdk = {}));
+var ThinSdk;
+(function (ThinSdk) {
+    var Token;
+    (function (Token) {
+        var NEO = (function (_super) {
+            __extends(NEO, _super);
+            function NEO(sb) {
+                return _super.call(this, Neo.Uint160.parse("0x43cf98eddbe047e198a3e5d57006311442a0ca15"), sb) || this;
+            }
+            return NEO;
+        }(Token.BaseToken));
+        Token.NEO = NEO;
+    })(Token = ThinSdk.Token || (ThinSdk.Token = {}));
+})(ThinSdk || (ThinSdk = {}));
 //# sourceMappingURL=neo-ts.js.map

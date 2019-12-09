@@ -99,3 +99,31 @@
         margin-top: 88px;
     } 
 }
+.radio-group{
+    background: #F9F9F9;
+    border: 1px solid #B2B2B2;
+    border-radius: 3px;
+    border-radius: 3px;
+    display: flex;
+    .radio{
+        flex: 1;
+        text-align: center;
+        padding: 5px 0px;
+        &.button{                
+            border-radius: 2px 0 0 2px;
+            border-radius: 2px 0px 0px 2px;
+            font-size: 14px;
+            color: #B2B2B2;
+            cursor: pointer;
+            .value{               
+                font-size: 12px;
+            }
+            &.active{
+                background: #5F8DFB;
+                border-radius: 2px 0 0 2px;
+                border-radius: 2px 0px 0px 2px;
+                color: #FFFFFF;
+            }
+        }
+    }        
+}

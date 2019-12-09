@@ -54,12 +54,6 @@ export default class Panel extends React.Component<IProps, IState>
 				return "GAS"
 			case HASH_CONFIG.ID_NEO:
 				return "NEO"
-			case HASH_CONFIG.ID_CGAS.toString():
-				return "CGAS"
-			case HASH_CONFIG.ID_NNC.toString():
-				return "NNC"
-			case HASH_CONFIG.ID_CNEO.toString():
-				return "CNEO"
 			default:
 				return assetId.substr(0, 4) + '...' + assetId.substr(assetId.length - 3, 4);
 		}
@@ -163,7 +157,7 @@ export default class Panel extends React.Component<IProps, IState>
 						<div className="group txid">
 							<div className="key-title">TXID</div>
 							<div className="value">
-								<a href={'https://scan.nel.group' + (common.network == NetWork.TestNet ? '/test' : '') + '/transaction/' + this.props.task.txid} target="_blank">
+								<a href={'https://scan.nel.group' + (common.network == NetWork.TestNet ? '/neo3' : '') + '/transaction/' + this.props.task.txid} target="_blank">
 									{this.props.task.txid.substr(0, 4) + '...' + this.props.task.txid.substr(this.props.task.txid.length - 4, 4)}
 								</a>
 							</div>
@@ -183,7 +177,7 @@ export default class Panel extends React.Component<IProps, IState>
 										<div className="value">
 											<a href=
 												{
-													'https://scan.nel.group' + (common.network == NetWork.TestNet ? '/test' : '') + '/address/' +
+													'https://scan.nel.group' + (common.network == NetWork.TestNet ? '/neo3' : '') + '/address/' +
 													(type == 'input' ? this.props.task.sendHistory.fromAddress : this.props.task.sendHistory.toAddress)
 												}
 												target="_blank">
