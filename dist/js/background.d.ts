@@ -30,7 +30,7 @@ declare const HASH_CONFIG: {
 };
 declare const baseCommonUrl = "https://apiblockneo3.nel.group/api";
 declare const baseUrl = "https://apiscanneo3.nel.group/api";
-declare const testRpcUrl = "http://localhost:20332";
+declare const testRpcUrl = "http://seed1t.neo.org:20332";
 declare const mainRpcUrl = "http://seed.nel.group:10332";
 declare const testRpcUrlList: string[];
 declare const mainRpcUrlList: string[];
@@ -742,6 +742,7 @@ interface SendArgs {
     networkFee?: string;
     systemFee?: string;
     network: "TestNet" | "MainNet";
+    fee?: string;
 }
 interface SendOutput {
     txid: string;

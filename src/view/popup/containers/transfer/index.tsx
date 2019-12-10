@@ -121,19 +121,16 @@ export default class Transfer extends React.Component<IProps, IState>
 		// let gas = parseFloat(common.balances.find(asset => asset.assetID === HASH_CONFIG.ID_GAS).amount);
 		const currentasset = manageStore.myAssets.find(option => option.assetid == currentOption.id);
 		const available = `${common.balances.find(asset => asset.assetID === currentOption.id).amount} ${currentOption.name}`
-		this.setState(
-			{
-				currentOption, available, balance, currentasset
-			}, () => {
-				this.onAmountChange(this.state.amount)
-			}
-		)
+		this.setState({
+			currentOption, available, balance, currentasset
+		}, () => {
+			this.onAmountChange(this.state.amount)
+		})
 		common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
 			this.setState({ gas: parseFloat(value.amount) })
+		}).catch(err => {
+			this.setState({ gas: 0 })
 		})
-			.catch(err => {
-				this.setState({ gas: 0 })
-			})
 	}
 	// 监控输入内容
 	public onAddrChange = async (event) => {
@@ -170,24 +167,13 @@ export default class Transfer extends React.Component<IProps, IState>
 			}
 		}
 		else if (neotools.verifyAddress(event)) {
-
 			errorAddr = false;
 			toAddress = event;
-			console.log('状态0', { errorAddr, addrMessage, domain, toAddress, resolverMessage });
 			this.setState({ errorAddr, addrMessage, domain, toAddress, resolverMessage }, () => {
 				this.onVerify();
 			})
 			try {
 				const domainInfo = await bg.getDomainFromAddress({ address: event, network: common.network });
-				// const currenttime = new Neo.BigInteger(new Date().getTime()).divide(1000);
-				// console.log(domainInfo);
-				// console.log(new Date().getTime());
-				// console.log(currenttime.toString());
-				// if(domainInfo.fullDomainName!='' && currenttime.compareTo(new Neo.BigInteger(domainInfo.TTL))<0)
-				// {
-				// 	resolverMessage=domainInfo.fullDomainName;
-				// }
-
 				if (domainInfo.fullDomainName != '') {
 					resolverMessage = domainInfo.fullDomainName;
 				}
@@ -235,8 +221,6 @@ export default class Transfer extends React.Component<IProps, IState>
 		}
 		else {
 			const gasbalance = Neo.Fixed8.fromNumber(this.state.gas);
-			console.log(gasbalance);
-
 			const balance = Neo.Fixed8.parse(common.balances.find(asset => this.state.currentOption.id == asset.assetID).amount.toString())
 			const compare = Neo.Fixed8.parse(amount).compareTo(balance)
 			const compareGas = Neo.Fixed8.parse(this.state.radioKey === "normal" ? "1.0127" : "1.0137").compareTo(gasbalance);
@@ -429,8 +413,11 @@ export default class Transfer extends React.Component<IProps, IState>
 								<Input
 									placeholder={`${intl.message.transfer.amount} （${
 										this.state.currentasset.assetid === HASH_CONFIG.ID_GAS ?
-											`${this.state.balance - (this.state.radioKey === 'normal' ? 1.0127 : 1.0137)} ${this.state.currentasset.name}` :
-											`${this.state.balance} ${this.state.currentasset.name}, ${this.state.gas} GAS`
+											`${Neo.Fixed8.fromNumber(this.state.balance)
+												.subtract(
+													Neo.Fixed8.fromNumber(this.state.radioKey === 'normal' ? 1.0127 : 1.0137)).toString()
+											} ${this.state.currentasset.name}` :
+											`${this.state.balance} ${this.state.currentasset.name}, ${Neo.Fixed8.fromNumber(this.state.gas).toString()} GAS`
 										}） ${intl.message.transfer.available}`}
 									value={this.state.amount}
 									onChange={this.onAmountChange} type="text"

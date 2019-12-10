@@ -14,7 +14,9 @@ import SendRequest from '../send';
 import DeployRequest from '../deploy';
 import SendScriptRequest from '../scripthex';
 import { ICON } from '../../../image';
-
+import common from '../../store/common';
+import { observer } from 'mobx-react';
+@observer
 export default class Home extends React.Component<any, any> {
 
   public state = {
@@ -118,11 +120,11 @@ export default class Home extends React.Component<any, any> {
                 }
                 {
                   (this.state.label == Command.invoke || this.state.label == Command.invokeGroup) &&
-                  <ContractRequest toError={this.toError} title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
+                  <ContractRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
                 }
                 {
                   this.state.label == Command.send &&
-                  <SendRequest toError={this.toError} title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
+                  <SendRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
                 }
                 {
                   this.state.label == Command.deployContract &&
@@ -139,7 +141,7 @@ export default class Home extends React.Component<any, any> {
                     <div className="error-message-text">余额不足</div>
                   </div> */}
               </div>
-              <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} disable={this.state.error} />
+              <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} disable={common.error} />
               {
                 this.state.label !== Command.getAccount && !this.state.data &&
                 <div className="loading-model">

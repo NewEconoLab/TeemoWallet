@@ -1647,7 +1647,7 @@ var Neo;
         };
         Fixed8.prototype.subtract = function (other) {
             if (this.data.compareTo(other.data) < 0)
-                throw new Error();
+                return Fixed8.Zero;
             return new Fixed8(this.data.subtract(other.data));
         };
         Fixed8.prototype.toString = function () {

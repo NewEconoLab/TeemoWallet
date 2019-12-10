@@ -11,6 +11,8 @@ import { Background, BalanceRequest, GetBalanceArgs } from '../../../../lib/back
 import intl from '../../../popup/store/intl';
 import { ICON } from '../../../image';
 import { HASH_CONFIG } from '../../../config';
+import common from '../../store/common';
+import { observer } from 'mobx-react';
 // import { observer } from 'mobx-react';
 
 interface IProps {
@@ -18,7 +20,6 @@ interface IProps {
   domain: string,
   data: any,
   address: string,
-  toError: () => void
 }
 interface IState {
   pageNumber: number,
@@ -33,7 +34,7 @@ interface IState {
   expenses: { symbol: string, amount: string, assetid: string }[],
   err: boolean,
 }
-// @observer
+@observer
 export default class ContractRequest extends React.Component<IProps, IState>
 {
   public bg: Background = chrome.extension.getBackgroundPage() as Background;
@@ -71,69 +72,49 @@ export default class ContractRequest extends React.Component<IProps, IState>
   }
 
   // 初始化state
-  public initData = (invoke: InvokeArgs[]) => {
-    this.bg.invokeArgsAnalyse(...invoke)
-      .then(result => {
-        this.setState({
-          description: result.descriptions,
-          scriptHash: result.scriptHashs,
-          operation: result.operations,
-          arguments: result.arguments,
-          expenses: result.expenses,
-          fee: result.fee
-        }, () => {
-          let params: BalanceRequest = { "address": this.props.address, "assets": this.state.expenses.map(asset => asset.assetid) };
-          // for (const asset of result.expenses) {
-          // }
-          // const params:BalanceRequest[]=result.expenses.map(exp=>{return {"address":this.props.address,"assets":exp.assetid}}) as BalanceRequest[];
-          this.bg.getBalance({ "network": invoke[ 0 ].network, params })
-            .then(balancesRes => {
-              const balances = balancesRes[ this.props.address ];
-              if (balances.length > 0) {
-                for (const asset of this.state.expenses) {
-                  const balance = balances.find(bal => bal.assetID == asset.assetid);
-                  if (asset.assetid === HASH_CONFIG.ID_GAS && (parseFloat(this.state.fee) + parseFloat(asset.amount)) > parseFloat(balance.amount)) {
-                    this.setState({ err: true });
-                    // if (this.props.toError) {
-                    //   this.props.toError()
-                    // }
-                    return;
-                  }
-                  else if (parseFloat(asset.amount) > parseFloat(balance.amount)) {
-                    this.setState({ err: true })
-                    // if (this.props.toError) {
-                    //   this.props.toError()
-                    // }
-                    return;
-                  }
-                }
-                const balance = balances.find(bal => bal.assetID == HASH_CONFIG.ID_GAS);
-                if (balance && parseFloat(this.state.fee) > parseFloat(balance.amount)) {
-                  this.setState({ err: true })
-                  // if (this.props.toError) {
-                  //   this.props.toError()
-                  // }
-                  return;
-                }
-                if (!balance && parseFloat(this.state.fee) > 0) {
-                  this.setState({ err: true })
-                  // if (this.props.toError) {
-                  //   this.props.toError()
-                  // }
-                  return;
-                }
-              }
-              else if (parseFloat(this.state.fee) > 0) {
-                this.setState({ err: true })
-                // if (this.props.toError) {
-                //   this.props.toError()
-                // }
-                return;
-              }
-            })
+  public initData = async (invoke: InvokeArgs[]) => {
+    const result = await this.bg.invokeArgsAnalyse(...invoke)
+    if (result.expenses && result.expenses.length > 0) {
+      let params: BalanceRequest = { "address": this.props.address, "assets": result.expenses.map(asset => asset.assetid).concat(HASH_CONFIG.ID_GAS) };
+      const balancesRes = await this.bg.getBalance({ "network": invoke[ 0 ].network, params })
+      if (balancesRes && balancesRes[ this.props.address ] && balancesRes[ this.props.address ].length > 0) {
+        const balances = balancesRes[ this.props.address ];
+        for (const expen of result.expenses) {
+          const balance = balances.find(balance => balance.assetID === expen.assetid);
+          const count = expen.assetid === HASH_CONFIG.ID_GAS ? parseFloat(expen.amount) + parseFloat(result.fee) : parseFloat(expen.amount);
+          if (!balance || count > parseFloat(balance.amount)) {
+            common.errorChange(true);
+          }
         }
-        );
-      })
+        const balance = balances.find(balance => balance.assetID === HASH_CONFIG.ID_GAS);
+        if (!balance || parseFloat(result.fee) > parseFloat(balance.amount)) {
+          common.errorChange(true);
+        }
+      } else {
+        common.errorChange(true);
+      }
+    }
+    else {
+      let params: BalanceRequest = { "address": this.props.address, "assets": [ HASH_CONFIG.ID_GAS ] };
+      const balancesRes = await this.bg.getBalance({ "network": invoke[ 0 ].network, params })
+      if (balancesRes && balancesRes[ this.props.address ] && balancesRes[ this.props.address ].length > 0) {
+        const balance = parseFloat(balancesRes[ this.props.address ][ 0 ].amount);
+        const fee = parseFloat(result.fee)
+        if (fee > balance) {
+          common.errorChange(true);
+        }
+      } else {
+        common.errorChange(true);
+      }
+    }
+    this.setState({
+      description: result.descriptions,
+      scriptHash: result.scriptHashs,
+      operation: result.operations,
+      arguments: result.arguments,
+      expenses: result.expenses,
+      fee: result.fee
+    });
   }
 
   // public netfeeChange = (check: boolean) => {
@@ -288,7 +269,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
           )
         }
         {
-          this.state.err &&
+          common.error &&
           <div className="error-message">
             <img src={ICON.attention} className="error-message-icon" />
             <div className="error-message-text">余额不足</div>

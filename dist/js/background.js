@@ -36,7 +36,7 @@ const HASH_CONFIG = {
 };
 const baseCommonUrl = "https://apiblockneo3.nel.group/api";
 const baseUrl = "https://apiscanneo3.nel.group/api";
-const testRpcUrl = "http://localhost:20332";
+const testRpcUrl = "http://seed1t.neo.org:20332";
 const mainRpcUrl = "http://seed.nel.group:10332";
 const testRpcUrlList = [
     'http://test.nel.group:20332',
@@ -1555,6 +1555,7 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         else {
             throw { type: "RPC_ERROR", description: 'An RPC error occured when submitting the request', data: result[0].errorMessage };
         }
+        data.fee = tran.networkFee.add(tran.systemFee).toNumber().div(100000000).toString();
         TaskManager.addTask(new Task(ConfirmType.tranfer, txid));
         TaskManager.addSendData(txid, data);
         return output;

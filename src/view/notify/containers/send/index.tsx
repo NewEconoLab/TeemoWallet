@@ -6,10 +6,13 @@ import * as React from 'react';
 import './index.less';
 import Checkbox from '../../../components/Checkbox';
 import { Storage_local } from '../../../../common/util';
-import { Background, SendArgs } from '../../../../lib/background';
+import { Background, SendArgs, BalanceRequest } from '../../../../lib/background';
 import { bg } from '../../../popup/utils/storagetools';
 import intl from '../../../popup/store/intl';
 import { ICON } from '../../../image';
+import { observer } from 'mobx-react';
+import common from '../../store/common';
+import { HASH_CONFIG } from '../../../config';
 // import { observer } from 'mobx-react';
 
 interface IProps {
@@ -17,7 +20,6 @@ interface IProps {
   domain: string,
   data: any,
   address: string,
-  toError: () => void
 }
 interface IState {
   pageNumber: number,
@@ -32,7 +34,7 @@ interface IState {
   network: 'TestNet' | 'MainNet';
   err: boolean;
 }
-// @observer
+@observer
 export default class SendRequest extends React.Component<IProps, IState>
 {
   public bg: Background = chrome.extension.getBackgroundPage() as Background;
@@ -68,8 +70,7 @@ export default class SendRequest extends React.Component<IProps, IState>
   }
 
   // 初始化state
-  public initData = (sendData: SendArgs) => {
-
+  public initData = async (sendData: SendArgs) => {
     if (sendData.asset) {
       this.setState({
         assetID: sendData.asset,
@@ -80,29 +81,64 @@ export default class SendRequest extends React.Component<IProps, IState>
         remark: sendData.remark ? sendData.remark : '',
         network: sendData.network ? sendData.network : 'TestNet'
       })
-      bg.queryAssetSymbol(sendData.asset, sendData.network)
-        .then(result => {
-          this.setState({
-            assetSymbol: result.symbol
-          })
-        })
+      if (sendData.asset == HASH_CONFIG.ID_GAS) {
+        const params: BalanceRequest = {
+          "assets": [ HASH_CONFIG.ID_GAS ],
+          "address": this.props.address
+        }
+        const result = await bg.getBalance({ params, "network": sendData.network })
+        const balances = result[ this.props.address ];
+        if (balances) {
+          const balance = balances.find(balance => balance.assetID == HASH_CONFIG.ID_GAS)
+          const count = parseFloat(sendData.amount) + parseFloat(sendData.networkFee) + parseFloat(sendData.systemFee);
+          if (count > parseFloat(balance.amount)) {
+            common.errorChange(true);
+          }
+        }
+        else {
+          common.errorChange(true);
+        }
+      }
+      else {
+        const params: BalanceRequest = {
+          "assets": [ sendData.asset, HASH_CONFIG.ID_GAS ],
+          "address": this.props.address
+        }
+        const result = await bg.getBalance({ params, "network": sendData.network })
+        const balances = result[ this.props.address ];
+        const gasbalance = balances.find(balance => balance.assetID == HASH_CONFIG.ID_GAS)
+        const assetbalance = balances.find(balance => balance.assetID == sendData.asset);
+        const fee = parseFloat(sendData.networkFee) + parseFloat(sendData.systemFee);
+        const amount = parseFloat(sendData.amount);
+        if (fee > parseFloat(gasbalance.amount) || amount > parseFloat(assetbalance.amount)) {
+          common.errorChange(true);
+        }
+      }
+      const result = await bg.queryAssetSymbol(sendData.asset, sendData.network)
+      console.log(result);
+
+      this.setState({
+        assetSymbol: result.symbol
+      })
     }
   }
 
-  public netfeeChange = (check: boolean) => {
-    Storage_local.set('checkNetFee', check);
-  }
+  // public netfeeChange = (check: boolean) => {
+  //   Storage_local.set('checkNetFee', check);
+  // }
 
   public nextPage = () => {
     this.setState({
       pageNumber: 1
     })
   }
+
   public previousPage = () => {
     this.setState({
       pageNumber: 0
     })
   }
+
   public render() {
     const assetHref = `https://scan.nel.group/${this.state.network == 'TestNet' ? 'neo3' : 'main'}/asset/`;
     return (
@@ -166,7 +202,6 @@ export default class SendRequest extends React.Component<IProps, IState>
           this.state.pageNumber === 1 && (
             <>
               <div className="contract-title">{intl.message.notify.tranData}</div>
-
               <div className="transaction-wrap white-wrap">
                 <div className="line-wrap">
                   <div className="line-left">{intl.message.notify.AssetsID}</div>
@@ -187,7 +222,7 @@ export default class SendRequest extends React.Component<IProps, IState>
           )
         }
         {
-          this.state.err &&
+          common.error &&
           <div className="error-message">
             <img src={ICON.attention} className="error-message-icon" />
             <div className="error-message-text">余额不足</div>
