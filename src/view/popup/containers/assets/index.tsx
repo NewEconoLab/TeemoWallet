@@ -30,7 +30,7 @@ export default class Assets extends React.Component<IProps, {}>
     }
     componentDidMount() {
         manageStore.initAssetList()
-        // common.initAccountBalance();
+        common.initAccountBalance();
     }
     // 显示收款码
     public onShowQrcode = () => {
@@ -45,7 +45,6 @@ export default class Assets extends React.Component<IProps, {}>
         }
         else if (this.props.lableChange) {
             // console.log("按钮触发转账");
-
             this.props.lableChange('transfer', this.state.tranAsset);
         }
     }

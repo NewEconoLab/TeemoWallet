@@ -33,7 +33,7 @@ export default {
       successfully: "Wallet created successfully",
       goWallet: "Please backup wallet before using it.",
       prikey: "Private key",
-      download: "Download the backup file and continue",
+      download: "Download the backup file",
       error1: "Wallet name is too long",
       error2: " Password must be at least 8 characters",
       error3: "Passwords don't match",

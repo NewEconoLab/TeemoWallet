@@ -14,10 +14,6 @@ class HistoryList implements IHistoryList {
 
         for (const task of shed) {
             if (task.type == ConfirmType.contract && task.invokeHistory) {
-                if (task.invokeHistory.domain == "TeemoWallet.exchangeCgas") {
-                    task.dappMessage = { title: intl.message.mywallet.cgasExchange, icon: ICON.exchange };
-                    task.invokeHistory.descripts[ 0 ] = (task.invokeHistory.descripts[ 0 ] == 'cgasToGas' ? intl.message.exchange.cgasToGas : intl.message.exchange.gasToCgas);
-                }
                 tasklist.push(task);
             }
             else if (task.type == ConfirmType.tranfer) {
