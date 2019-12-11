@@ -96,6 +96,8 @@ export interface Language_Notify {
     scriptHash: string,
     toAddress: string,
     AssetsID: string
+    error1: string
+    processing: string
 }
 
 export interface Language_MyWallet {
@@ -152,6 +154,8 @@ export interface Language_Transfer {
     next: string;
     error1: string;
     error2: string;
+    average: string;
+    fast: string;
 }
 
 export interface Language_Assets {

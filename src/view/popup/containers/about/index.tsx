@@ -12,35 +12,32 @@ import intl from '../../store/intl';
 import { ICON } from '../../../image';
 // import PrivateKey from './privatekey';
 // import DeleteWallet from './deletewallet';
-interface IProps
-{
+interface IProps {
     lableChange: (table: string) => void,
 }
 @observer
 export default class About extends React.Component<IProps, {}>
 {
-    constructor(props: any)
-    {
+    constructor(props: any) {
         super(props);
     }
 
-    componentDidMount(){
-        
+    componentDidMount() {
+
     }
-    
-    public render()
-    {
-        return(
+
+    public render() {
+        return (
             <div className="about-wrapper">
                 <div className="about-content">
                     <div className="about-info about-line">
                         <div className="icon-box">
-                            <img src={ICON.icon} alt=""/>
+                            <img src={ICON.icon} alt="" />
                         </div>
                         <div className="icon-title">
-                            <img src={ICON.teemo} alt=""/>
+                            <img src={ICON.teemo} alt="" />
                         </div>
-                        <div className="about-version">{intl.message.about.version}  V1.2.1</div>
+                        <div className="about-version">{intl.message.about.version}  V1.3.0</div>
                     </div>
                     <div className="href-line about-line">
                         <a href={intl.message.about.url1} target="_blank">{intl.message.about.website}</a>

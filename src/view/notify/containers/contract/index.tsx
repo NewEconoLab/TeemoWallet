@@ -272,7 +272,7 @@ export default class ContractRequest extends React.Component<IProps, IState>
           common.error &&
           <div className="error-message">
             <img src={ICON.attention} className="error-message-icon" />
-            <div className="error-message-text">余额不足</div>
+            <div className="error-message-text">{intl.message.notify.error1}</div>
           </div>
         }
       </div>

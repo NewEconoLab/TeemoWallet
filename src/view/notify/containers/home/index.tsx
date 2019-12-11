@@ -16,6 +16,7 @@ import SendScriptRequest from '../scripthex';
 import { ICON } from '../../../image';
 import common from '../../store/common';
 import { observer } from 'mobx-react';
+import intl from '../../../popup/store/intl';
 @observer
 export default class Home extends React.Component<any, any> {
 
@@ -134,12 +135,6 @@ export default class Home extends React.Component<any, any> {
                   this.state.label == Command.sendScript &&
                   <SendScriptRequest title={this.state.header.title} domain={this.state.header.domain} address={this.state.account.address} data={this.state.data} {...this.props} />
                 }
-                {/* 
-                  this.state.error &&
-                  <div className="error-message">
-                    <img src={ICON.attention} className="error-message-icon" />
-                    <div className="error-message-text">余额不足</div>
-                  </div> */}
               </div>
               <Footer onCancel={this.onCancel} onConfirm={this.onConfirm} disable={common.error} />
               {
@@ -149,7 +144,7 @@ export default class Home extends React.Component<any, any> {
                     <div className="loading-icon">
                       <img src={ICON.loading} />
                     </div>
-                    <div className="loading-text">处理中</div>
+                    <div className="loading-text">{intl.message.notify.processing}</div>
                   </div>
                 </div>
               }

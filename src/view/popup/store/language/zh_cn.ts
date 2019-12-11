@@ -118,7 +118,9 @@ export default {
     title3: "至",
     title4: "手续费",
     error1: "该域名不在使用中",
-    error2: "请输入正确的地址"
+    error2: "请输入正确的地址",
+    average: "普通",
+    fast: "快",
   },
   assets: {
     receiving: "收款",
@@ -147,7 +149,9 @@ export default {
     method: "方法",
     scriptHash: "合约hash",
     toAddress: "目标地址",
-    AssetsID: "资产ID"
+    AssetsID: "资产ID",
+    error1: "余额不足",
+    processing: "处理中..."
   },
   setting: {
     successful: "操作成功",

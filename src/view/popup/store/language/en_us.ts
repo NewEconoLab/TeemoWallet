@@ -116,7 +116,9 @@ export default {
     title3: "To",
     title4: "Fee",
     error1: "The domain is not in use",
-    error2: "Please enter the correct address"
+    error2: "Please enter the correct address",
+    average: "Average",
+    fast: "Fast",
   },
   assets: {
     receiving: "Receiving",
@@ -145,7 +147,9 @@ export default {
     method: "Method",
     scriptHash: "Contract hash",
     toAddress: "To",
-    AssetsID: "Asset ID"
+    AssetsID: "Asset ID",
+    error1: "Insufficient funds",
+    processing: "Processing..."
   },
   setting: {
     successful: 'Operation successful',

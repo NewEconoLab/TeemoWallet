@@ -428,10 +428,10 @@ export default class Transfer extends React.Component<IProps, IState>
 								{/* <Radio options={[ { label: '普通', value: '1' }, { label: '快', value: '2' } ]} /> */}
 								<div className="radio-group">
 									<div className={`radio button ${this.state.radioKey === 'normal' ? 'active' : ''}`} onClick={this.radioChange.bind(this, 'normal')}>
-										<div className="title">普通</div><div className="value">1.0127 GAS</div>
+										<div className="title">{intl.message.transfer.average}</div><div className="value">1.0127 GAS</div>
 									</div>
 									<div className={`radio button ${this.state.radioKey === 'fast' ? 'active' : ''}`} onClick={this.radioChange.bind(this, 'fast')}>
-										<div className="title">快</div><div className="value">1.0137 GAS</div>
+										<div className="title">{intl.message.transfer.fast}</div><div className="value">1.0137 GAS</div>
 									</div>
 								</div>
 							</div>
