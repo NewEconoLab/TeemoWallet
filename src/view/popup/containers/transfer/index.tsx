@@ -86,6 +86,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			const currentasset = manageStore.myAssets.find(option => option.assetid == this.props.asset)
 			let balance = common.balances.find(asset => asset.assetID === currentasset.assetid).amount;
 			common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+				// alert(JSON.stringify(value))
 				this.setState({ gas: parseFloat(value.amount) })
 			}).catch(err => {
 				this.setState({ gas: 0 })
@@ -110,6 +111,7 @@ export default class Transfer extends React.Component<IProps, IState>
 				// gas: parseFloat(gas)
 			})
 			common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+				// alert(JSON.stringify(value))
 				this.setState({ gas: parseFloat(value.amount) })
 			}).catch(err => {
 				this.setState({ gas: 0 })
@@ -127,6 +129,7 @@ export default class Transfer extends React.Component<IProps, IState>
 			this.onAmountChange(this.state.amount)
 		})
 		common.getBalanceByAsset(HASH_CONFIG.ID_GAS).then(value => {
+			// alert(JSON.stringify(value))
 			this.setState({ gas: parseFloat(value.amount) })
 		}).catch(err => {
 			this.setState({ gas: 0 })
@@ -312,22 +315,20 @@ export default class Transfer extends React.Component<IProps, IState>
 			"networkFee": this.state.radioKey === "normal" ? "0.0127" : "0.0137",
 			"systemFee": "1",
 			"network": "TestNet"
+		}).then(result => {
+			Toast(intl.message.toast.successfully);
+			// console.log(result);
+			this.onHide();
+		}).catch(error => {
+			if (error.description == "TX size is over 1024byte") {
+				Toast(intl.message.toast.txFailed, "error");
+			}
+			else {
+				Toast(intl.message.toast.failed, "error");
+			}
+			// console.log(error);
+			this.onHide();
 		})
-			.then(result => {
-				Toast(intl.message.toast.successfully);
-				// console.log(result);
-				this.onHide();
-			})
-			.catch(error => {
-				if (error.description == "TX size is over 1024byte") {
-					Toast(intl.message.toast.txFailed, "error");
-				}
-				else {
-					Toast(intl.message.toast.failed, "error");
-				}
-				// console.log(error);
-				this.onHide();
-			})
 	}
 
 	public radioChange = (key: string) => {
@@ -381,8 +382,7 @@ export default class Transfer extends React.Component<IProps, IState>
 									<Button type="primary" text={intl.message.button.confirm} onClick={this.send} disabled={this.state.confirmDisable} />
 								</div>
 							</div>
-						</div>
-						:
+						</div> :
 						<>
 							<div className="line">
 								<Select
@@ -413,7 +413,7 @@ export default class Transfer extends React.Component<IProps, IState>
 								<Input
 									placeholder={`${intl.message.transfer.amount} （${
 										this.state.currentasset.assetid === HASH_CONFIG.ID_GAS ?
-											`${Neo.Fixed8.fromNumber(this.state.balance)
+											`${Neo.Fixed8.fromNumber(this.state.gas)
 												.subtract(
 													Neo.Fixed8.fromNumber(this.state.radioKey === 'normal' ? 1.0127 : 1.0137)).toString()
 											} ${this.state.currentasset.name}` :

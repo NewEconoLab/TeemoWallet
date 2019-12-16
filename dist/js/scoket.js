@@ -106,7 +106,7 @@ class SocketManager {
                 for (const key in TaskManager.shed) {
                     const task = TaskManager.shed[key];
                     if (task.network == storage.network && task.state == TaskState.watting) {
-                        if (data.tx.findIndex(tx => { console.log(tx); return tx.hash.replace('0x', '') == task.txid; }) > 0) {
+                        if (data.tx.findIndex(tx => tx.hash.replace('0x', '') == task.txid) >= 0) {
                             task.state = TaskState.success;
                             TaskManager.shed[key] = task;
                             Storage_local.set(TaskManager.table, TaskManager.shed);
