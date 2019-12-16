@@ -7,11 +7,11 @@ interface BackStore {
     domains: string[];
     titles: string[];
     oldUtxo: {
-        [txid: string]: number[];
+        [ txid: string ]: number[];
     };
     allAssetInfo: AssetInfo[];
     accountWaitTaskCount: {
-        [addr: string]: number;
+        [ addr: string ]: number;
     };
 }
 declare const storage: BackStore;
@@ -471,19 +471,19 @@ interface DeployHistory {
 }
 declare class TaskManager {
     static shed: {
-        [txid: string]: Task;
+        [ txid: string ]: Task;
     };
     static invokeHistory: {
-        [txid: string]: InvokeHistory;
+        [ txid: string ]: InvokeHistory;
     };
     static deployHistory: {
-        [txid: string]: DeployHistory;
+        [ txid: string ]: DeployHistory;
     };
     static sendHistory: {
-        [txid: string]: SendArgs;
+        [ txid: string ]: SendArgs;
     };
     static dappsMessage: {
-        [txid: string]: {
+        [ txid: string ]: {
             title: string;
             icon: string;
         };
@@ -548,7 +548,7 @@ declare class AssetManager {
 }
 declare var assetManager: AssetManager;
 declare const BLOCKCHAIN = "NEO";
-declare const VERSION = "v1.3.0";
+declare const VERSION = "V1.3.0";
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -663,10 +663,10 @@ interface SendScriptArgs {
     network?: "TestNet" | "MainNet";
 }
 interface AttachedGas {
-    [addr: string]: string;
+    [ addr: string ]: string;
 }
 interface AttachedAssets {
-    [asset: string]: string;
+    [ asset: string ]: string;
 }
 interface AssetIntentOverrides {
     inputs: AssetInput[];
@@ -718,7 +718,7 @@ interface GetBalanceArgs {
     network: string;
 }
 interface BalanceResults {
-    [address: string]: Balance[];
+    [ address: string ]: Balance[];
 }
 interface Balance {
     assetID: string;
