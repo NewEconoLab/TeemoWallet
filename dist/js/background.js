@@ -2641,7 +2641,7 @@ class AssetManager {
 var assetManager = new AssetManager();
 assetManager.initAllAseetInfo();
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1.3.0';
+const VERSION = 'V1.0.0';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";

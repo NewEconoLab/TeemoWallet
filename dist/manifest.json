@@ -1,10 +1,10 @@
 {
     "manifest_version": 2,
-    "name": "Teemo Wallet",
+    "name": "Teemo Wallet NEO3",
     "description": "NEO browser extension",
-    "version": "1.3.0",
+    "version": "1.0.0",
     "browser_action": {
-        "default_title": "Teemo Wallet",
+        "default_title": "Teemo Wallet NEO3",
         "default_icon": "icon48.png",
         "default_popup": "index.html"
     },
