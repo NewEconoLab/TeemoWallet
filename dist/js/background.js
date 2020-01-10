@@ -1,4 +1,3 @@
-///<reference path="../../lib/neo-thinsdk.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -694,16 +693,16 @@ function networkSort() {
 const setContractMessage = (txid, domain, data) => {
     Storage_local.get("invoke-message")
         .then(result => {
-        if (result) {
-            result[txid] = { domain, data };
-            Storage_local.set("invoke-message", { result });
-        }
-        else {
-            let message = {};
-            message[txid] = { domain, data };
-            Storage_local.set("invoke-message", { message });
-        }
-    });
+            if (result) {
+                result[txid] = { domain, data };
+                Storage_local.set("invoke-message", { result });
+            }
+            else {
+                let message = {};
+                message[txid] = { domain, data };
+                Storage_local.set("invoke-message", { message });
+            }
+        });
 };
 const getWeakRandomValues = (array) => {
     let buffer = typeof array === "number" ? new Uint8Array(array) : array;
@@ -1698,11 +1697,11 @@ var invokeRead = (data) => {
             script.EmitInvokeArgs(data);
             Api.getInvokeRead(script.ToArray().toHexString())
                 .then(result => {
-                r(result);
-            })
+                    r(result);
+                })
                 .then(error => {
-                j(error);
-            });
+                    j(error);
+                });
         }
         catch (error) {
             j(error);
@@ -1716,11 +1715,11 @@ var invokeReadGroup = (data) => {
             script.EmitInvokeArgs(data.group);
             Api.getInvokeRead(script.ToArray().toHexString())
                 .then(result => {
-                r(result);
-            })
+                    r(result);
+                })
                 .then(error => {
-                j(error);
-            });
+                    j(error);
+                });
         }
         catch (error) {
             j(error);
@@ -1840,14 +1839,14 @@ const getStorage = (data) => {
     return new Promise((resolve, reject) => {
         Api.getStorage(data.scriptHash, data.key)
             .then(result => {
-            if (result)
-                resolve(result);
-            else
-                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
-        })
+                if (result)
+                    resolve(result);
+                else
+                    reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+            })
             .catch(error => {
-            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
-        });
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+            });
     });
 };
 const getPublicKey = () => {
@@ -1865,23 +1864,23 @@ const notifyInit = (title, domain, favIconUrl) => {
             };
             getBase64ByUrl(favIconUrl)
                 .then(icon => {
-                notifyHeader.header.icon = icon;
-                openNotify(notifyHeader)
-                    .then(result => {
-                    storage.domains.push(domain);
-                    Storage_local.get('white_list')
+                    notifyHeader.header.icon = icon;
+                    openNotify(notifyHeader)
                         .then(result => {
-                        let setData = result ? result : {};
-                        TaskManager.dappsMessage[domain] = setData[domain] = { title, icon };
-                        Storage_local.set('white_list', setData);
-                        EventsOnChange(WalletEvents.CONNECTED, { address: storage.account.address, label: storage.account.walletName });
-                    });
-                    r();
-                })
-                    .catch(error => {
-                    j(error);
+                            storage.domains.push(domain);
+                            Storage_local.get('white_list')
+                                .then(result => {
+                                    let setData = result ? result : {};
+                                    TaskManager.dappsMessage[domain] = setData[domain] = { title, icon };
+                                    Storage_local.set('white_list', setData);
+                                    EventsOnChange(WalletEvents.CONNECTED, { address: storage.account.address, label: storage.account.walletName });
+                                });
+                            r();
+                        })
+                        .catch(error => {
+                            j(error);
+                        });
                 });
-            });
         }
         else {
             r();
@@ -1927,14 +1926,14 @@ const getBlock = (data) => {
     return new Promise((resolve, reject) => {
         Api.getBlock(data.blockHeight)
             .then(result => {
-            if (result)
-                resolve(result);
-            else
-                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
-        })
+                if (result)
+                    resolve(result);
+                else
+                    reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+            })
             .catch(error => {
-            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
-        });
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+            });
     });
 };
 /**
@@ -1945,14 +1944,14 @@ const getApplicationLog = (data) => {
     return new Promise((resolve, reject) => {
         Api.getApplicationLog(data.txid)
             .then(result => {
-            if (result)
-                resolve(Array.isArray(result) ? result[0] : result);
-            else
-                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
-        })
+                if (result)
+                    resolve(Array.isArray(result) ? result[0] : result);
+                else
+                    reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+            })
             .catch(error => {
-            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
-        });
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+            });
     });
 };
 /**
@@ -1963,14 +1962,14 @@ const getTransaction = (data) => {
     return new Promise((resolve, reject) => {
         Api.getrawtransaction(data.txid)
             .then(result => {
-            if (result)
-                resolve(result);
-            else
-                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
-        })
+                if (result)
+                    resolve(result);
+                else
+                    reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request" });
+            })
             .catch(error => {
-            reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
-        });
+                reject({ type: 'RPC_ERROR', description: "An RPC error occured when submitting the request", data: error });
+            });
     });
 };
 /**
@@ -2164,104 +2163,104 @@ const responseMessage = (sender, request) => {
     }
     notifyInit(title, domain, tab.favIconUrl)
         .then(() => {
-        switch (command) {
-            case Command.getAccount:
-                sendResponse(getAccount());
-                break;
-            case Command.getProvider:
-                sendResponse(getProvider());
-                break;
-            case Command.getNetworks:
-                sendResponse(getNetworks());
-                break;
-            case Command.getPublicKey:
-                sendResponse(getPublicKey());
-                break;
-            case Command.send:
-                sendResponse(send(header, params));
-                break;
-            case Command.getBalance:
-                sendResponse(getBalance(params));
-                break;
-            case Command.getStorage:
-                sendResponse(getStorage(params));
-                break;
-            case Command.invokeRead:
-                sendResponse(invokeRead(params));
-                break;
-            case Command.invoke:
-                sendResponse(invoke(header, params));
-                break;
-            case Command.invokeReadGroup:
-                sendResponse(invokeReadGroup(params));
-                break;
-            case Command.invokeGroup:
-                sendResponse(invokeGroup(header, params));
-                break;
-            case Command.getBlock:
-                sendResponse(getBlock(params));
-                break;
-            case Command.getTransaction:
-                sendResponse(getTransaction(params));
-                break;
-            case Command.getApplicationLog:
-                sendResponse(getApplicationLog(params));
-                break;
-            case Command.TOOLS_validateAddress:
-                sendResponse(validateAddress(params));
-                break;
-            case Command.TOOLS_reverseHexstr:
-                sendResponse(reverseHexstr(params));
-                break;
-            case Command.TOOLS_getStringFromHexstr:
-                sendResponse(getStringFromHexstr(params));
-                break;
-            case Command.TOOLS_getDecimalsFromAssetAmount:
-                sendResponse(getDecimalsFromAssetAmount(params));
-                break;
-            case Command.TOOLS_getBigIntegerFromHexstr:
-                sendResponse(getBigIntegerFromHexstr(params));
-                break;
-            case Command.TOOLS_getBigIntegerFromAssetAmount:
-                sendResponse(getBigIntegerFromAssetAmount(params));
-                break;
-            case Command.TOOLS_getAddressFromScriptHash:
-                sendResponse(getAddressFromScriptHash(params));
-                break;
-            case Command.NNS_getAddressFromDomain:
-                sendResponse(getAddressFromDomain(params));
-                break;
-            case Command.NNS_getDomainFromAddress:
-                sendResponse(getDomainFromAddress(params));
-                break;
-            case Command.NNS_getNamehashFromDomain:
-                sendResponse(getNamehashFromDomain(params));
-                break;
-            case Command.deployContract:
-                // sendResponse(deployContract(header, params));
-                break;
-            case Command.sendScript:
-                // sendResponse(sendScript(header, params));
-                break;
-            default:
-                sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
-                break;
-        }
-    });
+            switch (command) {
+                case Command.getAccount:
+                    sendResponse(getAccount());
+                    break;
+                case Command.getProvider:
+                    sendResponse(getProvider());
+                    break;
+                case Command.getNetworks:
+                    sendResponse(getNetworks());
+                    break;
+                case Command.getPublicKey:
+                    sendResponse(getPublicKey());
+                    break;
+                case Command.send:
+                    sendResponse(send(header, params));
+                    break;
+                case Command.getBalance:
+                    sendResponse(getBalance(params));
+                    break;
+                case Command.getStorage:
+                    sendResponse(getStorage(params));
+                    break;
+                case Command.invokeRead:
+                    sendResponse(invokeRead(params));
+                    break;
+                case Command.invoke:
+                    sendResponse(invoke(header, params));
+                    break;
+                case Command.invokeReadGroup:
+                    sendResponse(invokeReadGroup(params));
+                    break;
+                case Command.invokeGroup:
+                    sendResponse(invokeGroup(header, params));
+                    break;
+                case Command.getBlock:
+                    sendResponse(getBlock(params));
+                    break;
+                case Command.getTransaction:
+                    sendResponse(getTransaction(params));
+                    break;
+                case Command.getApplicationLog:
+                    sendResponse(getApplicationLog(params));
+                    break;
+                case Command.TOOLS_validateAddress:
+                    sendResponse(validateAddress(params));
+                    break;
+                case Command.TOOLS_reverseHexstr:
+                    sendResponse(reverseHexstr(params));
+                    break;
+                case Command.TOOLS_getStringFromHexstr:
+                    sendResponse(getStringFromHexstr(params));
+                    break;
+                case Command.TOOLS_getDecimalsFromAssetAmount:
+                    sendResponse(getDecimalsFromAssetAmount(params));
+                    break;
+                case Command.TOOLS_getBigIntegerFromHexstr:
+                    sendResponse(getBigIntegerFromHexstr(params));
+                    break;
+                case Command.TOOLS_getBigIntegerFromAssetAmount:
+                    sendResponse(getBigIntegerFromAssetAmount(params));
+                    break;
+                case Command.TOOLS_getAddressFromScriptHash:
+                    sendResponse(getAddressFromScriptHash(params));
+                    break;
+                case Command.NNS_getAddressFromDomain:
+                    sendResponse(getAddressFromDomain(params));
+                    break;
+                case Command.NNS_getDomainFromAddress:
+                    sendResponse(getDomainFromAddress(params));
+                    break;
+                case Command.NNS_getNamehashFromDomain:
+                    sendResponse(getNamehashFromDomain(params));
+                    break;
+                case Command.deployContract:
+                    // sendResponse(deployContract(header, params));
+                    break;
+                case Command.sendScript:
+                    // sendResponse(sendScript(header, params));
+                    break;
+                default:
+                    sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
+                    break;
+            }
+        });
     const sendResponse = (result) => {
         result
             .then(data => {
-            chrome.tabs.sendMessage(tab.id, {
-                return: command,
-                ID, data
-            });
-        })
+                chrome.tabs.sendMessage(tab.id, {
+                    return: command,
+                    ID, data
+                });
+            })
             .catch(error => {
-            chrome.tabs.sendMessage(tab.id, {
-                return: command,
-                ID, error
+                chrome.tabs.sendMessage(tab.id, {
+                    return: command,
+                    ID, error
+                });
             });
-        });
     };
 };
 /**
@@ -2306,28 +2305,28 @@ class TransferGroup {
     static update(tran, network) {
         Api.sendrawtransaction(tran.txhex, network)
             .then(result => {
-            if (result['data']) {
-                TaskManager.shed[tran.txid].state = TaskState.watting;
-            }
-            else {
+                if (result['data']) {
+                    TaskManager.shed[tran.txid].state = TaskState.watting;
+                }
+                else {
+                    TaskManager.shed[tran.txid].state = TaskState.fail;
+                    TaskManager.shed[tran.txid].next.executeError = {
+                        type: "RPC_ERROR",
+                        description: result[0].errorMessage,
+                        data: tran.txhex
+                    };
+                }
+                Storage_local.set(TaskManager.table, TaskManager.shed);
+            })
+            .catch(error => {
                 TaskManager.shed[tran.txid].state = TaskState.fail;
                 TaskManager.shed[tran.txid].next.executeError = {
                     type: "RPC_ERROR",
-                    description: result[0].errorMessage,
+                    description: error,
                     data: tran.txhex
                 };
-            }
-            Storage_local.set(TaskManager.table, TaskManager.shed);
-        })
-            .catch(error => {
-            TaskManager.shed[tran.txid].state = TaskState.fail;
-            TaskManager.shed[tran.txid].next.executeError = {
-                type: "RPC_ERROR",
-                description: error,
-                data: tran.txhex
-            };
-            Storage_local.set(TaskManager.table, TaskManager.shed);
-        });
+                Storage_local.set(TaskManager.table, TaskManager.shed);
+            });
     }
 }
 class TaskManager {
@@ -2352,27 +2351,27 @@ class TaskManager {
     static addSendData(txid, data) {
         queryAssetSymbol(data.asset, data.network)
             .then(assetState => {
-            this.sendHistory[txid] = data;
-            this.sendHistory[txid]['symbol'] = assetState.symbol.toLocaleUpperCase();
-            Storage_local.set('send-data', this.sendHistory);
-        });
+                this.sendHistory[txid] = data;
+                this.sendHistory[txid]['symbol'] = assetState.symbol.toLocaleUpperCase();
+                Storage_local.set('send-data', this.sendHistory);
+            });
     }
     static addInvokeData(txid, domain, data) {
         const invokeArgs = Array.isArray(data) ? data : [data];
         invokeArgsAnalyse(...invokeArgs)
             .then(result => {
-            const message = {
-                domain: domain,
-                scriptHashs: result.scriptHashs,
-                descripts: result.descriptions,
-                expenses: result.expenses,
-                netfee: result.fee,
-                networkFee: result.networkFee,
-                systemFee: result.systemFee
-            };
-            this.invokeHistory[txid] = message;
-            Storage_local.set('invoke-data', this.invokeHistory);
-        });
+                const message = {
+                    domain: domain,
+                    scriptHashs: result.scriptHashs,
+                    descripts: result.descriptions,
+                    expenses: result.expenses,
+                    netfee: result.fee,
+                    networkFee: result.networkFee,
+                    systemFee: result.systemFee
+                };
+                this.invokeHistory[txid] = message;
+                Storage_local.set('invoke-data', this.invokeHistory);
+            });
     }
     static addDeployData(txid, domain, info) {
         const amount = (info.call ? 500 : 0) + (info.storage ? 400 : 0) + 90 + 11;
@@ -2418,86 +2417,86 @@ class TaskManager {
                 if (task.type === ConfirmType.tranfer) {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
-                        if (result['blockhash']) {
-                            task.state = TaskState.success;
-                            this.shed[key] = task;
-                            Storage_local.set(this.table, this.shed);
-                            TaskNotify(task);
-                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
-                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
-                            EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
-                            if (task.next) {
-                                TransferGroup.update(task.next, task.network);
+                            if (result['blockhash']) {
+                                task.state = TaskState.success;
+                                this.shed[key] = task;
+                                Storage_local.set(this.table, this.shed);
+                                TaskNotify(task);
+                                const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                                storage.accountWaitTaskCount[task.currentAddr] = count - 1;
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
+                                if (task.next) {
+                                    TransferGroup.update(task.next, task.network);
+                                }
                             }
-                        }
-                    })
+                        })
                         .catch(error => {
-                        console.log(error);
-                    });
+                            console.log(error);
+                        });
                 }
                 else if (task.type == ConfirmType.toClaimgas) {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
-                        if (result['blockhash']) {
-                            task.state = TaskState.success;
-                            this.shed[key] = task;
-                            Storage_local.set(this.table, this.shed);
-                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
-                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
-                            if (storage.account && storage.account.address == task.message) {
-                                try {
-                                    // claimGas(task.network);
+                            if (result['blockhash']) {
+                                task.state = TaskState.success;
+                                this.shed[key] = task;
+                                Storage_local.set(this.table, this.shed);
+                                const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                                storage.accountWaitTaskCount[task.currentAddr] = count - 1;
+                                if (storage.account && storage.account.address == task.message) {
+                                    try {
+                                        // claimGas(task.network);
+                                    }
+                                    catch (error) {
+                                        localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                    }
                                 }
-                                catch (error) {
+                                else {
                                     localStorage.setItem('Teemo-claimgasState-' + task.network, '');
                                 }
                             }
-                            else {
-                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                            }
-                        }
-                    })
+                        })
                         .catch(error => {
-                        console.log(error);
-                    });
+                            console.log(error);
+                        });
                 }
                 else if (task.type == ConfirmType.claimgas) {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
-                        if (result['blockhash']) {
-                            TaskNotify(task);
-                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
-                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
-                            task.state = TaskState.success;
-                            this.shed[key] = task;
-                            Storage_local.set(this.table, this.shed);
-                            localStorage.setItem('Teemo-claimgasState-' + task.network, '');
-                            EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
-                        }
-                    })
+                            if (result['blockhash']) {
+                                TaskNotify(task);
+                                const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                                storage.accountWaitTaskCount[task.currentAddr] = count - 1;
+                                task.state = TaskState.success;
+                                this.shed[key] = task;
+                                Storage_local.set(this.table, this.shed);
+                                localStorage.setItem('Teemo-claimgasState-' + task.network, '');
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
+                            }
+                        })
                         .catch(error => {
-                        console.log(error);
-                    });
+                            console.log(error);
+                        });
                 }
                 else if (task.type == ConfirmType.contract) {
                     Api.getrawtransaction(task.txid, task.network)
                         .then(result => {
-                        if (result['blockhash']) {
-                            TaskNotify(task);
-                            const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
-                            storage.accountWaitTaskCount[task.currentAddr] = count - 1;
-                            task.state = TaskState.success;
-                            this.shed[key] = task;
-                            Storage_local.set(this.table, this.shed);
-                            EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
-                            if (task.next) {
-                                TransferGroup.update(task.next, task.network);
+                            if (result['blockhash']) {
+                                TaskNotify(task);
+                                const count = storage.accountWaitTaskCount[task.currentAddr] ? storage.accountWaitTaskCount[task.currentAddr] : 0;
+                                storage.accountWaitTaskCount[task.currentAddr] = count - 1;
+                                task.state = TaskState.success;
+                                this.shed[key] = task;
+                                Storage_local.set(this.table, this.shed);
+                                EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: storage.height, blockTime: result["blockTime"] });
+                                if (task.next) {
+                                    TransferGroup.update(task.next, task.network);
+                                }
                             }
-                        }
-                    })
+                        })
                         .catch(error => {
-                        console.log(error);
-                    });
+                            console.log(error);
+                        });
                 }
             }
         }
@@ -2511,11 +2510,11 @@ TaskManager.dappsMessage = {};
 TaskManager.table = "Task-Manager-shed";
 TaskManager.socket = new SocketManager();
 TaskManager.blockDatas = [{
-        blockHeight: -1,
-        blockTime: 0,
-        blockHash: '',
-        timeDiff: 0
-    }];
+    blockHeight: -1,
+    blockTime: 0,
+    blockHash: '',
+    timeDiff: 0
+}];
 TaskManager.start();
 var cleanHistory = () => {
     const address = storage.account.address;
@@ -2641,7 +2640,7 @@ class AssetManager {
 var assetManager = new AssetManager();
 assetManager.initAllAseetInfo();
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'V1.0.0';
+const VERSION = 'V1.0.1';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";
