@@ -50,7 +50,7 @@ class Common implements ICommonStore {
             for (const key in list) {
                 if (list[ key ]) {
                     const asset = manageStore.allAsset.find(asset => asset.assetid == key)
-                    if (asset) this.balances.push({ symbol: asset.symbol, assetID: key, amount: '0' })
+                    if (asset) this.balances.push({ symbol: asset.symbol.toLocaleUpperCase(), assetID: key, amount: '0' })
                     arr.push(key)
                 }
             }

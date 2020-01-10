@@ -1,5 +1,5 @@
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1';
+const VERSION = 'V1.0.0';
 
 enum ArgumentDataType {
     STRING = 'String',
@@ -503,8 +503,8 @@ const EventChange = () => {
 }
 
 const provider: Provider = {
-    "name": "TeemoWallet",
-    "version": "0.1",
+    "name": "TeemoWallet NEO3",
+    "version": VERSION,
     "website": "nel.group",
     "compatibility": [ "typescript", "javascript" ],
     "extra": {

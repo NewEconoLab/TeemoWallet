@@ -1659,7 +1659,7 @@ var getBalance = async (data: GetBalanceArgs) => {
                         for (const iterator of res) {
                             const { assetid, symbol, balance } = iterator as { assetid: string, symbol: string, balance: string };
                             const assetID = assetid.replace("0x", "")
-                            assets[ assetID ] = { assetID, symbol, amount: balance }
+                            assets[ assetID ] = { assetID, symbol: symbol.toLocaleUpperCase(), amount: balance }
                         }
                         for (const id of asset) {
                             if (assets[ id ]) {
@@ -1667,14 +1667,14 @@ var getBalance = async (data: GetBalanceArgs) => {
                             }
                             else {
                                 const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
-                                assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' })
+                                assetArray.push({ assetID: info.assetid, symbol: info.symbol.toLocaleUpperCase(), amount: '0' })
                             }
                         }
                     }
                     else {
                         for (const id of asset) {
                             const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
-                            assetArray.push({ assetID: info.assetid, symbol: info.symbol, amount: '0' })
+                            assetArray.push({ assetID: info.assetid, symbol: info.symbol.toLocaleUpperCase(), amount: '0' })
                         }
                     }
                 }
@@ -1943,7 +1943,7 @@ var invokeArgsAnalyse = async (...invokes: InvokeArgs[]) => {
         const amount = utxoassets[ key ]
         const assetstate = await queryAssetSymbol(key, invokes[ 0 ].network);
         expenses.push({
-            symbol: assetstate.symbol,
+            symbol: assetstate.symbol.toLocaleUpperCase(),
             amount: amount.toString(),
             assetid: key
         })
@@ -1959,7 +1959,7 @@ var invokeArgsAnalyse = async (...invokes: InvokeArgs[]) => {
         var smallv = parseInt(amount.mod(v).toString()) / v;
 
         expenses.push({
-            symbol: assetstate.symbol,
+            symbol: assetstate.symbol.toLocaleUpperCase(),
             amount: (intv + smallv).toString(),
             assetid: key
         })
@@ -1979,7 +1979,7 @@ var queryAssetSymbol = async (assetID: string, network: 'TestNet' | 'MainNet') =
         if (stack) {
             const symbol: string = ThinNeo.Helper.Bytes2String((stack[ 0 ][ 'value' ] as string).hexToBytes());
             const decimals: number = parseInt(stack[ 1 ][ 'value' ]);
-            return { symbol, decimals };
+            return { symbol: symbol.toLocaleUpperCase(), decimals };
         }
     }
     if (assetID.hexToBytes().length == 32) {
@@ -1992,7 +1992,7 @@ var queryAssetSymbol = async (assetID: string, network: 'TestNet' | 'MainNet') =
             const result = await Api.getAssetState(assetID);
             const names = result[ name ];
             for (var i in names) {
-                asset.symbol = names[ i ].name;
+                asset.symbol = names[ i ].name.toLocaleUpperCase();
             }
         }
         return asset;
@@ -2622,7 +2622,7 @@ class TaskManager {
         queryAssetSymbol(data.asset, data.network)
             .then(assetState => {
                 this.sendHistory[ txid ] = data;
-                this.sendHistory[ txid ][ 'symbol' ] = assetState.symbol;
+                this.sendHistory[ txid ][ 'symbol' ] = assetState.symbol.toLocaleUpperCase();
                 Storage_local.set('send-data', this.sendHistory);
             })
     }
@@ -2857,7 +2857,7 @@ class AssetManager {
             assetInfo.assetid = nep5.assetid.replace('0x', '');
             assetInfo.decimals = nep5.decimals;
             assetInfo.type = 'nep5';
-            assetInfo.symbol = nep5.symbol ? nep5.symbol : (nep5.name ? nep5.name : '');
+            assetInfo.symbol = nep5.symbol ? nep5.symbol.toLocaleUpperCase() : (nep5.name ? nep5.name : '');
             assetInfo.name = nep5.name;
             this.allAssetInfo.push(assetInfo);
         }

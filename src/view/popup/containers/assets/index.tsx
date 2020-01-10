@@ -97,7 +97,7 @@ export default class Assets extends React.Component<IProps, {}>
                         common.balances && common.balances.map(asset => {
                             return (
                                 <div className="asset-panel" onClick={this.transfer.bind(this, asset.assetID)}>
-                                    <div className="asset-name">{asset.symbol}</div>
+                                    <div className="asset-name">{asset.symbol.toLocaleUpperCase()}</div>
                                     <div className={loadClassName}>{Neo.Fixed8.parse(asset.amount.toString()).toString()}</div>
                                 </div>
                             )
