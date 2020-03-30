@@ -20,6 +20,7 @@ export interface IDeployHistory {
     storage: boolean;        // 是否存储区
     sysfee: number;
     payment: boolean;        // 是否支持付费
+    fee: string;//手续费
 }
 
 export interface ISendHistory extends SendArgs {

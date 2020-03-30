@@ -64,7 +64,7 @@ class SocketManager {
         if (storage.network == 'MainNet')
             return 'wss://testwss.nel.group/ws/mainnet';
         else
-            return 'wss://testwss.nel.group/ws/testnet';
+            return 'wss://testwsneo3dev.nel.group/ws/testnet';
     }
     socketInit() {
         console.log("socketInit", storage.network);
@@ -133,7 +133,7 @@ class SocketManager {
                                 TransferGroup.update(task.next, task.network);
                             }
                         }
-                        else if (storage.height - task.height > 4) {
+                        else if (storage.height - task.height > 3) {
                             Api.getrawtransaction(task.txid, task.network)
                                 .then(result => {
                                 if (result['blockhash']) {
@@ -141,6 +141,7 @@ class SocketManager {
                                     TaskManager.shed[key] = task;
                                     Storage_local.set(TaskManager.table, TaskManager.shed);
                                     TaskNotify(task);
+                                    EventsOnChange(WalletEvents.TRANSACTION_CONFIRMED, { TXID: task.txid, blockHeight: data.blockHeight, blockTime: data.blockTime });
                                     // if (task.type == ConfirmType.toClaimgas) {
                                     //     if (storage.account && storage.account.address == task.message) {
                                     //         try {
@@ -197,7 +198,7 @@ function TaskNotify(task) {
         }
         else if (task.type === ConfirmType.contract) {
             const data = TaskManager.invokeHistory[task.txid];
-            amount = data.expenses.map(expense => "-" + expense.amount + " " + expense.symbol).join(',');
+            amount = data.expenses ? data.expenses.map(expense => "-" + expense.amount + " " + expense.symbol).join(',') : '0';
         }
         else if (task.type === ConfirmType.claimgas) {
             const data = TaskManager.sendHistory[task.txid];

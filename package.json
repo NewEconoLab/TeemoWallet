@@ -40,7 +40,6 @@
     "mobx": "^5.9.0",
     "mobx-react": "^5.4.3",
     "nel-neo-thinsdk": "0.0.9",
-    "neo-thinsdk-ts-nodejs": "^1.0.1",
     "peer": "^0.2.10",
     "react": "^16.2.0",
     "react-dom": "^16.8.4",

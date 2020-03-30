@@ -1,5 +1,5 @@
 declare const BLOCKCHAIN = "NEO";
-declare const VERSION = "v1";
+declare const VERSION = "V1.0.2";
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -89,10 +89,10 @@ interface InvokeReadGroup {
     group: InvokeReadInput[];
 }
 interface AttachedAssets {
-    [asset: string]: string;
+    [ asset: string ]: string;
 }
 interface AttachedGas {
-    [addr: string]: string;
+    [ addr: string ]: string;
 }
 interface AssetIntentOverrides {
     inputs: AssetInput[];
@@ -151,7 +151,7 @@ interface GetBalanceArgs {
     network: string;
 }
 interface BalanceResults {
-    [address: string]: Balance[];
+    [ address: string ]: Balance[];
 }
 interface Balance {
     assetID: string;
@@ -228,18 +228,10 @@ interface AddressArgs {
     network: 'MainNet' | 'TestNet';
 }
 interface DeployContractArgs {
-    contractHash: string;
-    description: string;
-    email: string;
-    author: string;
-    version: string;
-    name: string;
-    avmhex: string;
-    call: boolean;
-    storage: boolean;
-    payment: boolean;
-    fee?: string;
+    mainfest: string;
+    nefhex: string;
     network?: 'MainNet' | 'TestNet';
+    fee?: string;
 }
 declare const ids: any[];
 /**

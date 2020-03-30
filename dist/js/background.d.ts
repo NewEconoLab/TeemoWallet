@@ -18,8 +18,6 @@ declare const storage: BackStore;
 declare var getBlockHeight: () => number;
 declare const netstr: string;
 declare const HASH_CONFIG: {
-    ID_CGAS: Neo.Uint160;
-    DAPP_NNC: Neo.Uint160;
     baseContract: Neo.Uint160;
     resolverHash: string;
     ID_GAS: string;
@@ -28,9 +26,9 @@ declare const HASH_CONFIG: {
     ID_NNC: Neo.Uint160;
     ID_NNK: Neo.Uint160;
 };
-declare const baseCommonUrl = "https://apiblockneo3.nel.group/api";
+declare const baseCommonUrl = "https://apineo3dev.nel.group/api/";
 declare const baseUrl = "https://apiscanneo3.nel.group/api";
-declare const testRpcUrl = "http://seed1t.neo.org:20332";
+declare const testRpcUrl = "http://47.99.35.147:10337";
 declare const mainRpcUrl = "http://seed.nel.group:10332";
 declare const testRpcUrlList: string[];
 declare const mainRpcUrlList: string[];
@@ -203,6 +201,10 @@ declare var contractBuilder: (invokeArgs: InvokeArgs) => Promise<{
     txid: string;
     nodeUrl: string;
 }>;
+declare const deploy: (params: DeployContractArgs) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}>;
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
@@ -293,6 +295,18 @@ declare const invoke: (header: any, params: InvokeArgs) => Promise<{
     nodeUrl: string;
 }>;
 /**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
+declare const deployContract: (header: any, params: DeployContractArgs) => Promise<{
+    txid: string;
+    nodeUrl: string;
+}>;
+declare const calculateDeployData: (params: DeployContractArgs) => Promise<DeployContractArgs>;
+declare const sendScript: (header: any, params: SendScriptArgs) => Promise<InvokeOutput>;
+declare const calculateScriptData: (data: SendScriptArgs) => Promise<SendScriptArgs>;
+/**
  * 获得网络状态信息
  */
 declare const getNetworks: () => Promise<GetNetworksOutput>;
@@ -304,6 +318,7 @@ declare var getBalance: (data: GetBalanceArgs) => Promise<unknown>;
 declare var transfer: (data: SendArgs) => Promise<SendOutput>;
 declare const createTranData: (data: SendArgs) => Promise<SendArgs>;
 declare var send: (header: any, params: SendArgs) => Promise<SendOutput>;
+declare const sendInvoke: (header: any, data: SendScriptArgs) => Promise<InvokeOutput>;
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
@@ -459,15 +474,8 @@ interface InvokeHistory {
 interface DeployHistory {
     domain: string;
     contractHash: string;
-    description: string;
-    email: string;
-    author: string;
-    version: string;
-    name: string;
-    call: boolean;
-    storage: boolean;
-    payment: boolean;
-    sysfee: number;
+    sysfee?: string;
+    fee: string;
 }
 declare class TaskManager {
     static shed: {
@@ -497,7 +505,7 @@ declare class TaskManager {
         timeDiff: number;
     }[];
     static start(): void;
-    static readonly webSocketURL: "wss://testws.nel.group/ws/mainnet" | "wss://testws.nel.group/ws/testnet";
+    static readonly webSocketURL: string;
     static addSendData(txid: string, data: SendArgs): void;
     static addInvokeData(txid: string, domain: string, data: InvokeArgs | InvokeArgs[]): void;
     static addDeployData(txid: string, domain: string, info: DeployContractArgs): void;
@@ -548,7 +556,7 @@ declare class AssetManager {
 }
 declare var assetManager: AssetManager;
 declare const BLOCKCHAIN = "NEO";
-declare const VERSION = "V1.0.1";
+declare const VERSION = "V1.0.2";
 declare enum ArgumentDataType {
     STRING = "String",
     BOOLEAN = "Boolean",
@@ -658,7 +666,8 @@ interface SendScriptArgs {
     attachedAssets?: AttachedAssets;
     assetIntentOverrides?: AssetIntentOverrides;
     fee?: string;
-    sysfee?: string;
+    networkFee?: string;
+    systemFee?: string;
     description?: string;
     network?: "TestNet" | "MainNet";
 }
@@ -711,7 +720,6 @@ interface InvokeGroupOutup {
 interface BalanceRequest {
     address: string;
     assets?: string[];
-    fetchUTXO?: boolean;
 }
 interface GetBalanceArgs {
     params: BalanceRequest | BalanceRequest[];
@@ -749,18 +757,11 @@ interface SendOutput {
     nodeUrl: string;
 }
 interface DeployContractArgs {
-    contractHash: string;
-    description: string;
-    email: string;
-    author: string;
-    version: string;
-    name: string;
-    avmhex: string;
-    call: boolean;
-    storage: boolean;
-    payment: boolean;
-    fee?: string;
+    mainfest: string;
+    nefhex: string;
     network?: 'MainNet' | 'TestNet';
+    fee?: string;
+    systemFee?: string;
 }
 interface Provider {
     name: string;

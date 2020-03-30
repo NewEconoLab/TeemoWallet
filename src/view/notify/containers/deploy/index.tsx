@@ -22,13 +22,14 @@ export default class DeployRequest extends React.Component<IPorps>{
         pageNumber: 0, // 0为上一页，1为下一页
         data: null,
         scriptHash: "",
-        contractName: "",
+        // contractName: "",
         fee: '0',
-        avmhex: "",
-        call: false,           // 是否动态调用
-        storage: false,        // 是否存储区
-        payment: false,        // 是否支持付费
-
+        scripthex: "",
+        // call: false,           // 是否动态调用
+        // storage: false,        // 是否存储区
+        // payment: false,        // 是否支持付费
+        mainfest: "",
+        nefhex: ""
     }
     public componentWillReceiveProps(nextProps) {
         this.setState({
@@ -47,13 +48,13 @@ export default class DeployRequest extends React.Component<IPorps>{
 
     // 初始化state
     public initData = (data: DeployContractArgs) => {
+        const nef = Neo.SmartContract.NefFile.loadNef(data.nefhex);
+        console.log("nef scriptHash", nef.scriptHash);
+        console.log("nef scripthex", nef.script.toHexString());
         this.setState({
-            scriptHash: data.contractHash,
-            contractName: data.name,
-            avmhex: data.avmhex,
-            call: data.call,
-            storage: data.storage,
-            payment: data.payment,
+            scriptHash: nef.scriptHash.toString(),
+            scripthex: nef.script.toHexString(),
+            mainfest: data.mainfest,
             fee: data.fee
         })
     }
@@ -95,14 +96,14 @@ export default class DeployRequest extends React.Component<IPorps>{
                                         <a href="#">{this.state.scriptHash.replace(/^(.{4})(.*)(.{4})$/, '$1...$3')}</a>
                                     </div>
                                 </div>
-                                <div className="line-wrap">
+                                {/* <div className="line-wrap">
                                     <div className="line-left">{intl.message.history.amount}</div>
                                     <div className="line-right">
                                         <span>
                                             {(this.state.call ? 500 : 0) + (this.state.storage ? 400 : 0) + 90 + 11} GAS
                                         </span>
                                     </div>
-                                </div>
+                                </div> */}
                                 <div className="line-wrap">
                                     <div className="line-left">{intl.message.history.fee}</div>
                                     <div className="line-right">
@@ -113,7 +114,7 @@ export default class DeployRequest extends React.Component<IPorps>{
                             <div className="contract-title">{intl.message.notify.dappNote}</div>
                             <div className="remark-content white-wrap">
                                 {
-                                    this.state.contractName
+                                    // this.state.contractName
                                 }
                             </div>
                             <div className="previous-img" onClick={this.nextPage}>
@@ -137,16 +138,22 @@ export default class DeployRequest extends React.Component<IPorps>{
                                 </div>
                             </div>
 
-                            <div className="contract-title">AVM (hex)</div>
+                            <div className="contract-title">Script (hex)</div>
                             <div className="remark-content white-wrap hex">
                                 {
-                                    this.state.avmhex
+                                    this.state.scripthex
                                 }
                             </div>
                             {/* <div className="transaction-content">
                                     <span>内容</span>
                                 </div> 
                             */}
+                            <div className="contract-title">Manifest</div>
+                            <pre className="remark-content white-wrap">
+                                {
+                                    JSON.stringify(JSON.parse(this.state.mainfest), null, 3)
+                                }
+                            </pre>
                             <div className="previous-img" onClick={this.previousPage}>
                                 <img src={require('../../../image/next.png')} alt="" />
                             </div>

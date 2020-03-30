@@ -64,6 +64,8 @@ class Common implements ICommonStore {
                     "params": params
                 }
                 bg.getBalance(data).then((result: BalanceResults) => {
+                    console.log("getBalance Result", result);
+
                     this.balances = result[ this.account.address ];
                 })
             }
@@ -82,6 +84,7 @@ class Common implements ICommonStore {
                 "params": params
             }
             bg.getBalance(data).then((result: BalanceResults) => {
+                console.log("getBalance Result", result);
                 // console.log("BalanceResults", result);
                 this.balances = result[ this.account.address ];
             })
@@ -112,6 +115,7 @@ class Common implements ICommonStore {
             "params": params
         }
         const result = await bg.getBalance(data)
+        console.log("getBalance Result", result);
         return result[ this.account.address ][ 0 ];
     }
 

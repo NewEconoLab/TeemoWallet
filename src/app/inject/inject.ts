@@ -1,5 +1,5 @@
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'V1.0.1';
+const VERSION = 'V1.0.2';
 
 enum ArgumentDataType {
     STRING = 'String',
@@ -261,19 +261,26 @@ interface AddressArgs {
     network: 'MainNet' | 'TestNet'
 }
 
+
+// interface DeployContractArgs {
+//     contractHash: string     // 合约hash
+//     description: string;     // 备注信息
+//     email: string;           // 邮件
+//     author: string;          // 作者
+//     version: string,        // 版本
+//     name: string;           // 名称
+//     avmhex: string;         // avm hex字符串
+//     call: boolean;           // 是否动态调用
+//     storage: boolean;        // 是否存储区
+//     payment: boolean;        // 是否支持付费
+//     fee?: string;
+//     network?: 'MainNet' | 'TestNet';
+// }
 interface DeployContractArgs {
-    contractHash: string     // 合约hash
-    description: string;     // 备注信息
-    email: string;           // 邮件
-    author: string;          // 作者
-    version: string,        // 版本
-    name: string;           // 名称
-    avmhex: string;         // avm hex字符串
-    call: boolean;           // 是否动态调用
-    storage: boolean;        // 是否存储区
-    payment: boolean;        // 是否支持付费
+    mainfest: string;
+    nefhex: string;
+    network?: 'MainNet' | 'TestNet';
     fee?: string;
-    network?: 'MainNet' | 'TestNet'
 }
 
 const ids = [];

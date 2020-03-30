@@ -1,3 +1,4 @@
+///<reference path="../../lib/neo-thinsdk.d.ts"/>
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -23,19 +24,17 @@ var getBlockHeight = () => {
 const netstr = localStorage.getItem('Teemo-NetWork');
 storage.network = netstr ? ((netstr == 'TestNet' || netstr == 'MainNet') ? netstr : "TestNet") : "TestNet";
 const HASH_CONFIG = {
-    ID_CGAS: Neo.Uint160.parse('74f2dc36a68fdc4682034178eb2220729231db76'),
-    DAPP_NNC: Neo.Uint160.parse("fc732edee1efdf968c23c20a9628eaa5a6ccb934"),
     baseContract: Neo.Uint160.parse("348387116c4a75e420663277d9c02049907128c7"),
     resolverHash: `6e2aea28af9c5febea0774759b1b76398e3167f1`,
-    ID_GAS: "a1760976db5fcdfab2a9930e8f6ce875b2d18225",
-    ID_NEO: "43cf98eddbe047e198a3e5d57006311442a0ca15",
+    ID_GAS: "8c23f196d8a1bfd103a9dcb1f9ccf0c611377d3b",
+    ID_NEO: "9bde8f209c88dd0e7ca3bf0af0f476cdd8207789",
     saleContract: Neo.Uint160.parse("1b0ca9a908e07b20469917aed8d503049b420eeb"),
     ID_NNC: Neo.Uint160.parse('fc732edee1efdf968c23c20a9628eaa5a6ccb934'),
     ID_NNK: Neo.Uint160.parse('c36aee199dbba6c3f439983657558cfb67629599'),
 };
-const baseCommonUrl = "https://apiblockneo3.nel.group/api";
+const baseCommonUrl = "https://apineo3dev.nel.group/api/";
 const baseUrl = "https://apiscanneo3.nel.group/api";
-const testRpcUrl = "http://seed1t.neo.org:20332";
+const testRpcUrl = "http://47.99.35.147:10337";
 const mainRpcUrl = "http://seed.nel.group:10332";
 const testRpcUrlList = [
     'http://test.nel.group:20332',
@@ -257,7 +256,7 @@ class Transaction extends ThinNeo.Transaction {
         this.nonce = RANDOM_INT.toInt32();
         //this.tran.nonce = 12121;
         this.sender = Neo.Uint160.parse(ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(sender).toHexString());
-        this.validUntilBlock = currentBlockIndex + ThinNeo.Transaction.MaxValidUntilBlockIncrement;
+        this.validUntilBlock = currentBlockIndex + ThinNeo.Transaction.MaxValidUntilBlockIncrement - 1;
         const cosigner = new Neo.Cosigner();
         cosigner.scopes = Neo.WitnessScope.CalledByEntry;
         cosigner.account = this.sender;
@@ -268,10 +267,20 @@ class Transaction extends ThinNeo.Transaction {
     }
     // 记算网络费
     calculateNetworkFee() {
-        const count = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES64] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES33] + 1000000;
+        var witness_script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(storage.account.pubkeyHex.hexToBytes());
+        if (witness_script.isSignatureContract()) // 判断是否为合约签名 现在默认都是 这里要重整下的
+        {
+            var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHNULL] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + 1000000;
+        }
+        else {
+            //We can support more contract types in the future.
+        }
         // 记算网络费
-        const networkFee = Neo.Long.ZERO.add(this.GetMessage().length).add(107).mul(1000).add(count);
-        return networkFee;
+        return this.networkFee = this.networkFee.add(this.GetMessage().length).add(110).mul(1000).add(networkFee);
+        // const count = ThinSdk.ApplicationEngine[ ThinNeo.OpCode.PUSHDATA1 ] + ThinSdk.ApplicationEngine[ ThinNeo.OpCode.PUSHNULL ] + ThinSdk.ApplicationEngine[ ThinNeo.OpCode.PUSHDATA1 ] + 1000000;
+        // // 记算网络费
+        // const networkFee = Neo.Long.fromNumber(this.GetMessage().length).add(110).mul(1000).add(count);
+        // return networkFee
     }
     // 获得系统费
     getSystemFee() {
@@ -279,16 +288,16 @@ class Transaction extends ThinNeo.Transaction {
             const hexdata = this.script.toHexString();
             const result = yield Api.getInvokeRead(hexdata);
             const sysfee = result['gas_consumed'] ? parseFloat(result['gas_consumed']) : 0;
-            return Neo.Long.fromNumber(Math.ceil(sysfee / 100000000) * 100000000);
+            return this.systemFee = Neo.Long.fromNumber(sysfee).div(100000000).add(1).mul(100000000);
         });
     }
     pack(sysFee, netFee) {
         this.script = this.scriptBuilder.ToArray();
-        var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES64] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES33] + 1000000;
+        var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHNULL] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + 1000000;
         // 记算网络费
-        this.networkFee = Neo.Long.ZERO.add(this.GetMessage().length).add(107).mul(1000).add(networkFee);
+        this.networkFee = Neo.Long.ZERO.add(this.GetMessage().length).add(110).mul(1000).add(networkFee);
         // 计算系统费  目前系统费取整 0.1就是1  1.1就是2
-        this.systemFee = Neo.Long.fromNumber(Math.ceil(sysFee / 100000000) * 100000000);
+        this.systemFee = Neo.Long.fromNumber((sysFee / 100000000 + 1) * 100000000);
         // 判断网络费参数是否大于记算值，大于则用参数，小于则用记算值
         this.networkFee = this.networkFee.comp(netFee) > 0 ? this.networkFee : Neo.Long.fromValue(netFee.mul(100000000));
         return { networkFee: this.networkFee, systemFee: this.systemFee };
@@ -297,24 +306,6 @@ class Transaction extends ThinNeo.Transaction {
         this.script = this.scriptBuilder.ToArray();
         var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
         var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
-        // var witness_script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(pubkey);
-        // if (witness_script.isSignatureContract() || true)// 判断是否为合约签名 现在默认都是 这里要重整下的
-        // {
-        //     var networkFee = ThinSdk.ApplicationEngine[ ThinNeo.OpCode.PUSHBYTES64 ] + ThinSdk.ApplicationEngine[ ThinNeo.OpCode.PUSHBYTES33 ] + 1000000;
-        // }
-        // else {
-        //     // 这里本是判断多签来记算 网络费的，暂且不考虑多签的情况
-        // }
-        // // 记算网络费
-        // this.networkFee = Neo.Long.ZERO.add(this.GetMessage().length).add(107).mul(1000).add(networkFee);
-        // // 计算系统费  目前系统费取整 0.1就是1  1.1就是2
-        // this.systemFee = Neo.Long.fromNumber(Math.ceil(sysFee / 100000000) * 100000000);
-        // this.networkFee = this.networkFee.comp(netFee) > 0 ? this.networkFee : Neo.Long.fromValue(netFee.mul(100000000));
-        //var str = data.toHexString();
-        //console.log("msg str",str)
-        //var data2 = this.tran.GetMessage();
-        //console.log("Transaction Message ", data2.toHexString())
-        //console.log("GetMessage", this.tran.GetMessage().toHexString());
         var data = this.GetMessage();
         var signData = ThinNeo.Helper.Sign(data, prikey);
         var b = ThinNeo.Helper.VerifySignature(data, signData, pubkey);
@@ -816,8 +807,14 @@ class ScriptBuild extends ThinNeo.ScriptBuilder {
                     throw new Error("No parameter of this type");
             }
         }
-        this.EmitPushNumber(new Neo.BigInteger(argument.length));
-        this.Emit(ThinNeo.OpCode.PACK);
+        if (argument.length > 0) {
+            this.EmitPushNumber(new Neo.BigInteger(argument.length));
+            this.Emit(ThinNeo.OpCode.PACK);
+        }
+        else {
+            this.EmitPushNumber(Neo.BigInteger.Zero);
+            this.Emit(ThinNeo.OpCode.NEWARRAY);
+        }
         return this;
     }
     EmitInvokeArgs(data, hookTxid) {
@@ -884,45 +881,64 @@ var contractBuilder = (invokeArgs) => __awaiter(this, void 0, void 0, function* 
         throw error;
     }
 });
-// const deploy = async (params: DeployContractArgs) => {
-//     const amount = (params.call ? 500 : 0) + (params.storage ? 400 : 0) + 90;
-//     const num = (params.storage ? 1 : 0) | (params.call ? 2 : 0) | (params.payment ? 4 : 0);
-//     const sb = new ThinNeo.ScriptBuilder();
-//     sb.EmitPushString(params.description);
-//     sb.EmitPushString(params.email);
-//     sb.EmitPushString(params.author);
-//     sb.EmitPushString(params.version);
-//     sb.EmitPushString(name);
-//     sb.EmitPushNumber(new Neo.BigInteger(num));
-//     sb.EmitPushBytes("05".hexToBytes());
-//     sb.EmitPushBytes("0710".hexToBytes());
-//     sb.EmitPushBytes(params.avmhex.hexToBytes());
-//     sb.EmitSysCall("Neo.Contract.Create");
-//     const utxos = await MarkUtxo.getAllUtxo();
-//     const gass = utxos[ HASH_CONFIG.ID_GAS ];
-//     const consume = Neo.Fixed8.fromNumber(amount);
-//     const newFee = consume.add(Neo.Fixed8.fromNumber(11));  //在原有的基础上加11个gas
-//     const tran = new Transaction()
-//     tran.setScript(sb.ToArray(), consume);
-//     try {
-//         tran.creatInuptAndOutup(gass, newFee);
-//     } catch (error) {
-//         throw "You don't have enough utxo;";
-//     }
-//     tran.version = 1;
-//     try {
-//         let result = await transactionSignAndSend(tran);
-//         TaskManager.addTask(new Task(ConfirmType.deploy, result.txid));
-//         return result;
-//     } catch (error) {
-//         throw error;
-//     }
-//     // if (data.length > 102400)
-//     // {
-//     //     throw new Error("TRANSACTION_LARGE");
-//     // }
-//     // const result = await tools.wwwtool.api_postRawTransaction(data);
-// }
+const deploy = (params) => __awaiter(this, void 0, void 0, function* () {
+    const tran = new ThinSdk.NeoTransaction(Neo.Uint160.parse(ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(storage.account.address).toHexString()), storage.height);
+    const nef = Neo.SmartContract.NefFile.loadNef(params.nefhex);
+    ThinSdk.Contract.newContract(nef, params.mainfest, tran.scriptBuilder).deploy();
+    const invokeres = yield Api.getInvokeRead(tran.scriptBuilder.ToArray().toHexString());
+    const sysfee = invokeres['gas_consumed'] ? parseFloat(invokeres['gas_consumed']) : 0;
+    const data = tran.signAndPack(storage.account.prikeyHex.hexToBytes(), sysfee);
+    const txid = tran.tran.GetTxid();
+    const result = yield Api.sendrawtransaction(data.toHexString(), params.network);
+    let output = { txid, nodeUrl: "" };
+    if (result['data']) {
+        const nodeUrl = result.nodeUrl;
+        output = { txid, nodeUrl };
+    }
+    else {
+        throw { type: "RPC_ERROR", description: 'An RPC error occured when submitting the request', data: result[0].errorMessage };
+    }
+    params.fee = tran.tran.networkFee.add(tran.tran.systemFee).toNumber().div(100000000).toString();
+    TaskManager.addTask(new Task(ConfirmType.deploy, output.txid));
+    return output;
+    // const amount = (params.call ? 500 : 0) + (params.storage ? 400 : 0) + 90;
+    // const num = (params.storage ? 1 : 0) | (params.call ? 2 : 0) | (params.payment ? 4 : 0);
+    // const sb = new ThinNeo.ScriptBuilder();
+    // sb.EmitPushString(params.description);
+    // sb.EmitPushString(params.email);
+    // sb.EmitPushString(params.author);
+    // sb.EmitPushString(params.version);
+    // sb.EmitPushString(name);
+    // sb.EmitPushNumber(new Neo.BigInteger(num));
+    // sb.EmitPushBytes("05".hexToBytes());
+    // sb.EmitPushBytes("0710".hexToBytes());
+    // sb.EmitPushBytes(params.avmhex.hexToBytes());
+    // sb.EmitSysCall("Neo.Contract.Create");
+    // const utxos = await MarkUtxo.getAllUtxo();
+    // const gass = utxos[ HASH_CONFIG.ID_GAS ];
+    // const consume = Neo.Fixed8.fromNumber(amount);
+    // const newFee = consume.add(Neo.Fixed8.fromNumber(11));  //在原有的基础上加11个gas
+    // const tran = new Transaction()
+    // tran.setScript(sb.ToArray(), consume);
+    // try {
+    //     tran.creatInuptAndOutup(gass, newFee);
+    // } catch (error) {
+    //     throw "You don't have enough utxo;";
+    // }
+    // tran.version = 1;
+    // try {
+    //     let result = await transactionSignAndSend(tran);
+    //     TaskManager.addTask(new Task(ConfirmType.deploy, result.txid));
+    //     return result;
+    // } catch (error) {
+    //     throw error;
+    // }
+    // if (data.length > 102400)
+    // {
+    //     throw new Error("TRANSACTION_LARGE");
+    // }
+    // const result = await tools.wwwtool.api_postRawTransaction(data);
+});
 /**
  * 打包合并交易
  * @param data 合并合约调用参数
@@ -944,10 +960,16 @@ const invokeGroupBuild = (data) => __awaiter(this, void 0, void 0, function* () 
         }
         tran.scriptBuilder.EmitInvokeArgs(data.group);
         tran.script = tran.scriptBuilder.ToArray();
-        const systemFee = yield tran.getSystemFee();
-        const networkFee = tran.calculateNetworkFee();
-        tran.systemFee = Neo.Long.fromValue(parseFloat(data.group[0].systemFee).mul(100000000));
-        tran.networkFee = Neo.Long.fromValue(parseFloat(data.group[0].networkFee).mul(100000000));
+        const systemFee_calulate = yield tran.getSystemFee();
+        const networkFee_calulate = tran.calculateNetworkFee();
+        const systemFee = Neo.Long.fromValue(parseFloat(data.group[0].systemFee).mul(100000000));
+        const networkFee = Neo.Long.fromValue(parseFloat(data.group[0].networkFee).mul(100000000));
+        if (systemFee_calulate.comp(systemFee) < 0) {
+            tran.systemFee = systemFee;
+        }
+        if (networkFee_calulate.comp(networkFee) < 0) {
+            tran.networkFee = networkFee;
+        }
         const trandata = tran.signAndPack(storage.account.prikeyHex.hexToBytes());
         try {
             const result = yield Api.sendrawtransaction(trandata.toHexString());
@@ -1380,66 +1402,77 @@ const invoke = (header, params) => __awaiter(this, void 0, void 0, function* () 
     //         })
     // })
 });
-// /**
-//  * invoke 合约调用
-//  * @param title dapp请求方的信息
-//  * @param data 请求的参数
-//  */
-// const deployContract = (header, params: DeployContractArgs) => {
-//     return new Promise((resolve, reject) => {
-//         const data: NotifyMessage = {
-//             lable: Command.deployContract,
-//             data: params,
-//             header
-//         }
-//         openNotify(data)
-//             .then(() => {
-//                 Storage_local.get('checkNetFee')
-//                     .then(checkNetFee => {
-//                         Storage_local.set('checkNetFee', false);
-//                         deploy(params)
-//                             .then(result => {
-//                                 TaskManager.addDeployData(result.txid, header.domain, params);
-//                                 resolve(result);
-//                                 // TaskManager.addInvokeData(result.txid, header.domain, { scriptHash: params.contractHash, operation: "创建合约", network: params.network, arguments: [] });
-//                             })
-//                             .catch(error => {
-//                                 reject(error);
-//                             })
-//                     })
-//             })
-//             .catch(error => {
-//                 reject(error);
-//             })
-//     })
-// }
-// const sendScript = (header, params: SendScriptArgs) => {
-//     return new Promise((resolve, reject) => {
-//         const data: NotifyMessage = {
-//             lable: Command.sendScript,
-//             data: params,
-//             header
-//         }
-//         openNotify(data)
-//             .then(() => {
-//                 Storage_local.get('checkNetFee')
-//                     .then(checkNetFee => {
-//                         Storage_local.set('checkNetFee', false);
-//                         sendInvoke(header, params)
-//                             .then(result => {
-//                                 resolve(result);
-//                                 // TaskManager.addInvokeData(result.txid, header.domain, { scriptHash: params.contractHash, operation: "创建合约", network: params.network, arguments: [] });
-//                             })
-//                             .catch(error => {
-//                                 reject(error);
-//                             })
-//                     })
-//             })
-//             .catch(error => {
-//                 reject(error);
-//             })
-//     })
-// }
+/**
+ * invoke 合约调用
+ * @param title dapp请求方的信息
+ * @param data 请求的参数
+ */
+const deployContract = (header, params) => __awaiter(this, void 0, void 0, function* () {
+    const data = {
+        lable: Command.deployContract,
+        data: params,
+        header
+    };
+    try {
+        const resultData = yield openNotify(data, calculateDeployData(params));
+        if (resultData) {
+            const result = yield deploy(params);
+            TaskManager.addDeployData(result.txid, header.domain, params);
+            return result;
+        }
+    }
+    catch (error) {
+    }
+});
+const calculateDeployData = (params) => __awaiter(this, void 0, void 0, function* () {
+    const height = yield Api.getBlockCount();
+    const tran = new Transaction(storage.account.address, parseInt(height));
+    ThinSdk.Contract.newContract(Neo.SmartContract.NefFile.loadNef(params.nefhex), params.mainfest, tran.scriptBuilder).deploy();
+    tran.script = tran.scriptBuilder.ToArray();
+    const netfee = tran.calculateNetworkFee();
+    const sysfee = yield tran.getSystemFee();
+    const fee = netfee.add(sysfee).toNumber();
+    params.fee = fee.div(100000000).toString();
+    return params;
+});
+const sendScript = (header, params) => __awaiter(this, void 0, void 0, function* () {
+    const data = {
+        lable: Command.sendScript,
+        data: params,
+        header
+    };
+    try {
+        const resData = yield openNotify(data, calculateScriptData(params));
+        if (resData) {
+            const result = yield sendInvoke(header, params);
+            return result;
+        }
+    }
+    catch (error) {
+        throw error;
+    }
+});
+const calculateScriptData = (data) => __awaiter(this, void 0, void 0, function* () {
+    const height = yield Api.getBlockCount();
+    const tran = new Transaction(storage.account.address, parseInt(height));
+    const sysfee = data.systemFee ? Neo.Fixed8.parse(data.systemFee) : Neo.Fixed8.Zero;
+    const netfee = data.fee ? Neo.Fixed8.parse(data.fee) : Neo.Fixed8.Zero;
+    const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
+    for (let i = data.scriptArguments.length - 1; i >= 0; i--) {
+        const param = data.scriptArguments[i];
+        tran.scriptBuilder.EmitArgument(param);
+    }
+    tran.scriptBuilder.EmitPushBytes(new Uint8Array(Neo.Uint160.parse(data.scriptHash).bits.buffer));
+    tran.scriptBuilder.EmitSysCall("System.Contract.Call");
+    tran.scriptBuilder.Emit(ThinNeo.OpCode.THROWIFNOT);
+    tran.script = tran.scriptBuilder.ToArray();
+    const sysFee = yield tran.getSystemFee();
+    const netFee = tran.calculateNetworkFee();
+    data.fee = sysFee.add(netFee).toNumber().div(100000000).toString();
+    data.systemFee = sysFee.div(100000000).toString();
+    data.networkFee = netFee.div(100000000).toString();
+    return data;
+});
 /**
  * 获得网络状态信息
  */
@@ -1462,12 +1495,11 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
             if (!Array.isArray(data.params)) {
                 data.params = [data.params];
             }
-            data.params.forEach(({ address, assets, fetchUTXO }, index) => {
+            data.params.forEach(({ address, assets }, index) => {
                 if (assets && !Array.isArray(assets)) {
                     data.params[index] = {
                         address,
                         assets: [assets],
-                        fetchUTXO,
                     };
                 }
             });
@@ -1478,36 +1510,20 @@ var getBalance = (data) => __awaiter(this, void 0, void 0, function* () {
             for (const arg of data.params) {
                 var asset = arg.assets ? arg.assets : [HASH_CONFIG.ID_GAS, HASH_CONFIG.ID_NEO];
                 const assetArray = [];
-                if (asset.length) {
-                    let res = undefined;
-                    try {
-                        res = yield Api.getallnep5assetofaddress(arg.address);
-                    }
-                    catch (error) {
-                        throw error;
-                    }
-                    let assets = {};
-                    if (res) {
-                        for (const iterator of res) {
-                            const { assetid, symbol, balance } = iterator;
-                            const assetID = assetid.replace("0x", "");
-                            assets[assetID] = { assetID, symbol: symbol.toLocaleUpperCase(), amount: balance };
-                        }
-                        for (const id of asset) {
-                            if (assets[id]) {
-                                assetArray.push(assets[id]);
-                            }
-                            else {
-                                const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
-                                assetArray.push({ assetID: info.assetid, symbol: info.symbol.toLocaleUpperCase(), amount: '0' });
-                            }
-                        }
-                    }
-                    else {
-                        for (const id of asset) {
-                            const info = assetManager.allAssetInfo.find(asset => asset.assetid == id);
-                            assetArray.push({ assetID: info.assetid, symbol: info.symbol.toLocaleUpperCase(), amount: '0' });
-                        }
+                for (const assetID of asset) {
+                    const sb = new ThinNeo.ScriptBuilder();
+                    const token = new ThinSdk.Token.BaseToken(Neo.Uint160.parse(assetID), sb);
+                    token.symbol();
+                    token.decimals();
+                    token.balanceOf(arg.address);
+                    let res = yield Api.getInvokeRead(sb.ToArray().toHexString());
+                    const stack = res['stack'];
+                    if (stack) {
+                        const symbol = ThinNeo.Helper.Bytes2String(ThinNeo.Base64.toByteArray(stack[0].value.toString())).toLocaleUpperCase();
+                        const decimals = parseFloat(stack[1].value.toString());
+                        const count = parseFloat(stack[2].value.toString());
+                        const amount = decimals <= 0 ? count.toString() : count.div(Math.pow(10, decimals)).toString();
+                        assetArray.push({ assetID, symbol, amount });
                     }
                 }
                 balances[arg.address] = assetArray;
@@ -1533,7 +1549,8 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         else {
             throw { type: 'MALFORMED_INPUT', description: "This scripthash information undefined" };
         }
-        const tran = new Transaction(storage.account.address, storage.height);
+        const height = yield Api.getBlockCount();
+        const tran = new Transaction(storage.account.address, parseInt(height));
         const token1 = new ThinSdk.Token.BaseToken(Neo.Uint160.parse(data.asset), tran.scriptBuilder);
         token1.transfer(data.fromAddress, data.toAddress, amount);
         tran.script = tran.scriptBuilder.ToArray();
@@ -1546,6 +1563,8 @@ var transfer = (data) => __awaiter(this, void 0, void 0, function* () {
         const tranHex = tran.signAndPack(storage.account.prikeyHex.hexToBytes()).toHexString();
         const txid = tran.GetTxid();
         let output;
+        console.log("networkFee", tran.networkFee.toNumber());
+        console.log("systemFee", tran.systemFee.toNumber());
         const result = yield Api.sendrawtransaction(tranHex, data.network);
         if (result['data']) {
             const nodeUrl = result.nodeUrl;
@@ -1625,64 +1644,51 @@ var send = (header, params) => __awaiter(this, void 0, void 0, function* () {
         }
     }
 });
-// const sendInvoke = async (header, data: SendScriptArgs) => {
-//     const tran = new Transaction(ThinNeo.TransactionType.ContractTransaction)
-//     const sysfee = data.sysfee ? Neo.Fixed8.parse(data.sysfee) : Neo.Fixed8.Zero;
-//     const netfee = data.fee ? Neo.Fixed8.parse(data.fee) : Neo.Fixed8.Zero;
-//     const fee = sysfee.add(netfee); //计算出总消耗的费用 系统费加网络费
-//     const sb = new ScriptBuild();
-//     const RANDOM_UINT8: Uint8Array = getWeakRandomValues(32);
-//     const RANDOM_INT: Neo.BigInteger = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
-//     // 塞入随机数
-//     sb.EmitPushNumber(RANDOM_INT);  // 将随机数推入栈顶
-//     sb.Emit(ThinNeo.OpCode.DROP);   // 打包
-//     for (let i = data.scriptArguments.length - 1; i >= 0; i--) {
-//         sb.EmitParam(data.scriptArguments[ i ]);
-//     }
-//     const appcall = Neo.Uint160.parse(data.scriptHash);
-//     // let appcall = this.currentContract.scripthash.hexToBytes();
-//     sb.EmitAppCall(appcall);
-//     tran.setScript(sb.ToArray(), sysfee)
-//     const utxos = await MarkUtxo.getAllUtxo();
-//     if (data.attachedAssets) {
-//         for (const asset in data.attachedAssets) {
-//             if (data.attachedAssets.hasOwnProperty(asset)) {
-//                 const toaddr = ThinNeo.Helper.GetAddressFromScriptHash(Neo.Uint160.parse(data.scriptHash));
-//                 const amount = Neo.Fixed8.parse(data.attachedAssets[ asset ]);
-//                 const utxo = utxos[ asset ];
-//                 if (asset.includes(HASH_CONFIG.ID_GAS))
-//                     tran.creatInuptAndOutup(utxo, amount, toaddr, fee)
-//                 else
-//                     tran.creatInuptAndOutup(utxo, amount, toaddr)
-//             }
-//         }
-//     }
-//     else if (fee.compareTo(Neo.Fixed8.Zero) > 0) {
-//         if (utxos && utxos[ HASH_CONFIG.ID_GAS ]) {
-//             const utxo = utxos[ HASH_CONFIG.ID_GAS ]
-//             tran.creatInuptAndOutup(utxo, fee);
-//         }
-//         else {
-//             throw { type: 'INSUFFICIENT_FUNDS', description: 'The user does not have a sufficient balance to perform the requested action' };
-//         }
-//     }
-//     // console.log((tran.GetMessage().length+103).div(100000).add(0.001));
-//     const txsize = (tran.GetMessage().length + 103)
-//     const calFee = Neo.Fixed8.fromNumber(txsize.div(100000).add(0.001));    // 足够的网络费用
-//     if (txsize > 1024 && netfee.compareTo(calFee) < 0) {
-//         const newInvoke = data;
-//         newInvoke.fee = calFee.toString();
-//         return await sendInvoke(header, newInvoke)
-//     }
-//     else {
-//         let result = await transactionSignAndSend(tran);
-//         TaskManager.addTask(new Task(ConfirmType.contract, result.txid));
-//         // TaskManager.addSendData(outupt.txid, data);
-//         const invokeargs: InvokeArgs = { operation: "", arguments: [], description: data.description, scriptHash: data.scriptHash, network: storage.network }
-//         TaskManager.addInvokeData(result.txid, header.domain, invokeargs)
-//         return result;
-//     }
-// }
+const sendInvoke = (header, data) => __awaiter(this, void 0, void 0, function* () {
+    const height = yield Api.getBlockCount();
+    const tran = new Transaction(storage.account.address, parseInt(height));
+    for (let i = data.scriptArguments.length - 1; i >= 0; i--) {
+        const param = data.scriptArguments[i];
+        tran.scriptBuilder.EmitArgument(param);
+    }
+    tran.scriptBuilder.EmitPushBytes(new Uint8Array(Neo.Uint160.parse(data.scriptHash).bits.buffer));
+    tran.scriptBuilder.EmitSysCall("System.Contract.Call");
+    tran.scriptBuilder.Emit(ThinNeo.OpCode.THROWIFNOT);
+    tran.script = tran.scriptBuilder.ToArray();
+    const netfee = Neo.Long.fromNumber(parseFloat(data.networkFee).mul(100000000));
+    const sysfee = Neo.Long.fromNumber(parseFloat(data.systemFee).mul(100000000));
+    const calNetFee = tran.calculateNetworkFee();
+    const calSysFee = yield tran.getSystemFee();
+    tran.networkFee = (netfee.comp(calNetFee) > 0) ? netfee : calNetFee;
+    tran.systemFee = (sysfee.comp(calSysFee) > 0) ? sysfee : calSysFee;
+    const tranHex = tran.signAndPack(storage.account.prikeyHex.hexToBytes()).toHexString();
+    const txid = tran.GetTxid();
+    let output;
+    console.log("networkFee", tran.networkFee.toNumber());
+    console.log("systemFee", tran.systemFee.toNumber());
+    const result = yield Api.sendrawtransaction(tranHex, data.network);
+    if (result['data']) {
+        const nodeUrl = result.nodeUrl;
+        output = { txid, nodeUrl };
+    }
+    else {
+        throw { type: "RPC_ERROR", description: 'An RPC error occured when submitting the request', data: result[0].errorMessage };
+    }
+    TaskManager.addTask(new Task(ConfirmType.contract, txid));
+    // TaskManager.addSendData(outupt.txid, data);
+    const message = {
+        domain: header.domain,
+        scriptHashs: [data.scriptHash],
+        descripts: [data.description],
+        expenses: [],
+        netfee: tran.networkFee.add(tran.systemFee).toNumber().div(100000000).toString(),
+        networkFee: tran.networkFee.toNumber().div(Math.pow(10, 8)).toString(),
+        systemFee: tran.systemFee.toNumber().div(Math.pow(10, 8)).toString()
+    };
+    TaskManager.invokeHistory[txid] = message;
+    Storage_local.set('invoke-data', TaskManager.invokeHistory);
+    return output;
+});
 /**
  * invoke试运行方法
  * @param data invokeRead 的参数
@@ -2237,10 +2243,10 @@ const responseMessage = (sender, request) => {
                     sendResponse(getNamehashFromDomain(params));
                     break;
                 case Command.deployContract:
-                    // sendResponse(deployContract(header, params));
+                    sendResponse(deployContract(header, params));
                     break;
                 case Command.sendScript:
-                    // sendResponse(sendScript(header, params));
+                    sendResponse(sendScript(header, params));
                     break;
                 default:
                     sendResponse(new Promise((r, j) => j({ type: "NO_PROVIDER", description: "Could not find an instance of the dAPI in the webpage" })));
@@ -2343,10 +2349,9 @@ class TaskManager {
         this.socket.updateLastWSmsgSec();
     }
     static get webSocketURL() {
-        if (storage.network == 'MainNet')
-            return 'wss://testws.nel.group/ws/mainnet';
-        else
-            return 'wss://testws.nel.group/ws/testnet';
+        // if (storage.network == 'MainNet') return 'wss://testws.nel.group/ws/mainnet'
+        // else return 'wss://testws.nel.group/ws/testnet'
+        return "wss://testwsneo3dev.nel.group/ws/testnet";
     }
     static addSendData(txid, data) {
         queryAssetSymbol(data.asset, data.network)
@@ -2374,19 +2379,12 @@ class TaskManager {
             });
     }
     static addDeployData(txid, domain, info) {
-        const amount = (info.call ? 500 : 0) + (info.storage ? 400 : 0) + 90 + 11;
+        const nef = Neo.SmartContract.NefFile.loadNef(info.nefhex);
         const message = {
-            contractHash: info.contractHash,
-            name: info.name,
-            author: info.author,
-            description: info.description,
-            email: info.email,
-            version: info.version,
-            storage: info.storage,
-            call: info.call,
-            payment: info.payment,
+            contractHash: nef.scriptHash.toString(),
             domain: domain,
-            sysfee: amount
+            fee: info.fee,
+            sysfee: info.systemFee
         };
         this.deployHistory[txid] = message;
         Storage_local.set('deploy-data', this.deployHistory);
@@ -2640,7 +2638,7 @@ class AssetManager {
 var assetManager = new AssetManager();
 assetManager.initAllAseetInfo();
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'V1.0.1';
+const VERSION = 'V1.0.2';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";

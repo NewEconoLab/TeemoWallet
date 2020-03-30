@@ -593,10 +593,637 @@ var __extends = (this && this.__extends) || (function () {
 var __spreadArrays = (this && this.__spreadArrays) || function () {
     for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
     for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++ , k++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
             r[k] = a[j];
     return r;
 };
+var nid;
+(function (nid) {
+    var BitTreeDecoder = (function () {
+        function BitTreeDecoder(numBits) {
+            this.numBits = numBits;
+            this.probs = new Uint16Array(1 << this.numBits);
+        }
+        BitTreeDecoder.prototype.init = function () {
+            nid.LZMA.INIT_PROBS(this.probs);
+        };
+        BitTreeDecoder.prototype.decode = function (rc) {
+            var m = 1;
+            for (var i = 0; i < this.numBits; i++)
+                m = (m << 1) + rc.decodeBit(this.probs, m);
+            return m - (1 << this.numBits);
+        };
+        BitTreeDecoder.prototype.reverseDecode = function (rc) {
+            return nid.LZMA.BitTreeReverseDecode(this.probs, this.numBits, rc);
+        };
+        BitTreeDecoder.constructArray = function (numBits, len) {
+            var vec = [];
+            for (var i = 0; i < len; i++) {
+                vec[i] = new BitTreeDecoder(numBits);
+            }
+            return vec;
+        };
+        return BitTreeDecoder;
+    }());
+    nid.BitTreeDecoder = BitTreeDecoder;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    var RangeDecoder = (function () {
+        function RangeDecoder() {
+            this.rangeI = 0;
+            this.codeI = 1;
+            this.loc1 = 2;
+            this.loc2 = 3;
+            this.in_pos = 13;
+        }
+        RangeDecoder.prototype.isFinishedOK = function () {
+            return this.U32[this.codeI] == 0;
+        };
+        RangeDecoder.prototype.init = function () {
+            this.U32 = new Uint32Array(4);
+            this.U16 = new Uint16Array(4);
+            this.corrupted = false;
+            if (this.inStream[this.in_pos++] != 0) {
+                this.corrupted = true;
+            }
+            this.U32[this.rangeI] = 0xFFFFFFFF;
+            this.U32[this.codeI] = 0;
+            for (var i = 0; i < 4; i++) {
+                this.U32[this.codeI] = (this.U32[this.codeI] << 8) | this.inStream[this.in_pos++];
+            }
+            if (this.U32[this.codeI] == this.U32[this.rangeI]) {
+                this.corrupted = true;
+            }
+        };
+        RangeDecoder.prototype.normalize = function () {
+            if (this.U32[this.rangeI] < RangeDecoder.kTopValue) {
+                this.U32[this.rangeI] <<= 8;
+                this.U32[this.codeI] = (this.U32[this.codeI] << 8) | this.inStream[this.in_pos++];
+            }
+        };
+        RangeDecoder.prototype.decodeDirectBits = function (numBits) {
+            this.U32[this.loc1] = 0;
+            do {
+                this.U32[this.rangeI] >>>= 1;
+                this.U32[this.codeI] -= this.U32[this.rangeI];
+                this.U32[this.loc2] = 0 - (this.U32[this.codeI] >>> 31);
+                this.U32[this.codeI] += this.U32[this.rangeI] & this.U32[this.loc2];
+                if (this.U32[this.codeI] == this.U32[this.rangeI]) {
+                    this.corrupted = true;
+                }
+                this.normalize();
+                this.U32[this.loc1] <<= 1;
+                this.U32[this.loc1] += this.U32[this.loc2] + 1;
+            } while (--numBits);
+            return this.U32[this.loc1];
+        };
+        RangeDecoder.prototype.decodeBit = function (prob, index) {
+            this.U16[0] = prob[index];
+            this.U32[2] = (this.U32[0] >>> 11) * this.U16[0];
+            if (this.U32[1] < this.U32[2]) {
+                this.U16[0] += ((1 << 11) - this.U16[0]) >>> 5;
+                this.U32[0] = this.U32[2];
+                this.U16[1] = 0;
+            }
+            else {
+                this.U16[0] -= this.U16[0] >>> 5;
+                this.U32[1] -= this.U32[2];
+                this.U32[0] -= this.U32[2];
+                this.U16[1] = 1;
+            }
+            prob[index] = this.U16[0];
+            if (this.U32[0] < 16777216) {
+                this.U32[0] <<= 8;
+                this.U32[1] = (this.U32[1] << 8) | this.inStream[this.in_pos++];
+            }
+            return this.U16[1];
+        };
+        RangeDecoder.kTopValue = (1 << 24);
+        return RangeDecoder;
+    }());
+    nid.RangeDecoder = RangeDecoder;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    var OutWindow = (function () {
+        function OutWindow() {
+            this.out_pos = 0;
+        }
+        OutWindow.prototype.create = function (dictSize) {
+            this.buf = new Uint8Array(dictSize);
+            this.pos = 0;
+            this.size = dictSize;
+            this.isFull = false;
+            this.totalPos = 0;
+        };
+        OutWindow.prototype.putByte = function (b) {
+            this.totalPos++;
+            this.buf[this.pos++] = b;
+            if (this.pos == this.size) {
+                this.pos = 0;
+                this.isFull = true;
+            }
+            this.outStream[this.out_pos++] = b;
+        };
+        OutWindow.prototype.getByte = function (dist) {
+            return this.buf[dist <= this.pos ? this.pos - dist : this.size - dist + this.pos];
+        };
+        OutWindow.prototype.copyMatch = function (dist, len) {
+            for (; len > 0; len--) {
+                this.putByte(this.getByte(dist));
+            }
+        };
+        OutWindow.prototype.checkDistance = function (dist) {
+            return dist <= this.pos || this.isFull;
+        };
+        OutWindow.prototype.isEmpty = function () {
+            return this.pos == 0 && !this.isFull;
+        };
+        return OutWindow;
+    }());
+    nid.OutWindow = OutWindow;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    var LenDecoder = (function () {
+        function LenDecoder() {
+            this.lowCoder = nid.BitTreeDecoder.constructArray(3, 1 << nid.LZMA.kNumPosBitsMax);
+            this.midCoder = nid.BitTreeDecoder.constructArray(3, 1 << nid.LZMA.kNumPosBitsMax);
+            this.highCoder = new nid.BitTreeDecoder(8);
+        }
+        LenDecoder.prototype.init = function () {
+            this.choice = [nid.LZMA.PROB_INIT_VAL, nid.LZMA.PROB_INIT_VAL];
+            this.highCoder.init();
+            for (var i = 0; i < (1 << nid.LZMA.kNumPosBitsMax); i++) {
+                this.lowCoder[i].init();
+                this.midCoder[i].init();
+            }
+        };
+        LenDecoder.prototype.decode = function (rc, posState) {
+            if (rc.decodeBit(this.choice, 0) == 0) {
+                return this.lowCoder[posState].decode(rc);
+            }
+            if (rc.decodeBit(this.choice, 1) == 0) {
+                return 8 + this.midCoder[posState].decode(rc);
+            }
+            return 16 + this.highCoder.decode(rc);
+        };
+        return LenDecoder;
+    }());
+    nid.LenDecoder = LenDecoder;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    var LzmaDecoder = (function () {
+        function LzmaDecoder() {
+            this.posSlotDecoder = nid.BitTreeDecoder.constructArray(6, nid.LZMA.kNumLenToPosStates);
+            this.alignDecoder = new nid.BitTreeDecoder(nid.LZMA.kNumAlignBits);
+            this.posDecoders = new Uint16Array(1 + nid.LZMA.kNumFullDistances - nid.LZMA.kEndPosModelIndex);
+            this.isMatch = new Uint16Array(nid.LZMA.kNumStates << nid.LZMA.kNumPosBitsMax);
+            this.isRep = new Uint16Array(nid.LZMA.kNumStates);
+            this.isRepG0 = new Uint16Array(nid.LZMA.kNumStates);
+            this.isRepG1 = new Uint16Array(nid.LZMA.kNumStates);
+            this.isRepG2 = new Uint16Array(nid.LZMA.kNumStates);
+            this.isRep0Long = new Uint16Array(nid.LZMA.kNumStates << nid.LZMA.kNumPosBitsMax);
+            this.lenDecoder = new nid.LenDecoder();
+            this.repLenDecoder = new nid.LenDecoder();
+            this.rangeDec = new nid.RangeDecoder();
+            this.outWindow = new nid.OutWindow();
+        }
+        LzmaDecoder.prototype.init = function () {
+            this.loc1 = nid.utils.MEMORY.getUint32() | 0;
+            this.loc2 = nid.utils.MEMORY.getUint32() | 0;
+            this.matchBitI = nid.utils.MEMORY.getUint16() | 0;
+            this.matchByteI = nid.utils.MEMORY.getUint16() | 0;
+            this.bitI = nid.utils.MEMORY.getUint16() | 0;
+            this.symbolI = nid.utils.MEMORY.getUint16() | 0;
+            this.prevByteI = nid.utils.MEMORY.getUint16() | 0;
+            this.litStateI = nid.utils.MEMORY.getUint16() | 0;
+            this.initLiterals();
+            this.initDist();
+            nid.LZMA.INIT_PROBS(this.isMatch);
+            nid.LZMA.INIT_PROBS(this.isRep);
+            nid.LZMA.INIT_PROBS(this.isRepG0);
+            nid.LZMA.INIT_PROBS(this.isRepG1);
+            nid.LZMA.INIT_PROBS(this.isRepG2);
+            nid.LZMA.INIT_PROBS(this.isRep0Long);
+            this.lenDecoder.init();
+            this.repLenDecoder.init();
+        };
+        LzmaDecoder.prototype.create = function () {
+            this.outWindow.create(this.dictSize);
+            this.createLiterals();
+        };
+        LzmaDecoder.prototype.createLiterals = function () {
+            this.litProbs = new Uint16Array(0x300 << (this.lc + this.lp));
+        };
+        LzmaDecoder.prototype.initLiterals = function () {
+            var num = 0x300 << (this.lc + this.lp);
+            for (var i = 0; i < num; i++) {
+                this.litProbs[i] = nid.LZMA.PROB_INIT_VAL;
+            }
+        };
+        LzmaDecoder.prototype.decodeLiteral = function (state, rep0) {
+            nid.utils.MEMORY.u16[this.prevByteI] = 0;
+            if (!this.outWindow.isEmpty())
+                nid.utils.MEMORY.u16[this.prevByteI] = this.outWindow.getByte(1);
+            nid.utils.MEMORY.u16[this.symbolI] = 1;
+            nid.utils.MEMORY.u16[this.litStateI] = ((this.outWindow.totalPos & ((1 << this.lp) - 1)) << this.lc) + (nid.utils.MEMORY.u16[this.prevByteI] >>> (8 - this.lc));
+            var probsOffset = (0x300 * nid.utils.MEMORY.u16[this.litStateI]) | 0;
+            if (state >= 7) {
+                nid.utils.MEMORY.u16[this.matchByteI] = this.outWindow.getByte(rep0 + 1);
+                do {
+                    nid.utils.MEMORY.u16[this.matchBitI] = (nid.utils.MEMORY.u16[this.matchByteI] >>> 7) & 1;
+                    nid.utils.MEMORY.u16[this.matchByteI] <<= 1;
+                    nid.utils.MEMORY.u16[this.bitI] = this.rangeDec.decodeBit(this.litProbs, probsOffset + ((1 + nid.utils.MEMORY.u16[this.matchBitI]) << 8) + nid.utils.MEMORY.u16[this.symbolI]);
+                    nid.utils.MEMORY.u16[this.symbolI] = (nid.utils.MEMORY.u16[this.symbolI] << 1) | nid.utils.MEMORY.u16[this.bitI];
+                    if (nid.utils.MEMORY.u16[this.matchBitI] != nid.utils.MEMORY.u16[this.bitI])
+                        break;
+                } while (nid.utils.MEMORY.u16[this.symbolI] < 0x100);
+            }
+            while (nid.utils.MEMORY.u16[this.symbolI] < 0x100) {
+                nid.utils.MEMORY.u16[this.symbolI] = (nid.utils.MEMORY.u16[this.symbolI] << 1) | this.rangeDec.decodeBit(this.litProbs, probsOffset + nid.utils.MEMORY.u16[this.symbolI]);
+            }
+            this.outWindow.putByte(nid.utils.MEMORY.u16[this.symbolI] - 0x100);
+        };
+        LzmaDecoder.prototype.decodeDistance = function (len) {
+            var lenState = len;
+            if (lenState > nid.LZMA.kNumLenToPosStates - 1)
+                lenState = nid.LZMA.kNumLenToPosStates - 1;
+            var posSlot = this.posSlotDecoder[lenState].decode(this.rangeDec);
+            if (posSlot < 4)
+                return posSlot;
+            var numDirectBits = ((posSlot >>> 1) - 1);
+            nid.utils.MEMORY.u32[this.loc1] = ((2 | (posSlot & 1)) << numDirectBits);
+            if (posSlot < nid.LZMA.kEndPosModelIndex) {
+                nid.utils.MEMORY.u32[this.loc1] += nid.LZMA.BitTreeReverseDecode(this.posDecoders, numDirectBits, this.rangeDec, nid.utils.MEMORY.u32[this.loc1] - posSlot);
+            }
+            else {
+                nid.utils.MEMORY.u32[this.loc1] += this.rangeDec.decodeDirectBits(numDirectBits - nid.LZMA.kNumAlignBits) << nid.LZMA.kNumAlignBits;
+                nid.utils.MEMORY.u32[this.loc1] += this.alignDecoder.reverseDecode(this.rangeDec);
+            }
+            return nid.utils.MEMORY.u32[this.loc1];
+        };
+        LzmaDecoder.prototype.initDist = function () {
+            for (var i = 0; i < nid.LZMA.kNumLenToPosStates; i++) {
+                this.posSlotDecoder[i].init();
+            }
+            this.alignDecoder.init();
+            nid.LZMA.INIT_PROBS(this.posDecoders);
+        };
+        LzmaDecoder.prototype.decodeProperties = function (properties) {
+            var prop = new Uint8Array(4);
+            prop[0] = properties[0];
+            if (prop[0] >= (9 * 5 * 5)) {
+                throw "Incorrect LZMA properties";
+            }
+            prop[1] = prop[0] % 9;
+            prop[0] /= 9;
+            prop[2] = prop[0] / 5;
+            prop[3] = prop[0] % 5;
+            this.lc = prop[1];
+            this.pb = prop[2];
+            this.lp = prop[3];
+            this.dictSizeInProperties = 0;
+            for (var i = 0; i < 4; i++) {
+                this.dictSizeInProperties |= properties[i + 1] << (8 * i);
+            }
+            this.dictSize = this.dictSizeInProperties;
+            if (this.dictSize < nid.LZMA.LZMA_DIC_MIN) {
+                this.dictSize = nid.LZMA.LZMA_DIC_MIN;
+            }
+        };
+        LzmaDecoder.prototype.updateState_Literal = function (state) {
+            if (state < 4)
+                return 0;
+            else if (state < 10)
+                return state - 3;
+            else
+                return state - 6;
+        };
+        LzmaDecoder.prototype.updateState_ShortRep = function (state) { return state < 7 ? 9 : 11; };
+        LzmaDecoder.prototype.updateState_Rep = function (state) { return state < 7 ? 8 : 11; };
+        LzmaDecoder.prototype.updateState_Match = function (state) { return state < 7 ? 7 : 10; };
+        LzmaDecoder.prototype.decode = function (unpackSizeDefined, unpackSize) {
+            this.init();
+            this.rangeDec.init();
+            if (unpackSizeDefined) {
+                this.outWindow.outStream = new Uint8Array(new ArrayBuffer(unpackSize));
+            }
+            var rep0 = 0, rep1 = 0, rep2 = 0, rep3 = 0;
+            var state = 0;
+            for (; ;) {
+                if (unpackSizeDefined && unpackSize == 0 && !this.markerIsMandatory) {
+                    if (this.rangeDec.isFinishedOK()) {
+                        return nid.LZMA.LZMA_RES_FINISHED_WITHOUT_MARKER;
+                    }
+                }
+                var posState = this.outWindow.totalPos & ((1 << this.pb) - 1);
+                if (this.rangeDec.decodeBit(this.isMatch, (state << nid.LZMA.kNumPosBitsMax) + posState) == 0) {
+                    if (unpackSizeDefined && unpackSize == 0) {
+                        return nid.LZMA.LZMA_RES_ERROR;
+                    }
+                    this.decodeLiteral(state, rep0);
+                    state = this.updateState_Literal(state);
+                    unpackSize--;
+                    continue;
+                }
+                var len;
+                if (this.rangeDec.decodeBit(this.isRep, state) != 0) {
+                    if (unpackSizeDefined && unpackSize == 0) {
+                        return nid.LZMA.LZMA_RES_ERROR;
+                    }
+                    if (this.outWindow.isEmpty()) {
+                        return nid.LZMA.LZMA_RES_ERROR;
+                    }
+                    if (this.rangeDec.decodeBit(this.isRepG0, state) == 0) {
+                        if (this.rangeDec.decodeBit(this.isRep0Long, (state << nid.LZMA.kNumPosBitsMax) + posState) == 0) {
+                            state = this.updateState_ShortRep(state);
+                            this.outWindow.putByte(this.outWindow.getByte(rep0 + 1));
+                            unpackSize--;
+                            continue;
+                        }
+                    }
+                    else {
+                        var dist;
+                        if (this.rangeDec.decodeBit(this.isRepG1, state) == 0) {
+                            dist = rep1;
+                        }
+                        else {
+                            if (this.rangeDec.decodeBit(this.isRepG2, state) == 0) {
+                                dist = rep2;
+                            }
+                            else {
+                                dist = rep3;
+                                rep3 = rep2;
+                            }
+                            rep2 = rep1;
+                        }
+                        rep1 = rep0;
+                        rep0 = dist;
+                    }
+                    len = this.repLenDecoder.decode(this.rangeDec, posState);
+                    state = this.updateState_Rep(state);
+                }
+                else {
+                    rep3 = rep2;
+                    rep2 = rep1;
+                    rep1 = rep0;
+                    len = this.lenDecoder.decode(this.rangeDec, posState);
+                    state = this.updateState_Match(state);
+                    rep0 = this.decodeDistance(len);
+                    if (rep0 == 0xFFFFFFFF) {
+                        return this.rangeDec.isFinishedOK() ?
+                            nid.LZMA.LZMA_RES_FINISHED_WITH_MARKER :
+                            nid.LZMA.LZMA_RES_ERROR;
+                    }
+                    if (unpackSizeDefined && unpackSize == 0) {
+                        return nid.LZMA.LZMA_RES_ERROR;
+                    }
+                    if (rep0 >= this.dictSize || !this.outWindow.checkDistance(rep0)) {
+                        return nid.LZMA.LZMA_RES_ERROR;
+                    }
+                }
+                len += nid.LZMA.kMatchMinLen;
+                var isError = false;
+                if (unpackSizeDefined && unpackSize < len) {
+                    len = unpackSize;
+                    isError = true;
+                }
+                this.outWindow.copyMatch(rep0 + 1, len);
+                unpackSize -= len;
+                if (isError) {
+                    return nid.LZMA.LZMA_RES_ERROR;
+                }
+            }
+        };
+        return LzmaDecoder;
+    }());
+    nid.LzmaDecoder = LzmaDecoder;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    "use strict";
+    var LZMA = (function () {
+        function LZMA() {
+            this.decoder = new nid.LzmaDecoder();
+        }
+        LZMA.INIT_PROBS = function (p) {
+            for (var i = 0; i < p.length; i++) {
+                p[i] = this.PROB_INIT_VAL;
+            }
+        };
+        LZMA.BitTreeReverseDecode = function (probs, numBits, rc, offset) {
+            if (offset === void 0) { offset = 0; }
+            var m = 1;
+            var symbol = 0;
+            for (var i = 0; i < numBits; i++) {
+                var bit = rc.decodeBit(probs, offset + m);
+                m <<= 1;
+                m += bit;
+                symbol |= (bit << i);
+            }
+            return symbol;
+        };
+        LZMA.prototype.decode = function (data) {
+            this.data = data;
+            var header = new Uint8Array(13);
+            var i;
+            for (i = 0; i < 13; i++) {
+                header[i] = data[i];
+            }
+            this.decoder.decodeProperties(header);
+            var unpackSize = 0;
+            var unpackSizeDefined = true;
+            for (i = 0; i < 4; i++) {
+                var b = header[5 + i];
+                unpackSize |= b << (8 * i);
+            }
+            var packSize = 0;
+            for (i = 0; i < 4; i++) {
+                var b = header[9 + i];
+                packSize |= b << (8 * i);
+            }
+            this.decoder.markerIsMandatory = !unpackSizeDefined;
+            this.decoder.rangeDec.inStream = data;
+            this.decoder.create();
+            var res = this.decoder.decode(unpackSizeDefined, unpackSize);
+            if (res == LZMA.LZMA_RES_ERROR) {
+                throw "LZMA decoding error";
+            }
+            else if (res == LZMA.LZMA_RES_FINISHED_WITHOUT_MARKER) {
+            }
+            else if (res == LZMA.LZMA_RES_FINISHED_WITH_MARKER) {
+                if (unpackSizeDefined) {
+                    if (this.decoder.outWindow.out_pos != unpackSize) {
+                        throw "Finished with end marker before than specified size";
+                    }
+                }
+            }
+            else {
+                throw "Internal Error";
+            }
+            if (this.decoder.rangeDec.corrupted) {
+                console.log("Warning: LZMA stream is corrupted");
+            }
+            return this.decoder.outWindow.outStream;
+        };
+        LZMA.LZMA_DIC_MIN = (1 << 12);
+        LZMA.LZMA_RES_ERROR = 0;
+        LZMA.LZMA_RES_FINISHED_WITH_MARKER = 1;
+        LZMA.LZMA_RES_FINISHED_WITHOUT_MARKER = 2;
+        LZMA.kNumBitModelTotalBits = 11;
+        LZMA.kNumMoveBits = 5;
+        LZMA.PROB_INIT_VAL = ((1 << LZMA.kNumBitModelTotalBits) / 2);
+        LZMA.kNumPosBitsMax = 4;
+        LZMA.kNumStates = 12;
+        LZMA.kNumLenToPosStates = 4;
+        LZMA.kNumAlignBits = 4;
+        LZMA.kStartPosModelIndex = 4;
+        LZMA.kEndPosModelIndex = 14;
+        LZMA.kNumFullDistances = (1 << (LZMA.kEndPosModelIndex >>> 1));
+        LZMA.kMatchMinLen = 2;
+        return LZMA;
+    }());
+    nid.LZMA = LZMA;
+})(nid || (nid = {}));
+var nid;
+(function (nid) {
+    var utils;
+    (function (utils) {
+        var LZMA = nid.LZMA;
+        var LZMAHelper = (function () {
+            function LZMAHelper() {
+            }
+            LZMAHelper.init = function () {
+                var command = 0;
+                LZMAHelper.decoderAsync.onmessage = function (e) {
+                    if (command == 0) {
+                        command = e.data;
+                    }
+                    else if (command == LZMAHelper.ENCODE) {
+                        command = 0;
+                    }
+                    else if (command == LZMAHelper.DECODE) {
+                        command = 0;
+                        LZMAHelper.callback(e.data);
+                        LZMAHelper.callback = null;
+                    }
+                };
+            };
+            LZMAHelper.encode = function (data) {
+                return null;
+            };
+            LZMAHelper.decode = function (data) {
+                return LZMAHelper.decoder.decode(new Uint8Array(data)).buffer;
+            };
+            LZMAHelper.encodeAsync = function (data, _callback) {
+            };
+            LZMAHelper.decodeAsync = function (data, _callback) {
+                if (LZMAHelper.callback == null) {
+                    LZMAHelper.callback = _callback;
+                    LZMAHelper.decoderAsync.postMessage(LZMAHelper.DECODE);
+                    LZMAHelper.decoderAsync.postMessage(data, [data]);
+                }
+                else {
+                    console.log('Warning! Another LZMA decoding is running...');
+                }
+            };
+            LZMAHelper.decoder = new LZMA();
+            LZMAHelper.decoderAsync = new Worker('lib/LZMAWorker.min.js');
+            LZMAHelper.ENCODE = 1;
+            LZMAHelper.DECODE = 2;
+            return LZMAHelper;
+        }());
+        utils.LZMAHelper = LZMAHelper;
+    })(utils = nid.utils || (nid.utils = {}));
+})(nid || (nid = {}));
+nid.utils.LZMAHelper.init();
+var nid;
+(function (nid) {
+    "use strict";
+    var LZMAWorker = (function () {
+        function LZMAWorker() {
+            this.command = null;
+            var _this = this;
+            this.decoder = new nid.LZMA();
+            addEventListener('message', function (e) {
+                if (_this.command == null) {
+                    _this.command = e.data;
+                }
+                else if (_this.command['job'] == 1) {
+                    _this.command = null;
+                }
+                else if (_this.command['job'] == 2) {
+                    _this.decode(e.data);
+                }
+            }, false);
+        }
+        LZMAWorker.prototype.decode = function (data) {
+            this.time = Date.now();
+            var result = this.decoder.decode(new Uint8Array(data));
+            this.command['time'] = Date.now() - this.time;
+            postMessage(this.command);
+            postMessage(result.buffer, [result.buffer]);
+        };
+        LZMAWorker.ENCODE = 1;
+        LZMAWorker.DECODE = 2;
+        return LZMAWorker;
+    }());
+    nid.LZMAWorker = LZMAWorker;
+})(nid || (nid = {}));
+new nid.LZMAWorker();
+var nid;
+(function (nid) {
+    var utils;
+    (function (utils) {
+        var MEMORY = (function () {
+            function MEMORY() {
+            }
+            MEMORY.reset = function () {
+                MEMORY.u8Index = 0;
+                MEMORY.u16Index = 0;
+                MEMORY.u32Index = 0;
+                MEMORY.u8 = null;
+                MEMORY.u16 = null;
+                MEMORY.u32 = null;
+            };
+            MEMORY.allocateUint8 = function (len) {
+                MEMORY.u8 = new Uint8Array(len);
+            };
+            MEMORY.allocateUint16 = function (len) {
+                MEMORY.u16 = new Uint16Array(len);
+            };
+            MEMORY.allocateUint32 = function (len) {
+                MEMORY.u32 = new Uint32Array(len);
+            };
+            MEMORY.getUint8 = function () {
+                if (!MEMORY.u8) {
+                    MEMORY.allocateUint8(10);
+                }
+                return MEMORY.u8Index++;
+            };
+            MEMORY.getUint16 = function () {
+                if (!MEMORY.u16) {
+                    MEMORY.allocateUint16(24);
+                }
+                return MEMORY.u16Index++;
+            };
+            MEMORY.getUint32 = function () {
+                if (!MEMORY.u32) {
+                    MEMORY.allocateUint32(10);
+                }
+                return MEMORY.u32Index++;
+            };
+            MEMORY.u8Index = 0;
+            MEMORY.u16Index = 0;
+            MEMORY.u32Index = 0;
+            return MEMORY;
+        }());
+        utils.MEMORY = MEMORY;
+    })(utils = nid.utils || (nid.utils = {}));
+})(nid || (nid = {}));
 var Neo;
 (function (Neo) {
     var UintVariable = (function () {
@@ -1752,13 +2379,15 @@ Uint8Array.prototype.concat = function (data) {
     return newarr;
 };
 Uint8Array.prototype.isSignatureContract = function () {
-    if (this.Length != 39) {
+    if (this.length != 41)
         return false;
-    }
-    if (this[0] != ThinNeo.OpCode.PUSHBYTES33
-        || this[34] != ThinNeo.OpCode.SYSCALL) {
+    if (this[0] != ThinNeo.OpCode.PUSHDATA1
+        || this[1] != 33
+        || this[35] != ThinNeo.OpCode.PUSHNULL
+        || this[36] != ThinNeo.OpCode.SYSCALL
+        || Neo.BigInteger.fromUint8Array(this.slice(37, 41)).toUint64().toUint32() !=
+        Neo.BigInteger.fromUint8Array(Uint8Array.fromArrayBuffer(Neo.Cryptography.Sha256.computeHash(ThinNeo.Helper.String2Bytes("Neo.Crypto.ECDsaVerify").buffer))).toUint64().toUint32())
         return false;
-    }
     return true;
 };
 void function () {
@@ -3847,7 +4476,7 @@ var Neo;
             }
             RIPEMD160.bytesToWords = function (bytes) {
                 var words = [];
-                for (var i = 0, b = 0; i < bytes.length; i++ , b += 8) {
+                for (var i = 0, b = 0; i < bytes.length; i++, b += 8) {
                     words[b >>> 5] |= bytes[i] << (24 - b % 32);
                 }
                 return words;
@@ -4216,6 +4845,10 @@ var Neo;
             BinaryReader.prototype.readVarString = function () {
                 return decodeURIComponent(escape(String.fromCharCode.apply(null, new Uint8Array(this.readVarBytes()))));
             };
+            BinaryReader.prototype.readFixedString = function (length) {
+                var data = this.readBytes(length);
+                return decodeURIComponent(escape(String.fromCharCode.apply(null, new Uint8Array(data))));
+            };
             return BinaryReader;
         }());
         IO.BinaryReader = BinaryReader;
@@ -4335,6 +4968,21 @@ var Neo;
                 for (var i = 0; i < codes.length; i++)
                     codes[i] = value.charCodeAt(i);
                 this.writeVarBytes(codes.buffer);
+            };
+            BinaryWriter.prototype.writeFixedString = function (value, length) {
+                if (value == null)
+                    throw new Error("ArgumentNullException");
+                if (value.length > length)
+                    throw new Error("ArgumentNullException");
+                value = unescape(encodeURIComponent(value));
+                var codes = new Uint8Array(value.length);
+                for (var i = 0; i < codes.length; i++)
+                    codes[i] = value.charCodeAt(i);
+                if (codes.length > length)
+                    throw new Error("ArgumentNullException");
+                this.write(codes.buffer);
+                if (codes.length < length)
+                    this.write(new ArrayBuffer[length - codes.buffer.byteLength]);
             };
             return BinaryWriter;
         }());
@@ -4682,6 +5330,88 @@ var Neo;
         })(Caching = IO.Caching || (IO.Caching = {}));
     })(IO = Neo.IO || (Neo.IO = {}));
 })(Neo || (Neo = {}));
+var Neo;
+(function (Neo) {
+    var SmartContract;
+    (function (SmartContract) {
+        var NefFile = (function () {
+            function NefFile() {
+                this.magic = 0x3346454E;
+            }
+            Object.defineProperty(NefFile.prototype, "size", {
+                get: function () {
+                    return (NefFile.headerSize +
+                        this.script.length);
+                },
+                set: function (value) {
+                    this._size = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            NefFile.prototype.serialize = function (writer) {
+                var _a;
+                writer.writeUint32(this.magic);
+                writer.writeFixedString(this.compiler, 32);
+                writer.writeInt32(this.version.major);
+                writer.writeInt32(this.version.minor);
+                writer.writeInt32(this.version.build);
+                writer.writeInt32(this.version.revision);
+                writer.write(this.scriptHash.toArray(), 0, 20);
+                writer.writeUint32(this.checkSum);
+                writer.writeVarBytes((_a = this.script, (_a !== null && _a !== void 0 ? _a : new Uint8Array[0])));
+            };
+            NefFile.prototype.deserialize = function (reader) {
+                if (reader.readUint32() != this.magic) {
+                    throw new ErrorEvent("FormatException", new Error("Wrong magic"));
+                }
+                this.compiler = reader.readFixedString(32);
+                this.version = new Version(reader.readInt32(), reader.readInt32(), reader.readInt32(), reader.readInt32());
+                this.scriptHash = reader.readUint160();
+                this.checkSum = reader.readUint32();
+                this.script = new Uint8Array(reader.readVarBytes(1024 * 1024));
+                if (new Neo.Uint160(ThinNeo.Helper.Hash160(this.script)).equals(this.scriptHash)) {
+                    throw new ErrorEvent("FormatException", new Error("ScriptHash is different"));
+                }
+            };
+            NefFile.computeChecksum = function (file) {
+                var ms = new Neo.IO.MemoryStream();
+                var wr = new Neo.IO.BinaryWriter(ms);
+                file.serialize(wr);
+                var buffer = new Uint8Array(NefFile.headerSize - 4);
+                ms.seek(0, Neo.IO.SeekOrigin.Begin);
+                ms.read(buffer, 0, buffer.length);
+                return new Neo.BigInteger(Neo.Cryptography.Sha256.computeHash(buffer)).toInt32();
+            };
+            NefFile.loadNef = function (nefhex) {
+                var buf = nefhex.hexToBytes();
+                if (!nefhex || nefhex.length >= ThinNeo.Transaction.MaxTransactionSize) {
+                    throw new ErrorEvent("ArgumentException", new Error("this nefhex is undefined"));
+                }
+                var stream = new Neo.IO.BinaryReader(new Neo.IO.MemoryStream(buf.buffer, 0, buf.byteLength));
+                var file = stream.readSerializable(NefFile);
+                return file;
+            };
+            NefFile.headerSize = 4 +
+                32 +
+                16 +
+                20 +
+                4;
+            return NefFile;
+        }());
+        SmartContract.NefFile = NefFile;
+        var Version = (function () {
+            function Version(major, minor, build, revision) {
+                this.major = major;
+                this.minor = minor;
+                this.build = build;
+                this.revision = revision;
+            }
+            return Version;
+        }());
+        SmartContract.Version = Version;
+    })(SmartContract = Neo.SmartContract || (Neo.SmartContract = {}));
+})(Neo || (Neo = {}));
 var ThinNeo;
 (function (ThinNeo) {
     var contract = (function () {
@@ -4748,7 +5478,6 @@ var ThinNeo;
                     var ss = localacc.contract.script.hexToBytes();
                     if (ss.length != 35 || ss[0] != 33 || ss[34] != 172) {
                         console.log("ss.length != 35 || ss[0] != 33 || ss[34] != 172");
-                        // localacc.nep2key = null;
                     }
                 }
                 if (acc.key == undefined) {
@@ -4793,276 +5522,204 @@ var ThinNeo;
 (function (ThinNeo) {
     var OpCode;
     (function (OpCode) {
-        OpCode[OpCode["PUSH0"] = 0] = "PUSH0";
-        OpCode[OpCode["PUSHF"] = 0] = "PUSHF";
-        OpCode[OpCode["PUSHBYTES1"] = 1] = "PUSHBYTES1";
-        OpCode[OpCode["PUSHBYTES2"] = 2] = "PUSHBYTES2";
-        OpCode[OpCode["PUSHBYTES3"] = 3] = "PUSHBYTES3";
-        OpCode[OpCode["PUSHBYTES4"] = 4] = "PUSHBYTES4";
-        OpCode[OpCode["PUSHBYTES5"] = 5] = "PUSHBYTES5";
-        OpCode[OpCode["PUSHBYTES6"] = 6] = "PUSHBYTES6";
-        OpCode[OpCode["PUSHBYTES7"] = 7] = "PUSHBYTES7";
-        OpCode[OpCode["PUSHBYTES8"] = 8] = "PUSHBYTES8";
-        OpCode[OpCode["PUSHBYTES9"] = 9] = "PUSHBYTES9";
-        OpCode[OpCode["PUSHBYTES10"] = 10] = "PUSHBYTES10";
-        OpCode[OpCode["PUSHBYTES11"] = 11] = "PUSHBYTES11";
-        OpCode[OpCode["PUSHBYTES12"] = 12] = "PUSHBYTES12";
-        OpCode[OpCode["PUSHBYTES13"] = 13] = "PUSHBYTES13";
-        OpCode[OpCode["PUSHBYTES14"] = 14] = "PUSHBYTES14";
-        OpCode[OpCode["PUSHBYTES15"] = 15] = "PUSHBYTES15";
-        OpCode[OpCode["PUSHBYTES16"] = 16] = "PUSHBYTES16";
-        OpCode[OpCode["PUSHBYTES17"] = 17] = "PUSHBYTES17";
-        OpCode[OpCode["PUSHBYTES18"] = 18] = "PUSHBYTES18";
-        OpCode[OpCode["PUSHBYTES19"] = 19] = "PUSHBYTES19";
-        OpCode[OpCode["PUSHBYTES20"] = 20] = "PUSHBYTES20";
-        OpCode[OpCode["PUSHBYTES21"] = 21] = "PUSHBYTES21";
-        OpCode[OpCode["PUSHBYTES22"] = 22] = "PUSHBYTES22";
-        OpCode[OpCode["PUSHBYTES23"] = 23] = "PUSHBYTES23";
-        OpCode[OpCode["PUSHBYTES24"] = 24] = "PUSHBYTES24";
-        OpCode[OpCode["PUSHBYTES25"] = 25] = "PUSHBYTES25";
-        OpCode[OpCode["PUSHBYTES26"] = 26] = "PUSHBYTES26";
-        OpCode[OpCode["PUSHBYTES27"] = 27] = "PUSHBYTES27";
-        OpCode[OpCode["PUSHBYTES28"] = 28] = "PUSHBYTES28";
-        OpCode[OpCode["PUSHBYTES29"] = 29] = "PUSHBYTES29";
-        OpCode[OpCode["PUSHBYTES30"] = 30] = "PUSHBYTES30";
-        OpCode[OpCode["PUSHBYTES31"] = 31] = "PUSHBYTES31";
-        OpCode[OpCode["PUSHBYTES32"] = 32] = "PUSHBYTES32";
-        OpCode[OpCode["PUSHBYTES33"] = 33] = "PUSHBYTES33";
-        OpCode[OpCode["PUSHBYTES34"] = 34] = "PUSHBYTES34";
-        OpCode[OpCode["PUSHBYTES35"] = 35] = "PUSHBYTES35";
-        OpCode[OpCode["PUSHBYTES36"] = 36] = "PUSHBYTES36";
-        OpCode[OpCode["PUSHBYTES37"] = 37] = "PUSHBYTES37";
-        OpCode[OpCode["PUSHBYTES38"] = 38] = "PUSHBYTES38";
-        OpCode[OpCode["PUSHBYTES39"] = 39] = "PUSHBYTES39";
-        OpCode[OpCode["PUSHBYTES40"] = 40] = "PUSHBYTES40";
-        OpCode[OpCode["PUSHBYTES41"] = 41] = "PUSHBYTES41";
-        OpCode[OpCode["PUSHBYTES42"] = 42] = "PUSHBYTES42";
-        OpCode[OpCode["PUSHBYTES43"] = 43] = "PUSHBYTES43";
-        OpCode[OpCode["PUSHBYTES44"] = 44] = "PUSHBYTES44";
-        OpCode[OpCode["PUSHBYTES45"] = 45] = "PUSHBYTES45";
-        OpCode[OpCode["PUSHBYTES46"] = 46] = "PUSHBYTES46";
-        OpCode[OpCode["PUSHBYTES47"] = 47] = "PUSHBYTES47";
-        OpCode[OpCode["PUSHBYTES48"] = 48] = "PUSHBYTES48";
-        OpCode[OpCode["PUSHBYTES49"] = 49] = "PUSHBYTES49";
-        OpCode[OpCode["PUSHBYTES50"] = 50] = "PUSHBYTES50";
-        OpCode[OpCode["PUSHBYTES51"] = 51] = "PUSHBYTES51";
-        OpCode[OpCode["PUSHBYTES52"] = 52] = "PUSHBYTES52";
-        OpCode[OpCode["PUSHBYTES53"] = 53] = "PUSHBYTES53";
-        OpCode[OpCode["PUSHBYTES54"] = 54] = "PUSHBYTES54";
-        OpCode[OpCode["PUSHBYTES55"] = 55] = "PUSHBYTES55";
-        OpCode[OpCode["PUSHBYTES56"] = 56] = "PUSHBYTES56";
-        OpCode[OpCode["PUSHBYTES57"] = 57] = "PUSHBYTES57";
-        OpCode[OpCode["PUSHBYTES58"] = 58] = "PUSHBYTES58";
-        OpCode[OpCode["PUSHBYTES59"] = 59] = "PUSHBYTES59";
-        OpCode[OpCode["PUSHBYTES60"] = 60] = "PUSHBYTES60";
-        OpCode[OpCode["PUSHBYTES61"] = 61] = "PUSHBYTES61";
-        OpCode[OpCode["PUSHBYTES62"] = 62] = "PUSHBYTES62";
-        OpCode[OpCode["PUSHBYTES63"] = 63] = "PUSHBYTES63";
-        OpCode[OpCode["PUSHBYTES64"] = 64] = "PUSHBYTES64";
-        OpCode[OpCode["PUSHBYTES65"] = 65] = "PUSHBYTES65";
-        OpCode[OpCode["PUSHBYTES66"] = 66] = "PUSHBYTES66";
-        OpCode[OpCode["PUSHBYTES67"] = 67] = "PUSHBYTES67";
-        OpCode[OpCode["PUSHBYTES68"] = 68] = "PUSHBYTES68";
-        OpCode[OpCode["PUSHBYTES69"] = 69] = "PUSHBYTES69";
-        OpCode[OpCode["PUSHBYTES70"] = 70] = "PUSHBYTES70";
-        OpCode[OpCode["PUSHBYTES71"] = 71] = "PUSHBYTES71";
-        OpCode[OpCode["PUSHBYTES72"] = 72] = "PUSHBYTES72";
-        OpCode[OpCode["PUSHBYTES73"] = 73] = "PUSHBYTES73";
-        OpCode[OpCode["PUSHBYTES74"] = 74] = "PUSHBYTES74";
-        OpCode[OpCode["PUSHBYTES75"] = 75] = "PUSHBYTES75";
-        OpCode[OpCode["PUSHDATA1"] = 76] = "PUSHDATA1";
-        OpCode[OpCode["PUSHDATA2"] = 77] = "PUSHDATA2";
-        OpCode[OpCode["PUSHDATA4"] = 78] = "PUSHDATA4";
-        OpCode[OpCode["PUSHM1"] = 79] = "PUSHM1";
-        OpCode[OpCode["PUSH1"] = 81] = "PUSH1";
-        OpCode[OpCode["PUSHT"] = 81] = "PUSHT";
-        OpCode[OpCode["PUSH2"] = 82] = "PUSH2";
-        OpCode[OpCode["PUSH3"] = 83] = "PUSH3";
-        OpCode[OpCode["PUSH4"] = 84] = "PUSH4";
-        OpCode[OpCode["PUSH5"] = 85] = "PUSH5";
-        OpCode[OpCode["PUSH6"] = 86] = "PUSH6";
-        OpCode[OpCode["PUSH7"] = 87] = "PUSH7";
-        OpCode[OpCode["PUSH8"] = 88] = "PUSH8";
-        OpCode[OpCode["PUSH9"] = 89] = "PUSH9";
-        OpCode[OpCode["PUSH10"] = 90] = "PUSH10";
-        OpCode[OpCode["PUSH11"] = 91] = "PUSH11";
-        OpCode[OpCode["PUSH12"] = 92] = "PUSH12";
-        OpCode[OpCode["PUSH13"] = 93] = "PUSH13";
-        OpCode[OpCode["PUSH14"] = 94] = "PUSH14";
-        OpCode[OpCode["PUSH15"] = 95] = "PUSH15";
-        OpCode[OpCode["PUSH16"] = 96] = "PUSH16";
-        OpCode[OpCode["NOP"] = 97] = "NOP";
-        OpCode[OpCode["JMP"] = 98] = "JMP";
-        OpCode[OpCode["JMPIF"] = 99] = "JMPIF";
-        OpCode[OpCode["JMPIFNOT"] = 100] = "JMPIFNOT";
-        OpCode[OpCode["CALL"] = 101] = "CALL";
-        OpCode[OpCode["RET"] = 102] = "RET";
-        OpCode[OpCode["APPCALL"] = 103] = "APPCALL";
-        OpCode[OpCode["SYSCALL"] = 104] = "SYSCALL";
-        OpCode[OpCode["TAILCALL"] = 105] = "TAILCALL";
-        OpCode[OpCode["DUPFROMALTSTACK"] = 106] = "DUPFROMALTSTACK";
-        OpCode[OpCode["TOALTSTACK"] = 107] = "TOALTSTACK";
-        OpCode[OpCode["FROMALTSTACK"] = 108] = "FROMALTSTACK";
-        OpCode[OpCode["XDROP"] = 109] = "XDROP";
-        OpCode[OpCode["DUPFROMALTSTACKBOTTOM"] = 110] = "DUPFROMALTSTACKBOTTOM";
-        OpCode[OpCode["XSWAP"] = 114] = "XSWAP";
-        OpCode[OpCode["XTUCK"] = 115] = "XTUCK";
-        OpCode[OpCode["DEPTH"] = 116] = "DEPTH";
-        OpCode[OpCode["DROP"] = 117] = "DROP";
-        OpCode[OpCode["DUP"] = 118] = "DUP";
-        OpCode[OpCode["NIP"] = 119] = "NIP";
-        OpCode[OpCode["OVER"] = 120] = "OVER";
-        OpCode[OpCode["PICK"] = 121] = "PICK";
-        OpCode[OpCode["ROLL"] = 122] = "ROLL";
-        OpCode[OpCode["ROT"] = 123] = "ROT";
-        OpCode[OpCode["SWAP"] = 124] = "SWAP";
-        OpCode[OpCode["TUCK"] = 125] = "TUCK";
-        OpCode[OpCode["CAT"] = 126] = "CAT";
-        OpCode[OpCode["SUBSTR"] = 127] = "SUBSTR";
-        OpCode[OpCode["LEFT"] = 128] = "LEFT";
-        OpCode[OpCode["RIGHT"] = 129] = "RIGHT";
-        OpCode[OpCode["SIZE"] = 130] = "SIZE";
-        OpCode[OpCode["INVERT"] = 131] = "INVERT";
-        OpCode[OpCode["AND"] = 132] = "AND";
-        OpCode[OpCode["OR"] = 133] = "OR";
-        OpCode[OpCode["XOR"] = 134] = "XOR";
-        OpCode[OpCode["EQUAL"] = 135] = "EQUAL";
-        OpCode[OpCode["INC"] = 139] = "INC";
-        OpCode[OpCode["DEC"] = 140] = "DEC";
-        OpCode[OpCode["SIGN"] = 141] = "SIGN";
-        OpCode[OpCode["NEGATE"] = 143] = "NEGATE";
-        OpCode[OpCode["ABS"] = 144] = "ABS";
-        OpCode[OpCode["NOT"] = 145] = "NOT";
-        OpCode[OpCode["NZ"] = 146] = "NZ";
-        OpCode[OpCode["ADD"] = 147] = "ADD";
-        OpCode[OpCode["SUB"] = 148] = "SUB";
-        OpCode[OpCode["MUL"] = 149] = "MUL";
-        OpCode[OpCode["DIV"] = 150] = "DIV";
-        OpCode[OpCode["MOD"] = 151] = "MOD";
-        OpCode[OpCode["SHL"] = 152] = "SHL";
-        OpCode[OpCode["SHR"] = 153] = "SHR";
-        OpCode[OpCode["BOOLAND"] = 154] = "BOOLAND";
-        OpCode[OpCode["BOOLOR"] = 155] = "BOOLOR";
-        OpCode[OpCode["NUMEQUAL"] = 156] = "NUMEQUAL";
-        OpCode[OpCode["NUMNOTEQUAL"] = 158] = "NUMNOTEQUAL";
-        OpCode[OpCode["LT"] = 159] = "LT";
-        OpCode[OpCode["GT"] = 160] = "GT";
-        OpCode[OpCode["LTE"] = 161] = "LTE";
-        OpCode[OpCode["GTE"] = 162] = "GTE";
-        OpCode[OpCode["MIN"] = 163] = "MIN";
-        OpCode[OpCode["MAX"] = 164] = "MAX";
-        OpCode[OpCode["WITHIN"] = 165] = "WITHIN";
-        OpCode[OpCode["SHA1"] = 167] = "SHA1";
-        OpCode[OpCode["SHA256"] = 168] = "SHA256";
-        OpCode[OpCode["HASH160"] = 169] = "HASH160";
-        OpCode[OpCode["HASH256"] = 170] = "HASH256";
-        OpCode[OpCode["CSHARPSTRHASH32"] = 171] = "CSHARPSTRHASH32";
-        OpCode[OpCode["JAVAHASH32"] = 173] = "JAVAHASH32";
-        OpCode[OpCode["CHECKSIG"] = 172] = "CHECKSIG";
-        OpCode[OpCode["CHECKMULTISIG"] = 174] = "CHECKMULTISIG";
-        OpCode[OpCode["ARRAYSIZE"] = 192] = "ARRAYSIZE";
-        OpCode[OpCode["PACK"] = 193] = "PACK";
-        OpCode[OpCode["UNPACK"] = 194] = "UNPACK";
-        OpCode[OpCode["PICKITEM"] = 195] = "PICKITEM";
-        OpCode[OpCode["SETITEM"] = 196] = "SETITEM";
-        OpCode[OpCode["NEWARRAY"] = 197] = "NEWARRAY";
+        OpCode[OpCode["PUSHINT8"] = 0] = "PUSHINT8";
+        OpCode[OpCode["PUSHINT16"] = 1] = "PUSHINT16";
+        OpCode[OpCode["PUSHINT32"] = 2] = "PUSHINT32";
+        OpCode[OpCode["PUSHINT64"] = 3] = "PUSHINT64";
+        OpCode[OpCode["PUSHINT128"] = 4] = "PUSHINT128";
+        OpCode[OpCode["PUSHINT256"] = 5] = "PUSHINT256";
+        OpCode[OpCode["PUSHA"] = 10] = "PUSHA";
+        OpCode[OpCode["PUSHNULL"] = 11] = "PUSHNULL";
+        OpCode[OpCode["PUSHDATA1"] = 12] = "PUSHDATA1";
+        OpCode[OpCode["PUSHDATA2"] = 13] = "PUSHDATA2";
+        OpCode[OpCode["PUSHDATA4"] = 14] = "PUSHDATA4";
+        OpCode[OpCode["PUSHM1"] = 15] = "PUSHM1";
+        OpCode[OpCode["PUSH0"] = 16] = "PUSH0";
+        OpCode[OpCode["PUSH1"] = 17] = "PUSH1";
+        OpCode[OpCode["PUSH2"] = 18] = "PUSH2";
+        OpCode[OpCode["PUSH3"] = 19] = "PUSH3";
+        OpCode[OpCode["PUSH4"] = 20] = "PUSH4";
+        OpCode[OpCode["PUSH5"] = 21] = "PUSH5";
+        OpCode[OpCode["PUSH6"] = 22] = "PUSH6";
+        OpCode[OpCode["PUSH7"] = 23] = "PUSH7";
+        OpCode[OpCode["PUSH8"] = 24] = "PUSH8";
+        OpCode[OpCode["PUSH9"] = 25] = "PUSH9";
+        OpCode[OpCode["PUSH10"] = 26] = "PUSH10";
+        OpCode[OpCode["PUSH11"] = 27] = "PUSH11";
+        OpCode[OpCode["PUSH12"] = 28] = "PUSH12";
+        OpCode[OpCode["PUSH13"] = 29] = "PUSH13";
+        OpCode[OpCode["PUSH14"] = 30] = "PUSH14";
+        OpCode[OpCode["PUSH15"] = 31] = "PUSH15";
+        OpCode[OpCode["PUSH16"] = 32] = "PUSH16";
+        OpCode[OpCode["NOP"] = 33] = "NOP";
+        OpCode[OpCode["JMP"] = 34] = "JMP";
+        OpCode[OpCode["JMP_L"] = 35] = "JMP_L";
+        OpCode[OpCode["JMPIF"] = 36] = "JMPIF";
+        OpCode[OpCode["JMPIF_L"] = 37] = "JMPIF_L";
+        OpCode[OpCode["JMPIFNOT"] = 38] = "JMPIFNOT";
+        OpCode[OpCode["JMPIFNOT_L"] = 39] = "JMPIFNOT_L";
+        OpCode[OpCode["JMPEQ"] = 40] = "JMPEQ";
+        OpCode[OpCode["JMPEQ_L"] = 41] = "JMPEQ_L";
+        OpCode[OpCode["JMPNE"] = 42] = "JMPNE";
+        OpCode[OpCode["JMPNE_L"] = 43] = "JMPNE_L";
+        OpCode[OpCode["JMPGT"] = 44] = "JMPGT";
+        OpCode[OpCode["JMPGT_L"] = 45] = "JMPGT_L";
+        OpCode[OpCode["JMPGE"] = 46] = "JMPGE";
+        OpCode[OpCode["JMPGE_L"] = 47] = "JMPGE_L";
+        OpCode[OpCode["JMPLT"] = 48] = "JMPLT";
+        OpCode[OpCode["JMPLT_L"] = 49] = "JMPLT_L";
+        OpCode[OpCode["JMPLE"] = 50] = "JMPLE";
+        OpCode[OpCode["JMPLE_L"] = 51] = "JMPLE_L";
+        OpCode[OpCode["CALL"] = 52] = "CALL";
+        OpCode[OpCode["CALL_L"] = 53] = "CALL_L";
+        OpCode[OpCode["CALLA"] = 54] = "CALLA";
+        OpCode[OpCode["THROW"] = 55] = "THROW";
+        OpCode[OpCode["THROWIF"] = 56] = "THROWIF";
+        OpCode[OpCode["THROWIFNOT"] = 57] = "THROWIFNOT";
+        OpCode[OpCode["RET"] = 64] = "RET";
+        OpCode[OpCode["SYSCALL"] = 65] = "SYSCALL";
+        OpCode[OpCode["DEPTH"] = 67] = "DEPTH";
+        OpCode[OpCode["DROP"] = 69] = "DROP";
+        OpCode[OpCode["NIP"] = 70] = "NIP";
+        OpCode[OpCode["XDROP"] = 72] = "XDROP";
+        OpCode[OpCode["CLEAR"] = 73] = "CLEAR";
+        OpCode[OpCode["DUP"] = 74] = "DUP";
+        OpCode[OpCode["OVER"] = 75] = "OVER";
+        OpCode[OpCode["PICK"] = 77] = "PICK";
+        OpCode[OpCode["TUCK"] = 78] = "TUCK";
+        OpCode[OpCode["SWAP"] = 80] = "SWAP";
+        OpCode[OpCode["ROT"] = 81] = "ROT";
+        OpCode[OpCode["ROLL"] = 82] = "ROLL";
+        OpCode[OpCode["REVERSE3"] = 83] = "REVERSE3";
+        OpCode[OpCode["REVERSE4"] = 84] = "REVERSE4";
+        OpCode[OpCode["REVERSEN"] = 85] = "REVERSEN";
+        OpCode[OpCode["INITSSLOT"] = 86] = "INITSSLOT";
+        OpCode[OpCode["INITSLOT"] = 87] = "INITSLOT";
+        OpCode[OpCode["LDSFLD0"] = 88] = "LDSFLD0";
+        OpCode[OpCode["LDSFLD1"] = 89] = "LDSFLD1";
+        OpCode[OpCode["LDSFLD2"] = 90] = "LDSFLD2";
+        OpCode[OpCode["LDSFLD3"] = 91] = "LDSFLD3";
+        OpCode[OpCode["LDSFLD4"] = 92] = "LDSFLD4";
+        OpCode[OpCode["LDSFLD5"] = 93] = "LDSFLD5";
+        OpCode[OpCode["LDSFLD6"] = 94] = "LDSFLD6";
+        OpCode[OpCode["LDSFLD"] = 95] = "LDSFLD";
+        OpCode[OpCode["STSFLD0"] = 96] = "STSFLD0";
+        OpCode[OpCode["STSFLD1"] = 97] = "STSFLD1";
+        OpCode[OpCode["STSFLD2"] = 98] = "STSFLD2";
+        OpCode[OpCode["STSFLD3"] = 99] = "STSFLD3";
+        OpCode[OpCode["STSFLD4"] = 100] = "STSFLD4";
+        OpCode[OpCode["STSFLD5"] = 101] = "STSFLD5";
+        OpCode[OpCode["STSFLD6"] = 102] = "STSFLD6";
+        OpCode[OpCode["STSFLD"] = 103] = "STSFLD";
+        OpCode[OpCode["LDLOC0"] = 104] = "LDLOC0";
+        OpCode[OpCode["LDLOC1"] = 105] = "LDLOC1";
+        OpCode[OpCode["LDLOC2"] = 106] = "LDLOC2";
+        OpCode[OpCode["LDLOC3"] = 107] = "LDLOC3";
+        OpCode[OpCode["LDLOC4"] = 108] = "LDLOC4";
+        OpCode[OpCode["LDLOC5"] = 109] = "LDLOC5";
+        OpCode[OpCode["LDLOC6"] = 110] = "LDLOC6";
+        OpCode[OpCode["LDLOC"] = 111] = "LDLOC";
+        OpCode[OpCode["STLOC0"] = 112] = "STLOC0";
+        OpCode[OpCode["STLOC1"] = 113] = "STLOC1";
+        OpCode[OpCode["STLOC2"] = 114] = "STLOC2";
+        OpCode[OpCode["STLOC3"] = 115] = "STLOC3";
+        OpCode[OpCode["STLOC4"] = 116] = "STLOC4";
+        OpCode[OpCode["STLOC5"] = 117] = "STLOC5";
+        OpCode[OpCode["STLOC6"] = 118] = "STLOC6";
+        OpCode[OpCode["STLOC"] = 119] = "STLOC";
+        OpCode[OpCode["LDARG0"] = 120] = "LDARG0";
+        OpCode[OpCode["LDARG1"] = 121] = "LDARG1";
+        OpCode[OpCode["LDARG2"] = 122] = "LDARG2";
+        OpCode[OpCode["LDARG3"] = 123] = "LDARG3";
+        OpCode[OpCode["LDARG4"] = 124] = "LDARG4";
+        OpCode[OpCode["LDARG5"] = 125] = "LDARG5";
+        OpCode[OpCode["LDARG6"] = 126] = "LDARG6";
+        OpCode[OpCode["LDARG"] = 127] = "LDARG";
+        OpCode[OpCode["STARG0"] = 128] = "STARG0";
+        OpCode[OpCode["STARG1"] = 129] = "STARG1";
+        OpCode[OpCode["STARG2"] = 130] = "STARG2";
+        OpCode[OpCode["STARG3"] = 131] = "STARG3";
+        OpCode[OpCode["STARG4"] = 132] = "STARG4";
+        OpCode[OpCode["STARG5"] = 133] = "STARG5";
+        OpCode[OpCode["STARG6"] = 134] = "STARG6";
+        OpCode[OpCode["STARG"] = 135] = "STARG";
+        OpCode[OpCode["NEWBUFFER"] = 136] = "NEWBUFFER";
+        OpCode[OpCode["MEMCPY"] = 137] = "MEMCPY";
+        OpCode[OpCode["CAT"] = 139] = "CAT";
+        OpCode[OpCode["SUBSTR"] = 140] = "SUBSTR";
+        OpCode[OpCode["LEFT"] = 141] = "LEFT";
+        OpCode[OpCode["RIGHT"] = 142] = "RIGHT";
+        OpCode[OpCode["INVERT"] = 144] = "INVERT";
+        OpCode[OpCode["AND"] = 145] = "AND";
+        OpCode[OpCode["OR"] = 146] = "OR";
+        OpCode[OpCode["XOR"] = 147] = "XOR";
+        OpCode[OpCode["EQUAL"] = 151] = "EQUAL";
+        OpCode[OpCode["NOTEQUAL"] = 152] = "NOTEQUAL";
+        OpCode[OpCode["SIGN"] = 153] = "SIGN";
+        OpCode[OpCode["ABS"] = 154] = "ABS";
+        OpCode[OpCode["NEGATE"] = 155] = "NEGATE";
+        OpCode[OpCode["INC"] = 156] = "INC";
+        OpCode[OpCode["DEC"] = 157] = "DEC";
+        OpCode[OpCode["ADD"] = 158] = "ADD";
+        OpCode[OpCode["SUB"] = 159] = "SUB";
+        OpCode[OpCode["MUL"] = 160] = "MUL";
+        OpCode[OpCode["DIV"] = 161] = "DIV";
+        OpCode[OpCode["MOD"] = 162] = "MOD";
+        OpCode[OpCode["SHL"] = 168] = "SHL";
+        OpCode[OpCode["SHR"] = 169] = "SHR";
+        OpCode[OpCode["NOT"] = 170] = "NOT";
+        OpCode[OpCode["BOOLAND"] = 171] = "BOOLAND";
+        OpCode[OpCode["BOOLOR"] = 172] = "BOOLOR";
+        OpCode[OpCode["NZ"] = 177] = "NZ";
+        OpCode[OpCode["NUMEQUAL"] = 179] = "NUMEQUAL";
+        OpCode[OpCode["NUMNOTEQUAL"] = 180] = "NUMNOTEQUAL";
+        OpCode[OpCode["LT"] = 181] = "LT";
+        OpCode[OpCode["LE"] = 182] = "LE";
+        OpCode[OpCode["GT"] = 183] = "GT";
+        OpCode[OpCode["GE"] = 184] = "GE";
+        OpCode[OpCode["MIN"] = 185] = "MIN";
+        OpCode[OpCode["MAX"] = 186] = "MAX";
+        OpCode[OpCode["WITHIN"] = 187] = "WITHIN";
+        OpCode[OpCode["PACK"] = 192] = "PACK";
+        OpCode[OpCode["UNPACK"] = 193] = "UNPACK";
+        OpCode[OpCode["NEWARRAY0"] = 194] = "NEWARRAY0";
+        OpCode[OpCode["NEWARRAY"] = 195] = "NEWARRAY";
+        OpCode[OpCode["NEWARRAY_T"] = 196] = "NEWARRAY_T";
+        OpCode[OpCode["NEWSTRUCT0"] = 197] = "NEWSTRUCT0";
         OpCode[OpCode["NEWSTRUCT"] = 198] = "NEWSTRUCT";
-        OpCode[OpCode["NEWMAP"] = 199] = "NEWMAP";
-        OpCode[OpCode["APPEND"] = 200] = "APPEND";
-        OpCode[OpCode["REVERSE"] = 201] = "REVERSE";
-        OpCode[OpCode["REMOVE"] = 202] = "REMOVE";
+        OpCode[OpCode["NEWMAP"] = 200] = "NEWMAP";
+        OpCode[OpCode["SIZE"] = 202] = "SIZE";
         OpCode[OpCode["HASKEY"] = 203] = "HASKEY";
         OpCode[OpCode["KEYS"] = 204] = "KEYS";
         OpCode[OpCode["VALUES"] = 205] = "VALUES";
-        OpCode[OpCode["SWITCH"] = 208] = "SWITCH";
-        OpCode[OpCode["THROW"] = 240] = "THROW";
-        OpCode[OpCode["THROWIFNOT"] = 241] = "THROWIFNOT";
+        OpCode[OpCode["PICKITEM"] = 206] = "PICKITEM";
+        OpCode[OpCode["APPEND"] = 207] = "APPEND";
+        OpCode[OpCode["SETITEM"] = 208] = "SETITEM";
+        OpCode[OpCode["REVERSEITEMS"] = 209] = "REVERSEITEMS";
+        OpCode[OpCode["REMOVE"] = 210] = "REMOVE";
+        OpCode[OpCode["CLEARITEMS"] = 211] = "CLEARITEMS";
+        OpCode[OpCode["ISNULL"] = 216] = "ISNULL";
+        OpCode[OpCode["ISTYPE"] = 217] = "ISTYPE";
+        OpCode[OpCode["CONVERT"] = 219] = "CONVERT";
     })(OpCode = ThinNeo.OpCode || (ThinNeo.OpCode = {}));
 })(ThinNeo || (ThinNeo = {}));
 var ThinSdk;
 (function (ThinSdk) {
     var _a;
     ThinSdk.ApplicationEngine = (_a = {},
-        _a[ThinNeo.OpCode.PUSH0] = 30,
-        _a[ThinNeo.OpCode.PUSHBYTES1] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES2] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES3] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES4] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES5] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES6] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES7] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES8] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES9] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES10] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES11] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES12] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES13] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES14] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES15] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES16] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES17] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES18] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES19] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES20] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES21] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES22] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES23] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES24] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES25] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES26] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES27] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES28] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES29] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES30] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES31] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES32] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES33] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES34] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES35] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES36] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES37] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES38] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES39] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES40] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES41] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES42] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES43] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES44] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES45] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES46] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES47] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES48] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES49] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES50] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES51] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES52] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES53] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES54] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES55] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES56] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES57] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES58] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES59] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES60] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES61] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES62] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES63] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES64] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES65] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES66] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES67] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES68] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES69] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES70] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES71] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES72] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES73] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES74] = 120,
-        _a[ThinNeo.OpCode.PUSHBYTES75] = 120,
+        _a[ThinNeo.OpCode.PUSHINT8] = 30,
+        _a[ThinNeo.OpCode.PUSHINT16] = 30,
+        _a[ThinNeo.OpCode.PUSHINT32] = 30,
+        _a[ThinNeo.OpCode.PUSHINT64] = 30,
+        _a[ThinNeo.OpCode.PUSHINT128] = 120,
+        _a[ThinNeo.OpCode.PUSHINT256] = 120,
+        _a[ThinNeo.OpCode.PUSHA] = 120,
+        _a[ThinNeo.OpCode.PUSHNULL] = 30,
         _a[ThinNeo.OpCode.PUSHDATA1] = 180,
         _a[ThinNeo.OpCode.PUSHDATA2] = 13000,
         _a[ThinNeo.OpCode.PUSHDATA4] = 110000,
         _a[ThinNeo.OpCode.PUSHM1] = 30,
+        _a[ThinNeo.OpCode.PUSH0] = 30,
         _a[ThinNeo.OpCode.PUSH1] = 30,
         _a[ThinNeo.OpCode.PUSH2] = 30,
         _a[ThinNeo.OpCode.PUSH3] = 30,
@@ -5081,45 +5738,113 @@ var ThinSdk;
         _a[ThinNeo.OpCode.PUSH16] = 30,
         _a[ThinNeo.OpCode.NOP] = 30,
         _a[ThinNeo.OpCode.JMP] = 70,
+        _a[ThinNeo.OpCode.JMP_L] = 70,
         _a[ThinNeo.OpCode.JMPIF] = 70,
+        _a[ThinNeo.OpCode.JMPIF_L] = 70,
         _a[ThinNeo.OpCode.JMPIFNOT] = 70,
+        _a[ThinNeo.OpCode.JMPIFNOT_L] = 70,
+        _a[ThinNeo.OpCode.JMPEQ] = 70,
+        _a[ThinNeo.OpCode.JMPEQ_L] = 70,
+        _a[ThinNeo.OpCode.JMPNE] = 70,
+        _a[ThinNeo.OpCode.JMPNE_L] = 70,
+        _a[ThinNeo.OpCode.JMPGT] = 70,
+        _a[ThinNeo.OpCode.JMPGT_L] = 70,
+        _a[ThinNeo.OpCode.JMPGE] = 70,
+        _a[ThinNeo.OpCode.JMPGE_L] = 70,
+        _a[ThinNeo.OpCode.JMPLT] = 70,
+        _a[ThinNeo.OpCode.JMPLT_L] = 70,
+        _a[ThinNeo.OpCode.JMPLE] = 70,
+        _a[ThinNeo.OpCode.JMPLE_L] = 70,
         _a[ThinNeo.OpCode.CALL] = 22000,
-        _a[ThinNeo.OpCode.RET] = 40,
+        _a[ThinNeo.OpCode.CALL_L] = 22000,
+        _a[ThinNeo.OpCode.CALLA] = 22000,
+        _a[ThinNeo.OpCode.THROW] = 30,
+        _a[ThinNeo.OpCode.THROWIF] = 30,
+        _a[ThinNeo.OpCode.THROWIFNOT] = 30,
+        _a[ThinNeo.OpCode.RET] = 0,
         _a[ThinNeo.OpCode.SYSCALL] = 0,
-        _a[ThinNeo.OpCode.DUPFROMALTSTACKBOTTOM] = 60,
-        _a[ThinNeo.OpCode.DUPFROMALTSTACK] = 60,
-        _a[ThinNeo.OpCode.TOALTSTACK] = 60,
-        _a[ThinNeo.OpCode.FROMALTSTACK] = 60,
-        _a[ThinNeo.OpCode.XDROP] = 400,
-        _a[ThinNeo.OpCode.XSWAP] = 60,
-        _a[ThinNeo.OpCode.XTUCK] = 400,
         _a[ThinNeo.OpCode.DEPTH] = 60,
         _a[ThinNeo.OpCode.DROP] = 60,
-        _a[ThinNeo.OpCode.DUP] = 60,
         _a[ThinNeo.OpCode.NIP] = 60,
+        _a[ThinNeo.OpCode.XDROP] = 400,
+        _a[ThinNeo.OpCode.CLEAR] = 400,
+        _a[ThinNeo.OpCode.DUP] = 60,
         _a[ThinNeo.OpCode.OVER] = 60,
         _a[ThinNeo.OpCode.PICK] = 60,
-        _a[ThinNeo.OpCode.ROLL] = 400,
-        _a[ThinNeo.OpCode.ROT] = 60,
-        _a[ThinNeo.OpCode.SWAP] = 60,
         _a[ThinNeo.OpCode.TUCK] = 60,
+        _a[ThinNeo.OpCode.SWAP] = 60,
+        _a[ThinNeo.OpCode.ROT] = 60,
+        _a[ThinNeo.OpCode.ROLL] = 400,
+        _a[ThinNeo.OpCode.REVERSE3] = 60,
+        _a[ThinNeo.OpCode.REVERSE4] = 60,
+        _a[ThinNeo.OpCode.REVERSEN] = 400,
+        _a[ThinNeo.OpCode.INITSSLOT] = 400,
+        _a[ThinNeo.OpCode.INITSLOT] = 800,
+        _a[ThinNeo.OpCode.LDSFLD0] = 60,
+        _a[ThinNeo.OpCode.LDSFLD1] = 60,
+        _a[ThinNeo.OpCode.LDSFLD2] = 60,
+        _a[ThinNeo.OpCode.LDSFLD3] = 60,
+        _a[ThinNeo.OpCode.LDSFLD4] = 60,
+        _a[ThinNeo.OpCode.LDSFLD5] = 60,
+        _a[ThinNeo.OpCode.LDSFLD6] = 60,
+        _a[ThinNeo.OpCode.LDSFLD] = 60,
+        _a[ThinNeo.OpCode.STSFLD0] = 60,
+        _a[ThinNeo.OpCode.STSFLD1] = 60,
+        _a[ThinNeo.OpCode.STSFLD2] = 60,
+        _a[ThinNeo.OpCode.STSFLD3] = 60,
+        _a[ThinNeo.OpCode.STSFLD4] = 60,
+        _a[ThinNeo.OpCode.STSFLD5] = 60,
+        _a[ThinNeo.OpCode.STSFLD6] = 60,
+        _a[ThinNeo.OpCode.STSFLD] = 60,
+        _a[ThinNeo.OpCode.LDLOC0] = 60,
+        _a[ThinNeo.OpCode.LDLOC1] = 60,
+        _a[ThinNeo.OpCode.LDLOC2] = 60,
+        _a[ThinNeo.OpCode.LDLOC3] = 60,
+        _a[ThinNeo.OpCode.LDLOC4] = 60,
+        _a[ThinNeo.OpCode.LDLOC5] = 60,
+        _a[ThinNeo.OpCode.LDLOC6] = 60,
+        _a[ThinNeo.OpCode.LDLOC] = 60,
+        _a[ThinNeo.OpCode.STLOC0] = 60,
+        _a[ThinNeo.OpCode.STLOC1] = 60,
+        _a[ThinNeo.OpCode.STLOC2] = 60,
+        _a[ThinNeo.OpCode.STLOC3] = 60,
+        _a[ThinNeo.OpCode.STLOC4] = 60,
+        _a[ThinNeo.OpCode.STLOC5] = 60,
+        _a[ThinNeo.OpCode.STLOC6] = 60,
+        _a[ThinNeo.OpCode.STLOC] = 60,
+        _a[ThinNeo.OpCode.LDARG0] = 60,
+        _a[ThinNeo.OpCode.LDARG1] = 60,
+        _a[ThinNeo.OpCode.LDARG2] = 60,
+        _a[ThinNeo.OpCode.LDARG3] = 60,
+        _a[ThinNeo.OpCode.LDARG4] = 60,
+        _a[ThinNeo.OpCode.LDARG5] = 60,
+        _a[ThinNeo.OpCode.LDARG6] = 60,
+        _a[ThinNeo.OpCode.LDARG] = 60,
+        _a[ThinNeo.OpCode.STARG0] = 60,
+        _a[ThinNeo.OpCode.STARG1] = 60,
+        _a[ThinNeo.OpCode.STARG2] = 60,
+        _a[ThinNeo.OpCode.STARG3] = 60,
+        _a[ThinNeo.OpCode.STARG4] = 60,
+        _a[ThinNeo.OpCode.STARG5] = 60,
+        _a[ThinNeo.OpCode.STARG6] = 60,
+        _a[ThinNeo.OpCode.STARG] = 60,
+        _a[ThinNeo.OpCode.NEWBUFFER] = 80000,
+        _a[ThinNeo.OpCode.MEMCPY] = 80000,
         _a[ThinNeo.OpCode.CAT] = 80000,
         _a[ThinNeo.OpCode.SUBSTR] = 80000,
         _a[ThinNeo.OpCode.LEFT] = 80000,
         _a[ThinNeo.OpCode.RIGHT] = 80000,
-        _a[ThinNeo.OpCode.SIZE] = 60,
         _a[ThinNeo.OpCode.INVERT] = 100,
         _a[ThinNeo.OpCode.AND] = 200,
         _a[ThinNeo.OpCode.OR] = 200,
         _a[ThinNeo.OpCode.XOR] = 200,
         _a[ThinNeo.OpCode.EQUAL] = 200,
+        _a[ThinNeo.OpCode.NOTEQUAL] = 200,
+        _a[ThinNeo.OpCode.SIGN] = 100,
+        _a[ThinNeo.OpCode.ABS] = 100,
+        _a[ThinNeo.OpCode.NEGATE] = 100,
         _a[ThinNeo.OpCode.INC] = 100,
         _a[ThinNeo.OpCode.DEC] = 100,
-        _a[ThinNeo.OpCode.SIGN] = 100,
-        _a[ThinNeo.OpCode.NEGATE] = 100,
-        _a[ThinNeo.OpCode.ABS] = 100,
-        _a[ThinNeo.OpCode.NOT] = 100,
-        _a[ThinNeo.OpCode.NZ] = 100,
         _a[ThinNeo.OpCode.ADD] = 200,
         _a[ThinNeo.OpCode.SUB] = 200,
         _a[ThinNeo.OpCode.MUL] = 300,
@@ -5127,33 +5852,40 @@ var ThinSdk;
         _a[ThinNeo.OpCode.MOD] = 300,
         _a[ThinNeo.OpCode.SHL] = 300,
         _a[ThinNeo.OpCode.SHR] = 300,
+        _a[ThinNeo.OpCode.NOT] = 100,
         _a[ThinNeo.OpCode.BOOLAND] = 200,
         _a[ThinNeo.OpCode.BOOLOR] = 200,
+        _a[ThinNeo.OpCode.NZ] = 100,
         _a[ThinNeo.OpCode.NUMEQUAL] = 200,
         _a[ThinNeo.OpCode.NUMNOTEQUAL] = 200,
         _a[ThinNeo.OpCode.LT] = 200,
+        _a[ThinNeo.OpCode.LE] = 200,
         _a[ThinNeo.OpCode.GT] = 200,
-        _a[ThinNeo.OpCode.LTE] = 200,
-        _a[ThinNeo.OpCode.GTE] = 200,
+        _a[ThinNeo.OpCode.GE] = 200,
         _a[ThinNeo.OpCode.MIN] = 200,
         _a[ThinNeo.OpCode.MAX] = 200,
         _a[ThinNeo.OpCode.WITHIN] = 200,
-        _a[ThinNeo.OpCode.ARRAYSIZE] = 150,
         _a[ThinNeo.OpCode.PACK] = 7000,
         _a[ThinNeo.OpCode.UNPACK] = 7000,
-        _a[ThinNeo.OpCode.PICKITEM] = 270000,
-        _a[ThinNeo.OpCode.SETITEM] = 270000,
+        _a[ThinNeo.OpCode.NEWARRAY0] = 400,
         _a[ThinNeo.OpCode.NEWARRAY] = 15000,
+        _a[ThinNeo.OpCode.NEWARRAY_T] = 15000,
+        _a[ThinNeo.OpCode.NEWSTRUCT0] = 400,
         _a[ThinNeo.OpCode.NEWSTRUCT] = 15000,
         _a[ThinNeo.OpCode.NEWMAP] = 200,
-        _a[ThinNeo.OpCode.APPEND] = 15000,
-        _a[ThinNeo.OpCode.REVERSE] = 500,
-        _a[ThinNeo.OpCode.REMOVE] = 500,
+        _a[ThinNeo.OpCode.SIZE] = 150,
         _a[ThinNeo.OpCode.HASKEY] = 270000,
         _a[ThinNeo.OpCode.KEYS] = 500,
         _a[ThinNeo.OpCode.VALUES] = 7000,
-        _a[ThinNeo.OpCode.THROW] = 30,
-        _a[ThinNeo.OpCode.THROWIFNOT] = 30,
+        _a[ThinNeo.OpCode.PICKITEM] = 270000,
+        _a[ThinNeo.OpCode.APPEND] = 15000,
+        _a[ThinNeo.OpCode.SETITEM] = 270000,
+        _a[ThinNeo.OpCode.REVERSEITEMS] = 500,
+        _a[ThinNeo.OpCode.REMOVE] = 500,
+        _a[ThinNeo.OpCode.CLEARITEMS] = 400,
+        _a[ThinNeo.OpCode.ISNULL] = 60,
+        _a[ThinNeo.OpCode.ISTYPE] = 60,
+        _a[ThinNeo.OpCode.CONVERT] = 80000,
         _a);
 })(ThinSdk || (ThinSdk = {}));
 var ThinNeo;
@@ -5263,6 +5995,12 @@ var ThinSdk;
             this.contractHash = _contractHash;
             this.scriptBuilder = _scriptBuild;
         }
+        Contract.newContract = function (nef, mainfest, scriptBuild) {
+            var contract = new Contract(nef.scriptHash, scriptBuild);
+            contract.script = nef.script;
+            contract.mainfest = mainfest;
+            return contract;
+        };
         Contract.prototype.Call = function (method) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -5276,7 +6014,7 @@ var ThinSdk;
                 args[_i - 3] = arguments[_i];
             }
             if (args && args.length > 0) {
-                sb.EmitParamJson(args);
+                sb.EmitArguments(args);
             }
             else {
                 sb.EmitPushNumber(Neo.BigInteger.Zero);
@@ -5286,6 +6024,13 @@ var ThinSdk;
             sb.EmitPushBytes(new Uint8Array(scriptHash.bits.buffer));
             sb.EmitSysCall("System.Contract.Call");
             return sb;
+        };
+        Contract.prototype.deploy = function () {
+            if (this.script == null || this.script.length == 0)
+                throw new Error("script is undefind");
+            this.scriptBuilder.EmitPushString(this.mainfest);
+            this.scriptBuilder.EmitPushBytes(this.script);
+            this.scriptBuilder.EmitSysCall("System.Contract.Create");
         };
         return Contract;
     }());
@@ -5302,9 +6047,9 @@ var ThinSdk;
             this.tran.version = 0;
             var RANDOM_UINT8 = this.getWeakRandomValues(32);
             var RANDOM_INT = Neo.BigInteger.fromUint8Array(RANDOM_UINT8);
-            this.tran.nonce = RANDOM_INT.toInt32();
+            this.tran.nonce = 12121;
             this.tran.sender = sender;
-            this.tran.validUntilBlock = currentBlockIndex + ThinNeo.Transaction.MaxValidUntilBlockIncrement;
+            this.tran.validUntilBlock = currentBlockIndex + ThinNeo.Transaction.MaxValidUntilBlockIncrement - 1;
             var cosigner = new Neo.Cosigner();
             cosigner.scopes = Neo.WitnessScope.CalledByEntry;
             cosigner.account = sender;
@@ -5315,21 +6060,21 @@ var ThinSdk;
         }
         NeoTransaction.prototype.signAndPack = function (prikey, sysFee) {
             this.tran.script = this.scriptBuilder.ToArray();
-            console.log(this.tran.script.toHexString());
+            console.log("script", this.tran.script.toHexString());
             var pubkey = ThinNeo.Helper.GetPublicKeyFromPrivateKey(prikey);
             var address = ThinNeo.Helper.GetAddressFromPublicKey(pubkey);
             var witness_script = ThinNeo.Helper.GetAddressCheckScriptFromPublicKey(pubkey);
-            if (witness_script.isSignatureContract() || true) {
-                var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES64] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHBYTES33] + 1000000;
+            if (witness_script.isSignatureContract()) {
+                var networkFee = ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHNULL] + ThinSdk.ApplicationEngine[ThinNeo.OpCode.PUSHDATA1] + 1000000;
             }
-            else { }
-            this.tran.networkFee = this.tran.networkFee.add(this.tran.GetMessage().length).add(107).mul(1000).add(networkFee);
-            this.tran.systemFee = Neo.Long.fromNumber(Math.ceil(sysFee / 100000000) * 100000000);
-            console.log("Transaction Message ", this.tran.GetMessage().toHexString());
-            console.log("Transaction Message ", this.tran.GetMessage().toHexString());
+            else {
+            }
+            this.tran.networkFee = this.tran.networkFee.add(this.tran.GetMessage().length).add(110).mul(1000).add(networkFee);
+            this.tran.systemFee = Neo.Long.fromNumber(sysFee).div(100000000).add(1).mul(100000000);
+            console.log("Transaction SystemFee", this.tran.systemFee.toNumber());
+            console.log("Transaction NetworkFee", this.tran.networkFee.toNumber());
             var data = this.tran.GetMessage();
-            var signtest = ThinNeo.Helper.Sign(Neo.Long.fromNumber(10000).toBytes(true), prikey);
-            console.log("test sign", signtest.toHexString());
+            console.log("Transaction Message", data.toHexString());
             var signData = ThinNeo.Helper.Sign(data, prikey);
             console.log("sign data", signData.toHexString());
             var b = ThinNeo.Helper.VerifySignature(data, signData, pubkey);
@@ -5402,18 +6147,22 @@ var ThinNeo;
                 this._WriteUint8Array(arg);
             return this;
         };
-        ScriptBuilder.prototype.EmitAppCall = function (scriptHash, useTailCall) {
-            if (useTailCall === void 0) { useTailCall = false; }
-            var hash = null;
-            if (scriptHash instanceof Neo.Uint160) {
-                hash = new Uint8Array(scriptHash.bits.buffer);
+        ScriptBuilder.prototype.EmitAppCall = function (scriptHash, operation) {
+            var args = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                args[_i - 2] = arguments[_i];
             }
-            else if (scriptHash.length != 20)
-                throw new Error("error scriptHash length");
+            if (args && args.length > 0) {
+                this.EmitArguments(args);
+            }
             else {
-                hash = scriptHash;
+                this.EmitPushNumber(Neo.BigInteger.Zero);
+                this.Emit(ThinNeo.OpCode.NEWARRAY);
             }
-            return this.Emit(useTailCall ? ThinNeo.OpCode.TAILCALL : ThinNeo.OpCode.APPCALL, hash);
+            this.EmitPushString(operation);
+            this.EmitPushBytes(new Uint8Array(scriptHash.bits.buffer));
+            this.EmitSysCall("System.Contract.Call");
+            return this;
         };
         ScriptBuilder.prototype.EmitJump = function (op, offset) {
             if (op != ThinNeo.OpCode.JMP && op != ThinNeo.OpCode.JMPIF && op != ThinNeo.OpCode.JMPIFNOT && op != ThinNeo.OpCode.CALL)
@@ -5431,15 +6180,11 @@ var ThinNeo;
             return this.EmitPushBytes(number.toUint8ArrayWithSign(true));
         };
         ScriptBuilder.prototype.EmitPushBool = function (data) {
-            return this.Emit(data ? ThinNeo.OpCode.PUSHT : ThinNeo.OpCode.PUSHF);
+            return this.Emit(data ? ThinNeo.OpCode.PUSH1 : ThinNeo.OpCode.PUSH0);
         };
         ScriptBuilder.prototype.EmitPushBytes = function (data) {
             if (data == null)
                 throw new Error("ArgumentNullException");
-            if (data.length <= ThinNeo.OpCode.PUSHBYTES75) {
-                this._WriteUint8(data.length);
-                this._WriteUint8Array(data);
-            }
             else if (data.length < 0x100) {
                 this.Emit(ThinNeo.OpCode.PUSHDATA1);
                 this._WriteUint8(data.length);
@@ -5557,9 +6302,81 @@ var ThinNeo;
             }
             return this;
         };
+        ScriptBuilder.prototype.EmitArgument = function (param) {
+            switch (param.type) {
+                case ArgumentDataType.STRING:
+                    this.EmitPushString(param.value);
+                    break;
+                case ArgumentDataType.INTEGER:
+                    var num = new Neo.BigInteger(param.value);
+                    this.EmitPushNumber(num);
+                    break;
+                case ArgumentDataType.HASH160:
+                    var hex = param.value.hexToBytes();
+                    if (hex.length != 20)
+                        throw new Error("not a hex160");
+                    this.EmitPushBytes(hex.reverse());
+                    break;
+                case ArgumentDataType.HASH256:
+                    var hex = param.value.hexToBytes();
+                    if (hex.length != 32)
+                        throw new Error("not a hex256");
+                    this.EmitPushBytes(hex.reverse());
+                    break;
+                case ArgumentDataType.BYTEARRAY:
+                    var hex = param.value.hexToBytes();
+                    this.EmitPushBytes(hex);
+                    break;
+                case ArgumentDataType.BOOLEAN:
+                    var num = new Neo.BigInteger(param.value ? 1 : 0);
+                    this.EmitPushNumber(num);
+                    break;
+                case ArgumentDataType.ADDRESS:
+                    var hex = ThinNeo.Helper.GetPublicKeyScriptHash_FromAddress(param.value);
+                    this.EmitPushBytes(hex);
+                    break;
+                case ArgumentDataType.HOOKTXID:
+                    this.EmitSysCall("System.ExecutionEngine.GetScriptContainer");
+                    this.EmitSysCall("Neo.Transaction.GetHash");
+                    break;
+                case ArgumentDataType.ARRAY:
+                    this.EmitArguments(param.value);
+                    break;
+                default:
+                    throw new Error("No parameter of this type");
+            }
+            return this;
+        };
+        ScriptBuilder.prototype.EmitArguments = function (argument) {
+            for (var i = argument.length - 1; i >= 0; i--) {
+                var param = argument[i];
+                this.EmitArgument(param);
+            }
+            if (argument.length > 0) {
+                this.EmitPushNumber(new Neo.BigInteger(argument.length));
+                this.Emit(ThinNeo.OpCode.PACK);
+            }
+            else {
+                this.EmitPushNumber(Neo.BigInteger.Zero);
+                this.Emit(ThinNeo.OpCode.NEWARRAY);
+            }
+            return this;
+        };
         return ScriptBuilder;
     }());
     ThinNeo.ScriptBuilder = ScriptBuilder;
+    var ArgumentDataType;
+    (function (ArgumentDataType) {
+        ArgumentDataType["STRING"] = "String";
+        ArgumentDataType["BOOLEAN"] = "Boolean";
+        ArgumentDataType["HASH160"] = "Hash160";
+        ArgumentDataType["HASH256"] = "Hash256";
+        ArgumentDataType["INTEGER"] = "Integer";
+        ArgumentDataType["BYTEARRAY"] = "ByteArray";
+        ArgumentDataType["ARRAY"] = "Array";
+        ArgumentDataType["ADDRESS"] = "Address";
+        ArgumentDataType["HOOKTXID"] = "Hook_Txid";
+    })(ArgumentDataType || (ArgumentDataType = {}));
 })(ThinNeo || (ThinNeo = {}));
 var ThinNeo;
 (function (ThinNeo) {
@@ -5613,11 +6430,13 @@ var ThinNeo;
         Helper.GetAddressCheckScriptFromPublicKey = function (publicKey) {
             var sb = new ThinNeo.ScriptBuilder();
             sb.EmitPushBytes(publicKey);
-            sb.EmitSysCall("Neo.Crypto.CheckSig");
+            sb.Emit(ThinNeo.OpCode.PUSHNULL);
+            sb.EmitSysCall("Neo.Crypto.ECDsaVerify");
             return sb.ToArray();
         };
         Helper.GetPublicKeyScriptHashFromPublicKey = function (publicKey) {
             var script = Helper.GetAddressCheckScriptFromPublicKey(publicKey);
+            console.log(script.toHexString());
             var scripthash = Neo.Cryptography.Sha256.computeHash(script);
             scripthash = Neo.Cryptography.RIPEMD160.computeHash(scripthash);
             return new Uint8Array(scripthash);
@@ -5635,11 +6454,10 @@ var ThinNeo;
             else {
                 script_hash = scripthash;
             }
+            console.log(script_hash.toHexString());
             var data = new Uint8Array(script_hash.length + 1);
-            data[0] = 0x17;
-            for (var i = 0; i < script_hash.length; i++) {
-                data[i + 1] = script_hash[i];
-            }
+            data[0] = 0x35;
+            Array.copy(script_hash, 0, data, 1, 20);
             var hash = Neo.Cryptography.Sha256.computeHash(data);
             hash = Neo.Cryptography.Sha256.computeHash(hash);
             var hashu8 = new Uint8Array(hash, 0, 4);
@@ -5990,6 +6808,7 @@ var ThinNeo;
     })(TransactionType = ThinNeo.TransactionType || (ThinNeo.TransactionType = {}));
     var TransactionAttributeUsage;
     (function (TransactionAttributeUsage) {
+        TransactionAttributeUsage[TransactionAttributeUsage["Url"] = 129] = "Url";
         TransactionAttributeUsage[TransactionAttributeUsage["ContractHash"] = 0] = "ContractHash";
         TransactionAttributeUsage[TransactionAttributeUsage["ECDH02"] = 2] = "ECDH02";
         TransactionAttributeUsage[TransactionAttributeUsage["ECDH03"] = 3] = "ECDH03";
@@ -6330,6 +7149,9 @@ var ThinNeo;
                     throw new Error("InvalidOperationException");
                 this.list[this.list.length - index - 1] = item;
             };
+            RandomAccessStack.prototype.Reverse = function () {
+                this.list.reverse();
+            };
             return RandomAccessStack;
         }());
         VM.RandomAccessStack = RandomAccessStack;
@@ -6350,164 +7172,294 @@ var ThinNeo;
                     o.addr = breader.addr;
                     o.code = breader.ReadOP();
                     try {
-                        if (o.code >= ThinNeo.OpCode.PUSHBYTES1 && o.code <= ThinNeo.OpCode.PUSHBYTES75) {
-                            o.paramType = Compiler.ParamType.ByteArray;
-                            var _count = o.code;
-                            o.paramData = breader.ReadBytes(_count);
-                        }
-                        else {
-                            switch (o.code) {
-                                case ThinNeo.OpCode.PUSH0:
-                                case ThinNeo.OpCode.PUSHM1:
-                                case ThinNeo.OpCode.PUSH1:
-                                case ThinNeo.OpCode.PUSH2:
-                                case ThinNeo.OpCode.PUSH3:
-                                case ThinNeo.OpCode.PUSH4:
-                                case ThinNeo.OpCode.PUSH5:
-                                case ThinNeo.OpCode.PUSH6:
-                                case ThinNeo.OpCode.PUSH7:
-                                case ThinNeo.OpCode.PUSH8:
-                                case ThinNeo.OpCode.PUSH9:
-                                case ThinNeo.OpCode.PUSH10:
-                                case ThinNeo.OpCode.PUSH11:
-                                case ThinNeo.OpCode.PUSH12:
-                                case ThinNeo.OpCode.PUSH13:
-                                case ThinNeo.OpCode.PUSH14:
-                                case ThinNeo.OpCode.PUSH15:
-                                case ThinNeo.OpCode.PUSH16:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.PUSHDATA1:
-                                    {
-                                        o.paramType = Compiler.ParamType.ByteArray;
-                                        var _count = breader.ReadByte();
-                                        o.paramData = breader.ReadBytes(_count);
-                                    }
-                                    break;
-                                case ThinNeo.OpCode.PUSHDATA2:
-                                    {
-                                        o.paramType = Compiler.ParamType.ByteArray;
-                                        var _count = breader.ReadUInt16();
-                                        o.paramData = breader.ReadBytes(_count);
-                                    }
-                                    break;
-                                case ThinNeo.OpCode.PUSHDATA4:
-                                    {
-                                        o.paramType = Compiler.ParamType.ByteArray;
-                                        var _count = breader.ReadInt32();
-                                        o.paramData = breader.ReadBytes(_count);
-                                    }
-                                    break;
-                                case ThinNeo.OpCode.NOP:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.JMP:
-                                case ThinNeo.OpCode.JMPIF:
-                                case ThinNeo.OpCode.JMPIFNOT:
-                                    o.paramType = Compiler.ParamType.Addr;
-                                    o.paramData = breader.ReadBytes(2);
-                                    break;
-                                case ThinNeo.OpCode.CALL:
-                                    o.paramType = Compiler.ParamType.Addr;
-                                    o.paramData = breader.ReadBytes(2);
-                                    break;
-                                case ThinNeo.OpCode.RET:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.APPCALL:
-                                case ThinNeo.OpCode.TAILCALL:
+                        switch (o.code) {
+                            case ThinNeo.OpCode.PUSHINT8:
+                                {
                                     o.paramType = Compiler.ParamType.ByteArray;
-                                    o.paramData = breader.ReadBytes(20);
+                                    var count = 1;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHINT16:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = 2;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHINT32:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = 4;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHINT64:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = 8;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHINT128:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = 16;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHINT256:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = 32;
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHA:
+                                {
+                                    o.paramType = Compiler.ParamType.None;
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHNULL:
+                                {
+                                    o.paramType = Compiler.ParamType.None;
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHDATA1:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = breader.ReadByte();
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHDATA2:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = breader.ReadUInt16();
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHDATA4:
+                                {
+                                    o.paramType = Compiler.ParamType.ByteArray;
+                                    var count = breader.ReadInt32();
+                                    o.paramData = breader.ReadBytes(count);
+                                }
+                                break;
+                            case ThinNeo.OpCode.PUSHM1:
+                            case ThinNeo.OpCode.PUSH0:
+                            case ThinNeo.OpCode.PUSH1:
+                            case ThinNeo.OpCode.PUSH2:
+                            case ThinNeo.OpCode.PUSH3:
+                            case ThinNeo.OpCode.PUSH4:
+                            case ThinNeo.OpCode.PUSH5:
+                            case ThinNeo.OpCode.PUSH6:
+                            case ThinNeo.OpCode.PUSH7:
+                            case ThinNeo.OpCode.PUSH8:
+                            case ThinNeo.OpCode.PUSH9:
+                            case ThinNeo.OpCode.PUSH10:
+                            case ThinNeo.OpCode.PUSH11:
+                            case ThinNeo.OpCode.PUSH12:
+                            case ThinNeo.OpCode.PUSH13:
+                            case ThinNeo.OpCode.PUSH14:
+                            case ThinNeo.OpCode.PUSH15:
+                            case ThinNeo.OpCode.PUSH16:
+                                {
+                                    o.paramType = Compiler.ParamType.None;
+                                }
+                                break;
+                            case ThinNeo.OpCode.NOP:
+                                {
+                                    o.paramType = Compiler.ParamType.None;
+                                }
+                                break;
+                            case ThinNeo.OpCode.JMP:
+                            case ThinNeo.OpCode.JMPIF:
+                            case ThinNeo.OpCode.JMPIFNOT:
+                            case ThinNeo.OpCode.JMPEQ:
+                            case ThinNeo.OpCode.JMPNE:
+                            case ThinNeo.OpCode.JMPGT:
+                            case ThinNeo.OpCode.JMPGE:
+                            case ThinNeo.OpCode.JMPLT:
+                            case ThinNeo.OpCode.JMPLE:
+                                {
+                                    o.paramType = Compiler.ParamType.Addr;
+                                    o.paramData = breader.ReadBytes(1);
+                                }
+                                break;
+                            case ThinNeo.OpCode.JMP_L:
+                            case ThinNeo.OpCode.JMPIF_L:
+                            case ThinNeo.OpCode.JMPIFNOT_L:
+                            case ThinNeo.OpCode.JMPEQ_L:
+                            case ThinNeo.OpCode.JMPNE_L:
+                            case ThinNeo.OpCode.JMPGT_L:
+                            case ThinNeo.OpCode.JMPGE_L:
+                            case ThinNeo.OpCode.JMPLT_L:
+                            case ThinNeo.OpCode.JMPLE_L:
+                                {
+                                    o.paramType = Compiler.ParamType.Addr;
+                                    o.paramData = breader.ReadBytes(4);
+                                }
+                                break;
+                            case ThinNeo.OpCode.CALL:
+                                {
+                                    o.paramType = Compiler.ParamType.Addr;
+                                    o.paramData = breader.ReadBytes(1);
                                     break;
-                                case ThinNeo.OpCode.SYSCALL:
+                                }
+                            case ThinNeo.OpCode.CALL_L:
+                                {
+                                    o.paramType = Compiler.ParamType.Addr;
+                                    o.paramData = breader.ReadBytes(4);
+                                    break;
+                                }
+                            case ThinNeo.OpCode.CALLA:
+                                {
+                                    o.paramType = Compiler.ParamType.Addr;
+                                    o.paramData = breader.ReadBytes(4);
+                                    break;
+                                }
+                            case ThinNeo.OpCode.RET:
+                            case ThinNeo.OpCode.THROW:
+                            case ThinNeo.OpCode.THROWIF:
+                            case ThinNeo.OpCode.THROWIFNOT:
+                                {
+                                    o.paramType = Compiler.ParamType.None;
+                                }
+                                break;
+                            case ThinNeo.OpCode.SYSCALL:
+                                {
                                     o.paramType = Compiler.ParamType.String;
-                                    o.paramData = breader.ReadVarBytes();
-                                    break;
-                                case ThinNeo.OpCode.DUPFROMALTSTACK:
-                                case ThinNeo.OpCode.TOALTSTACK:
-                                case ThinNeo.OpCode.FROMALTSTACK:
-                                case ThinNeo.OpCode.XDROP:
-                                case ThinNeo.OpCode.XSWAP:
-                                case ThinNeo.OpCode.XTUCK:
-                                case ThinNeo.OpCode.DEPTH:
-                                case ThinNeo.OpCode.DROP:
-                                case ThinNeo.OpCode.DUP:
-                                case ThinNeo.OpCode.NIP:
-                                case ThinNeo.OpCode.OVER:
-                                case ThinNeo.OpCode.PICK:
-                                case ThinNeo.OpCode.ROLL:
-                                case ThinNeo.OpCode.ROT:
-                                case ThinNeo.OpCode.SWAP:
-                                case ThinNeo.OpCode.TUCK:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.CAT:
-                                case ThinNeo.OpCode.SUBSTR:
-                                case ThinNeo.OpCode.LEFT:
-                                case ThinNeo.OpCode.RIGHT:
-                                case ThinNeo.OpCode.SIZE:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.INVERT:
-                                case ThinNeo.OpCode.AND:
-                                case ThinNeo.OpCode.OR:
-                                case ThinNeo.OpCode.XOR:
-                                case ThinNeo.OpCode.EQUAL:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.INC:
-                                case ThinNeo.OpCode.DEC:
-                                case ThinNeo.OpCode.SIGN:
-                                case ThinNeo.OpCode.NEGATE:
-                                case ThinNeo.OpCode.ABS:
-                                case ThinNeo.OpCode.NOT:
-                                case ThinNeo.OpCode.NZ:
-                                case ThinNeo.OpCode.ADD:
-                                case ThinNeo.OpCode.SUB:
-                                case ThinNeo.OpCode.MUL:
-                                case ThinNeo.OpCode.DIV:
-                                case ThinNeo.OpCode.MOD:
-                                case ThinNeo.OpCode.SHL:
-                                case ThinNeo.OpCode.SHR:
-                                case ThinNeo.OpCode.BOOLAND:
-                                case ThinNeo.OpCode.BOOLOR:
-                                case ThinNeo.OpCode.NUMEQUAL:
-                                case ThinNeo.OpCode.NUMNOTEQUAL:
-                                case ThinNeo.OpCode.LT:
-                                case ThinNeo.OpCode.GT:
-                                case ThinNeo.OpCode.LTE:
-                                case ThinNeo.OpCode.GTE:
-                                case ThinNeo.OpCode.MIN:
-                                case ThinNeo.OpCode.MAX:
-                                case ThinNeo.OpCode.WITHIN:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.SHA1:
-                                case ThinNeo.OpCode.SHA256:
-                                case ThinNeo.OpCode.HASH160:
-                                case ThinNeo.OpCode.HASH256:
-                                case ThinNeo.OpCode.CSHARPSTRHASH32:
-                                case ThinNeo.OpCode.JAVAHASH32:
-                                case ThinNeo.OpCode.CHECKSIG:
-                                case ThinNeo.OpCode.CHECKMULTISIG:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.ARRAYSIZE:
-                                case ThinNeo.OpCode.PACK:
-                                case ThinNeo.OpCode.UNPACK:
-                                case ThinNeo.OpCode.PICKITEM:
-                                case ThinNeo.OpCode.SETITEM:
-                                case ThinNeo.OpCode.NEWARRAY:
-                                case ThinNeo.OpCode.NEWSTRUCT:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                case ThinNeo.OpCode.THROW:
-                                case ThinNeo.OpCode.THROWIFNOT:
-                                    o.paramType = Compiler.ParamType.None;
-                                    break;
-                                default:
-                                    throw new Error("you fogot a type:" + o.code);
-                            }
+                                    o.paramData = breader.ReadVarBytes(252);
+                                }
+                                break;
+                            case ThinNeo.OpCode.DEPTH:
+                            case ThinNeo.OpCode.DROP:
+                            case ThinNeo.OpCode.NIP:
+                            case ThinNeo.OpCode.XDROP:
+                            case ThinNeo.OpCode.CLEAR:
+                            case ThinNeo.OpCode.DUP:
+                            case ThinNeo.OpCode.OVER:
+                            case ThinNeo.OpCode.PICK:
+                            case ThinNeo.OpCode.TUCK:
+                            case ThinNeo.OpCode.SWAP:
+                            case ThinNeo.OpCode.ROT:
+                            case ThinNeo.OpCode.ROLL:
+                            case ThinNeo.OpCode.REVERSE3:
+                            case ThinNeo.OpCode.REVERSE4:
+                            case ThinNeo.OpCode.REVERSEN:
+                            case ThinNeo.OpCode.INITSSLOT:
+                            case ThinNeo.OpCode.INITSLOT:
+                            case ThinNeo.OpCode.LDSFLD0:
+                            case ThinNeo.OpCode.LDSFLD1:
+                            case ThinNeo.OpCode.LDSFLD2:
+                            case ThinNeo.OpCode.LDSFLD3:
+                            case ThinNeo.OpCode.LDSFLD4:
+                            case ThinNeo.OpCode.LDSFLD5:
+                            case ThinNeo.OpCode.LDSFLD6:
+                            case ThinNeo.OpCode.LDSFLD:
+                            case ThinNeo.OpCode.STSFLD0:
+                            case ThinNeo.OpCode.STSFLD1:
+                            case ThinNeo.OpCode.STSFLD2:
+                            case ThinNeo.OpCode.STSFLD3:
+                            case ThinNeo.OpCode.STSFLD4:
+                            case ThinNeo.OpCode.STSFLD5:
+                            case ThinNeo.OpCode.STSFLD6:
+                            case ThinNeo.OpCode.STSFLD:
+                            case ThinNeo.OpCode.LDLOC0:
+                            case ThinNeo.OpCode.LDLOC1:
+                            case ThinNeo.OpCode.LDLOC2:
+                            case ThinNeo.OpCode.LDLOC3:
+                            case ThinNeo.OpCode.LDLOC4:
+                            case ThinNeo.OpCode.LDLOC5:
+                            case ThinNeo.OpCode.LDLOC6:
+                            case ThinNeo.OpCode.LDLOC:
+                            case ThinNeo.OpCode.STLOC0:
+                            case ThinNeo.OpCode.STLOC1:
+                            case ThinNeo.OpCode.STLOC2:
+                            case ThinNeo.OpCode.STLOC3:
+                            case ThinNeo.OpCode.STLOC4:
+                            case ThinNeo.OpCode.STLOC5:
+                            case ThinNeo.OpCode.STLOC6:
+                            case ThinNeo.OpCode.STLOC:
+                            case ThinNeo.OpCode.LDARG0:
+                            case ThinNeo.OpCode.LDARG1:
+                            case ThinNeo.OpCode.LDARG2:
+                            case ThinNeo.OpCode.LDARG3:
+                            case ThinNeo.OpCode.LDARG4:
+                            case ThinNeo.OpCode.LDARG5:
+                            case ThinNeo.OpCode.LDARG6:
+                            case ThinNeo.OpCode.LDARG:
+                            case ThinNeo.OpCode.STARG0:
+                            case ThinNeo.OpCode.STARG1:
+                            case ThinNeo.OpCode.STARG2:
+                            case ThinNeo.OpCode.STARG3:
+                            case ThinNeo.OpCode.STARG4:
+                            case ThinNeo.OpCode.STARG5:
+                            case ThinNeo.OpCode.STARG6:
+                            case ThinNeo.OpCode.STARG:
+                            case ThinNeo.OpCode.NEWBUFFER:
+                            case ThinNeo.OpCode.MEMCPY:
+                            case ThinNeo.OpCode.CAT:
+                            case ThinNeo.OpCode.SUBSTR:
+                            case ThinNeo.OpCode.LEFT:
+                            case ThinNeo.OpCode.RIGHT:
+                            case ThinNeo.OpCode.INVERT:
+                            case ThinNeo.OpCode.AND:
+                            case ThinNeo.OpCode.OR:
+                            case ThinNeo.OpCode.XOR:
+                            case ThinNeo.OpCode.EQUAL:
+                            case ThinNeo.OpCode.NOTEQUAL:
+                            case ThinNeo.OpCode.SIGN:
+                            case ThinNeo.OpCode.ABS:
+                            case ThinNeo.OpCode.NEGATE:
+                            case ThinNeo.OpCode.INC:
+                            case ThinNeo.OpCode.DEC:
+                            case ThinNeo.OpCode.ADD:
+                            case ThinNeo.OpCode.SUB:
+                            case ThinNeo.OpCode.MUL:
+                            case ThinNeo.OpCode.DIV:
+                            case ThinNeo.OpCode.MOD:
+                            case ThinNeo.OpCode.SHL:
+                            case ThinNeo.OpCode.SHR:
+                            case ThinNeo.OpCode.NOT:
+                            case ThinNeo.OpCode.BOOLAND:
+                            case ThinNeo.OpCode.BOOLOR:
+                            case ThinNeo.OpCode.NZ:
+                            case ThinNeo.OpCode.NUMEQUAL:
+                            case ThinNeo.OpCode.NUMNOTEQUAL:
+                            case ThinNeo.OpCode.LT:
+                            case ThinNeo.OpCode.LE:
+                            case ThinNeo.OpCode.GT:
+                            case ThinNeo.OpCode.GE:
+                            case ThinNeo.OpCode.MIN:
+                            case ThinNeo.OpCode.MAX:
+                            case ThinNeo.OpCode.WITHIN:
+                            case ThinNeo.OpCode.PACK:
+                            case ThinNeo.OpCode.UNPACK:
+                            case ThinNeo.OpCode.NEWARRAY0:
+                            case ThinNeo.OpCode.NEWARRAY:
+                            case ThinNeo.OpCode.NEWARRAY_T:
+                            case ThinNeo.OpCode.NEWSTRUCT0:
+                            case ThinNeo.OpCode.NEWSTRUCT:
+                            case ThinNeo.OpCode.NEWMAP:
+                            case ThinNeo.OpCode.SIZE:
+                            case ThinNeo.OpCode.HASKEY:
+                            case ThinNeo.OpCode.KEYS:
+                            case ThinNeo.OpCode.VALUES:
+                            case ThinNeo.OpCode.PICKITEM:
+                            case ThinNeo.OpCode.APPEND:
+                            case ThinNeo.OpCode.SETITEM:
+                            case ThinNeo.OpCode.REVERSEITEMS:
+                            case ThinNeo.OpCode.REMOVE:
+                            case ThinNeo.OpCode.CLEARITEMS:
+                            case ThinNeo.OpCode.ISNULL:
+                            case ThinNeo.OpCode.ISTYPE:
+                            case ThinNeo.OpCode.CONVERT:
+                                o.paramType = Compiler.ParamType.None;
+                                break;
+                            default:
+                                throw new Error("you fogot a type:" + o.code);
                         }
                     }
                     catch (_a) {
@@ -6579,11 +7531,13 @@ var ThinNeo;
                 var u2 = this.ReadUInt32();
                 return u2 * 0x100000000 + u1;
             };
-            ByteReader.prototype.ReadVarBytes = function () {
-                var count = this.ReadVarInt();
+            ByteReader.prototype.ReadVarBytes = function (max) {
+                if (max === void 0) { max = 0X7fffffc7; }
+                var count = this.ReadVarInt(max);
                 return this.ReadBytes(count);
             };
-            ByteReader.prototype.ReadVarInt = function () {
+            ByteReader.prototype.ReadVarInt = function (max) {
+                if (max === void 0) { max = 0xFFFFFFFFFFFFFFFF; }
                 var fb = this.ReadByte();
                 var value;
                 if (fb == 0xFD)
@@ -6594,6 +7548,8 @@ var ThinNeo;
                     value = this.ReadUInt64();
                 else
                     value = fb;
+                if (value > max)
+                    throw new Error("FormatException");
                 return value;
             };
             Object.defineProperty(ByteReader.prototype, "End", {
@@ -6662,19 +7618,802 @@ var ThinNeo;
                 var name = "";
                 if (this.error)
                     name = "[E]";
-                if (this.code == ThinNeo.OpCode.PUSHT)
-                    return "PUSH1(true)";
-                if (this.code == ThinNeo.OpCode.PUSHF)
-                    return "PUSH0(false)";
-                if (this.code > ThinNeo.OpCode.PUSHBYTES1 && this.code < ThinNeo.OpCode.PUSHBYTES75)
-                    return name + "PUSHBYTES" + (this.code - ThinNeo.OpCode.PUSHBYTES1 + 1);
-                else
-                    return name + ThinNeo.OpCode[this.code].toString();
+                return name + ThinNeo.OpCode[this.code].toString();
             };
             return Op;
         }());
         Compiler.Op = Op;
     })(Compiler = ThinNeo.Compiler || (ThinNeo.Compiler = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var Debug;
+    (function (Debug) {
+        var Helper;
+        (function (Helper) {
+            var MethodInfo = (function () {
+                function MethodInfo() {
+                    this.addr2line = {};
+                    this.line2addr = {};
+                    this.addr_count = 0;
+                    this.lines = new Array();
+                    this.addrs = new Array();
+                }
+                MethodInfo.prototype.Add = function (line, addr) {
+                    if (this.line2addr[line] == undefined) {
+                        this.line2addr[line] = addr;
+                        this.addr2line[addr] = line;
+                        if (this.addr_count == 0) {
+                            this.line2addr_minkey = line;
+                            this.line2addr_maxkey = line;
+                            this.addr2line_minkey = addr;
+                            this.addr2line_maxkey = addr;
+                        }
+                        this.addr_count++;
+                        if (line < this.line2addr_minkey)
+                            this.line2addr_minkey = line;
+                        if (line > this.line2addr_maxkey)
+                            this.line2addr_maxkey = line;
+                        if (addr < this.addr2line_minkey)
+                            this.addr2line_minkey = addr;
+                        if (addr > this.addr2line_maxkey)
+                            this.addr2line_maxkey = addr;
+                    }
+                    if (this.lines.indexOf(line) < 0)
+                        this.lines.push(line);
+                    if (this.addrs.indexOf(addr) < 0)
+                        this.addrs.push(addr);
+                };
+                MethodInfo.prototype.Sort = function () {
+                };
+                MethodInfo.prototype.GetAddr = function (line) {
+                    if (this.line2addr_maxkey == undefined)
+                        return -1;
+                    if (line > this.line2addr_maxkey)
+                        return -1;
+                    for (var i = 0; ; i++) {
+                        if (this.line2addr[line + i] != undefined)
+                            return this.line2addr[line + i];
+                    }
+                };
+                MethodInfo.prototype.GetAddrBack = function (line) {
+                    if (this.line2addr_minkey == undefined)
+                        return -1;
+                    if (this.addr_count == 0)
+                        return -1;
+                    if (line < this.line2addr_minkey)
+                        return -1;
+                    for (var i = 0; ; i--) {
+                        if (this.line2addr[line + i] != undefined)
+                            return this.line2addr[line + i];
+                    }
+                };
+                MethodInfo.prototype.GetLineDirect = function (addr) {
+                    if (this.addr2line[addr] != undefined)
+                        return this.addr2line[addr];
+                    return -1;
+                };
+                MethodInfo.prototype.GetLine = function (addr) {
+                    if (this.addr2line_maxkey == undefined)
+                        return -1;
+                    if (addr > this.addr2line_maxkey)
+                        return -1;
+                    for (var i = 0; ; i++) {
+                        if (this.addr2line[addr + i] != undefined)
+                            return this.addr2line[addr + i];
+                    }
+                };
+                MethodInfo.prototype.GetLineBack = function (addr) {
+                    if (this.addr2line_minkey == undefined)
+                        return -1;
+                    if (this.addr_count == 0)
+                        return -1;
+                    if (addr < this.addr2line_minkey)
+                        return -1;
+                    for (var i = 0; ; i--) {
+                        if (this.addr2line[addr + i] != undefined)
+                            return this.addr2line[addr + i];
+                    }
+                };
+                return MethodInfo;
+            }());
+            Helper.MethodInfo = MethodInfo;
+            var AddrMap = (function () {
+                function AddrMap() {
+                    this.methods = new Array();
+                }
+                AddrMap.prototype.GetAddr = function (line) {
+                    for (var a = 0; a < this.methods.length; a++) {
+                        var m = this.methods[a];
+                        var i = m.GetAddr(line);
+                        if (i > 0)
+                            return i + m.startAddr;
+                    }
+                    return -1;
+                };
+                AddrMap.prototype.GetAddrBack = function (line) {
+                    for (var a = 0; a < this.methods.length; a++) {
+                        var m = this.methods[a];
+                        var i = m.GetAddrBack(line);
+                        if (i > 0)
+                            return i + m.startAddr;
+                    }
+                    return -1;
+                };
+                AddrMap.prototype.GetLine = function (addr) {
+                    for (var a = 0; a < this.methods.length; a++) {
+                        var m = this.methods[a];
+                        var i = m.GetLine(addr);
+                        if (i > 0)
+                            return i;
+                    }
+                    return -1;
+                };
+                AddrMap.prototype.GetLineDirect = function (addr) {
+                    for (var a = 0; a < this.methods.length; a++) {
+                        var m = this.methods[a];
+                        var i = m.GetLineDirect(addr);
+                        if (i > 0)
+                            return i;
+                    }
+                    return -1;
+                };
+                AddrMap.prototype.GetLineBack = function (addr) {
+                    for (var _i = this.methods.length - 1; _i >= 0; _i--) {
+                        var m = this.methods[_i];
+                        var i = m.GetLineBack(addr);
+                        if (i > 0)
+                            return i;
+                    }
+                    return -1;
+                };
+                AddrMap.FromJson = function (json) {
+                    var info = new AddrMap();
+                    for (var key in json) {
+                        var item = json[key];
+                        var minfo = new MethodInfo();
+                        minfo.name = item["name"];
+                        minfo.startAddr = parseInt(item["addr"], 16);
+                        var map = item["map"];
+                        for (var i = 0; i < map.length; i++) {
+                            var mapitem = map[i];
+                            var src = parseInt(mapitem.substr(5));
+                            var addr = parseInt(mapitem.substr(0, 4), 16);
+                            if (src < 0 || src >= 0xffff)
+                                continue;
+                            minfo.Add(src, addr);
+                        }
+                        minfo.Sort();
+                        info.methods.push(minfo);
+                        info.methods.sort(function (a, b) {
+                            return a.startAddr - b.startAddr;
+                        });
+                    }
+                    return info;
+                };
+                return AddrMap;
+            }());
+            Helper.AddrMap = AddrMap;
+        })(Helper = Debug.Helper || (Debug.Helper = {}));
+    })(Debug = ThinNeo.Debug || (ThinNeo.Debug = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var Debug;
+    (function (Debug) {
+        var DebugScript = (function () {
+            function DebugScript() {
+            }
+            return DebugScript;
+        }());
+        Debug.DebugScript = DebugScript;
+        var DebugTool = (function () {
+            function DebugTool() {
+                this.scripts = {};
+            }
+            return DebugTool;
+        }());
+        Debug.DebugTool = DebugTool;
+    })(Debug = ThinNeo.Debug || (ThinNeo.Debug = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var SmartContract;
+    (function (SmartContract) {
+        var Debug;
+        (function (Debug) {
+            var VMState;
+            (function (VMState) {
+                VMState[VMState["NONE"] = 0] = "NONE";
+                VMState[VMState["HALT"] = 1] = "HALT";
+                VMState[VMState["FAULT"] = 2] = "FAULT";
+                VMState[VMState["BREAK"] = 4] = "BREAK";
+            })(VMState = Debug.VMState || (Debug.VMState = {}));
+            var OpType;
+            (function (OpType) {
+                OpType[OpType["Non"] = 0] = "Non";
+                OpType[OpType["Clear"] = 1] = "Clear";
+                OpType[OpType["Insert"] = 2] = "Insert";
+                OpType[OpType["Peek"] = 3] = "Peek";
+                OpType[OpType["Pop"] = 4] = "Pop";
+                OpType[OpType["Push"] = 5] = "Push";
+                OpType[OpType["Remove"] = 6] = "Remove";
+                OpType[OpType["Set"] = 7] = "Set";
+                OpType[OpType["Reserve"] = 8] = "Reserve";
+            })(OpType = Debug.OpType || (Debug.OpType = {}));
+            var Op = (function () {
+                function Op(type, ind) {
+                    if (ind === void 0) { ind = -1; }
+                    this.type = type;
+                    this.ind = ind;
+                }
+                Op.prototype.Clone = function () {
+                    var op = new Op(this.type, this.ind);
+                    return op;
+                };
+                return Op;
+            }());
+            Debug.Op = Op;
+            var StackItem = (function () {
+                function StackItem() {
+                }
+                StackItem.prototype.Clone = function () {
+                    if (this.type != "Struct")
+                        return this;
+                    var item = new StackItem();
+                    item.type = this.type;
+                    item.strvalue = this.strvalue;
+                    if (this.subItems != null) {
+                        item.subItems = [];
+                        for (var i = 0; i < this.subItems.length; i++) {
+                            item.subItems.push(this.subItems[i].Clone());
+                        }
+                    }
+                    return item;
+                };
+                StackItem.prototype.AsInt = function () {
+                    return parseInt(this.strvalue);
+                };
+                StackItem.prototype.AsBigInteger = function () {
+                    return Neo.BigInteger.parse(this.strvalue);
+                };
+                StackItem.prototype.asBytes = function () {
+                    return null;
+                };
+                StackItem.prototype.ToString = function () {
+                    if (this.type == "Array" || this.type == "Struct") {
+                        var outstr = this.type + "[";
+                        for (var i = 0; i < this.subItems.length; i++) {
+                            outstr += this.subItems[i].ToShortString();
+                            if (i != this.subItems.length - 1) {
+                                outstr += ",";
+                            }
+                        }
+                        outstr += "]";
+                        return outstr;
+                    }
+                    else {
+                        return this.type + ":" + this.strvalue;
+                    }
+                };
+                StackItem.prototype.ToShortString = function () {
+                    if (this.type == "Array" || this.type == "Struct") {
+                        var outstr = "[";
+                        for (var i = 0; i < this.subItems.length; i++) {
+                            outstr += this.subItems[i].ToShortString();
+                            if (i != this.subItems.length - 1) {
+                                outstr += ",";
+                            }
+                        }
+                        outstr += "]";
+                        return outstr;
+                    }
+                    else {
+                        return this.strvalue;
+                    }
+                };
+                StackItem.FromJson = function (json) {
+                    var item = new StackItem();
+                    if (Object.keys(json).length === 0)
+                        return item;
+                    for (var key in json) {
+                        item.type = key;
+                        break;
+                    }
+                    var strvalue = json[item.type];
+                    var isarrayvalue = json[item.type] instanceof Array;
+                    if (isarrayvalue == false) {
+                        item.strvalue = strvalue;
+                    }
+                    else {
+                        var arrayvalue = json[item.type];
+                        item.subItems = [];
+                        for (var i = 0; i < arrayvalue.length; i++) {
+                            item.subItems.push(StackItem.FromJson(arrayvalue[i]));
+                        }
+                    }
+                    return item;
+                };
+                return StackItem;
+            }());
+            Debug.StackItem = StackItem;
+            var LogScript = (function () {
+                function LogScript(hash) {
+                    this.ops = new Array();
+                    this.hash = hash;
+                }
+                LogScript.prototype.GetAllScriptName = function (names) {
+                    names.push(this.hash);
+                    var scount = 1;
+                    for (var i = 0; i < this.ops.length; i++) {
+                        var op = this.ops[i];
+                        if (op.subScript != null) {
+                            scount += op.subScript.GetAllScriptName(names);
+                        }
+                    }
+                    return scount;
+                };
+                LogScript.FromJson = function (json) {
+                    var hash = json["hash"];
+                    var script = new LogScript(hash);
+                    var array = json["ops"];
+                    for (var i = 0; i < array.length; i++) {
+                        var op = array[i];
+                        script.ops.push(LogOp.FromJson(op));
+                        var ss = script.ops[script.ops.length - 1].subScript;
+                        if (ss != null)
+                            ss.parent = script;
+                    }
+                    return script;
+                };
+                LogScript.prototype.Clone = function () {
+                    var s = new LogScript(this.hash);
+                    s.parent = this;
+                    s.ops = new Array();
+                    for (var i = 0; i < this.ops.length; i++) {
+                        var o = this.ops[i];
+                        s.ops.push(o.Clone());
+                    }
+                    return s;
+                };
+                return LogScript;
+            }());
+            Debug.LogScript = LogScript;
+            var LogOp = (function () {
+                function LogOp(addr, op) {
+                    this.addr = addr;
+                    this.op = op;
+                    if (op == undefined) {
+                        console.log("what a fuck");
+                    }
+                    LogOp.__guid++;
+                    this.thisguid = LogOp.__guid;
+                }
+                Object.defineProperty(LogOp.prototype, "guid", {
+                    get: function () {
+                        return this.thisguid;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                LogOp.prototype.GetHeader = function () {
+                    var addrstr = this.addr.toString(16);
+                    while (addrstr.length < 4)
+                        addrstr = "0" + addrstr;
+                    var name = this.addr + ":";
+                    var trystr = ThinNeo.OpCode[this.op];
+                    if (trystr == undefined)
+                        trystr = "" + this.op;
+                    return name + trystr;
+                };
+                LogOp.FromJson = function (json) {
+                    var opstr = json["op"];
+                    var addr = json["addr"];
+                    if (opstr === "CALL_I")
+                        opstr = "CALL";
+                    console.log(opstr);
+                    var op = ThinNeo.OpCode.PUSH2;
+                    try {
+                        op = ThinNeo.OpCode[opstr];
+                        if (op == undefined)
+                            op = parseInt(opstr);
+                    }
+                    catch (_a) { }
+                    var _op = new LogOp(addr, op);
+                    if (json["stack"] != undefined) {
+                        var array = json["stack"];
+                        _op.stack = new Array(array.length);
+                        for (var i = 0; i < array.length; i++) {
+                            var str = array[i];
+                            var ind = -1;
+                            if (str.indexOf('|') >= 0) {
+                                var strs = str.split('|');
+                                ind = parseInt(strs[1]);
+                                str = strs[0];
+                            }
+                            var _type = OpType[str];
+                            if (_type == undefined)
+                                _type = parseInt(str);
+                            _op.stack[i] = new Op(_type, ind);
+                        }
+                    }
+                    if (json["param"] != undefined) {
+                        _op.param = json["param"].hexToBytes();
+                    }
+                    if (json["result"] != undefined && Object.keys(json["result"]).length > 0) {
+                        _op.opresult = StackItem.FromJson(json["result"]);
+                    }
+                    if (json["subscript"] != undefined) {
+                        _op.subScript = LogScript.FromJson(json["subscript"]);
+                    }
+                    return _op;
+                };
+                LogOp.prototype.Clone = function () {
+                    var op = new LogOp(this.addr, this.op);
+                    op.thisguid = this.thisguid;
+                    op.error = this.error;
+                    if (this.stack != null) {
+                        op.stack = new Array(this.stack.length);
+                        for (var i = 0; i < this.stack.length; i++) {
+                            op.stack[i] = this.stack[i].Clone();
+                        }
+                    }
+                    if (this.param != null) {
+                        op.param = this.param.clone();
+                    }
+                    if (this.opresult != null) {
+                        op.opresult = this.opresult.Clone();
+                    }
+                    op.subScript = this.subScript;
+                    return op;
+                };
+                LogOp.__guid = 0;
+                return LogOp;
+            }());
+            Debug.LogOp = LogOp;
+            var DumpInfo = (function () {
+                function DumpInfo() {
+                    this.script = null;
+                    this.error = null;
+                    this.curScript = null;
+                    this.curOp = null;
+                }
+                DumpInfo.FromJson = function (json) {
+                    var dumpinfo = new DumpInfo();
+                    if (json["error"] != undefined)
+                        dumpinfo.error = json["error"];
+                    if (json["VMState"] != undefined) {
+                        var state = json["VMState"];
+                        var words = state.split(",");
+                        dumpinfo.states = [];
+                        for (var i = 0; i < words.length; i++) {
+                            var item = words[i].replace(" ", "");
+                            dumpinfo.states.push(VMState[item]);
+                        }
+                    }
+                    if (json["script"] != undefined) {
+                        dumpinfo.script = LogScript.FromJson(json["script"]);
+                    }
+                    return dumpinfo;
+                };
+                return DumpInfo;
+            }());
+            Debug.DumpInfo = DumpInfo;
+        })(Debug = SmartContract.Debug || (SmartContract.Debug = {}));
+    })(SmartContract = ThinNeo.SmartContract || (ThinNeo.SmartContract = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var Debug;
+    (function (Debug) {
+        var State = (function () {
+            function State() {
+                this.ExeStack = new ThinNeo.VM.RandomAccessStack();
+                this.CalcStack = new ThinNeo.VM.RandomAccessStack();
+                this.AltStack = new ThinNeo.VM.RandomAccessStack();
+            }
+            Object.defineProperty(State.prototype, "StateID", {
+                get: function () {
+                    return this._StateID;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            State.prototype.SetId = function (id) {
+                this._StateID = id;
+            };
+            State.prototype.PushExe = function (hash) {
+                this.ExeStack.Push(hash);
+                this._StateID++;
+            };
+            State.prototype.PopExe = function () {
+                this.ExeStack.Pop();
+                this._StateID++;
+            };
+            State.prototype.CalcCalcStack = function (op) {
+                return false;
+            };
+            State.prototype.CalcCalcStack2 = function (stackop, item) {
+                console.log(stackop.type + ":" + stackop.ind);
+                if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Push) {
+                    this.CalcStack.Push(item);
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Insert) {
+                    if (item == null)
+                        throw new Error(stackop.type + "can not pass null");
+                    this.CalcStack.Insert(stackop.ind, item);
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Clear) {
+                    this.CalcStack.Clear();
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Set) {
+                    if (item == null)
+                        throw new Error(stackop.type + "can not pass null");
+                    this.CalcStack.Set(stackop.ind, item);
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Pop) {
+                    this.CalcStack.Pop();
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Peek) {
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Remove) {
+                    if (stackop.ind >= 0)
+                        this.CalcStack.Remove(stackop.ind);
+                }
+                else if (stackop.type == ThinNeo.SmartContract.Debug.OpType.Reserve) {
+                    this.CalcStack.Reverse();
+                }
+                if (stackop.type != ThinNeo.SmartContract.Debug.OpType.Peek)
+                    this._StateID++;
+            };
+            State.prototype.DoSysCall = function () {
+            };
+            State.prototype.Clone = function () {
+                var state = new State();
+                state._StateID = this._StateID;
+                for (var i = 0; i < this.ExeStack.Count; i++) {
+                    var s = this.ExeStack.GetItem(i);
+                    state.ExeStack.Push(s);
+                }
+                for (var i = 0; i < this.CalcStack.Count; i++) {
+                    var s = this.CalcStack.GetItem(i);
+                    if (s == null)
+                        state.CalcStack.Push(null);
+                    else
+                        state.CalcStack.Push(s.Clone());
+                }
+                for (var i = 0; i < this.AltStack.Count; i++) {
+                    var s = this.AltStack.GetItem(i);
+                    state.AltStack.Push(s.Clone());
+                }
+                return state;
+            };
+            return State;
+        }());
+        Debug.State = State;
+        var CareItem = (function () {
+            function CareItem(name, state) {
+                this.name = name;
+                if (name == "Neo.Runtime.CheckWitness" ||
+                    name == "Neo.Runtime.Notify") {
+                    this.item = state.CalcStack.Peek(0).Clone();
+                }
+                else if (name == "Neo.Runtime.Log") {
+                    var item = state.CalcStack.Peek(0);
+                    this.item = new ThinNeo.SmartContract.Debug.StackItem();
+                    this.item.type = "String";
+                    if (item.type == "String") {
+                        this.item.strvalue = item.strvalue;
+                    }
+                    else if (item.type == "ByteArray") {
+                        var bt = item.strvalue.hexToBytes();
+                        this.item.strvalue = ThinNeo.Helper.Bytes2String(bt);
+                    }
+                    else {
+                        this.item.strvalue = "can't convert this.";
+                    }
+                }
+                else if (name == "Neo.Storage.Put") {
+                    var item1 = state.CalcStack.Peek(0);
+                    var item2 = state.CalcStack.Peek(1);
+                    var item3 = state.CalcStack.Peek(2);
+                    this.item = new ThinNeo.SmartContract.Debug.StackItem();
+                    this.item.type = "Array";
+                    this.item.subItems = new Array();
+                    this.item.subItems.push(item1.Clone());
+                    this.item.subItems.push(item2.Clone());
+                    this.item.subItems.push(item3.Clone());
+                }
+                else {
+                }
+            }
+            CareItem.prototype.ToString = function () {
+                return name + "(" + this.item == null ? "" : this.item.ToString() + ")";
+            };
+            return CareItem;
+        }());
+        Debug.CareItem = CareItem;
+        var SimVM = (function () {
+            function SimVM() {
+                this.lastScript = null;
+            }
+            SimVM.prototype.Execute = function (DumpInfo) {
+                var runstate = new State();
+                runstate.SetId(0);
+                this.stateClone = {};
+                this.mapState = {};
+                this.careinfo = new Array();
+                this.regenScript = new ThinNeo.SmartContract.Debug.LogScript(DumpInfo.script.hash);
+                this.lastScript = this.regenScript;
+                this.ExecuteScript(runstate, DumpInfo.script);
+            };
+            SimVM.prototype.ExecuteScript = function (runstate, script) {
+                {
+                    runstate.PushExe(script.hash);
+                    for (var i = 0; i < script.ops.length; i++) {
+                        var op = script.ops[i];
+                        var _nop = op.Clone();
+                        this.lastScript.ops.push(_nop);
+                        try {
+                            if (op.op == ThinNeo.OpCode.SYSCALL) {
+                                var api = Neo.BigInteger.fromUint8Array(op.param).toUint64().toUint32();
+                                var p = Debug.methodHelper.Ins.getMethodName(api);
+                                if (op.stack != null) {
+                                    for (var j = 0; j < op.stack.length; j++) {
+                                        if (j == op.stack.length - 1) {
+                                            runstate.CalcCalcStack2(op.stack[j], op.opresult);
+                                        }
+                                        else {
+                                            runstate.CalcCalcStack2(op.stack[j], null);
+                                        }
+                                    }
+                                }
+                                runstate.PushExe(script.hash);
+                                if (this.stateClone[runstate.StateID] == undefined) {
+                                    this.stateClone[runstate.StateID] = runstate.Clone();
+                                }
+                                if (p == "System.Contract.Call" || p == "System.Contract.CallEx") {
+                                    var _script = op.subScript;
+                                    var outscript = new ThinNeo.SmartContract.Debug.LogScript(op.subScript.hash);
+                                    outscript.parent = this.lastScript;
+                                    _nop.subScript = outscript;
+                                    this.lastScript = outscript;
+                                    this.ExecuteScript(runstate, _script);
+                                    this.mapState[_nop.guid] = runstate.StateID;
+                                }
+                                this.careinfo.push(new CareItem(p, runstate));
+                            }
+                            else if (op.op == ThinNeo.OpCode.CALL) {
+                                var _lastScript = new ThinNeo.SmartContract.Debug.LogScript(this.lastScript.hash);
+                                _lastScript.parent = this.lastScript;
+                                _nop.subScript = _lastScript;
+                                this.lastScript = _lastScript;
+                                runstate.PushExe(this.lastScript.hash);
+                                this.mapState[_nop.guid] = runstate.StateID;
+                            }
+                            else if (op.op == ThinNeo.OpCode.RET) {
+                                runstate.PopExe();
+                                {
+                                    this.lastScript = this.lastScript.parent;
+                                }
+                                if (this.stateClone[runstate.StateID] == undefined) {
+                                    this.stateClone[runstate.StateID] = runstate.Clone();
+                                }
+                                this.mapState[_nop.guid] = runstate.StateID;
+                            }
+                            else {
+                                if (runstate.CalcCalcStack(op.op) == false) {
+                                    if (op.stack != null) {
+                                        for (var k = 0; k < op.stack.length; k++) {
+                                            if (k == op.stack.length - 1) {
+                                                runstate.CalcCalcStack2(op.stack[k], op.opresult);
+                                            }
+                                            else {
+                                                runstate.CalcCalcStack2(op.stack[k], null);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (this.stateClone[runstate.StateID] == undefined) {
+                                    this.stateClone[runstate.StateID] = runstate.Clone();
+                                }
+                                this.mapState[_nop.guid] = runstate.StateID;
+                            }
+                        }
+                        catch (err1) {
+                            _nop.error = true;
+                        }
+                    }
+                }
+            };
+            return SimVM;
+        }());
+        Debug.SimVM = SimVM;
+    })(Debug = ThinNeo.Debug || (ThinNeo.Debug = {}));
+})(ThinNeo || (ThinNeo = {}));
+var ThinNeo;
+(function (ThinNeo) {
+    var Debug;
+    (function (Debug) {
+        var methodHelper = (function () {
+            function methodHelper() {
+                this.dic = {};
+                this.methods = [
+                    "System.Enumerator.Create",
+                    "System.Enumerator.Next",
+                    "System.Enumerator.Value",
+                    "System.Enumerator.Concat",
+                    "System.Json.Serialize",
+                    "System.Json.Deserialize",
+                    "System.Runtime.Platform",
+                    "System.Runtime.GetTrigger",
+                    "System.Runtime.GetTime",
+                    "System.Runtime.GetScriptContainer",
+                    "System.Runtime.GetExecutingScriptHash",
+                    "System.Runtime.GetCallingScriptHash",
+                    "System.Runtime.GetEntryScriptHash",
+                    "System.Runtime.CheckWitness",
+                    "System.Runtime.GetInvocationCounter",
+                    "System.Runtime.Log",
+                    "System.Runtime.Notify",
+                    "System.Runtime.GetNotifications",
+                    "System.Storage.GetContext",
+                    "System.Storage.GetReadOnlyContext",
+                    "System.Storage.AsReadOnly",
+                    "System.Storage.Get",
+                    "System.Storage.Find",
+                    "System.Storage.Put",
+                    "System.Storage.PutEx",
+                    "System.Storage.Delete",
+                    "System.Contract.Create",
+                    "System.Contract.Update",
+                    "System.Contract.Destroy",
+                    "System.Contract.Call",
+                    "System.Contract.CallEx",
+                    "System.Contract.IsStandard",
+                    "System.Iterator.Create",
+                    "System.Iterator.Key",
+                    "System.Iterator.Keys",
+                    "System.Iterator.Values",
+                    "System.Iterator.Concat",
+                    "System.Blockchain.GetHeight",
+                    "System.Blockchain.GetBlock",
+                    "System.Blockchain.GetTransaction",
+                    "System.Blockchain.GetTransactionHeight",
+                    "System.Blockchain.GetTransactionFromBlock",
+                    "System.Blockchain.GetContract",
+                    "System.Binary.Serialize",
+                    "System.Binary.Deserialize",
+                    "Neo.Crypto.ECDsaVerify",
+                    "Neo.Crypto.ECDsaCheckMultiSig",
+                    "Neo.Native.Deploy",
+                    "Neo.Native.Tokens.NEO",
+                    "Neo.Native.Tokens.GAS",
+                    "Neo.Native.Policy"
+                ];
+                for (var i = 0; i < this.methods.length; i++) {
+                    var method = this.methods[i];
+                    var api_bytes = ThinNeo.Helper.String2Bytes(method);
+                    var api = Neo.BigInteger.fromUint8Array(Uint8Array.fromArrayBuffer(Neo.Cryptography.Sha256.computeHash(api_bytes.buffer))).toUint64().toUint32();
+                    this.dic[api] = method;
+                }
+            }
+            Object.defineProperty(methodHelper, "Ins", {
+                get: function () {
+                    if (this._Ins == undefined)
+                        this._Ins = new methodHelper();
+                    return this._Ins;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            methodHelper.prototype.getMethodName = function (_api) {
+                return this.dic[_api] ? this.dic[_api] : "UNKONW";
+            };
+            return methodHelper;
+        }());
+        Debug.methodHelper = methodHelper;
+    })(Debug = ThinNeo.Debug || (ThinNeo.Debug = {}));
 })(ThinNeo || (ThinNeo = {}));
 var ThinSdk;
 (function (ThinSdk) {
@@ -6686,7 +8425,7 @@ var ThinSdk;
                 return _super.call(this, _contractHash, _scriptBuilder) || this;
             }
             BaseToken.prototype.transfer = function (from, to, amount) {
-                this.Call("transfer", "(addr)" + from, "(addr)" + to, "(integer)" + amount);
+                this.Call("transfer", { type: "Address", value: from }, { type: "Address", value: to }, { type: "Integer", value: amount });
                 this.scriptBuilder.Emit(ThinNeo.OpCode.THROWIFNOT);
             };
             BaseToken.prototype.balanceOf = function () {
@@ -6696,7 +8435,7 @@ var ThinSdk;
                 }
                 for (var _a = 0, accounts_1 = accounts; _a < accounts_1.length; _a++) {
                     var account = accounts_1[_a];
-                    this.Call("balanceOf", account);
+                    this.Call("balanceOf", { type: "Address", value: account });
                 }
             };
             BaseToken.prototype.balanceOf_Unite = function () {
@@ -6707,7 +8446,7 @@ var ThinSdk;
                 this.scriptBuilder.EmitPushNumber(Neo.BigInteger.Zero);
                 for (var _a = 0, accounts_2 = accounts; _a < accounts_2.length; _a++) {
                     var account = accounts_2[_a];
-                    this.Call("balanceOf", account);
+                    this.Call("balanceOf", { type: "Address", value: account });
                     this.scriptBuilder.Emit(ThinNeo.OpCode.ADD);
                 }
             };
@@ -6729,7 +8468,7 @@ var ThinSdk;
         var GAS = (function (_super) {
             __extends(GAS, _super);
             function GAS(sb) {
-                return _super.call(this, Neo.Uint160.parse("0xa1760976db5fcdfab2a9930e8f6ce875b2d18225"), sb) || this;
+                return _super.call(this, Neo.Uint160.parse("0x8c23f196d8a1bfd103a9dcb1f9ccf0c611377d3b"), sb) || this;
             }
             return GAS;
         }(Token.BaseToken));
@@ -6743,7 +8482,7 @@ var ThinSdk;
         var NEO = (function (_super) {
             __extends(NEO, _super);
             function NEO(sb) {
-                return _super.call(this, Neo.Uint160.parse("0x43cf98eddbe047e198a3e5d57006311442a0ca15"), sb) || this;
+                return _super.call(this, Neo.Uint160.parse("0x9bde8f209c88dd0e7ca3bf0af0f476cdd8207789"), sb) || this;
             }
             return NEO;
         }(Token.BaseToken));

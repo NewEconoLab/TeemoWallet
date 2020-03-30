@@ -13,7 +13,7 @@ declare class SocketManager {
     lastWSmsgSec: number;
     reconnection: number;
     txids: string[];
-    readonly webSocketURL: "wss://testwss.nel.group/ws/mainnet" | "wss://testwss.nel.group/ws/testnet";
+    readonly webSocketURL: "wss://testwss.nel.group/ws/mainnet" | "wss://testwsneo3dev.nel.group/ws/testnet";
     updateLastWSmsgSec: () => void;
     socketInit(): void;
 }

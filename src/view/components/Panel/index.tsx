@@ -254,19 +254,19 @@ export default class Panel extends React.Component<IProps, IState>
 											{this.props.task.deployHistory.contractHash.substr(0, 4) + "..." + this.props.task.deployHistory.contractHash.substr(this.props.task.deployHistory.contractHash.length - 3, 4)}
 										</div>
 									</div>
-									<div className="group">
+									{/* <div className="group">
 										<div className="key-title">{intl.message.history.note}</div>
 										<div className="value">{this.props.task.deployHistory.name ? this.props.task.deployHistory.name : ""}</div>
-									</div>
+									</div> */}
 									<div className="money">
-										<div className="group expense">
+										{/* <div className="group expense">
 											<div className="key-title">{intl.message.history.amount}</div>
 											<div className="value">{this.props.task.deployHistory.sysfee} GAS
 											</div>
-										</div>
-										<div className="group netfee">
+										</div> */}
+										<div className="group expense netfee">
 											<div className="key-title">{intl.message.history.fee}</div>
-											<div className="value">0 GAS</div>
+											<div className="value">{this.props.task.deployHistory.fee} GAS</div>
 										</div>
 									</div>
 								</div>

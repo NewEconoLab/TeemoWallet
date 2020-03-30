@@ -1,5 +1,5 @@
 const BLOCKCHAIN = 'NEO';
-const VERSION = 'v1';
+const VERSION = 'V1.0.2';
 var ArgumentDataType;
 (function (ArgumentDataType) {
     ArgumentDataType["STRING"] = "String";
@@ -84,7 +84,7 @@ function sendMessage(command, params) {
         window.addEventListener("message", e => {
             const response = e.data;
             if (response.return == command && response.ID == ID) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
-             {
+            {
                 if (response.error) {
                     reject(response.error);
                 }
@@ -254,14 +254,14 @@ const EventChange = () => {
     window.addEventListener("message", e => {
         const response = e.data;
         if (response.EventName) // 判断return参数是否有值 并且 判断返回名称是否对应如果是则抛出异常或数据
-         {
+        {
             window.dispatchEvent(new CustomEvent(response.EventName, { "detail": response.data }));
         }
     });
 };
 const provider = {
-    "name": "TeemoWallet",
-    "version": "0.1",
+    "name": "TeemoWallet NEO3",
+    "version": VERSION,
     "website": "nel.group",
     "compatibility": ["typescript", "javascript"],
     "extra": {
